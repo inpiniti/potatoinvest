@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { AlertCircle } from "lucide-react";
+import { AlertCircle } from 'lucide-react';
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useState } from 'react';
 
 const AlertComponent = () => {
-  const [open, setOpen] = useState(true);
+  const [open] = useState(true);
 
   if (!open) return;
   return (
