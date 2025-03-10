@@ -13,7 +13,7 @@ export default function PageLayout({
 }>) {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex flex-col divide-y divide-neutral-200">
+      <div className="flex flex-col divide-y divide-neutral-200 bg-neutral-100 min-h-screen">
         <Header>
           <Nav />
         </Header>

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import IStock from "@/app/interface/IStock";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import IStock from '@/app/interface/IStock';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Table,
   TableBody,
@@ -9,9 +9,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
 const RealTime = () => {
   const getTodos = async () => {
     const controller = new AbortController();
@@ -21,7 +21,7 @@ const RealTime = () => {
     const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     try {
-      const response = await fetch("/api/hello", { signal });
+      const response = await fetch('/api/hello', { signal });
       clearTimeout(timeoutId); // Clear the timeout if the request completes in time
 
       if (!response.ok) {
@@ -31,24 +31,23 @@ const RealTime = () => {
       const data = await response.json();
       return data;
     } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") {
-        throw new Error("Request timed out");
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('Request timed out');
       }
       throw error;
     }
   };
 
-  const query = useQuery({ queryKey: ["todos"], queryFn: getTodos });
+  const query = useQuery({ queryKey: ['todos'], queryFn: getTodos });
 
   return (
-    <div>
-      <h1>Real Time Page</h1>
-      <Table>
+    <div className="rounded-sm overflow-hidden border bg-white">
+      <h1 className="border-b px-4 py-2 bg-neutral-50">Real Time Page</h1>
+      <Table className="rounded-lg p-4">
         <TableHeader>
           <TableRow>
             <TableHead>로고</TableHead>
             <TableHead>종목코드</TableHead>
-            <TableHead>설명</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -66,7 +65,6 @@ const RealTime = () => {
                 </Avatar>
               </TableCell>
               <TableCell>{live.name}</TableCell>
-              <TableCell>{live.description}</TableCell>
             </TableRow>
           ))}
         </TableBody>
