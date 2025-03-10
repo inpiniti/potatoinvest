@@ -9,8 +9,8 @@ const Nav = () => {
       : 'cursor-pointer px-2 py-1 hover:font-bold hover:bg-neutral-100 rounded-md';
 
   return (
-    <nav className="container mx-auto px-1 sm:px-2 md:px-3 lg:px-4 pb-0.5 overflow-x-auto">
-      <ul className="flex gap-1 sm:gap-2 md:gap-3 lg:gap-4 whitespace-nowrap flex-nowrap">
+    <nav className="container mx-auto pb-0.5 overflow-x-auto px-2">
+      <ul className="flex gap-1 whitespace-nowrap flex-nowrap">
         <li className={getLinkClass('/realtime')}>
           <Link href="/page/realtime">실시간 데이터</Link>
         </li>
