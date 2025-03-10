@@ -51,8 +51,8 @@ const RealTime = () => {
             <TableHead>종가</TableHead>
             <TableHead>1개월 성과</TableHead>
             <TableHead>3개월 성과</TableHead>
-            <TableHead>6개월 성과</TableHead>
-            <TableHead>1년 성과</TableHead>
+            <TableHead className="hidden sm:table-cell">6개월 성과</TableHead>
+            <TableHead className="hidden sm:table-cell">1년 성과</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -92,16 +92,16 @@ const RealTime = () => {
                 {Number(live.perf_3_m).toFixed(2)}%
               </TableCell>
               <TableCell
-                className={
+                className={`${
                   Number(live.perf_6_m) < 0 ? 'text-blue-400' : 'text-red-400'
-                }
+                }  hidden sm:table-cell`}
               >
                 {Number(live.perf_6_m).toFixed(2)}%
               </TableCell>
               <TableCell
-                className={
+                className={`${
                   Number(live.perf_y) < 0 ? 'text-blue-400' : 'text-red-400'
-                }
+                }  hidden sm:table-cell`}
               >
                 {Number(live.perf_y).toFixed(2)}%
               </TableCell>

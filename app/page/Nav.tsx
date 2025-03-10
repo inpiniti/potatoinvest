@@ -5,7 +5,7 @@ const Nav = () => {
   const pathname = usePathname();
   const getLinkClass = (path: string) =>
     pathname.includes(path)
-      ? 'cursor-pointer px-2 py-1 font-bold hover:bg-neutral-100 rounded-md underline underline-offset-8 decoration-2 sm:underline-offset-10'
+      ? 'cursor-pointer px-2 py-1 font-bold hover:bg-neutral-100 rounded-md underline underline-offset-10 decoration-2'
       : 'cursor-pointer px-2 py-1 hover:font-bold hover:bg-neutral-100 rounded-md';
 
   return (
