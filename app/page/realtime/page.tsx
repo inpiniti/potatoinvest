@@ -48,6 +48,11 @@ const RealTime = () => {
           <TableRow>
             <TableHead>로고</TableHead>
             <TableHead>종목코드</TableHead>
+            <TableHead>종가</TableHead>
+            <TableHead>1개월 성과</TableHead>
+            <TableHead>3개월 성과</TableHead>
+            <TableHead>6개월 성과</TableHead>
+            <TableHead>1년 성과</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -65,6 +70,41 @@ const RealTime = () => {
                 </Avatar>
               </TableCell>
               <TableCell>{live.name}</TableCell>
+              <TableCell
+                className={
+                  Number(live.change) < 0 ? 'text-blue-400' : 'text-red-400'
+                }
+              >
+                {live.close} ({Number(live.change).toFixed(2)}%)
+              </TableCell>
+              <TableCell
+                className={
+                  Number(live.perf_1_m) < 0 ? 'text-blue-400' : 'text-red-400'
+                }
+              >
+                {Number(live.perf_1_m).toFixed(2)}%
+              </TableCell>
+              <TableCell
+                className={
+                  Number(live.perf_3_m) < 0 ? 'text-blue-400' : 'text-red-400'
+                }
+              >
+                {Number(live.perf_3_m).toFixed(2)}%
+              </TableCell>
+              <TableCell
+                className={
+                  Number(live.perf_6_m) < 0 ? 'text-blue-400' : 'text-red-400'
+                }
+              >
+                {Number(live.perf_6_m).toFixed(2)}%
+              </TableCell>
+              <TableCell
+                className={
+                  Number(live.perf_y) < 0 ? 'text-blue-400' : 'text-red-400'
+                }
+              >
+                {Number(live.perf_y).toFixed(2)}%
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
