@@ -17,7 +17,7 @@ export default function PageLayout({
         <Header>
           <Nav />
         </Header>
-        <main>
+        <main className="pt-20 sm:pt-22 md:pt-24 lg:pt-26">
           <div className="container mx-auto p-4">{children}</div>
         </main>
       </div>
