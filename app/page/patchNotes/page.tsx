@@ -4,11 +4,28 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 
 const Update = () => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>API 페이지 추가</CardTitle>
+          <CardDescription className="text-red-400">버전 0.2.1</CardDescription>
+          <CardDescription>2025년 3월 12일</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="flex items-center space-x-4 rounded-md bg-neutral-100 p-4">
+            <div className="flex-1 space-y-1">
+              <ul className="font-medium text-muted-foreground gap-1 flex flex-col">
+                <li>화면 레이아웃 개발</li>
+                <li>구현할 API 정의</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>자동매매 기능 구현중</CardTitle>
