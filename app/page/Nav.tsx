@@ -32,6 +32,9 @@ const Nav = () => {
         <li className={getLinkClass('/patchNotes')}>
           <Link href="/page/patchNotes">패치노트</Link>
         </li>
+        <li className={getLinkClass('/note')}>
+          <Link href="/page/note">개발노트</Link>
+        </li>
       </ul>
     </nav>
   );
