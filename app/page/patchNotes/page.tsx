@@ -4,11 +4,29 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 
 const Update = () => {
   return (
     <div className="flex flex-col gap-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>설정을 위한 상태 관리 및 암복호화</CardTitle>
+          <CardDescription className="text-red-400">버전 0.2.3</CardDescription>
+          <CardDescription>2025년 3월 13일</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="flex items-center space-x-4 rounded-md bg-neutral-100 p-4">
+            <div className="flex-1 space-y-1">
+              <ul className="font-medium text-muted-foreground gap-1 flex flex-col">
+                <li>설정화면 추가</li>
+                <li>상태관리 라이브러리 도입</li>
+                <li>암복호화 도입</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>개발노트 및 이슈 추가</CardTitle>
