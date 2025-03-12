@@ -1,6 +1,59 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+const navList = [
+  {
+    name: '실시간 데이터',
+    path: '/realtime',
+    href: '/page/realtime',
+  },
+  {
+    name: '구매내역',
+    path: '/buy',
+    href: '/page/buy',
+  },
+  {
+    name: '판매내역',
+    path: '/sell',
+    href: '/page/sell',
+  },
+  {
+    name: '자동매매',
+    path: '/log',
+    href: '/page/log',
+  },
+  {
+    name: '자산',
+    path: '/money',
+    href: '/page/money',
+  },
+  {
+    name: '설정',
+    path: '/setting',
+    href: '/page/setting',
+  },
+  {
+    name: '패치노트',
+    path: '/patchNotes',
+    href: '/page/patchNotes',
+  },
+  {
+    name: 'API',
+    path: '/api',
+    href: '/page/api',
+  },
+  {
+    name: '개발노트',
+    path: '/note',
+    href: '/page/note',
+  },
+  {
+    name: '이슈',
+    path: '/issue',
+    href: '/page/issue',
+  },
+];
+
 const Nav = () => {
   const pathname = usePathname();
   const getLinkClass = (path: string) =>
@@ -11,30 +64,11 @@ const Nav = () => {
   return (
     <nav className="container mx-auto pb-0.5 overflow-x-auto px-2">
       <ul className="flex gap-1 whitespace-nowrap flex-nowrap">
-        <li className={getLinkClass('/realtime')}>
-          <Link href="/page/realtime">실시간 데이터</Link>
-        </li>
-        <li className={getLinkClass('/buy')}>
-          <Link href="/page/buy">구매내역</Link>
-        </li>
-        <li className={getLinkClass('/sell')}>
-          <Link href="/page/sell">판매내역</Link>
-        </li>
-        <li className={getLinkClass('/log')}>
-          <Link href="/page/log">자동매매</Link>
-        </li>
-        <li className={getLinkClass('/money')}>
-          <Link href="/page/money">자산</Link>
-        </li>
-        <li className={getLinkClass('/setting')}>
-          <Link href="/page/setting">설정</Link>
-        </li>
-        <li className={getLinkClass('/patchNotes')}>
-          <Link href="/page/patchNotes">패치노트</Link>
-        </li>
-        <li className={getLinkClass('/note')}>
-          <Link href="/page/note">개발노트</Link>
-        </li>
+        {navList.map((nav) => (
+          <Link key={nav.path} href={nav.href}>
+            <li className={getLinkClass(nav.path)}>{nav.name}</li>
+          </Link>
+        ))}
       </ul>
     </nav>
   );

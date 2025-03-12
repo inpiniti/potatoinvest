@@ -1,3 +1,4 @@
+import { Title } from '@/components/title';
 import {
   Card,
   CardContent,
@@ -9,23 +10,10 @@ import {
 const Update = () => {
   return (
     <div className="flex flex-col gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>개발노트 및 이슈 추가</CardTitle>
-          <CardDescription className="text-red-400">버전 0.2.2</CardDescription>
-          <CardDescription>2025년 3월 12일</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="flex items-center space-x-4 rounded-md bg-neutral-100 p-4">
-            <div className="flex-1 space-y-1">
-              <ul className="font-medium text-muted-foreground gap-1 flex flex-col">
-                <li>개발노트 및 이슈 화면 추가</li>
-                <li>nav 외각은 클릭해도 이동이 안되는 현상 수정</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <Title
+        title="이슈"
+        description="버그나 건의사항을 올려주시면 확인후에 처리하도록 하겠습니다."
+      />
       <Card>
         <CardHeader>
           <CardTitle>API 페이지 추가</CardTitle>
