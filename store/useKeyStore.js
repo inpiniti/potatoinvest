@@ -1,19 +1,19 @@
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
-import CryptoJS from 'crypto-js';
+import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
+import CryptoJS from "crypto-js";
 
-import { useTempKeyStore } from './useTempKeyStore';
+import { useTempKeyStore } from "./useTempKeyStore";
 
 export const useKeyStore = create(
   devtools(
     persist(
       (set) => ({
         key: {
-          appKey: '',
-          secretKey: '',
-          vtsAppKey: '',
-          vtsSecretKey: '',
-          approval_key: '', // 웹소캣 접속키
+          appKey: "",
+          secretKey: "",
+          vtsAppKey: "",
+          vtsSecretKey: "",
+          approval_key: "", // 웹소캣 접속키
         },
         setKey: (key) => {
           const password = useTempKeyStore.getState().key.password;
@@ -37,11 +37,11 @@ export const useKeyStore = create(
         },
       }),
       {
-        name: 'key',
+        name: "key",
         getStorage: () => localStorage,
       }
     ),
-    { name: 'key' }
+    { name: "key" }
   )
 );
 

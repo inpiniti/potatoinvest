@@ -3,16 +3,16 @@ import { useTempKeyStore } from "@/store/useTempKeyStore";
 import { useKeyStore } from "@/store/useKeyStore";
 
 const TokenP = () => {
-  const { setKey } = useTempKeyStore();
-  const { getKey } = useKeyStore();
+  const { key: tempKey, setKey } = useTempKeyStore();
+  const { key } = useKeyStore();
 
   const handleButtonClick = async () => {
-    const { vtsAppKey, vtsSecretKey } = getKey();
-    const url = "https://openapivts.koreainvestment.com:29443/oauth2/tokenP";
+    const { appKey, secretKey } = key;
+    const url = "/api/koreainvestment/oauth2/tokenP";
     const body = {
-      grant_type: "client_credentials",
-      appkey: vtsAppKey,
-      appsecret: vtsSecretKey,
+      appkey: appKey,
+      appsecret: secretKey,
+      solt: tempKey.password,
     };
 
     try {
@@ -25,15 +25,15 @@ const TokenP = () => {
       });
 
       const data = await response.json();
+
       setKey({
+        ...tempKey,
         ...data,
-        access_token: data.access_token,
-        token_type: data.token_type,
-        expires_in: data.expires_in,
-        access_token_token_expired: data.access_token_token_expired,
       });
+
+      alert("접근토큰이 발급되었습니다.");
     } catch (error) {
-      console.error("Error issuing token:", error);
+      alert(error);
     }
   };
 

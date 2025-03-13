@@ -13,6 +13,8 @@ import { Title } from "@/components/title";
 
 import { Button } from "@/components/ui/button";
 import TokenP from "./TokenP";
+import Price from "./Price";
+import DailyPrice from "./DailyPrice";
 
 const Log = () => {
   const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
@@ -45,31 +47,45 @@ const Log = () => {
         <Accordion type="single" collapsible>
           <AccordionItem value="item-1">
             <AccordionTrigger className="p-4 bg-neutral-50 rounded-none">
-              한국투자 증권 (인증)
+              OAuth인증
             </AccordionTrigger>
             <AccordionContent className="border-t flex flex-col divide-y pb-0">
-              <section className="flex items-center justify-between p-4">
+              <section className="flex items-center justify-between p-4 text-neutral-300">
                 <div className="flex gap-4">
                   <b>실시간 (웹소켓) 접속키 발급[실시간-000]</b>
                   <p>/oauth2/Approval</p>
                 </div>
-                <Button>API 호출</Button>
+                <Button disabled>API 호출</Button>
               </section>
-              <section className="flex items-center justify-between p-4">
+              <section className="flex items-center justify-between p-4 text-neutral-300">
                 <div className="flex gap-4">
                   <b>Hashkey</b>
                   <p>/uapi/hashkey</p>
                 </div>
-                <Button>API 호출</Button>
+                <Button disabled>API 호출</Button>
               </section>
               <TokenP />
-              <section className="flex items-center justify-between p-4">
+              <section className="flex items-center justify-between p-4 text-neutral-300">
                 <div className="flex gap-4">
                   <b>Hashkey</b>
                   <p>/uapi/hashkey</p>
                 </div>
-                <Button>API 호출</Button>
+                <Button disabled>API 호출</Button>
               </section>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </section>
+
+      <section className="bg-white border rounded-sm overflow-hidden">
+        <Accordion type="single" collapsible>
+          <AccordionItem value="item-1">
+            <AccordionTrigger className="p-4 bg-neutral-50 rounded-none">
+              [해외주식] 기본시세
+            </AccordionTrigger>
+            <AccordionContent className="border-t flex flex-col divide-y pb-0">
+              <Price />
+              <DailyPrice />
             </AccordionContent>
           </AccordionItem>
         </Accordion>
