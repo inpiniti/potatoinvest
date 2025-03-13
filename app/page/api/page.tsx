@@ -42,7 +42,6 @@ const Log = () => {
           앞서 작은 단위의 함수들을 하나하나 만들고 테스트 해보기 위해
           만들었습니다."
       />
-
       <section className="bg-white border rounded-sm overflow-hidden">
         <Accordion type="single" collapsible>
           <AccordionItem value="item-1">
@@ -76,7 +75,6 @@ const Log = () => {
           </AccordionItem>
         </Accordion>
       </section>
-
       <section className="bg-white border rounded-sm overflow-hidden">
         <Accordion type="single" collapsible>
           <AccordionItem value="item-1">
@@ -90,7 +88,56 @@ const Log = () => {
           </AccordionItem>
         </Accordion>
       </section>
-
+      주문/계좌 <br />
+      해외주식 주문 /uapi/overseas-stock/v1/trading/order
+      <br />
+      해외주식 정정취소주문 /uapi/overseas-stock/v1/trading/order-rvsecncl
+      <br />
+      해외주식 예약주문접수 /uapi/overseas-stock/v1/trading/order-resv
+      <br />
+      해외주식 예약주문접수취소 /uapi/overseas-stock/v1/trading/order-resv-ccnl
+      <br />
+      해외주식 미체결내역 /uapi/overseas-stock/v1/trading/inquire-nccs
+      <br />
+      해외주식 잔고 /uapi/overseas-stock/v1/trading/inquire-balance
+      <br />
+      해외주식 주문체결내역 /uapi/overseas-stock/v1/trading/inquire-ccnl
+      <br />
+      해외주식 체결기준현재잔고
+      /uapi/overseas-stock/v1/trading/inquire-present-balance
+      <br />
+      해외주식 예약주문조회
+      <br />
+      해외주식 매수가능금액조회
+      <br />
+      해외주식 미국주간주문
+      <br />
+      해외주식 미국주간정정취소
+      <br />
+      해외주식 기간손익
+      <br />
+      해외증거금 통화별조회
+      <br />
+      해외주식 일별거래내역
+      <br />
+      해외주식 결제기준잔고
+      <br />
+      기본시세 해외주식 현재체결가 /uapi/overseas-price/v1/quotations/price
+      <br />
+      해외주식 기간별시세 /uapi/overseas-price/v1/quotations/dailyprice
+      <br />
+      해외주식 종목/지수/환율기간별시세(일/주/월/년)
+      /uapi/overseas-price/v1/quotations/inquire-daily-chartprice
+      <br />
+      해외주식 조건검색 /uapi/overseas-price/v1/quotations/inquire-search
+      <br />
+      [해외주식]기본시세 해외결제일자조회 <br />
+      [해외주식]기본시세 해외주식 현재가상세 <br />
+      [해외주식]기본시세 해외주식분봉조회 <br />
+      [해외주식]기본시세 해외지수분봉조회 <br />
+      [해외주식]기본시세 해외주식 상품기본정보 <br />
+      [해외주식]기본시세 해외주식 현재가 10호가
+      <br />
       <section className="bg-white border rounded-sm overflow-hidden">
         <Accordion type="single" collapsible>
           <AccordionItem value="item-1">
@@ -128,7 +175,6 @@ const Log = () => {
           </AccordionItem>
         </Accordion>
       </section>
-
       <section className="flex bg-white border rounded-sm flex-col gap-4 overflow-hidden">
         <div className="flex flex-col gap-2">
           <Accordion type="single" collapsible>
