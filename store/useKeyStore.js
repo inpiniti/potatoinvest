@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import CryptoJS from "crypto-js";
+import { encrypt, decrypt } from "@/utils/crypto";
 
 import { useTempKeyStore } from "./useTempKeyStore";
 
@@ -44,13 +44,3 @@ export const useKeyStore = create(
     { name: "key" }
   )
 );
-
-// 암호화 메서드
-export const encrypt = (key, value) => {
-  return CryptoJS.AES.encrypt(value, key).toString();
-};
-
-// 복호화 메서드
-export const decrypt = (key, value) => {
-  return CryptoJS.AES.decrypt(value, key).toString(CryptoJS.enc.Utf8);
-};
