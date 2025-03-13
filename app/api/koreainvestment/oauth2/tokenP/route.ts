@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 }
 
 // 복호화 메서드
-export const decrypt = (key: string, value: string) => {
+const decrypt = (key: string, value: string) => {
   try {
     const bytes = CryptoJS.AES.decrypt(value, key);
     const decryptedValue = bytes.toString(CryptoJS.enc.Utf8);
