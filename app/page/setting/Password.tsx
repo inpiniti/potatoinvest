@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Input } from "@/components/ui/input";
-import { useTempKeyStore } from "@/store/useTempKeyStore";
+import { Input } from '@/components/ui/input';
+import { useTempKeyStore } from '@/store/useTempKeyStore';
 
 const Password = () => {
   const { key, setKey } = useTempKeyStore();

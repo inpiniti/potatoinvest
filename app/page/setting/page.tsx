@@ -1,8 +1,6 @@
-import { Title } from "@/components/title";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import Password from "./Password";
-import AppKey from "./AppKey";
+import { Title } from '@/components/title';
+import Password from './Password';
+import KeySetting from './KeySetting';
 
 const Setting = () => {
   return (
@@ -16,42 +14,11 @@ const Setting = () => {
           그리고 아래 키들이 있어야 자동매매가 가능합니다.
         "
       />
-
       <Password />
-      <AppKey />
-
-      <section className="bg-white border rounded-sm overflow-hidden p-4 flex justify-between items-center gap-4">
-        <div className="flex flex-col text-sm shrink-0">
-          <label className="font-bold">실전계좌</label>
-          <label className="font-bold">secret key</label>
-        </div>
-        <div className="flex gap-4">
-          <Input type="password" />
-          <Button>저장</Button>
-        </div>
-      </section>
-
-      <section className="bg-white border rounded-sm overflow-hidden p-4 flex justify-between items-center gap-4">
-        <div className="flex flex-col text-sm shrink-0">
-          <label className="font-bold">모의투자계좌</label>
-          <label className="font-bold">app key</label>
-        </div>
-        <div className="flex gap-4">
-          <Input type="password" />
-          <Button>저장</Button>
-        </div>
-      </section>
-
-      <section className="bg-white border rounded-sm overflow-hidden p-4 flex justify-between items-center gap-4">
-        <div className="flex flex-col text-sm shrink-0">
-          <label className="font-bold">모의투자계좌</label>
-          <label className="font-bold">secret key</label>
-        </div>
-        <div className="flex gap-4">
-          <Input type="password" />
-          <Button>저장</Button>
-        </div>
-      </section>
+      <KeySetting filed="appKey" label="실전계좌 app key" />
+      <KeySetting filed="secretKey" label="실전계좌 secret key" />
+      <KeySetting filed="vtsAppKey" label="모의투자계좌 app key" />
+      <KeySetting filed="vtsSecretKey" label="모의투자계좌 secret key" />
     </div>
   );
 };

@@ -1,28 +1,26 @@
-import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
-import CryptoJS from "crypto-js";
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
+import CryptoJS from 'crypto-js';
 
-import { useTempKeyStore } from "./useTempKeyStore";
+import { useTempKeyStore } from './useTempKeyStore';
 
 export const useKeyStore = create(
   devtools(
     persist(
       (set) => ({
         key: {
-          appKey: "",
-          appSecret: "",
-          vtsAppKey: "",
-          vtsAppSecret: "",
-          approval_key: "", // 웹소캣 접속키
+          appKey: '',
+          secretKey: '',
+          vtsAppKey: '',
+          vtsSecretKey: '',
+          approval_key: '', // 웹소캣 접속키
         },
         setKey: (key) => {
           const password = useTempKeyStore.getState().key.password;
+          const filed = key.filed;
           const encryptedKey = {
-            appKey: encrypt(password, key.appKey),
-            appSecret: encrypt(password, key.appSecret),
-            vtsAppKey: encrypt(password, key.vtsAppKey),
-            vtsAppSecret: encrypt(password, key.vtsAppSecret),
-            approval_key: encrypt(password, key.approval_key),
+            ...useKeyStore.getState().key,
+            [filed]: encrypt(password, key[filed]),
           };
           set({ key: encryptedKey });
         },
@@ -31,19 +29,19 @@ export const useKeyStore = create(
           const key = useKeyStore.getState().key;
           return {
             appKey: decrypt(password, key.appKey),
-            appSecret: decrypt(password, key.appSecret),
+            secretKey: decrypt(password, key.secretKey),
             vtsAppKey: decrypt(password, key.vtsAppKey),
-            vtsAppSecret: decrypt(password, key.vtsAppSecret),
+            vtsSecretKey: decrypt(password, key.vtsSecretKey),
             approval_key: decrypt(password, key.approval_key),
           };
         },
       }),
       {
-        name: "key",
+        name: 'key',
         getStorage: () => localStorage,
       }
     ),
-    { name: "key" }
+    { name: 'key' }
   )
 );
 
