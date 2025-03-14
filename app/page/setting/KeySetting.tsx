@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useKeyStore } from "@/store/useKeyStore";
-import { useTempKeyStore } from "@/store/useTempKeyStore";
-import { useState } from "react";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useKeyStore } from '@/store/useKeyStore';
+import { useTempKeyStore } from '@/store/useTempKeyStore';
+import { useState } from 'react';
 
-const KeySetting = ({ filed = "appKey", label = "실전계좌 app key" }) => {
+const KeySetting = ({ filed = 'appKey', label = '실전계좌 app key' }) => {
   const { key, setKey, getKey } = useKeyStore();
   const { key: tempKey } = useTempKeyStore();
 
-  const [word, setWord] = useState("");
+  const [word, setWord] = useState('');
 
   // 저장 토글
   const [saveToggle, setSaveToggle] = useState(false);
@@ -25,7 +25,7 @@ const KeySetting = ({ filed = "appKey", label = "실전계좌 app key" }) => {
   // }, [key[filed]]);
 
   return (
-    <section className="bg-white border rounded-sm overflow-hidden p-4 flex justify-between items-center gap-4">
+    <section className="overflow-hidden p-4 flex justify-between items-center gap-4">
       <div className="flex flex-col text-sm shrink-0">
         <label className="font-bold">{label}</label>
       </div>
@@ -37,9 +37,9 @@ const KeySetting = ({ filed = "appKey", label = "실전계좌 app key" }) => {
               value={word}
               onChange={(e) => setWord(e.target.value)}
               placeholder={
-                tempKey.password === "" ? "암호화용 비번이 필요" : ""
+                tempKey.password === '' ? '암호화용 비번이 필요' : ''
               }
-              disabled={tempKey.password === ""}
+              disabled={tempKey.password === ''}
             />
             <Button
               onClick={() => {
@@ -51,7 +51,7 @@ const KeySetting = ({ filed = "appKey", label = "실전계좌 app key" }) => {
                 setWord(key[filed]);
                 setSaveToggle(!saveToggle);
               }}
-              disabled={tempKey.password === ""}
+              disabled={tempKey.password === ''}
             >
               저장
             </Button>
@@ -64,9 +64,9 @@ const KeySetting = ({ filed = "appKey", label = "실전계좌 app key" }) => {
                 className="shrink-0"
                 onClick={() => {
                   setSaveToggle(!saveToggle);
-                  setWord("");
+                  setWord('');
                 }}
-                disabled={tempKey.password === ""}
+                disabled={tempKey.password === ''}
                 variant="destructive"
               >
                 수정
@@ -84,10 +84,10 @@ const KeySetting = ({ filed = "appKey", label = "실전계좌 app key" }) => {
                 }
                 setToggle(!toggle);
               }}
-              disabled={tempKey.password === ""}
+              disabled={tempKey.password === ''}
               variant="secondary"
             >
-              {toggle ? "원복" : "복호화"}
+              {toggle ? '원복' : '복호화'}
             </Button>
           </>
         )}

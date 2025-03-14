@@ -9,9 +9,9 @@ const Password = () => {
   return (
     <section className="bg-white border rounded-sm overflow-hidden p-4 flex justify-between items-center gap-4">
       <div>
-        <label className="font-bold">암호화용 비번</label>
+        <label className="font-bold">암호화용 sort</label>
         <div className="text-xs text-neutral-500">
-          데이터 암, 복호화를 위한 비번으로 저장되지 않습니다.
+          데이터 암, 복호화를 위한 sort입니다.
         </div>
       </div>
       <Input

@@ -1,8 +1,16 @@
+'use client';
+
 import { Title } from '@/components/title';
 import Password from './Password';
 import KeySetting from './KeySetting';
+import AccordionSection from '@/components/accordionSection';
+import SettingContent from './SettingContent';
+import { useTempKeyStore } from '@/store/useTempKeyStore';
+import dayjs from 'dayjs';
 
 const Setting = () => {
+  const { key } = useTempKeyStore();
+
   return (
     <div className="flex flex-col gap-6">
       <Title
@@ -15,10 +23,31 @@ const Setting = () => {
         "
       />
       <Password />
-      <KeySetting filed="appKey" label="실전계좌 app key" />
-      <KeySetting filed="secretKey" label="실전계좌 secret key" />
-      <KeySetting filed="vtsAppKey" label="모의투자계좌 app key" />
-      <KeySetting filed="vtsSecretKey" label="모의투자계좌 secret key" />
+      <AccordionSection title="기타">
+        <SettingContent title="실전계좌, 모의투자계좌 유무" value="실전계좌" />
+      </AccordionSection>
+      <AccordionSection title="발급받은 토큰">
+        <SettingContent title="접근토큰" value={key.access_token} />
+        <SettingContent title="접근토큰유형" value={key.token_type} />
+        <SettingContent
+          title="접근토큰 유효기간"
+          value={dayjs(key.expires_in).format('HH:mm:ss')}
+        />
+        <SettingContent
+          title="접근토큰 유효기간(일시표시)"
+          value={dayjs(key.access_token_token_expired).format('MM/DD HH:mm:ss')}
+        />
+      </AccordionSection>
+      <AccordionSection title="한국투자증권 API KEY 설정">
+        <KeySetting filed="appKey" label="실전계좌 app key" />
+        <KeySetting filed="secretKey" label="실전계좌 secret key" />
+        <KeySetting filed="vtsAppKey" label="모의투자계좌 app key" />
+        <KeySetting filed="vtsSecretKey" label="모의투자계좌 secret key" />
+      </AccordionSection>
+      <AccordionSection title="기타">
+        <div>key</div>
+        <div>실전계좌 VS 모의투자계좌</div>
+      </AccordionSection>
     </div>
   );
 };
