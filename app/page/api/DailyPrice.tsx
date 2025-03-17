@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { useTempKeyStore } from "@/store/useTempKeyStore";
-import { useKeyStore } from "@/store/useKeyStore";
+import { Button } from '@/components/ui/button';
+import { useTempKeyStore } from '@/store/useTempKeyStore';
+import { useKeyStore } from '@/store/useKeyStore';
 
 import {
   Drawer,
@@ -11,24 +11,25 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/drawer';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-import { useState } from "react";
+import { useState } from 'react';
+import ApiContent from './ApiContent';
 
 const DailyPrice = () => {
   const { key: tempKey } = useTempKeyStore();
   const { key } = useKeyStore();
 
-  const [excd, setExcd] = useState("");
-  const [symb, setSymb] = useState("");
-  const [gubn, setGubn] = useState("0");
-  const [modp, setModp] = useState("0");
+  const [excd, setExcd] = useState('');
+  const [symb, setSymb] = useState('');
+  const [gubn, setGubn] = useState('0');
+  const [modp, setModp] = useState('0');
 
   const handleButtonClick = async () => {
     const { appKey, secretKey } = key;
-    const url = "/api/koreainvestment/quotations/dailyprice";
+    const url = '/api/koreainvestment/quotations/dailyprice';
     const body = {
       appkey: appKey,
       appsecret: secretKey,
@@ -42,9 +43,9 @@ const DailyPrice = () => {
 
     try {
       const response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json; charset=UTF-8",
+          'Content-Type': 'application/json; charset=UTF-8',
         },
         body: JSON.stringify(body),
       });
@@ -53,18 +54,18 @@ const DailyPrice = () => {
 
       console.log(data);
 
-      alert("해외주식 기간별시세를 조회되었습니다.");
+      alert('해외주식 기간별시세를 조회되었습니다.');
     } catch (error) {
       alert(error);
     }
   };
 
   return (
-    <section className="flex items-center justify-between p-4">
-      <div className="flex gap-4">
-        <b>해외주식 기간별시세</b>
-        <p>/quotations/dailyprice</p>
-      </div>
+    <ApiContent
+      title="해외주식 기간별시세"
+      endPoint="/quotations/dailyprice"
+      disabled={false}
+    >
       <Drawer>
         <DrawerTrigger>
           <Button>API 호출</Button>
@@ -103,20 +104,20 @@ const DailyPrice = () => {
               <Label htmlFor="gubn">구분</Label>
               <div className="flex gap-2">
                 <Button
-                  onClick={() => setGubn("0")}
-                  variant={gubn === "0" ? "default" : "outline"}
+                  onClick={() => setGubn('0')}
+                  variant={gubn === '0' ? 'default' : 'outline'}
                 >
                   일
                 </Button>
                 <Button
-                  onClick={() => setGubn("1")}
-                  variant={gubn === "1" ? "default" : "outline"}
+                  onClick={() => setGubn('1')}
+                  variant={gubn === '1' ? 'default' : 'outline'}
                 >
                   주
                 </Button>
                 <Button
-                  onClick={() => setGubn("2")}
-                  variant={gubn === "2" ? "default" : "outline"}
+                  onClick={() => setGubn('2')}
+                  variant={gubn === '2' ? 'default' : 'outline'}
                 >
                   월
                 </Button>
@@ -126,14 +127,14 @@ const DailyPrice = () => {
               <Label htmlFor="modp">수정주가반영여부</Label>
               <div className="flex gap-2">
                 <Button
-                  onClick={() => setModp("0")}
-                  variant={modp === "0" ? "default" : "outline"}
+                  onClick={() => setModp('0')}
+                  variant={modp === '0' ? 'default' : 'outline'}
                 >
                   미반영
                 </Button>
                 <Button
-                  onClick={() => setModp("1")}
-                  variant={modp === "1" ? "default" : "outline"}
+                  onClick={() => setModp('1')}
+                  variant={modp === '1' ? 'default' : 'outline'}
                 >
                   반영
                 </Button>
@@ -141,7 +142,7 @@ const DailyPrice = () => {
             </div>
           </div>
           <DrawerFooter>
-            <div className="flex items-center w-full gap-4">
+            <div className="flex items-center justify-end w-full gap-4">
               <Button onClick={handleButtonClick}>조회</Button>
               <DrawerClose>
                 <Button variant="outline">취소</Button>
@@ -150,7 +151,7 @@ const DailyPrice = () => {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-    </section>
+    </ApiContent>
   );
 };
 

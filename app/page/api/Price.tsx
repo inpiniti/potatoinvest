@@ -1,31 +1,33 @@
-import { Button } from "@/components/ui/button";
-import { useTempKeyStore } from "@/store/useTempKeyStore";
-import { useKeyStore } from "@/store/useKeyStore";
+import { Button } from '@/components/ui/button';
+import { useTempKeyStore } from '@/store/useTempKeyStore';
+import { useKeyStore } from '@/store/useKeyStore';
+
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useState } from "react";
+} from '@/components/ui/drawer';
+import { useState } from 'react';
+import ApiContent from './ApiContent';
 
 const Price = () => {
   const { key: tempKey } = useTempKeyStore();
   const { key } = useKeyStore();
 
-  const [excd, setExcd] = useState("");
-  const [symb, setSymb] = useState("");
+  const [result, setResult] = useState('');
+  const [excd, setExcd] = useState('NYS');
+  const [symb, setSymb] = useState('APPL');
 
   const handleButtonClick = async () => {
     const { appKey, secretKey } = key;
-    const url = "/api/koreainvestment/quotations/price";
+    const url = '/api/koreainvestment/quotations/price';
     const body = {
       appkey: appKey,
       appsecret: secretKey,
@@ -37,66 +39,90 @@ const Price = () => {
 
     try {
       const response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json; charset=UTF-8",
+          'Content-Type': 'application/json; charset=UTF-8',
         },
         body: JSON.stringify(body),
       });
 
       const data = await response.json();
 
-      console.log(data);
+      setResult(JSON.stringify(data, null, 2));
 
-      alert("해외주식 현재체결가가 조회되었습니다.");
+      alert('해외주식 현재체결가가 조회되었습니다.');
     } catch (error) {
       alert(error);
     }
   };
 
   return (
-    <section className="flex items-center justify-between p-4">
-      <div className="flex gap-4">
-        <b>해외주식 현재체결가</b>
-        <p>/quotations/price</p>
-      </div>
+    <ApiContent
+      title="해외주식 현재체결가"
+      endPoint="/quotations/price"
+      disabled={false}
+      result={result}
+    >
       <Drawer>
         <DrawerTrigger>
           <Button>API 호출</Button>
         </DrawerTrigger>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>다음정보를 입력해주세요.</DrawerTitle>
-            <DrawerDescription>
-              거래소 코드와 종목코드는 필수 입니다.
-            </DrawerDescription>
+            <DrawerTitle>해외주식 현재체결가</DrawerTitle>
           </DrawerHeader>
-          <div className="px-4 flex flex-col gap-4">
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="excd">
-                거래소 코드 : (NYS, NAS, AMS, TSE, HKS, ...)
-              </Label>
-              <Input
-                type="text"
-                id="excd"
+          <div className="px-4 flex flex-col gap-6">
+            <div className="grid w-full max-w-sm items-center gap-3">
+              <Label htmlFor="excd">거래소 코드</Label>
+              <RadioGroup
+                className="flex gap-4"
+                defaultValue="comfortable"
                 value={excd}
-                onChange={(e) => setExcd(e.target.value)}
-                placeholder="거래소 코드를 입력해주세요."
-              />
+                onValueChange={(value) => setExcd(value)}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="NYS" id="r1" />
+                  <Label htmlFor="r1">NYS</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="NAS" id="r2" />
+                  <Label htmlFor="r2">NAS</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="AMS" id="r3" />
+                  <Label htmlFor="r3">AMS</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="TSE" id="r4" />
+                  <Label htmlFor="r4">TSE</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="HKS" id="r5" />
+                  <Label htmlFor="r5">HKS</Label>
+                </div>
+              </RadioGroup>
             </div>
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="symb">종목 코드 (APPL, TSLA)</Label>
-              <Input
-                type="text"
-                id="symb"
+            <div className="grid w-full max-w-sm items-center gap-3">
+              <Label htmlFor="symb">종목 코드</Label>
+              <RadioGroup
+                className="flex gap-4"
+                defaultValue="comfortable"
                 value={symb}
-                onChange={(e) => setSymb(e.target.value)}
-                placeholder="종목 코드를 입력해주세요."
-              />
+                onValueChange={(value) => setSymb(value)}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="APPL" id="r1" />
+                  <Label htmlFor="r1">APPL</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="TSLA" id="r2" />
+                  <Label htmlFor="r2">TSLA</Label>
+                </div>
+              </RadioGroup>
             </div>
           </div>
           <DrawerFooter>
-            <div className="flex items-center w-full gap-4">
+            <div className="flex items-center justify-end w-full gap-2">
               <Button onClick={handleButtonClick}>조회</Button>
               <DrawerClose>
                 <Button variant="outline">취소</Button>
@@ -105,7 +131,7 @@ const Price = () => {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-    </section>
+    </ApiContent>
   );
 };
 
