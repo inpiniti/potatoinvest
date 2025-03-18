@@ -1,6 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { tempKeyStore } from "@/store/tempKeyStore";
-import { keyStore } from "@/store/keyStore";
 
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
