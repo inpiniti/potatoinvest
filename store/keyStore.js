@@ -2,9 +2,9 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { encrypt, decrypt } from "@/utils/crypto";
 
-import { useTempKeyStore } from "./useTempKeyStore";
+import { tempKeyStore } from "./tempKeyStore";
 
-export const useKeyStore = create(
+export const keyStore = create(
   devtools(
     persist(
       (set) => ({
@@ -14,19 +14,23 @@ export const useKeyStore = create(
           vtsAppKey: "",
           vtsSecretKey: "",
           approval_key: "", // 웹소캣 접속키
+          isVts: true,
+        },
+        setIsVts: (isVts) => {
+          set({ key: { ...keyStore.getState().key, isVts } });
         },
         setKey: (key) => {
-          const password = useTempKeyStore.getState().key.password;
+          const password = tempKeyStore.getState().key.password;
           const filed = key.filed;
           const encryptedKey = {
-            ...useKeyStore.getState().key,
+            ...keyStore.getState().key,
             [filed]: encrypt(password, key[filed]),
           };
           set({ key: encryptedKey });
         },
         getKey: () => {
-          const password = useTempKeyStore.getState().key.password;
-          const key = useKeyStore.getState().key;
+          const password = tempKeyStore.getState().key.password;
+          const key = keyStore.getState().key;
           return {
             appKey: decrypt(password, key.appKey),
             secretKey: decrypt(password, key.secretKey),

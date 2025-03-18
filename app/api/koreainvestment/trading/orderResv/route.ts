@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     token,
     excd,
     symb,
-    isVts = true,
+    isVts = false,
   } = await request.json();
 
   const port = isVts ? "29443" : "9443";

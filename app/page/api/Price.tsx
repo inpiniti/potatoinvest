@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button';
-import { useTempKeyStore } from '@/store/useTempKeyStore';
-import { useKeyStore } from '@/store/useKeyStore';
+import { Button } from "@/components/ui/button";
+import { tempKeyStore } from "@/store/tempKeyStore";
+import { keyStore } from "@/store/keyStore";
 
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import {
   Drawer,
@@ -13,44 +13,32 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer';
-import { useState } from 'react';
-import ApiContent from './ApiContent';
+} from "@/components/ui/drawer";
+import { useState } from "react";
+import ApiContent from "./ApiContent";
+import useApi from "@/hooks/useApi";
 
 const Price = () => {
-  const { key: tempKey } = useTempKeyStore();
-  const { key } = useKeyStore();
+  const api = useApi();
 
-  const [result, setResult] = useState('');
-  const [excd, setExcd] = useState('NYS');
-  const [symb, setSymb] = useState('APPL');
+  const [result, setResult] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const [excd, setExcd] = useState("NYS");
+  const [symb, setSymb] = useState("APPL");
 
   const handleButtonClick = async () => {
-    const { appKey, secretKey } = key;
-    const url = '/api/koreainvestment/quotations/price';
     const body = {
-      appkey: appKey,
-      appsecret: secretKey,
-      solt: tempKey.password,
-      token: tempKey.access_token,
       excd: excd,
       symb: symb,
     };
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: JSON.stringify(body),
-      });
-
+      const response = await api.quotations.price(body);
       const data = await response.json();
 
       setResult(JSON.stringify(data, null, 2));
-
-      alert('해외주식 현재체결가가 조회되었습니다.');
+      setIsOpen(false);
     } catch (error) {
       alert(error);
     }
@@ -63,7 +51,7 @@ const Price = () => {
       disabled={false}
       result={result}
     >
-      <Drawer>
+      <Drawer open={isOpen} onOpenChange={setIsOpen}>
         <DrawerTrigger>
           <Button>API 호출</Button>
         </DrawerTrigger>

@@ -1,23 +1,24 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
+} from "@/components/ui/accordion";
 
-import { Title } from '@/components/title';
+import { Title } from "@/components/title";
 
-import { Button } from '@/components/ui/button';
-import TokenP from './TokenP';
-import Price from './Price';
-import DailyPrice from './DailyPrice';
+import { Button } from "@/components/ui/button";
+import TokenP from "./TokenP";
+import Price from "./Price";
+import DailyPrice from "./DailyPrice";
 
-import AccordionSection from '@/components/accordionSection';
-import ApiContent from './ApiContent';
+import AccordionSection from "@/components/accordionSection";
+import ApiContent from "./ApiContent";
+import InquireBalance from "./trading/InquireBalance";
 
 const Log = () => {
   const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
@@ -72,7 +73,7 @@ const Log = () => {
           title="해외주식 미체결내역"
           endPoint="/trading/inquire-nccs"
         />
-        <ApiContent title="해외주식 잔고" endPoint="/trading/inquire-balance" />
+        <InquireBalance />
         <ApiContent
           title="해외주식 주문체결내역"
           endPoint="/trading/inquire-ccnl"

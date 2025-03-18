@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { Input } from '@/components/ui/input';
-import { useTempKeyStore } from '@/store/useTempKeyStore';
+import { Input } from "@/components/ui/input";
+import { tempKeyStore } from "@/store/tempKeyStore";
 
 const Password = () => {
-  const { key, setKey } = useTempKeyStore();
+  const { key, setKey } = tempKeyStore();
 
   return (
     <section className="bg-white border rounded-sm overflow-hidden p-4 flex justify-between items-center gap-4">

@@ -17,6 +17,39 @@ const Update = () => {
 
       <Card>
         <CardHeader>
+          <CardTitle>1일 1커밋</CardTitle>
+          <CardDescription>2025년 3월 19일 01:29</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="flex items-center space-x-4 rounded-md bg-neutral-100 p-4">
+            <div className="flex-1 space-y-1">
+              <p className="font-medium text-muted-foreground">
+                주말 제외하곤, 1일 1커밋을 원칙이 목표인데, 어제 하루는
+                쉬어버렸다. 나도 인간인지라 나태해지는 것 같다. api 연동만 일단
+                이번주에 끝을 내고 싶은데, 생각보다 오래 걸린다. api
+                모듈이라는걸 만들었는데,{" "}
+                <pre className="text-red-400">
+                  import useApi from &quot;@/hooks/useApi&quot;; <br />
+                  const api = useApi(); <br />
+                  const response = await api.trading.inquireBalance(payload);{" "}
+                  <br />
+                </pre>
+                payload 부분을 제외하곤 코드가 간략하다. 특히나{" "}
+                <b className="text-red-400"> api. </b> 하고 ctrl + space 를
+                누르면, 모듈에 있는 api가 나오기 때문에 vscode에서 사용하기
+                편하도록 만들어 두었다. 사실 위의 내용보다는 header 에 들어가야
+                되는 부분도 신경 써야 될게 많고, 실전 api를 호출할지, 모의 api를
+                호출할지 일일이 매번 컨트롤 하는건 사실상 매우 비효율적이었다.
+                그러한 문제를 해결하기 위해서 만들었고, 세부적인 컨트롤은 설정
+                페이지에서 ui로 설정이 가능하도록 되어있다.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>한국투자증권 API 연동</CardTitle>
           <CardDescription>2025년 3월 14일 00:14</CardDescription>
         </CardHeader>

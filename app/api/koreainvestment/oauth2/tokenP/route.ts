@@ -2,16 +2,19 @@ import { NextResponse, NextRequest } from "next/server";
 import { decrypt } from "@/utils/crypto";
 
 export async function POST(request: NextRequest) {
-  const { appkey, appsecret, solt } = await request.json();
+  const { appkey, appsecret, solt, isVts = true } = await request.json();
 
-  //const url = "https://openapivts.koreainvestment.com:29443/oauth2/tokenP";
-  const url = "https://openapi.koreainvestment.com:9443/oauth2/tokenP";
+  const port = isVts ? "29443" : "9443";
+  const domain = isVts ? "openapivts" : "openapi";
+  const url = `https://${domain}.koreainvestment.com:${port}/oauth2/tokenP`;
 
   const body = {
     grant_type: "client_credentials",
     appkey: decrypt(solt, appkey),
     appsecret: decrypt(solt, appsecret),
   };
+
+  console.log({ url, body });
 
   try {
     const response = await fetch(url, {

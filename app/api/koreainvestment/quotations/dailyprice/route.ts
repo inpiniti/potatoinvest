@@ -2,11 +2,23 @@ import { NextResponse, NextRequest } from "next/server";
 import { decrypt } from "@/utils/crypto";
 
 export async function POST(request: NextRequest) {
-  const { appkey, appsecret, solt, token, excd, symb, gubn, modp } =
-    await request.json();
+  const {
+    appkey,
+    appsecret,
+    solt,
+    token,
+    excd,
+    symb,
+    gubn,
+    modp,
+    isVts = true,
+  } = await request.json();
 
-  const url =
-    "https://openapi.koreainvestment.com:9443/uapi/overseas-price/v1/quotations/dailyprice";
+  const port = isVts ? "29443" : "9443";
+  const domain = isVts ? "openapivts" : "openapi";
+  const endpoint = "uapi/overseas-price/v1/quotations/dailyprice";
+  const url = `https://${domain}.koreainvestment.com:${port}/${endpoint}`;
+
   const payload = {
     AUTH: "",
     EXCD: excd,
@@ -18,6 +30,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const queryParams = new URLSearchParams(payload);
+
+    console.log({ url, payload });
 
     const response = await fetch(`${url}?${queryParams.toString()}`, {
       method: "GET",

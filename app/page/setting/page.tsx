@@ -1,20 +1,19 @@
-'use client';
+"use client";
 
-import { Title } from '@/components/title';
-import Password from './Password';
-import KeySetting from './KeySetting';
-import AccordionSection from '@/components/accordionSection';
-import SettingContent from './SettingContent';
-import { useTempKeyStore } from '@/store/useTempKeyStore';
-import dayjs from 'dayjs';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState } from 'react';
-import { Input } from '@/components/ui/input';
+import { Title } from "@/components/title";
+import Password from "./Password";
+import KeySetting from "./KeySetting";
+import AccordionSection from "@/components/accordionSection";
+import SettingContent from "./SettingContent";
+import { tempKeyStore } from "@/store/tempKeyStore";
+import dayjs from "dayjs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { keyStore } from "@/store/keyStore";
 
 const Setting = () => {
-  const { key } = useTempKeyStore();
-
-  const [account, setAccount] = useState('account');
+  const { key: tempKey } = tempKeyStore();
+  const { key, setIsVts } = keyStore();
 
   return (
     <div className="flex flex-col gap-6">
@@ -34,12 +33,12 @@ const Setting = () => {
           value={
             <Tabs
               defaultValue="account"
-              value={account}
-              onValueChange={setAccount}
+              value={String(key.isVts)}
+              onValueChange={(e) => setIsVts(e === "true")}
             >
               <TabsList>
-                <TabsTrigger value="account">실전계좌</TabsTrigger>
-                <TabsTrigger value="password">모의투자계좌</TabsTrigger>
+                <TabsTrigger value="false">실전계좌</TabsTrigger>
+                <TabsTrigger value="true">모의투자계좌</TabsTrigger>
               </TabsList>
             </Tabs>
           }
@@ -70,15 +69,17 @@ const Setting = () => {
         />
       </AccordionSection>
       <AccordionSection title="발급받은 토큰">
-        <SettingContent title="접근토큰" value={key.access_token} />
-        <SettingContent title="접근토큰유형" value={key.token_type} />
+        <SettingContent title="접근토큰" value={tempKey.access_token} />
+        <SettingContent title="접근토큰유형" value={tempKey.token_type} />
         <SettingContent
           title="접근토큰 유효기간"
-          value={dayjs(key.expires_in).format('HH:mm:ss')}
+          value={dayjs(tempKey.expires_in).format("HH:mm:ss")}
         />
         <SettingContent
           title="접근토큰 유효기간(일시표시)"
-          value={dayjs(key.access_token_token_expired).format('MM/DD HH:mm:ss')}
+          value={dayjs(tempKey.access_token_token_expired).format(
+            "MM/DD HH:mm:ss"
+          )}
         />
       </AccordionSection>
       <AccordionSection title="한국투자증권 API KEY 설정">

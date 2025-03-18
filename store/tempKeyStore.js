@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
-export const useTempKeyStore = create(
+export const tempKeyStore = create(
   devtools(
     persist(
       (set) => ({

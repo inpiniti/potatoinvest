@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { tempKeyStore } from "@/store/tempKeyStore";
-import ApiContent from "./ApiContent";
+import ApiContent from "../ApiContent";
 import { useState } from "react";
 import useApi from "@/hooks/useApi";
 
-const TokenP = () => {
+const Order = () => {
   const api = useApi();
 
   const { key: tempKey, setKey } = tempKeyStore();
@@ -22,6 +22,8 @@ const TokenP = () => {
         ...tempKey,
         ...data,
       });
+
+      alert("접근토큰이 발급되었습니다.");
     } catch (error) {
       setResult(JSON.stringify(error, null, 2));
       alert(error);
@@ -40,4 +42,4 @@ const TokenP = () => {
   );
 };
 
-export default TokenP;
+export default Order;
