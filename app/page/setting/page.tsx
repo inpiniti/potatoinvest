@@ -7,9 +7,14 @@ import AccordionSection from '@/components/accordionSection';
 import SettingContent from './SettingContent';
 import { useTempKeyStore } from '@/store/useTempKeyStore';
 import dayjs from 'dayjs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 const Setting = () => {
   const { key } = useTempKeyStore();
+
+  const [account, setAccount] = useState('account');
 
   return (
     <div className="flex flex-col gap-6">
@@ -24,7 +29,45 @@ const Setting = () => {
       />
       <Password />
       <AccordionSection title="기타">
-        <SettingContent title="실전계좌, 모의투자계좌 유무" value="실전계좌" />
+        <SettingContent
+          title="계좌"
+          value={
+            <Tabs
+              defaultValue="account"
+              value={account}
+              onValueChange={setAccount}
+            >
+              <TabsList>
+                <TabsTrigger value="account">실전계좌</TabsTrigger>
+                <TabsTrigger value="password">모의투자계좌</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          }
+        />
+        <SettingContent
+          title="최소 매수 금액 ($)"
+          value={
+            <div className="flex items-center gap-2">
+              <Input className="w-24" />
+            </div>
+          }
+        />
+        <SettingContent
+          title="최소예측률 (%)"
+          value={
+            <div className="flex items-center gap-2">
+              <Input className="w-24" value="60" />
+            </div>
+          }
+        />
+        <SettingContent
+          title="판매기준율 (%)"
+          value={
+            <div className="flex items-center gap-2">
+              <Input className="w-24" value="2" />
+            </div>
+          }
+        />
       </AccordionSection>
       <AccordionSection title="발급받은 토큰">
         <SettingContent title="접근토큰" value={key.access_token} />

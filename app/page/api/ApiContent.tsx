@@ -26,9 +26,11 @@ const ApiContent = ({
         </div>
         {children ?? <Button disabled>API 호출</Button>}
       </div>
-      <div className="w-full bg-neutral-500 text-white rounded-md p-4 overflow-hidden whitespace-pre">
-        {result || 'API의 결과가 여기에 표시됩니다.'}
-      </div>
+      {result && (
+        <div className="w-full bg-neutral-500 text-white rounded-md p-4 overflow-hidden whitespace-pre">
+          {result || 'API의 결과가 여기에 표시됩니다.'}
+        </div>
+      )}
     </section>
   );
 };
