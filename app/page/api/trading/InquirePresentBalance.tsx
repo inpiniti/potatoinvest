@@ -15,7 +15,7 @@ import { useState } from 'react';
 import ApiContent from '../ApiContent';
 import useApi from '@/hooks/useApi';
 
-const Order = () => {
+const InquirePresentBalance = () => {
   const api = useApi();
 
   const [result, setResult] = useState('');
@@ -32,7 +32,7 @@ const Order = () => {
 
   const handleButtonClick = async () => {
     try {
-      const response = await api.trading.order(payload);
+      const response = await api.trading.inquirePresentBalance(payload);
       const data = await response.json();
 
       setResult(JSON.stringify(data, null, 2));
@@ -44,8 +44,8 @@ const Order = () => {
 
   return (
     <ApiContent
-      title="해외주식 주문"
-      endPoint="/trading/order"
+      title="해외주식 체결기준현재잔고"
+      endPoint="/trading/inquirePresentBalance"
       disabled={false}
       result={result}
     >
@@ -75,4 +75,4 @@ const Order = () => {
   );
 };
 
-export default Order;
+export default InquirePresentBalance;

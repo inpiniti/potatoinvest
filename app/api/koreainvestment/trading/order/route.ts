@@ -1,5 +1,5 @@
-import { NextResponse, NextRequest } from "next/server";
-import { decrypt } from "@/utils/crypto";
+import { NextResponse, NextRequest } from 'next/server';
+import { decrypt } from '@/utils/crypto';
 
 export async function POST(request: NextRequest) {
   const {
@@ -16,33 +16,33 @@ export async function POST(request: NextRequest) {
     PDNO, // 종목코드 ex) 009150
     ORD_QTY, // 주문수량 ex) 3
     OVRS_ORD_UNPR, // 해외주문단가 ex) 150000
-    ORD_SVR_DVSN_CD = "0", // 주문서버구분코드 ex) 0
-    ORD_DVSN = "00", // 주문구분 ex) 00: 지정가
+    ORD_SVR_DVSN_CD = '0', // 주문서버구분코드 ex) 0
+    ORD_DVSN = '00', // 주문구분 ex) 00: 지정가
   } = await request.json();
 
-  const port = isVts ? "29443" : "9443";
-  const domain = isVts ? "openapivts" : "openapi";
-  const endpoint = "uapi/overseas-stock/v1/trading/order";
+  const port = isVts ? '29443' : '9443';
+  const domain = isVts ? 'openapivts' : 'openapi';
+  const endpoint = 'uapi/overseas-stock/v1/trading/order';
   const url = `https://${domain}.koreainvestment.com:${port}/${endpoint}`;
 
   const trIds = {
-    실전매수: "TTTT1002U",
-    실전매도: "TTTT1006U",
-    모의매수: "VTTT1002U",
-    모의매도: "VTTT1001U",
+    실전매수: 'TTTT1002U',
+    실전매도: 'TTTT1006U',
+    모의매수: 'VTTT1002U',
+    모의매도: 'VTTT1001U',
   };
 
   const trId = isVts
-    ? tr === "매수"
+    ? tr === '매수'
       ? trIds.모의매수
-      : tr === "매도"
+      : tr === '매도'
       ? trIds.모의매도
-      : ""
-    : tr === "매수"
+      : ''
+    : tr === '매수'
     ? trIds.실전매수
-    : tr === "매도"
+    : tr === '매도'
     ? trIds.실전매도
-    : "";
+    : '';
 
   const payload = {
     CANO, // 종합계좌번호
@@ -57,21 +57,30 @@ export async function POST(request: NextRequest) {
 
   try {
     const queryParams = new URLSearchParams(payload);
-
-    const response = await fetch(`${url}?${queryParams.toString()}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json; charset=UTF-8",
-        Authorization: `Bearer ${token}`,
-        appkey: decrypt(solt, appkey),
-        appsecret: decrypt(solt, appsecret),
-        tr_id: trId, // 거래ID
-      },
+    console.log({
+      appkey: decrypt(solt, appkey),
+      appsecret,
+      solt,
+      token,
+      url,
+      trId,
+      queryParams,
     });
 
-    const data = await response.json();
+    // const response = await fetch(`${url}?${queryParams.toString()}`, {
+    //   method: "GET",
+    //   headers: {
+    //     "Content-Type": "application/json; charset=UTF-8",
+    //     Authorization: `Bearer ${token}`,
+    //     appkey: decrypt(solt, appkey),
+    //     appsecret: decrypt(solt, appsecret),
+    //     tr_id: trId, // 거래ID
+    //   },
+    // });
 
-    return NextResponse.json(data);
+    // const data = await response.json();
+
+    return NextResponse.json('해외주식 주문 : 서버에서 내려준 값입니다.');
   } catch (error) {
     return NextResponse.json(error);
   }

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 import {
   Drawer,
@@ -9,24 +9,24 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/drawer';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-import { useState } from "react";
-import ApiContent from "./ApiContent";
-import useApi from "@/hooks/useApi";
+import { useState } from 'react';
+import ApiContent from '../ApiContent';
+import useApi from '@/hooks/useApi';
 
 const DailyPrice = () => {
   const api = useApi();
 
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
-  const [excd, setExcd] = useState("");
-  const [symb, setSymb] = useState("");
-  const [gubn, setGubn] = useState("0");
-  const [modp, setModp] = useState("0");
+  const [excd, setExcd] = useState('');
+  const [symb, setSymb] = useState('');
+  const [gubn, setGubn] = useState('0');
+  const [modp, setModp] = useState('0');
 
   const handleButtonClick = async () => {
     const body = {
@@ -92,20 +92,20 @@ const DailyPrice = () => {
               <Label htmlFor="gubn">구분</Label>
               <div className="flex gap-2">
                 <Button
-                  onClick={() => setGubn("0")}
-                  variant={gubn === "0" ? "default" : "outline"}
+                  onClick={() => setGubn('0')}
+                  variant={gubn === '0' ? 'default' : 'outline'}
                 >
                   일
                 </Button>
                 <Button
-                  onClick={() => setGubn("1")}
-                  variant={gubn === "1" ? "default" : "outline"}
+                  onClick={() => setGubn('1')}
+                  variant={gubn === '1' ? 'default' : 'outline'}
                 >
                   주
                 </Button>
                 <Button
-                  onClick={() => setGubn("2")}
-                  variant={gubn === "2" ? "default" : "outline"}
+                  onClick={() => setGubn('2')}
+                  variant={gubn === '2' ? 'default' : 'outline'}
                 >
                   월
                 </Button>
@@ -115,14 +115,14 @@ const DailyPrice = () => {
               <Label htmlFor="modp">수정주가반영여부</Label>
               <div className="flex gap-2">
                 <Button
-                  onClick={() => setModp("0")}
-                  variant={modp === "0" ? "default" : "outline"}
+                  onClick={() => setModp('0')}
+                  variant={modp === '0' ? 'default' : 'outline'}
                 >
                   미반영
                 </Button>
                 <Button
-                  onClick={() => setModp("1")}
-                  variant={modp === "1" ? "default" : "outline"}
+                  onClick={() => setModp('1')}
+                  variant={modp === '1' ? 'default' : 'outline'}
                 >
                   반영
                 </Button>

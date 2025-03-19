@@ -1,24 +1,32 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from '@/components/ui/accordion';
 
-import { Title } from "@/components/title";
+import { Title } from '@/components/title';
 
-import { Button } from "@/components/ui/button";
-import TokenP from "./TokenP";
-import Price from "./Price";
-import DailyPrice from "./DailyPrice";
+import { Button } from '@/components/ui/button';
+import TokenP from './TokenP';
+import Price from './quotations/Price';
+import DailyPrice from './quotations/DailyPrice';
 
-import AccordionSection from "@/components/accordionSection";
-import ApiContent from "./ApiContent";
-import InquireBalance from "./trading/InquireBalance";
+import AccordionSection from '@/components/accordionSection';
+import ApiContent from './ApiContent';
+import InquireBalance from './trading/InquireBalance';
+import Order from './trading/Order';
+import OrderRvsecncl from './trading/OrderRvsecncl';
+import OrderResv from './trading/OrderResv';
+import OrderResvCcnl from './trading/OrderResvCcnl';
+import InquireCcnl from './trading/InquireCcnl';
+import InquirePresentBalance from './trading/InquirePresentBalance';
+import InquireBuyableAmount from './trading/InquireBuyableAmount';
+import InquireSearch from './quotations/InquireSearch';
 
 const Log = () => {
   const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
@@ -56,40 +64,22 @@ const Log = () => {
         <ApiContent title="Hashkey" endPoint="/uapi/hashkey" />
       </AccordionSection>
       <AccordionSection title="주문/계좌">
-        <ApiContent title="해외주식 주문" endPoint="/trading/order" />
-        <ApiContent
-          title="해외주식 정정취소주문"
-          endPoint="/trading/order-rvsecncl"
-        />
-        <ApiContent
-          title="해외주식 예약주문접수"
-          endPoint="/trading/order-resv"
-        />
-        <ApiContent
-          title="해외주식 예약주문접수취소"
-          endPoint="/trading/order-resv-ccnl"
-        />
+        <Order />
+        <OrderRvsecncl />
+        <OrderResv />
+        <OrderResvCcnl />
         <ApiContent
           title="해외주식 미체결내역"
           endPoint="/trading/inquire-nccs"
         />
         <InquireBalance />
-        <ApiContent
-          title="해외주식 주문체결내역"
-          endPoint="/trading/inquire-ccnl"
-        />
-        <ApiContent
-          title="해외주식 체결기준현재잔고"
-          endPoint="/trading/inquire-present-balance"
-        />
+        <InquireCcnl />
+        <InquirePresentBalance />
         <ApiContent
           title="해외주식 예약주문조회"
           endPoint="/trading/inquire-resv"
         />
-        <ApiContent
-          title="해외주식 매수가능금액조회"
-          endPoint="/trading/inquire-buyable-amount"
-        />
+        <InquireBuyableAmount />
         <ApiContent
           title="해외주식 미국주간주문"
           endPoint="/trading/order-weekly"
@@ -122,10 +112,7 @@ const Log = () => {
           title="해외주식 종목/지수/환율기간별시세(일/주/월/년)"
           endPoint="/quotations/inquire-daily-chartprice"
         />
-        <ApiContent
-          title="해외주식 조건검색"
-          endPoint="/quotations/inquire-search"
-        />
+        <InquireSearch />
       </AccordionSection>
       [해외주식]기본시세 해외결제일자조회 <br />
       [해외주식]기본시세 해외주식 현재가상세 <br />

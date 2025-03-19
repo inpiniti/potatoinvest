@@ -80,7 +80,9 @@ export async function POST(request: NextRequest) {
 
     // const data = await response.json();
 
-    return NextResponse.json('임시 데이터 입니다.');
+    return NextResponse.json(
+      '해외주식 체결기준현재잔고 : 서버에서 내려준 값입니다.'
+    );
   } catch (error) {
     return NextResponse.json(error);
   }
