@@ -25,15 +25,6 @@ export async function POST(request: NextRequest) {
   try {
     const queryParams = new URLSearchParams(payload);
 
-    console.log(`${url}?${queryParams.toString()}`);
-    console.log({
-      "Content-Type": "application/json; charset=UTF-8",
-      Authorization: `Bearer ${token}`,
-      appkey: decrypt(solt, appkey),
-      appsecret: decrypt(solt, appsecret),
-      tr_id: "HHDFS76410000", // 거래ID
-    });
-
     const response = await fetch(`${url}?${queryParams.toString()}`, {
       method: "GET",
       headers: {
