@@ -7,6 +7,7 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -57,6 +58,7 @@ const Price = () => {
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>해외주식 현재체결가</DrawerTitle>
+            <DrawerDescription>/quotations/price</DrawerDescription>
           </DrawerHeader>
           <div className="px-4 flex flex-col gap-6">
             <div className="grid w-full max-w-sm items-center gap-3">

@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
 import {
   Drawer,
@@ -9,30 +9,27 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer';
+} from "@/components/ui/drawer";
 
-import { useState } from 'react';
-import ApiContent from '../ApiContent';
-import useApi from '@/hooks/useApi';
+import { useState } from "react";
+import ApiContent from "../ApiContent";
+import useApi from "@/hooks/useApi";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const InquireSearch = () => {
   const api = useApi();
 
-  const [result, setResult] = useState('');
+  const [result, setResult] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const [payload] = useState({
-    CANO: '50127423', // 종합계좌번호 ex) 810XXXXX
-    ACNT_PRDT_CD: '01', // 계좌상품코드 ex) 01
-    OVRS_EXCG_CD: 'NASD', // 해외거래소코드 ex) NASD, NAS : 나스닥,    NYSE, AMEX
-    TR_CRCY_CD: 'USD', // 통화코드 ex) USD
-    CTX_AREA_FK200: '', // 연속조회검색조건200 ex) 3
-    CTX_AREA_NK200: '', // 연속조회키200 ex) 150000
-  });
+  const [EXCD, setEXCD] = useState("");
 
   const handleButtonClick = async () => {
     try {
-      const response = await api.quotations.inquireSearch(payload);
+      const response = await api.quotations.inquireSearch({
+        EXCD,
+      });
       const data = await response.json();
 
       setResult(JSON.stringify(data, null, 2));
@@ -55,12 +52,32 @@ const InquireSearch = () => {
         </DrawerTrigger>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>다음정보를 입력해주세요.</DrawerTitle>
-            <DrawerDescription>
-              거래소 코드와 종목코드는 필수 입니다.
-            </DrawerDescription>
+            <DrawerTitle>해외주식 조건검색</DrawerTitle>
+            <DrawerDescription>/quotations/inquireSearch</DrawerDescription>
           </DrawerHeader>
-          <div className="px-4 flex flex-col gap-4"></div>
+          <div className="px-4 flex flex-col gap-4">
+            <div className="grid w-full max-w-sm items-center gap-3">
+              <Label htmlFor="excd">거래소 코드 : EXCD ({EXCD})</Label>
+              <Tabs defaultValue="account" value={EXCD} onValueChange={setEXCD}>
+                <TabsList>
+                  <TabsTrigger value="HKS">홍콩</TabsTrigger>
+                  <TabsTrigger value="NYS">뉴욕</TabsTrigger>
+                  <TabsTrigger value="NAS">나스닥</TabsTrigger>
+                  <TabsTrigger value="AMS">아멕스</TabsTrigger>
+                  <TabsTrigger value="TSE">도쿄</TabsTrigger>
+                  <TabsTrigger value="SHS">상해</TabsTrigger>
+                  <TabsTrigger value="SZS">심천</TabsTrigger>
+                  <TabsTrigger value="SHI">상해지수</TabsTrigger>
+                  <TabsTrigger value="SZI">심천지수</TabsTrigger>
+                  <TabsTrigger value="HSX">호치민</TabsTrigger>
+                  <TabsTrigger value="HNX">하노이</TabsTrigger>
+                  <TabsTrigger value="BAY">뉴욕(주간)</TabsTrigger>
+                  <TabsTrigger value="BAQ">나스닥(주간)</TabsTrigger>
+                  <TabsTrigger value="BAA">아멕스(주간)</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
           <DrawerFooter>
             <div className="flex items-center justify-end w-full gap-4">
               <Button onClick={handleButtonClick}>조회</Button>
