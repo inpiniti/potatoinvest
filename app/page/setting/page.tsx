@@ -32,7 +32,7 @@ const Setting = () => {
           title="계좌"
           value={
             <Tabs
-              defaultValue="account"
+              defaultValue="isVts"
               value={String(key.isVts)}
               onValueChange={(e) => setIsVts(e === "true")}
             >
@@ -43,6 +43,8 @@ const Setting = () => {
             </Tabs>
           }
         />
+        <KeySetting filed="account" label="실전 계좌번호" />
+        <KeySetting filed="vtsAccount" label="모의투자 계좌번호" />
         <SettingContent
           title="최소 매수 금액 ($)"
           value={

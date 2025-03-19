@@ -15,6 +15,8 @@ export const keyStore = create(
           vtsSecretKey: "",
           approval_key: "", // 웹소캣 접속키
           isVts: true,
+          account: "",
+          vtsAccount: "",
         },
         setIsVts: (isVts) => {
           set({ key: { ...keyStore.getState().key, isVts } });
@@ -36,7 +38,8 @@ export const keyStore = create(
             secretKey: decrypt(password, key.secretKey),
             vtsAppKey: decrypt(password, key.vtsAppKey),
             vtsSecretKey: decrypt(password, key.vtsSecretKey),
-            approval_key: decrypt(password, key.approval_key),
+            account: decrypt(password, key.account),
+            vtsAccount: decrypt(password, key.vtsAccount),
           };
         },
       }),
