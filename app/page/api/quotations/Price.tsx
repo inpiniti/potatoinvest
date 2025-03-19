@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import {
   Drawer,
@@ -11,19 +11,20 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer';
-import { useState } from 'react';
-import ApiContent from '../ApiContent';
-import useApi from '@/hooks/useApi';
+} from "@/components/ui/drawer";
+import { useState } from "react";
+import ApiContent from "../ApiContent";
+import useApi from "@/hooks/useApi";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Price = () => {
   const api = useApi();
 
-  const [result, setResult] = useState('');
+  const [result, setResult] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const [excd, setExcd] = useState('NYS');
-  const [symb, setSymb] = useState('APPL');
+  const [excd, setExcd] = useState("NYS");
+  const [symb, setSymb] = useState("APPL");
 
   const handleButtonClick = async () => {
     const body = {
@@ -59,52 +60,34 @@ const Price = () => {
           </DrawerHeader>
           <div className="px-4 flex flex-col gap-6">
             <div className="grid w-full max-w-sm items-center gap-3">
-              <Label htmlFor="excd">거래소 코드</Label>
-              <RadioGroup
-                className="flex gap-4"
-                defaultValue="comfortable"
-                value={excd}
-                onValueChange={(value) => setExcd(value)}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="NYS" id="r1" />
-                  <Label htmlFor="r1">NYS</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="NAS" id="r2" />
-                  <Label htmlFor="r2">NAS</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="AMS" id="r3" />
-                  <Label htmlFor="r3">AMS</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="TSE" id="r4" />
-                  <Label htmlFor="r4">TSE</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="HKS" id="r5" />
-                  <Label htmlFor="r5">HKS</Label>
-                </div>
-              </RadioGroup>
+              <Label htmlFor="excd">거래소 코드 : EXCD ({excd})</Label>
+              <Tabs defaultValue="account" value={excd} onValueChange={setExcd}>
+                <TabsList>
+                  <TabsTrigger value="HKS">홍콩</TabsTrigger>
+                  <TabsTrigger value="NYS">뉴욕</TabsTrigger>
+                  <TabsTrigger value="NAS">나스닥</TabsTrigger>
+                  <TabsTrigger value="AMS">아멕스</TabsTrigger>
+                  <TabsTrigger value="TSE">도쿄</TabsTrigger>
+                  <TabsTrigger value="SHS">상해</TabsTrigger>
+                  <TabsTrigger value="SZS">심천</TabsTrigger>
+                  <TabsTrigger value="SHI">상해지수</TabsTrigger>
+                  <TabsTrigger value="SZI">심천지수</TabsTrigger>
+                  <TabsTrigger value="HSX">호치민</TabsTrigger>
+                  <TabsTrigger value="HNX">하노이</TabsTrigger>
+                  <TabsTrigger value="BAY">뉴욕(주간)</TabsTrigger>
+                  <TabsTrigger value="BAQ">나스닥(주간)</TabsTrigger>
+                  <TabsTrigger value="BAA">아멕스(주간)</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
             <div className="grid w-full max-w-sm items-center gap-3">
-              <Label htmlFor="symb">종목 코드</Label>
-              <RadioGroup
-                className="flex gap-4"
-                defaultValue="comfortable"
-                value={symb}
-                onValueChange={(value) => setSymb(value)}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="APPL" id="r1" />
-                  <Label htmlFor="r1">APPL</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="TSLA" id="r2" />
-                  <Label htmlFor="r2">TSLA</Label>
-                </div>
-              </RadioGroup>
+              <Label htmlFor="symb">종목 코드 : SYMB ({symb})</Label>
+              <Tabs defaultValue="account" value={symb} onValueChange={setSymb}>
+                <TabsList>
+                  <TabsTrigger value="AAPL">애플</TabsTrigger>
+                  <TabsTrigger value="TSLA">테슬라</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           </div>
           <DrawerFooter>
