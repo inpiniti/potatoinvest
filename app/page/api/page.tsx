@@ -63,8 +63,10 @@ const Log = () => {
         <TokenP />
         <ApiContent title="Hashkey" endPoint="/uapi/hashkey" />
       </AccordionSection>
-      <AccordionSection title="주문/계좌">
+      <AccordionSection title="[해외주식] 주문/계좌">
+        {/* 해외주식 주문 */}
         <Order />
+        {/* 해외주식 정정취소주문 */}
         <OrderRvsecncl />
         <OrderResv />
         <OrderResvCcnl />
@@ -114,12 +116,6 @@ const Log = () => {
         />
         <InquireSearch />
       </AccordionSection>
-      [해외주식]기본시세 해외결제일자조회 <br />
-      [해외주식]기본시세 해외주식 현재가상세 <br />
-      [해외주식]기본시세 해외주식분봉조회 <br />
-      [해외주식]기본시세 해외지수분봉조회 <br />
-      [해외주식]기본시세 해외주식 상품기본정보 <br />
-      [해외주식]기본시세 해외주식 현재가 10호가
       <section className="flex bg-white border rounded-sm flex-col gap-4 overflow-hidden">
         <div className="flex flex-col gap-2">
           <Accordion type="single" collapsible>

@@ -50,7 +50,7 @@ const InquireCcnl = () => {
       result={result}
     >
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerTrigger>
+        <DrawerTrigger asChild>
           <Button>API 호출</Button>
         </DrawerTrigger>
         <DrawerContent>

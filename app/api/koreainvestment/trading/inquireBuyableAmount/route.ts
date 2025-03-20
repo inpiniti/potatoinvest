@@ -83,7 +83,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       '해외주식 매수가능금액조회 : 서버에서 내려준 값입니다.'
     );
-  } catch (error) {
-    return NextResponse.json(error);
+  } catch (error: unknown) {
+    return NextResponse.json(
+      {
+        message: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }

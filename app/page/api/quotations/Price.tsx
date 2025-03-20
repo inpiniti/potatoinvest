@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
-import { Label } from "@/components/ui/label";
+import { Label } from '@/components/ui/label';
 
 import {
   Drawer,
@@ -11,20 +11,20 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
-import { useState } from "react";
-import ApiContent from "../ApiContent";
-import useApi from "@/hooks/useApi";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/drawer';
+import { useState } from 'react';
+import ApiContent from '../ApiContent';
+import useApi from '@/hooks/useApi';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Price = () => {
   const api = useApi();
 
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
-  const [excd, setExcd] = useState("NYS");
-  const [symb, setSymb] = useState("APPL");
+  const [excd, setExcd] = useState('NYS');
+  const [symb, setSymb] = useState('APPL');
 
   const handleButtonClick = async () => {
     const body = {
@@ -51,7 +51,7 @@ const Price = () => {
       result={result}
     >
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerTrigger>
+        <DrawerTrigger asChild>
           <Button>API 호출</Button>
         </DrawerTrigger>
         <DrawerContent>

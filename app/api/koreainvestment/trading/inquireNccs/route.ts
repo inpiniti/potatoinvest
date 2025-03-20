@@ -81,7 +81,12 @@ export async function POST(request: NextRequest) {
     // const data = await response.json();
 
     return NextResponse.json('임시 데이터 입니다.');
-  } catch (error) {
-    return NextResponse.json(error);
+  } catch (error: unknown) {
+    return NextResponse.json(
+      {
+        message: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }

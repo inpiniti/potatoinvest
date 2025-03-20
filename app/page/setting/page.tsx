@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { Title } from "@/components/title";
-import Password from "./Password";
-import KeySetting from "./KeySetting";
-import AccordionSection from "@/components/accordionSection";
-import SettingContent from "./SettingContent";
-import { tempKeyStore } from "@/store/tempKeyStore";
-import dayjs from "dayjs";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { keyStore } from "@/store/keyStore";
+import { Title } from '@/components/title';
+import Password from './Password';
+import KeySetting from './KeySetting';
+import AccordionSection from '@/components/accordionSection';
+import SettingContent from './SettingContent';
+import { tempKeyStore } from '@/store/tempKeyStore';
+import dayjs from 'dayjs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { keyStore } from '@/store/keyStore';
 
 const Setting = () => {
   const { key: tempKey } = tempKeyStore();
@@ -34,7 +34,7 @@ const Setting = () => {
             <Tabs
               defaultValue="isVts"
               value={String(key.isVts)}
-              onValueChange={(e) => setIsVts(e === "true")}
+              onValueChange={(e) => setIsVts(e === 'true')}
             >
               <TabsList>
                 <TabsTrigger value="false">실전계좌</TabsTrigger>
@@ -57,7 +57,7 @@ const Setting = () => {
           title="최소예측률 (%)"
           value={
             <div className="flex items-center gap-2">
-              <Input className="w-24" value="60" />
+              <Input className="w-24" defaultValue="60" />
             </div>
           }
         />
@@ -65,7 +65,7 @@ const Setting = () => {
           title="판매기준율 (%)"
           value={
             <div className="flex items-center gap-2">
-              <Input className="w-24" value="2" />
+              <Input className="w-24" defaultValue="2" />
             </div>
           }
         />
@@ -75,12 +75,12 @@ const Setting = () => {
         <SettingContent title="접근토큰유형" value={tempKey.token_type} />
         <SettingContent
           title="접근토큰 유효기간"
-          value={dayjs(tempKey.expires_in).format("HH:mm:ss")}
+          value={dayjs(tempKey.expires_in).format('HH:mm:ss')}
         />
         <SettingContent
           title="접근토큰 유효기간(일시표시)"
           value={dayjs(tempKey.access_token_token_expired).format(
-            "MM/DD HH:mm:ss"
+            'MM/DD HH:mm:ss'
           )}
         />
       </AccordionSection>

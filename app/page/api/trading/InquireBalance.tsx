@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 import {
   Drawer,
@@ -9,25 +9,25 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
+} from '@/components/ui/drawer';
 
-import { useState } from "react";
-import ApiContent from "../ApiContent";
-import useApi from "@/hooks/useApi";
+import { useState } from 'react';
+import ApiContent from '../ApiContent';
+import useApi from '@/hooks/useApi';
 
 const InquireBalance = () => {
   const api = useApi();
 
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
   const [payload] = useState({
-    CANO: "50127423", // 종합계좌번호 ex) 810XXXXX
-    ACNT_PRDT_CD: "01", // 계좌상품코드 ex) 01
-    OVRS_EXCG_CD: "NASD", // 해외거래소코드 ex) NASD, NAS : 나스닥,    NYSE, AMEX
-    TR_CRCY_CD: "USD", // 통화코드 ex) USD
-    CTX_AREA_FK200: "", // 연속조회검색조건200 ex) 3
-    CTX_AREA_NK200: "", // 연속조회키200 ex) 150000
+    CANO: '50127423', // 종합계좌번호 ex) 810XXXXX
+    ACNT_PRDT_CD: '01', // 계좌상품코드 ex) 01
+    OVRS_EXCG_CD: 'NASD', // 해외거래소코드 ex) NASD, NAS : 나스닥,    NYSE, AMEX
+    TR_CRCY_CD: 'USD', // 통화코드 ex) USD
+    CTX_AREA_FK200: '', // 연속조회검색조건200 ex) 3
+    CTX_AREA_NK200: '', // 연속조회키200 ex) 150000
   });
 
   const handleButtonClick = async () => {
@@ -50,7 +50,7 @@ const InquireBalance = () => {
       result={result}
     >
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerTrigger>
+        <DrawerTrigger asChild>
           <Button>API 호출</Button>
         </DrawerTrigger>
         <DrawerContent>

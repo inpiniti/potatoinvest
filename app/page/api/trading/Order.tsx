@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 import {
   Drawer,
@@ -9,40 +9,40 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
+} from '@/components/ui/drawer';
 
-import { useEffect, useState } from "react";
-import ApiContent from "../ApiContent";
-import useApi from "@/hooks/useApi";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { keyStore } from "@/store/keyStore";
+import { useEffect, useState } from 'react';
+import ApiContent from '../ApiContent';
+import useApi from '@/hooks/useApi';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { keyStore } from '@/store/keyStore';
 
 const Order = () => {
   const { key, getKey } = keyStore();
 
   const api = useApi();
 
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
-  const [tr, setTr] = useState("");
-  const [CANO, setCANO] = useState(""); // 종합계좌번호 ex) 810XXXX
-  const [ACNT_PRDT_CD, setACNT_PRDT_CD] = useState(""); // 계좌상품코드 ex) 01
-  const [OVRS_EXCG_CD, setOVRS_EXCG_CD] = useState(""); // 해외거래소코드 ex) NASD, NAS : 나스닥,  NYSE, AMEX
-  const [PDNO, setPDNO] = useState(""); // 종목코드 ex) 1
-  const [ORD_QTY, setORD_QTY] = useState(""); // 주문수량 ex) 1
-  const [OVRS_ORD_UNPR, setOVRS_ORD_UNPR] = useState(""); // 해외주문단가 ex) 1
+  const [tr, setTr] = useState('');
+  const [CANO, setCANO] = useState(''); // 종합계좌번호 ex) 810XXXX
+  const [ACNT_PRDT_CD, setACNT_PRDT_CD] = useState(''); // 계좌상품코드 ex) 01
+  const [OVRS_EXCG_CD, setOVRS_EXCG_CD] = useState(''); // 해외거래소코드 ex) NASD, NAS : 나스닥,  NYSE, AMEX
+  const [PDNO, setPDNO] = useState(''); // 종목코드 ex) 1
+  const [ORD_QTY, setORD_QTY] = useState(''); // 주문수량 ex) 1
+  const [OVRS_ORD_UNPR, setOVRS_ORD_UNPR] = useState(''); // 해외주문단가 ex) 1
 
   useEffect(() => {
     const _key = getKey();
 
     if (key.isVts === true) {
-      const vtsAccountList = _key.vtsAccount.split("-");
+      const vtsAccountList = _key.vtsAccount.split('-');
       setCANO(vtsAccountList[0]);
       setACNT_PRDT_CD(vtsAccountList[1]);
     } else {
-      const accountList = _key.account.split("-");
+      const accountList = _key.account.split('-');
       setCANO(accountList[0]);
       setACNT_PRDT_CD(accountList[1]);
     }
@@ -78,7 +78,7 @@ const Order = () => {
       result={result}
     >
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerTrigger>
+        <DrawerTrigger asChild>
           <Button>API 호출</Button>
         </DrawerTrigger>
         <DrawerContent>

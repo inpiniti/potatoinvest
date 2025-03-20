@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 import {
   Drawer,
@@ -9,24 +9,24 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/drawer';
+import { Label } from '@/components/ui/label';
 
-import { useState } from "react";
-import ApiContent from "../ApiContent";
-import useApi from "@/hooks/useApi";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from 'react';
+import ApiContent from '../ApiContent';
+import useApi from '@/hooks/useApi';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const DailyPrice = () => {
   const api = useApi();
 
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
-  const [excd, setExcd] = useState("");
-  const [symb, setSymb] = useState("");
-  const [gubn, setGubn] = useState("0");
-  const [modp, setModp] = useState("0");
+  const [excd, setExcd] = useState('');
+  const [symb, setSymb] = useState('');
+  const [gubn, setGubn] = useState('0');
+  const [modp, setModp] = useState('0');
 
   const handleButtonClick = async () => {
     const body = {
@@ -55,7 +55,7 @@ const DailyPrice = () => {
       result={result}
     >
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerTrigger>
+        <DrawerTrigger asChild>
           <Button>API 호출</Button>
         </DrawerTrigger>
         <DrawerContent>

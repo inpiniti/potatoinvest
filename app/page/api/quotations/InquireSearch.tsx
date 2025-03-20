@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 import {
   Drawer,
@@ -9,21 +9,21 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
+} from '@/components/ui/drawer';
 
-import { useState } from "react";
-import ApiContent from "../ApiContent";
-import useApi from "@/hooks/useApi";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from 'react';
+import ApiContent from '../ApiContent';
+import useApi from '@/hooks/useApi';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const InquireSearch = () => {
   const api = useApi();
 
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
-  const [EXCD, setEXCD] = useState("");
+  const [EXCD, setEXCD] = useState('');
 
   const handleButtonClick = async () => {
     try {
@@ -47,7 +47,7 @@ const InquireSearch = () => {
       result={result}
     >
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerTrigger>
+        <DrawerTrigger asChild>
           <Button>API 호출</Button>
         </DrawerTrigger>
         <DrawerContent>
