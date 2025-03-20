@@ -7,7 +7,6 @@ export async function POST(request: NextRequest) {
     appsecret, // 앱시크릿키
     solt,
     token, // 접근토큰
-    tr, // 거래ID '매수', '매도'
     isVts = true, // 모의투자 여부
 
     CANO,
