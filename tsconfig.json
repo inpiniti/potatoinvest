@@ -29,7 +29,8 @@
     ".next/types/**/*.ts",
     "store/useKey.js",
     "utils/api.ts",
-    "hooks/useApi.js"
+    "hooks/useApi.js",
+    "app/page/buy/page.js"
   ],
   "exclude": ["node_modules"]
 }

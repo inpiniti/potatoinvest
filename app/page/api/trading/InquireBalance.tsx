@@ -27,7 +27,7 @@ const InquireBalance = () => {
   const [CANO, setCANO] = useState("");
   const [ACNT_PRDT_CD, setACNT_PRDT_CD] = useState("");
   const [OVRS_EXCG_CD, setOVRS_EXCG_CD] = useState("NASD");
-  const [TR_CRCY_CD, setTR_CRCY_CD] = useState("USD"); // 주문수량
+  const [TR_CRCY_CD, setTR_CRCY_CD] = useState("USD"); // 거래통화
 
   const payload = {
     CANO,
