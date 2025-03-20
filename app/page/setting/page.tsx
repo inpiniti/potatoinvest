@@ -46,7 +46,7 @@ const Setting = () => {
         <KeySetting filed="account" label="실전 계좌번호" />
         <KeySetting filed="vtsAccount" label="모의투자 계좌번호" />
         <SettingContent
-          title="최소 매수 금액 ($)"
+          title="최소 매수 금액"
           value={
             <div className="flex items-center gap-2">
               <Input className="w-24" />
