@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
 import {
   Drawer,
@@ -9,42 +9,42 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer';
+} from "@/components/ui/drawer";
 
-import { useEffect, useState } from 'react';
-import ApiContent from '../ApiContent';
-import useApi from '@/hooks/useApi';
-import { keyStore } from '@/store/keyStore';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
+import { useEffect, useState } from "react";
+import ApiContent from "../ApiContent";
+import useApi from "@/hooks/useApi";
+import { keyStore } from "@/store/keyStore";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 
 const OrderRvsecncl = () => {
   const { key, getKey } = keyStore();
 
   const api = useApi();
 
-  const [result, setResult] = useState('');
+  const [result, setResult] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const [CANO, setCANO] = useState('');
-  const [ACNT_PRDT_CD, setACNT_PRDT_CD] = useState('');
-  const [OVRS_EXCG_CD, setOVRS_EXCG_CD] = useState('');
-  const [PDNO, setPDNO] = useState('');
-  const [ORGN_ODNO, setORGN_ODNO] = useState('');
-  const [RVSE_CNCL_DVSN_CD, setRVSE_CNCL_DVSN_CD] = useState('');
-  const [ORD_QTY, setORD_QTY] = useState('');
-  const [OVRS_ORD_UNPR, setOVRS_ORD_UNPR] = useState('0');
+  const [CANO, setCANO] = useState("");
+  const [ACNT_PRDT_CD, setACNT_PRDT_CD] = useState("");
+  const [OVRS_EXCG_CD, setOVRS_EXCG_CD] = useState("");
+  const [PDNO, setPDNO] = useState("");
+  const [ORGN_ODNO, setORGN_ODNO] = useState("");
+  const [RVSE_CNCL_DVSN_CD, setRVSE_CNCL_DVSN_CD] = useState("");
+  const [ORD_QTY, setORD_QTY] = useState("");
+  const [OVRS_ORD_UNPR, setOVRS_ORD_UNPR] = useState("0");
 
   useEffect(() => {
     const _key = getKey();
 
     if (key.isVts === true) {
-      const vtsAccountList = _key.vtsAccount.split('-');
+      const vtsAccountList = _key.vtsAccount.split("-");
       setCANO(vtsAccountList[0]);
       setACNT_PRDT_CD(vtsAccountList[1]);
     } else {
-      const accountList = _key.account.split('-');
+      const accountList = _key.account.split("-");
       setCANO(accountList[0]);
       setACNT_PRDT_CD(accountList[1]);
     }
@@ -184,6 +184,7 @@ const OrderRvsecncl = () => {
                 onValueChange={setOVRS_ORD_UNPR}
               >
                 <TabsList>
+                  <TabsTrigger value="0">0</TabsTrigger>
                   <TabsTrigger value="1">1</TabsTrigger>
                   <TabsTrigger value="2">2</TabsTrigger>
                   <TabsTrigger value="3">3</TabsTrigger>

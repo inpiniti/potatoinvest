@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
 import {
   Drawer,
@@ -9,26 +9,39 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer';
+} from "@/components/ui/drawer";
 
-import { useState } from 'react';
-import ApiContent from '../ApiContent';
-import useApi from '@/hooks/useApi';
+import ApiContent from "../ApiContent";
+import useApi from "@/hooks/useApi";
+import OVRS_EXCG_CD_COMPONENT from "./common/OVRS_EXCG_CD_COMPONENT";
+import TAB_COMPONENT from "./common/TAB_COMPONENT";
+import CANO_COMPONENT from "./common/CANO_COMPONENT";
+import ACNT_PRDT_CD_COMPONENT from "./common/ACNT_PRDT_CD_COMPONENT";
+import { useState } from "react";
 
 const OrderResv = () => {
   const api = useApi();
 
-  const [result, setResult] = useState('');
+  const [result, setResult] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const [payload] = useState({
-    CANO: '50127423', // 종합계좌번호 ex) 810XXXXX
-    ACNT_PRDT_CD: '01', // 계좌상품코드 ex) 01
-    OVRS_EXCG_CD: 'NASD', // 해외거래소코드 ex) NASD, NAS : 나스닥,    NYSE, AMEX
-    TR_CRCY_CD: 'USD', // 통화코드 ex) USD
-    CTX_AREA_FK200: '', // 연속조회검색조건200 ex) 3
-    CTX_AREA_NK200: '', // 연속조회키200 ex) 150000
-  });
+  const [tr, setTr] = useState("매수");
+  const [CANO, setCANO] = useState("");
+  const [ACNT_PRDT_CD, setACNT_PRDT_CD] = useState("");
+  const [PDNO, setPDNO] = useState("AAPL");
+  const [OVRS_EXCG_CD, setOVRS_EXCG_CD] = useState("NASD");
+  const [FT_ORD_QTY, setFT_ORD_QTY] = useState("1"); // 주문수량
+  const [FT_ORD_UNPR3, setFT_ORD_UNPR3] = useState("148.00"); // 주문단가
+
+  const payload = {
+    tr,
+    CANO,
+    ACNT_PRDT_CD,
+    OVRS_EXCG_CD,
+    PDNO,
+    FT_ORD_QTY,
+    FT_ORD_UNPR3,
+  };
 
   const handleButtonClick = async () => {
     try {
@@ -60,7 +73,45 @@ const OrderResv = () => {
               거래소 코드와 종목코드는 필수 입니다.
             </DrawerDescription>
           </DrawerHeader>
-          <div className="px-4 flex flex-col gap-4"></div>
+          <div className="px-4 flex flex-col gap-4">
+            <TAB_COMPONENT
+              value={tr}
+              onChange={setTr}
+              title="거래유형"
+              column="tr"
+              items={["매수", "매도"]}
+            />
+            <CANO_COMPONENT value={CANO} onChange={setCANO} />
+            <ACNT_PRDT_CD_COMPONENT
+              value={ACNT_PRDT_CD}
+              onChange={setACNT_PRDT_CD}
+            />
+            <OVRS_EXCG_CD_COMPONENT
+              value={OVRS_EXCG_CD}
+              onChange={setOVRS_EXCG_CD}
+            />
+            <TAB_COMPONENT
+              value={PDNO}
+              onChange={setPDNO}
+              title="종목 코드"
+              column="PDNO"
+              items={["AAPL", "TSLA"]}
+            />
+            <TAB_COMPONENT
+              value={FT_ORD_QTY}
+              onChange={setFT_ORD_QTY}
+              title="주문수량"
+              column="FT_ORD_QTY"
+              items={["1", "2", "3", "4", "5", "6", "7", "8"]}
+            />
+            <TAB_COMPONENT
+              value={FT_ORD_UNPR3}
+              onChange={setFT_ORD_UNPR3}
+              title="해외주문단가"
+              column="FT_ORD_UNPR3"
+              items={["1", "2", "3", "4", "5", "6", "7", "8"]}
+            />
+          </div>
           <DrawerFooter>
             <div className="flex items-center justify-end w-full gap-4">
               <Button onClick={handleButtonClick}>조회</Button>

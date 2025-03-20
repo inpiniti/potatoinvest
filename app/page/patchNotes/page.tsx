@@ -11,6 +11,29 @@ const Update = () => {
     <div className="flex flex-col gap-4">
       <Card>
         <CardHeader>
+          <CardTitle>한국투자증권 API 연동3</CardTitle>
+          <CardDescription className="text-red-400">버전 0.2.6</CardDescription>
+          <CardDescription>2025년 3월 19일</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="flex items-center space-x-4 rounded-md bg-neutral-100 p-4">
+            <div className="flex-1 space-y-1">
+              <ul className="font-medium text-muted-foreground gap-1 flex flex-col">
+                <li>해외주식 정정취소주문 연동</li>
+                <li>해외주식 예약주문접수 연동</li>
+                <li>해외주식 예약주문접수취소 연동</li>
+                <li>해외주식 주문체결내역 연동</li>
+                <li>해외주식 체결기준현재잔고 연동</li>
+                <li>해외주식 매수가능금액조회 연동</li>
+                <li>각종 컴포넌트 추가 (INPUT, DATE, TAB, 그외 특수 입력)</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>한국투자증권 API 연동2</CardTitle>
           <CardDescription className="text-red-400">버전 0.2.5</CardDescription>
           <CardDescription>2025년 3월 19일</CardDescription>

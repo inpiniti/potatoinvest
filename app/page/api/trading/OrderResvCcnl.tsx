@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
 import {
   Drawer,
@@ -9,26 +9,32 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer';
+} from "@/components/ui/drawer";
 
-import { useState } from 'react';
-import ApiContent from '../ApiContent';
-import useApi from '@/hooks/useApi';
+import { useState } from "react";
+import ApiContent from "../ApiContent";
+import useApi from "@/hooks/useApi";
+import CANO_COMPONENT from "./common/CANO_COMPONENT";
+import ACNT_PRDT_CD_COMPONENT from "./common/ACNT_PRDT_CD_COMPONENT";
+import INPUT_COMPONENT from "./common/INPUT_COMPONENT";
 
 const OrderResvCcnl = () => {
   const api = useApi();
 
-  const [result, setResult] = useState('');
+  const [result, setResult] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const [payload] = useState({
-    CANO: '50127423', // 종합계좌번호 ex) 810XXXXX
-    ACNT_PRDT_CD: '01', // 계좌상품코드 ex) 01
-    OVRS_EXCG_CD: 'NASD', // 해외거래소코드 ex) NASD, NAS : 나스닥,    NYSE, AMEX
-    TR_CRCY_CD: 'USD', // 통화코드 ex) USD
-    CTX_AREA_FK200: '', // 연속조회검색조건200 ex) 3
-    CTX_AREA_NK200: '', // 연속조회키200 ex) 150000
-  });
+  const [CANO, setCANO] = useState("");
+  const [ACNT_PRDT_CD, setACNT_PRDT_CD] = useState("");
+  const [RSYN_ORD_RCIT_DT, setRSYN_ORD_RCIT_DT] = useState("20211124");
+  const [OVRS_RSVN_ODNO, setOVRS_RSVN_ODNO] = useState("30135682");
+
+  const payload = {
+    CANO,
+    ACNT_PRDT_CD,
+    RSYN_ORD_RCIT_DT,
+    OVRS_RSVN_ODNO,
+  };
 
   const handleButtonClick = async () => {
     try {
@@ -60,7 +66,25 @@ const OrderResvCcnl = () => {
               거래소 코드와 종목코드는 필수 입니다.
             </DrawerDescription>
           </DrawerHeader>
-          <div className="px-4 flex flex-col gap-4"></div>
+          <div className="px-4 flex flex-col gap-4">
+            <CANO_COMPONENT value={CANO} onChange={setCANO} />
+            <ACNT_PRDT_CD_COMPONENT
+              value={ACNT_PRDT_CD}
+              onChange={setACNT_PRDT_CD}
+            />
+            <INPUT_COMPONENT
+              value={RSYN_ORD_RCIT_DT}
+              onChange={setRSYN_ORD_RCIT_DT}
+              title="예약주문접수일자"
+              column="RSYN_ORD_RCIT_DT"
+            />
+            <INPUT_COMPONENT
+              value={OVRS_RSVN_ODNO}
+              onChange={setOVRS_RSVN_ODNO}
+              title="해외예약주문번호"
+              column="OVRS_RSVN_ODNO"
+            />
+          </div>
           <DrawerFooter>
             <div className="flex items-center justify-end w-full gap-4">
               <Button onClick={handleButtonClick}>조회</Button>
