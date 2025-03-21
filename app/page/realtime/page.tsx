@@ -24,11 +24,14 @@ const RealTime = () => {
       const response = await fetch('/api/hello', { signal });
       clearTimeout(timeoutId); // Clear the timeout if the request completes in time
 
+      console.log(response);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
+
       return data;
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
