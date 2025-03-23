@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface LogItem {
   id: number;
@@ -12,19 +12,41 @@ interface LogItem {
 }
 
 const contentList = [
-  '구매 가능 여부 체크 중 입니다...',
-  '연속 하락한 주식 필터링 하는 중 입니다...',
-  '실시간 데이터를 가져오는 중입니다...',
-  '최고가 대비 많이 하락한 주식 조회 중입니다.',
-  '구매중입니다...',
-  '보유한 종목중 오른 것이 있는지 확인중입니다...',
+  "구매 가능 여부 체크 중 입니다...",
+  "연속 하락한 주식 필터링 하는 중 입니다...",
+  "실시간 데이터를 가져오는 중입니다...",
+  "최고가 대비 많이 하락한 주식 조회 중입니다.",
+  "구매중입니다...",
+  "보유한 종목중 오른 것이 있는지 확인중입니다...",
 ];
 
 const completeList = [
-  '삼성전자 1주를 구매하였습니다.',
-  '구매가 완료되었습니다.',
-  '구매한 만큼 보유한 자산에서 마이너스 하였습니다.',
+  "삼성전자 1주를 구매하였습니다.",
+  "구매가 완료되었습니다.",
+  "구매한 만큼 보유한 자산에서 마이너스 하였습니다.",
 ];
+
+// 1. 발급된 토큰이 있는지 확인
+
+// 2. 없다면 토큰 발급,
+
+// 3. 발급된 토큰이 있다면 남은 시간 확인
+
+// 4. 남은 시간이 0 이하라면 토큰 재발급
+
+// 5. appkey 와 secretkey가 입력되어 있는지 확인
+
+// 6. appkey 와 secretkey 를 통한 토큰 발급
+
+// 7. 해외주식 잔고 조회
+
+// 8. 해외주식 잔고중 2% 이상 상승한 종목이 있는지 확인
+
+// 9. 2% 이상 상승한 종목이 있다면 전 수량 매도주문
+
+// 10. 매도 주문이 완료되었다면 매수 주문
+
+// 11. 최근 한달간 가장 많이 하락한 종목 sort 조회
 
 const Log = () => {
   const [start, setStart] = useState(false);
@@ -111,7 +133,7 @@ const Log = () => {
               <Loader2 className="w-5 h-5 animate-spin" />
             </figure>
           )}
-          {start ? '중지' : '시작'}
+          {start ? "중지" : "시작"}
         </Button>
       </section>
       {log.map(
