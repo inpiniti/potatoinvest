@@ -30,7 +30,8 @@
     "store/useKey.js",
     "utils/api.ts",
     "hooks/useApi.js",
-    "app/page/buy/page.js"
+    "app/page/buy/page.js",
+    "app/page/log/page.jsx"
   ],
   "exclude": ["node_modules"]
 }
