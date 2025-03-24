@@ -1,32 +1,15 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import useToken from '../../../hooks/useToken';
 
 interface LogItem {
-  id: number;
   date: string;
   content: string;
   loading: boolean;
 }
-
-const contentList = [
-  "구매 가능 여부 체크 중 입니다...",
-  "연속 하락한 주식 필터링 하는 중 입니다...",
-  "실시간 데이터를 가져오는 중입니다...",
-  "최고가 대비 많이 하락한 주식 조회 중입니다.",
-  "구매중입니다...",
-  "보유한 종목중 오른 것이 있는지 확인중입니다...",
-];
-
-const completeList = [
-  "삼성전자 1주를 구매하였습니다.",
-  "구매가 완료되었습니다.",
-  "구매한 만큼 보유한 자산에서 마이너스 하였습니다.",
-];
-
-// 1. 발급된 토큰이 있는지 확인
 
 // 2. 없다면 토큰 발급,
 
@@ -53,45 +36,52 @@ const Log = () => {
   const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
   const [log, setLog] = useState<LogItem[]>([]);
 
-  // 임의의 로그 아이템(로딩 중) 생성 함수
-  const createPendingLog = () => {
-    const randomContent =
-      contentList[Math.floor(Math.random() * contentList.length)];
+  const [발급된토큰확인] = useToken();
 
+  // 로딩 추가
+  const loading = (message: string) => {
     const newLogItem: LogItem = {
-      id: Date.now(),
       date: new Date().toLocaleString(),
-      content: randomContent,
+      content: message,
       loading: true,
     };
-
     setLog((prev) => [newLogItem, ...prev]);
-
-    // 지정된 시간 후 로딩 해제 + 완료 상태로 업데이트
-    setTimeout(() => {
-      const randomComplete =
-        completeList[Math.floor(Math.random() * completeList.length)];
-
-      setLog((prev) =>
-        prev.map((item) =>
-          item.id === newLogItem.id
-            ? { ...item, content: randomComplete, loading: false }
-            : item
-        )
-      );
-    }, 3000);
   };
 
-  const run = () => {
+  // 완료
+  const complete = (message: string) => {
+    setLog((prev) =>
+      prev.map((item, index) =>
+        index === 0 ? { ...item, content: message, loading: false } : item
+      )
+    );
+  };
+
+  // 1. 발급된 토큰이 있는지 확인
+  const 토큰확인 = async () => {
+    // 발급된 토큰이 있는지 확인 중입니다.
+    loading('발급된 토큰이 있는지 확인 중입니다.');
+    // 확인 로직
+    const result = await 발급된토큰확인();
+
+    // 발급된 토큰이 없습니다.
+    // or 토큰을 발급합니다.
+    if (result) complete('발급된 토큰이 있습니다.');
+    else complete('발급된 토큰이 없습니다. 토큰을 발급합니다.');
+  };
+
+  const run = async () => {
     // 1) run 함수 호출 시 즉시 1회 실행
-    createPendingLog();
+    // createPendingLog();
 
-    // 2) 이후 4초 간격으로 실행
-    const id = setInterval(() => {
-      createPendingLog();
-    }, 4000);
+    // // 2) 이후 4초 간격으로 실행
+    // const id = setInterval(() => {
+    //   createPendingLog();
+    // }, 4000);
 
-    setTimerId(id);
+    // setTimerId(id);
+
+    await 토큰확인();
   };
 
   const stop = () => {
@@ -133,7 +123,7 @@ const Log = () => {
               <Loader2 className="w-5 h-5 animate-spin" />
             </figure>
           )}
-          {start ? "중지" : "시작"}
+          {start ? '중지' : '시작'}
         </Button>
       </section>
       {log.map(

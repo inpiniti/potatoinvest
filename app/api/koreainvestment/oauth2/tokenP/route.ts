@@ -14,8 +14,6 @@ export async function POST(request: NextRequest) {
     appsecret: decrypt(solt, appsecret),
   };
 
-  console.log({ url, body });
-
   try {
     const response = await fetch(url, {
       method: 'POST',
