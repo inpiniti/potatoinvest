@@ -1,11 +1,14 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import useToken from '../../../hooks/useToken';
-import useKey from '@/hooks/useKey';
-import useTrading from '@/hooks/useTrading';
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import useToken from "../../../hooks/useToken";
+import useKey from "@/hooks/useKey";
+import useTrading from "@/hooks/useTrading";
+import useAi from "@/hooks/useAi";
+
+import aiModels from "@/json/ai_models.json";
 
 // 2. 없다면 토큰 발급,
 
@@ -32,9 +35,13 @@ const Log = () => {
   const [timerId, setTimerId] = useState(null);
   const [log, setLog] = useState([]);
 
+  const [models, setModels] = useState([]);
+
   const { 발급받은키확인 } = useKey();
   const { 발급된토큰확인, 토큰발급, 토큰남은시간확인 } = useToken();
-  const { 주식잔고확인, 매도확인, 물타기확인 } = useTrading();
+  const { 주식잔고확인, 매도확인, 물타기확인, 매도, 매수, 조건검색 } =
+    useTrading();
+  const { 데이터가져오기, 전처리, 역직렬화, 예측 } = useAi();
 
   // 로딩 추가
   const loading = (message) => {
@@ -89,33 +96,33 @@ const Log = () => {
     // setTimerId(id);
 
     const isKey = await 확인({
-      로딩메시지: '발급받은 키가 있는지 확인 중입니다.',
-      성공메시지: '발급받은 키가 있습니다.',
-      실패메시지: '발급받은 키가 없습니다.',
+      로딩메시지: "발급받은 키가 있는지 확인 중입니다.",
+      성공메시지: "발급받은 키가 있습니다.",
+      실패메시지: "발급받은 키가 없습니다.",
       함수: 발급받은키확인,
     });
     if (!isKey) return;
 
     const isToken = await 확인({
-      로딩메시지: '발급된 토큰이 있는지 확인 중입니다.',
-      성공메시지: '발급된 토큰이 있습니다.',
-      실패메시지: '발급된 토큰이 없습니다. 토큰을 발급합니다.',
+      로딩메시지: "발급된 토큰이 있는지 확인 중입니다.",
+      성공메시지: "발급된 토큰이 있습니다.",
+      실패메시지: "발급된 토큰이 없습니다. 토큰을 발급합니다.",
       함수: 발급된토큰확인,
     });
 
     if (isToken) {
       const is남은시간 = await 확인({
-        로딩메시지: '남은 시간을 확인합니다.',
-        성공메시지: '남은 시간이 있습니다.',
-        실패메시지: '남은 시간이 없습니다. 토큰을 발급합니다.',
+        로딩메시지: "남은 시간을 확인합니다.",
+        성공메시지: "남은 시간이 있습니다.",
+        실패메시지: "남은 시간이 없습니다. 토큰을 발급합니다.",
         함수: 토큰남은시간확인,
       });
 
       if (!is남은시간) {
         const is발급 = await 확인({
-          로딩메시지: '토큰을 발급합니다.',
-          성공메시지: '토큰이 발급되었습니다.',
-          실패메시지: '토큰 발급에 실패했습니다.',
+          로딩메시지: "토큰을 발급합니다.",
+          성공메시지: "토큰이 발급되었습니다.",
+          실패메시지: "토큰 발급에 실패했습니다.",
           함수: 토큰발급,
         });
 
@@ -123,9 +130,9 @@ const Log = () => {
       }
     } else {
       const is발급 = await 확인({
-        로딩메시지: '토큰을 발급합니다.',
-        성공메시지: '토큰이 발급되었습니다.',
-        실패메시지: '토큰 발급에 실패했습니다.',
+        로딩메시지: "토큰을 발급합니다.",
+        성공메시지: "토큰이 발급되었습니다.",
+        실패메시지: "토큰 발급에 실패했습니다.",
         함수: 토큰발급,
       });
 
@@ -133,9 +140,9 @@ const Log = () => {
     }
 
     const 주식잔고 = await 작업({
-      로딩메시지: '주식잔고를 확인합니다.',
-      성공메시지: '개의 주식잔고가 있습니다.',
-      실패메시지: '주식잔고가 없습니다.',
+      로딩메시지: "주식잔고를 확인합니다.",
+      성공메시지: "개의 주식잔고가 있습니다.",
+      실패메시지: "주식잔고가 없습니다.",
       함수: 주식잔고확인,
     });
 
@@ -155,12 +162,158 @@ const Log = () => {
           함수: () => 물타기확인(item),
         });
 
-        console.log(is물타기);
+        if (is물타기) {
+          const 매수결과 = await 작업({
+            로딩메시지: `${item.ovrs_pdno} (${item.ovrs_item_name}) 물타기중입니다...`,
+            성공메시지: `${item.ovrs_pdno} (${item.ovrs_item_name}) 물타기가 완료되었습니다.`,
+            실패메시지: `${item.ovrs_pdno} (${item.ovrs_item_name}) 물타기에 실패했습니다.`,
+            함수: () => 매수(item),
+          });
+
+          console.log(매수결과);
+        }
         // 물타기 실행
       } else {
         // 매도 실행
+        const 매도결과 = await 작업({
+          로딩메시지: `${item.ovrs_pdno} (${item.ovrs_item_name}) 매도중입니다...`,
+          성공메시지: `${item.ovrs_pdno} (${item.ovrs_item_name}) 매도가 완료되었습니다.`,
+          실패메시지: `${item.ovrs_pdno} (${item.ovrs_item_name}) 매도에 실패했습니다.`,
+          함수: () => 매도(item),
+        });
+
+        console.log(매도결과);
       }
     }
+
+    // const 데이터 = await 데이터가져오기();
+    // const 전처리된데이터 = 전처리(데이터);
+
+    // const 모델들 = aiModels
+    //   .filter((item) => item.market_sector === "all")
+    //   .map(async (model) => {
+    //     return 역직렬화(model.model, model.weights);
+    //   });
+
+    // const 결과 = await Promise.all(
+    //   모델들.map(async (model) => {
+    //     return 예측(model, 전처리된데이터);
+    //   })
+    // );
+
+    // console.log(결과);
+
+    const 분석할데이터 = await 작업({
+      로딩메시지: "분석할 데이터를 조회중입니다...",
+      성공메시지: "분석할 데이터를 조회했습니다.",
+      실패메시지: "분석할 데이터 조회에 실패했습니다.",
+      함수: 데이터가져오기,
+    });
+
+    const 전처리된분석데이터 = await 작업({
+      로딩메시지: "분석할 데이터를 전처리중입니다...",
+      성공메시지: "분석할 데이터를 전처리했습니다.",
+      실패메시지: "분석할 데이터 전처리에 실패했습니다.",
+      함수: () => 전처리(분석할데이터),
+    });
+
+    const 모델들 =
+      models.length > 0
+        ? models
+        : await 작업({
+            로딩메시지: "모델을 로딩중입니다...",
+            성공메시지: "모델을 로딩했습니다.",
+            실패메시지: "모델 로딩에 실패했습니다.",
+            함수: async () => {
+              const loadedModels = await Promise.all(
+                aiModels.ai_models.map((model) =>
+                  역직렬화(model.model, model.weights)
+                )
+              );
+              setModels(loadedModels);
+              return loadedModels;
+            },
+          });
+
+    // 모든 모델에 대해 예측 수행
+    const 예측결과들 = await 작업({
+      로딩메시지: "예측중입니다...",
+      성공메시지: "예측이 완료되었습니다.",
+      실패메시지: "예측에 실패했습니다.",
+      함수: async () => {
+        const predictions = await Promise.all(
+          모델들.map((model) => 예측(model, 전처리된분석데이터))
+        );
+        return predictions;
+      },
+    });
+
+    const 분석된데이터 = await 작업({
+      로딩메시지: "예측 분석중입니다...",
+      성공메시지: "분석이 완료되었습니다.",
+      실패메시지: "분석에 실패했습니다.",
+      함수: async () => {
+        // 예측 결과의 평균 계산
+        const 예측결과평균 = 예측결과들[0].map(
+          (_, colIndex) =>
+            예측결과들.reduce((sum, row) => sum + row[colIndex], 0) /
+            예측결과들.length
+        );
+
+        // 분석할 데이터에 예측 결과 추가
+        const 최종분석데이터 = 분석할데이터.map((row, index) => ({
+          ...row,
+          예측결과: 예측결과평균[index],
+        }));
+
+        const 예측결과가높은데이터 = 최종분석데이터.sort(
+          (a, b) => b.예측결과 - a.예측결과
+        );
+
+        return 예측결과가높은데이터.slice(0, 100);
+      },
+    });
+
+    // 분석된 데이터에서 주식 잔고에 있는건 제외해야 함.
+    // 분석된 데이터의 key 는 name 이고,
+    // 잔고의 키는 ovrs_pdno 이다.
+
+    const 매수할데이터 = 분석된데이터.filter(
+      (item) => !주식잔고.find((balance) => balance.ovrs_pdno === item.name)
+    );
+
+    const 현재가검색 = await 작업({
+      로딩메시지: "현재가를 조회중입니다...",
+      성공메시지: "현재가를 조회했습니다.",
+      실패메시지: "현재가 조회에 실패했습니다.",
+      함수: 조건검색,
+    });
+
+    for (const item of 매수할데이터) {
+      const 현재가 = 현재가검색?.output2?.find(
+        (search) => search.symb === item.name
+      );
+
+      if (현재가) {
+        const 매수결과 = await 작업({
+          로딩메시지: `${item.name} (${item.ovrs_item_name}) 매수중입니다...`,
+          성공메시지: `${item.name} (${item.ovrs_item_name}) 매수가 완료되었습니다.`,
+          실패메시지: `${item.name} (${item.ovrs_item_name}) 매수에 실패했습니다.`,
+          함수: () =>
+            매수({
+              ovrs_pdno: item.name,
+              ovrs_cblc_qty: 1,
+              now_pric2: 현재가.last,
+            }),
+        });
+
+        console.log(매수결과);
+      }
+    }
+
+    // 최종분석데이터에서 예측결과로 소팅해서
+    // 가장 높은 예측결과를 가진 데이터를 선택해서
+    // name 컬럼이 종목명이다.
   };
 
   const stop = () => {
@@ -202,7 +355,7 @@ const Log = () => {
               <Loader2 className="w-5 h-5 animate-spin" />
             </figure>
           )}
-          {start ? '중지' : '시작'}
+          {start ? "중지" : "시작"}
         </Button>
       </section>
       {log.map(
