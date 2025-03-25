@@ -27,6 +27,7 @@ import InquireCcnl from './trading/InquireCcnl';
 import InquirePresentBalance from './trading/InquirePresentBalance';
 import InquireBuyableAmount from './trading/InquireBuyableAmount';
 import InquireSearch from './quotations/InquireSearch';
+import PriceDetail from './quotations/PriceDetail';
 
 const Log = () => {
   const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
@@ -115,6 +116,7 @@ const Log = () => {
           endPoint="/quotations/inquire-daily-chartprice"
         />
         <InquireSearch />
+        <PriceDetail />
       </AccordionSection>
       <section className="flex bg-white border rounded-sm flex-col gap-4 overflow-hidden">
         <div className="flex flex-col gap-2">

@@ -3,10 +3,14 @@
 import { tempKeyStore } from '@/store/tempKeyStore';
 import useApi from '@/hooks/useApi';
 import { delay } from '@/utils/util';
+import { keyStore } from '@/store/keyStore';
 
 const useToken = () => {
   const api = useApi();
-  const { key, setKey } = tempKeyStore();
+  const {
+    key: { isVts },
+  } = keyStore();
+  const { key, setKey, realKey, setRealKey } = tempKeyStore();
 
   // 1. 발급된 토큰이 있는지 확인
   const 발급된토큰확인 = async (): Promise<boolean> => {
@@ -28,6 +32,24 @@ const useToken = () => {
       ...key,
       ...data,
     });
+
+    // 모의투자라고 하더라도,
+    if (isVts) {
+      // 실전토큰도 발급 받는게 좋음
+      const response = await api.oauth2.tokenR();
+      const data = await response.json();
+
+      if (response.status !== 200) {
+        console.error('토큰 발급 실패', response.status, data);
+        return false;
+      }
+
+      setRealKey({
+        ...realKey,
+        ...data,
+      });
+    }
+
     return true;
   };
 
