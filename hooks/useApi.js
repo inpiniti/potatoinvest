@@ -24,13 +24,18 @@ const useApi = () => {
       }),
     };
 
-    return fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json; charset=UTF-8",
-      },
-      body: JSON.stringify(_payload),
-    });
+    try {
+      return fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify(_payload),
+      });
+    } catch (error) {
+      console.error("error", error);
+      throw error;
+    }
   };
 
   const api = {

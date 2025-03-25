@@ -260,7 +260,7 @@ const Log = () => {
         const predictions = await Promise.all(
           모델들.map((model) => 예측(model, 전처리된분석데이터))
         );
-        return predictions;
+        return predictions.slice(0, 100);
       },
     });
 
@@ -301,7 +301,7 @@ const Log = () => {
       )
       .filter((item) => !오늘한번이라도구매한종목코드.includes(item.name))
       .filter((item) => {
-        return item.예측결과 > 0.7;
+        return item.예측결과 > 0.65;
       });
 
     for (const item of 매수할데이터) {
