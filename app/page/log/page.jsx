@@ -33,7 +33,7 @@ const Log = () => {
       content: message,
       loading: true,
     };
-    setLog((prev) => [newLogItem, ...prev]);
+    setLog((prev) => [newLogItem, ...prev.slice(0, 99)]);
   };
 
   // 완료
@@ -381,7 +381,7 @@ const Log = () => {
           {start ? "중지" : "시작"}
         </Button>
       </section>
-      {log.slice(0, 100).map(
+      {log.map(
         (item, index) =>
           item && (
             <section key={index} className="flex justify-end">
