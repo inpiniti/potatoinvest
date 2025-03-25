@@ -17,16 +17,36 @@ const useTrading = () => {
       CTX_AREA_NK200: "",
     };
 
-    const response = await api.trading.inquireBalance(payload);
-    const data = await response.json();
+    let allOutput1: unknown[] = [];
+    let hasNextPage = true;
 
-    if (response.status !== 200) {
-      console.error("주식잔고 확인 실패", response.status, data);
-      return false;
+    while (hasNextPage) {
+      const response = await api.trading.inquireBalance(payload);
+      const data = await response.json();
+
+      if (response.status !== 200) {
+        console.error("주식잔고 확인 실패", response.status, data);
+        return false;
+      }
+
+      if (data?.output1) {
+        allOutput1 = [...allOutput1, ...data.output1];
+      }
+
+      if (
+        data?.ctx_area_nk200?.trim() !== "" ||
+        data?.ctx_area_fk200?.trim() !== ""
+      ) {
+        // 다음 페이지가 있는 경우, 페이로드를 업데이트
+        payload.CTX_AREA_NK200 = data?.ctx_area_nk200?.trim() ?? "";
+        payload.CTX_AREA_FK200 = data?.ctx_area_fk200?.trim() ?? "";
+      } else {
+        // 다음 페이지가 없으면 반복 종료
+        hasNextPage = false;
+      }
     }
 
-    if (data?.output1) return data?.output1;
-    else return false;
+    return allOutput1;
   };
 
   const 매도 = async (item: Item) => {
@@ -90,20 +110,7 @@ const useTrading = () => {
     return Number(item.evlu_pfls_rt) < -2;
   };
 
-  const 조건검색 = async (종목코드: string) => {
-    const response = await api.quotations.inquireSearch({
-      EXCD: "NAS",
-    });
-    const list = await response.json();
-
-    const newData = list?.output2?.find(
-      (item: { symb: string }) => item?.symb === 종목코드
-    );
-
-    return newData;
-  };
-
-  return { 주식잔고확인, 매도확인, 물타기확인, 매도, 매수, 조건검색 };
+  return { 주식잔고확인, 매도확인, 물타기확인, 매도, 매수 };
 };
 
 export default useTrading;

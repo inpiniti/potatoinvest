@@ -31,7 +31,8 @@
     "utils/api.ts",
     "hooks/useApi.js",
     "app/page/buy/page.js",
-    "app/page/log/page.jsx"
+    "app/page/log/page.jsx",
+    "hooks/useAi.js"
   ],
   "exclude": ["node_modules"]
 }
