@@ -41,15 +41,6 @@ export async function POST(request: NextRequest) {
   try {
     const queryParams = new URLSearchParams(payload);
 
-    console.log({
-      url,
-      queryParams,
-      token,
-      appkey: decrypt(solt, appkey),
-      appsecret: decrypt(solt, appsecret),
-      trId,
-    });
-
     const response = await fetch(`${url}?${queryParams.toString()}`, {
       method: "GET",
       headers: {
@@ -62,8 +53,6 @@ export async function POST(request: NextRequest) {
     });
 
     const data = await response.json();
-
-    console.log(data);
 
     return NextResponse.json(data);
   } catch (error: unknown) {

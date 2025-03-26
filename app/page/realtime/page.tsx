@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import IStock from '@/app/interface/IStock';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import IStock from "@/app/interface/IStock";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -9,9 +9,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 const RealTime = () => {
   const getTodos = async () => {
     const controller = new AbortController();
@@ -21,10 +21,8 @@ const RealTime = () => {
     const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     try {
-      const response = await fetch('/api/hello', { signal });
+      const response = await fetch("/api/hello", { signal });
       clearTimeout(timeoutId); // Clear the timeout if the request completes in time
-
-      console.log(response);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -34,14 +32,14 @@ const RealTime = () => {
 
       return data;
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error('Request timed out');
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error("Request timed out");
       }
       throw error;
     }
   };
 
-  const query = useQuery({ queryKey: ['todos'], queryFn: getTodos });
+  const query = useQuery({ queryKey: ["todos"], queryFn: getTodos });
 
   return (
     <div className="rounded-sm overflow-hidden border bg-white">
@@ -75,35 +73,35 @@ const RealTime = () => {
               <TableCell>{live.name}</TableCell>
               <TableCell
                 className={
-                  Number(live.change) < 0 ? 'text-blue-400' : 'text-red-400'
+                  Number(live.change) < 0 ? "text-blue-400" : "text-red-400"
                 }
               >
                 {live.close} ({Number(live.change).toFixed(2)}%)
               </TableCell>
               <TableCell
                 className={
-                  Number(live.perf_1_m) < 0 ? 'text-blue-400' : 'text-red-400'
+                  Number(live.perf_1_m) < 0 ? "text-blue-400" : "text-red-400"
                 }
               >
                 {Number(live.perf_1_m).toFixed(2)}%
               </TableCell>
               <TableCell
                 className={
-                  Number(live.perf_3_m) < 0 ? 'text-blue-400' : 'text-red-400'
+                  Number(live.perf_3_m) < 0 ? "text-blue-400" : "text-red-400"
                 }
               >
                 {Number(live.perf_3_m).toFixed(2)}%
               </TableCell>
               <TableCell
                 className={`${
-                  Number(live.perf_6_m) < 0 ? 'text-blue-400' : 'text-red-400'
+                  Number(live.perf_6_m) < 0 ? "text-blue-400" : "text-red-400"
                 }  hidden sm:table-cell`}
               >
                 {Number(live.perf_6_m).toFixed(2)}%
               </TableCell>
               <TableCell
                 className={`${
-                  Number(live.perf_y) < 0 ? 'text-blue-400' : 'text-red-400'
+                  Number(live.perf_y) < 0 ? "text-blue-400" : "text-red-400"
                 }  hidden sm:table-cell`}
               >
                 {Number(live.perf_y).toFixed(2)}%

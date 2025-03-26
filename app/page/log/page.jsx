@@ -326,7 +326,6 @@ const Log = () => {
         });
 
         if (매수결과 && !매수결과?.msg1) {
-          console.log("매수성공");
           set오늘한번이라도구매한종목코드((prev) => {
             if (!prev.includes(item.name)) {
               return [...prev, item.name];

@@ -43,8 +43,6 @@ export async function POST(request: NextRequest) {
     OVRS_ORD_UNPR,
   };
 
-  console.log(payload);
-
   try {
     const queryParams = new URLSearchParams(payload);
 

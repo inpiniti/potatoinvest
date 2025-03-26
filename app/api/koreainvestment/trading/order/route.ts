@@ -63,9 +63,6 @@ export async function POST(request: NextRequest) {
     ORD_DVSN, // 주문구분
   };
 
-  console.log("headers", headers);
-  console.log("payload", payload);
-
   try {
     //const queryParams = new URLSearchParams(payload);
 
