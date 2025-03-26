@@ -6,14 +6,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import Write from './Write';
 
 const Update = () => {
   return (
     <div className="flex flex-col gap-4">
       <Title
-        title="이슈"
-        description="버그나 건의사항을 올려주시면 확인후에 처리하도록 하겠습니다."
+        title="건의사항 등록하기"
+        description="여러분의 의견을 남겨주시면, 더 나은 서비스를 제공할 수 있습니다."
       />
+      <Write />
       <Card>
         <CardHeader>
           <CardTitle>API 페이지 추가</CardTitle>
