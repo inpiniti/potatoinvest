@@ -68,13 +68,7 @@ export async function POST(request: NextRequest) {
 
     const response = await fetch(`${url}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json; charset=UTF-8",
-        Authorization: `Bearer ${token}`,
-        appkey: decrypt(solt, appkey),
-        appsecret: decrypt(solt, appsecret),
-        tr_id: trId, // 거래ID
-      },
+      headers,
       body: JSON.stringify(payload),
     });
 
