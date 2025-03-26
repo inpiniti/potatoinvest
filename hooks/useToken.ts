@@ -23,7 +23,7 @@ const useToken = () => {
     const response = await api.oauth2.tokenP();
     const data = await response.json();
 
-    if (!isVts) {
+    if (isVts) {
       if (response.status !== 200) {
         console.error("토큰 발급 실패", response.status, data);
         return false;
