@@ -78,7 +78,7 @@ const useTrading = () => {
       ACNT_PRDT_CD,
       OVRS_EXCG_CD: "NASD",
       PDNO: item.ovrs_pdno,
-      ORD_QTY: item.ovrs_cblc_qty,
+      ORD_QTY: "1",
       OVRS_ORD_UNPR: item.now_pric2,
     };
 
@@ -107,7 +107,7 @@ const useTrading = () => {
 
   const 물타기확인 = async (item: Item) => {
     await delay(500);
-    return Number(item.evlu_pfls_rt) < -2;
+    return Number(item.evlu_pfls_rt) < -5;
   };
 
   return { 주식잔고확인, 매도확인, 물타기확인, 매도, 매수 };
