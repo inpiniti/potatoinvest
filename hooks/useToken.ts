@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { tempKeyStore } from '@/store/tempKeyStore';
-import useApi from '@/hooks/useApi';
-import { delay } from '@/utils/util';
-import { keyStore } from '@/store/keyStore';
+import { tempKeyStore } from "@/store/tempKeyStore";
+import useApi from "@/hooks/useApi";
+import { delay } from "@/utils/util";
+import { keyStore } from "@/store/keyStore";
 
 const useToken = () => {
   const api = useApi();
@@ -23,15 +23,17 @@ const useToken = () => {
     const response = await api.oauth2.tokenP();
     const data = await response.json();
 
-    if (response.status !== 200) {
-      console.error('토큰 발급 실패', response.status, data);
-      return false;
-    }
+    if (!isVts) {
+      if (response.status !== 200) {
+        console.error("토큰 발급 실패", response.status, data);
+        return false;
+      }
 
-    setKey({
-      ...key,
-      ...data,
-    });
+      setKey({
+        ...key,
+        ...data,
+      });
+    }
 
     // 모의투자라고 하더라도,
     if (isVts) {
@@ -40,7 +42,7 @@ const useToken = () => {
       const data = await response.json();
 
       if (response.status !== 200) {
-        console.error('토큰 발급 실패', response.status, data);
+        console.error("토큰 발급 실패", response.status, data);
         return false;
       }
 
