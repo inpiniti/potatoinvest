@@ -1,5 +1,5 @@
-import { NextResponse, NextRequest } from 'next/server';
-import { decrypt } from '@/utils/crypto';
+import { NextResponse, NextRequest } from "next/server";
+import { decrypt } from "@/utils/crypto";
 
 export async function POST(request: NextRequest) {
   const {
@@ -17,14 +17,14 @@ export async function POST(request: NextRequest) {
     CTX_AREA_NK200, // 연속조회키200 ex) ''
   } = await request.json();
 
-  const port = isVts ? '29443' : '9443';
-  const domain = isVts ? 'openapivts' : 'openapi';
-  const endpoint = 'uapi/overseas-stock/v1/trading/inquire-balance';
+  const port = isVts ? "29443" : "9443";
+  const domain = isVts ? "openapivts" : "openapi";
+  const endpoint = "uapi/overseas-stock/v1/trading/inquire-balance";
   const url = `https://${domain}.koreainvestment.com:${port}/${endpoint}`;
 
   const trIds = {
-    실전: 'TTTS3012R',
-    모의: 'VTTS3012R',
+    실전: "TTTS3012R",
+    모의: "VTTS3012R",
   };
 
   const trId = isVts ? trIds.모의 : trIds.실전;
@@ -51,9 +51,9 @@ export async function POST(request: NextRequest) {
     });
 
     const response = await fetch(`${url}?${queryParams.toString()}`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
+        "Content-Type": "application/json; charset=UTF-8",
         Authorization: `Bearer ${token}`,
         appkey: decrypt(solt, appkey),
         appsecret: decrypt(solt, appsecret),
@@ -62,6 +62,8 @@ export async function POST(request: NextRequest) {
     });
 
     const data = await response.json();
+
+    console.log(data);
 
     return NextResponse.json(data);
   } catch (error: unknown) {

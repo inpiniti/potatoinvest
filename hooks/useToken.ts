@@ -20,10 +20,11 @@ const useToken = () => {
 
   // 2. 없다면 토큰 발급
   const 토큰발급 = async () => {
-    const response = await api.oauth2.tokenP();
-    const data = await response.json();
-
     if (isVts) {
+      const response = await api.oauth2.tokenP();
+      const data = await response.json();
+
+      console.log("모의");
       if (response.status !== 200) {
         console.error("토큰 발급 실패", response.status, data);
         return false;
@@ -36,21 +37,21 @@ const useToken = () => {
     }
 
     // 모의투자라고 하더라도,
-    if (isVts) {
-      // 실전토큰도 발급 받는게 좋음
-      const response = await api.oauth2.tokenR();
-      const data = await response.json();
 
-      if (response.status !== 200) {
-        console.error("토큰 발급 실패", response.status, data);
-        return false;
-      }
+    console.log("실전");
+    // 실전토큰도 발급 받는게 좋음
+    const response = await api.oauth2.tokenR();
+    const data = await response.json();
 
-      setRealKey({
-        ...realKey,
-        ...data,
-      });
+    if (response.status !== 200) {
+      console.error("토큰 발급 실패", response.status, data);
+      return false;
     }
+
+    setRealKey({
+      ...realKey,
+      ...data,
+    });
 
     return true;
   };
