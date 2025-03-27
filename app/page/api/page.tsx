@@ -28,6 +28,7 @@ import InquirePresentBalance from './trading/InquirePresentBalance';
 import InquireBuyableAmount from './trading/InquireBuyableAmount';
 import InquireSearch from './quotations/InquireSearch';
 import PriceDetail from './quotations/PriceDetail';
+import InquirePeriodProfit from './trading/InquirePeriodProfit';
 
 const Log = () => {
   const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
@@ -107,6 +108,7 @@ const Log = () => {
           title="해외주식 결제기준잔고"
           endPoint="/trading/inquire-settle-balance"
         />
+        <InquirePeriodProfit />
       </AccordionSection>
       <AccordionSection title="[해외주식] 기본시세">
         <Price />

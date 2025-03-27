@@ -32,7 +32,8 @@
     "hooks/useApi.js",
     "app/page/buy/page.js",
     "app/page/log/page.jsx",
-    "hooks/useAi.js"
+    "hooks/useAi.js",
+    "app/page/sell/page.jsx"
   ],
   "exclude": ["node_modules"]
 }
