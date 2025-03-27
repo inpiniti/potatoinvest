@@ -1,13 +1,12 @@
-'use client';
+"use client";
 
-import useAccount from '@/hooks/useAccount';
-import useApi from '@/hooks/useApi';
-import dayjs from 'dayjs';
-import { useCallback, useEffect, useState } from 'react';
+import useAccount from "@/hooks/useAccount";
+import useApi from "@/hooks/useApi";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useState } from "react";
 
-import { logos } from '@/json/logoData';
-import { Card } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { logos } from "@/json/logoData";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -15,13 +14,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 
 const Sell = () => {
   const api = useApi();
 
   const [cano, acntPrdtCd] = useAccount();
-  const [WCRC_FRCR_DVSN_CD, setWCRC_FRCR_DVSN_CD] = useState('02');
+  const [WCRC_FRCR_DVSN_CD, setWCRC_FRCR_DVSN_CD] = useState("02");
   const [list, setList] = useState([]);
   const [expandedRows, setExpandedRows] = useState({}); // 추가된 상태
 
@@ -30,15 +29,15 @@ const Sell = () => {
       const payload = {
         CANO: cano,
         ACNT_PRDT_CD: acntPrdtCd,
-        OVRS_EXCG_CD: 'NASD',
-        NATN_CD: '', // 국가코드 : 공란
-        CRCY_CD: '', // 통화코드 : 공란
-        PDNO: '', // 상품번호 : 공란
-        INQR_STRT_DT: dayjs('2025.03.25').format('YYYYMMDD'), // 조회시작일자
-        INQR_END_DT: dayjs().format('YYYYMMDD'), // 조회종료일자
+        OVRS_EXCG_CD: "NASD",
+        NATN_CD: "", // 국가코드 : 공란
+        CRCY_CD: "", // 통화코드 : 공란
+        PDNO: "", // 상품번호 : 공란
+        INQR_STRT_DT: dayjs("2025.03.25").format("YYYYMMDD"), // 조회시작일자
+        INQR_END_DT: dayjs().format("YYYYMMDD"), // 조회종료일자
         WCRC_FRCR_DVSN_CD, // 원화외화구분코드 : 01: 외화, 02: 원화
-        CTX_AREA_FK200: '', // 연속조회검색조건200 : 공란
-        CTX_AREA_NK200: '', // 연속조회키200 : 공란
+        CTX_AREA_FK200: "", // 연속조회검색조건200 : 공란
+        CTX_AREA_NK200: "", // 연속조회키200 : 공란
       };
 
       const response = await api.trading.inquirePeriodProfit(payload);
@@ -89,7 +88,7 @@ const Sell = () => {
     totalProfit: group.totalProfit,
     yield: group.totalInvestment
       ? ((group.totalProfit / group.totalInvestment) * 100).toFixed(2)
-      : '0.00',
+      : "0.00",
   }));
 
   return (
@@ -112,13 +111,13 @@ const Sell = () => {
                 >
                   <TableCell>
                     {item?.trad_day &&
-                      dayjs(item?.trad_day).format('YYYY년 MM월 DD일')}
+                      dayjs(item?.trad_day).format("YYYY년 MM월 DD일")}
                   </TableCell>
                   <TableCell>
                     {item?.totalProfit &&
                       Math.floor(item?.totalProfit)
                         .toString()
-                        .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                     원
                   </TableCell>
                   <TableCell>{item?.yield}%</TableCell>
@@ -162,7 +161,7 @@ const Sell = () => {
                                   {item?.ovrs_rlzt_pfls_amt &&
                                     Math.floor(item?.ovrs_rlzt_pfls_amt)
                                       .toString()
-                                      .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                      .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                                   원
                                 </TableCell>
                                 <TableCell>{item.pftrt}</TableCell>

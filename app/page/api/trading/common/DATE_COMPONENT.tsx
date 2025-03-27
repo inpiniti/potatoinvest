@@ -26,7 +26,7 @@ const DATE_COMPONENT = ({
         {title} : {column} ( {value} )
       </Label>
       <Popover>
-        <PopoverTrigger asChild>
+        <PopoverTrigger>
           <Button
             variant={"outline"}
             className={"w-[280px] justify-start text-left font-normal"}
