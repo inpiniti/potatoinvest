@@ -1,5 +1,3 @@
-import { Button } from '@/components/ui/button';
-
 import { ReactNode, useEffect, useState } from 'react';
 
 const Header = ({ children }: { children: ReactNode }) => {
