@@ -115,7 +115,11 @@ const Sell = () => {
                       dayjs(item?.trad_day).format('YYYY년 MM월 DD일')}
                   </TableCell>
                   <TableCell>
-                    {item?.totalProfit && Math.floor(item?.totalProfit)}
+                    {item?.totalProfit &&
+                      Math.floor(item?.totalProfit)
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                    원
                   </TableCell>
                   <TableCell>{item?.yield}%</TableCell>
                 </TableRow>
@@ -154,7 +158,13 @@ const Sell = () => {
                                 </TableCell>
                                 <TableCell>{item.ovrs_pdno}</TableCell>
                                 <TableCell>{item.ovrs_item_name}</TableCell>
-                                <TableCell>{item.ovrs_rlzt_pfls_amt}</TableCell>
+                                <TableCell>
+                                  {item?.ovrs_rlzt_pfls_amt &&
+                                    Math.floor(item?.ovrs_rlzt_pfls_amt)
+                                      .toString()
+                                      .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                  원
+                                </TableCell>
                                 <TableCell>{item.pftrt}</TableCell>
                               </TableRow>
                             ))}
