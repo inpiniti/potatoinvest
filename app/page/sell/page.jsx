@@ -8,6 +8,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { logos } from '@/json/logoData';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const Sell = () => {
   const api = useApi();
@@ -15,6 +23,7 @@ const Sell = () => {
   const [cano, acntPrdtCd] = useAccount();
   const [WCRC_FRCR_DVSN_CD, setWCRC_FRCR_DVSN_CD] = useState('02');
   const [list, setList] = useState([]);
+  const [expandedRows, setExpandedRows] = useState({}); // 추가된 상태
 
   const getList = useCallback(async () => {
     if (cano && acntPrdtCd) {
@@ -35,7 +44,17 @@ const Sell = () => {
       const response = await api.trading.inquirePeriodProfit(payload);
       const data = await response.json();
 
-      setList(data);
+      setList(
+        data?.output1?.map((item) => {
+          const logo = logos.find(
+            (logo) => logo.name === item.ovrs_pdno
+          ).logoid;
+          return {
+            ...item,
+            logo,
+          };
+        })
+      );
     }
   }, []);
 
@@ -43,45 +62,112 @@ const Sell = () => {
     getList();
   }, []);
 
-  return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-      {list?.output1?.map((item, index) => {
-        const logo = logos.find((logo) => logo.name === item.ovrs_pdno);
-        return (
-          <Card
-            key={index}
-            className="flex flex-row px-6 gap-2 items-center justify-between"
-          >
-            <div className="flex items-center gap-4">
-              <Avatar className="border w-12 h-12">
-                <AvatarImage
-                  src={`https://s3-symbol-logo.tradingview.com/${logo.logoid}--big.svg`}
-                  alt="@radix-vue"
-                  className="w-12 h-12"
-                />
-                <AvatarFallback>{item.ovrs_pdno?.slice(0, 2)}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <div className="font-bold text-2xl">{item.ovrs_pdno}</div>
-                <div className="text-neutral-400">{item.ovrs_item_name}</div>
-              </div>
-            </div>
-            <div>매매일 {item.trad_day}</div>
-            <div>매도청산수량 {item.slcl_qty}</div>
-            <div>매입평균가격 {item.pchs_avg_pric}</div>
-            <div>외화매입금액1 {item.frcr_pchs_amt1}</div>
-            <div>평균매도단가 {item.avg_sll_unpr}</div>
-            <div>외화매도금액합계1 {item.frcr_sll_amt_smtl1}</div>
-            <div>주식매도제비용 {item.stck_sll_tlex}</div>
-            <div>해외실현손익금액 {item.ovrs_rlzt_pfls_amt}</div>
-            <div>수익률 {item.pftrt}</div>
-            <div>환율 {item.exrt}</div>
+  const toggleRow = (rowKey) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [rowKey]: !prev[rowKey],
+    }));
+  };
 
-            <div>해외거래소코드 {item.ovrs_excg_cd}</div>
-            <div>최초고시환율 {item.frst_bltn_exrt}</div>
-          </Card>
-        );
-      })}
+  const groupedData = list?.reduce((acc, item) => {
+    const existingGroup = acc.find((group) => group.trad_day === item.trad_day);
+    if (existingGroup) {
+      existingGroup.totalProfit += Number(item.ovrs_rlzt_pfls_amt);
+      existingGroup.totalInvestment += Number(item.frcr_pchs_amt1);
+    } else {
+      acc.push({
+        trad_day: item.trad_day,
+        totalProfit: Number(item.ovrs_rlzt_pfls_amt),
+        totalInvestment: Number(item.frcr_pchs_amt1),
+      });
+    }
+    return acc;
+  }, []);
+
+  const groupedWithYield = groupedData?.map((group) => ({
+    trad_day: group.trad_day,
+    totalProfit: group.totalProfit,
+    yield: group.totalInvestment
+      ? ((group.totalProfit / group.totalInvestment) * 100).toFixed(2)
+      : '0.00',
+  }));
+
+  return (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3 text-center">
+      <div className="border rounded-md !bg-white">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-center">매매일</TableHead>
+              <TableHead className="text-center">실현손익금액</TableHead>
+              <TableHead className="text-center">수익률</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {groupedWithYield?.map((item) => (
+              <>
+                <TableRow
+                  key={item?.trad_day}
+                  onClick={() => toggleRow(item?.trad_day)}
+                >
+                  <TableCell>
+                    {item?.trad_day &&
+                      dayjs(item?.trad_day).format('YYYY년 MM월 DD일')}
+                  </TableCell>
+                  <TableCell>
+                    {item?.totalProfit && Math.floor(item?.totalProfit)}
+                  </TableCell>
+                  <TableCell>{item?.yield}%</TableCell>
+                </TableRow>
+                {expandedRows[item?.trad_day] && (
+                  <TableRow>
+                    <TableCell colSpan={3} className="bg-gray-100 p-0">
+                      <Table>
+                        <TableHeader className="bg-gray-50 border-b">
+                          <TableHead className="text-center">로고</TableHead>
+                          <TableHead className="text-center">
+                            종목코드
+                          </TableHead>
+                          <TableHead className="text-center">종목명</TableHead>
+                          <TableHead className="text-center">
+                            실현손익금액
+                          </TableHead>
+                          <TableHead className="text-center">수익률</TableHead>
+                        </TableHeader>
+                        <TableBody>
+                          {list
+                            ?.filter(
+                              (_item) => _item.trad_day === item?.trad_day
+                            )
+                            .map((item) => (
+                              <TableRow key={item?.ovrs_pdno}>
+                                <TableCell className="items-center justify-center flex">
+                                  <Avatar className="border w-8 h-8">
+                                    <AvatarImage
+                                      src={`https://s3-symbol-logo.tradingview.com/${item.logo}--big.svg`}
+                                      alt="@radix-vue"
+                                    />
+                                    <AvatarFallback>
+                                      {item.ovrs_pdno?.slice(0, 2)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                </TableCell>
+                                <TableCell>{item.ovrs_pdno}</TableCell>
+                                <TableCell>{item.ovrs_item_name}</TableCell>
+                                <TableCell>{item.ovrs_rlzt_pfls_amt}</TableCell>
+                                <TableCell>{item.pftrt}</TableCell>
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                      </Table>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
