@@ -1,21 +1,22 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import useToken from "../../../hooks/useToken";
-import useKey from "@/hooks/useKey";
-import useTrading from "@/hooks/useTrading";
-import useAi from "@/hooks/useAi";
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import useToken from '../../../hooks/useToken';
+import useKey from '@/hooks/useKey';
+import useTrading from '@/hooks/useTrading';
+import useAi from '@/hooks/useAi';
 
-import aiModels from "@/json/ai_models.json";
-import useQuotations from "@/hooks/useQuotations";
+import aiModels from '@/json/ai_models.json';
+import useQuotations from '@/hooks/useQuotations';
 
 const Log = () => {
   const [start, setStart] = useState(false);
   const [log, setLog] = useState([]);
   const [models, setModels] = useState([]);
   const abortControllerRef = useRef(null);
+  const [진행중인가요, set진행중인가요] = useState(false);
 
   const { 발급받은키확인 } = useKey();
   const { 발급된토큰확인, 토큰발급, 토큰남은시간확인 } = useToken();
@@ -51,7 +52,7 @@ const Log = () => {
     const result = await 함수();
 
     if (result?.msg1) {
-      complete(실패메시지 + " : " + result?.msg1);
+      complete(실패메시지 + ' : ' + result?.msg1);
     } else if (result) {
       complete(성공메시지);
     } else {
@@ -59,8 +60,8 @@ const Log = () => {
     }
 
     if (abortControllerRef.current?.signal.aborted) {
-      loading("확인 작업이 중단되었습니다.");
-      complete("확인 작업이 중단되었습니다.");
+      loading('확인 작업이 중단되었습니다.');
+      complete('확인 작업이 중단되었습니다.');
       return;
     }
 
@@ -73,7 +74,7 @@ const Log = () => {
     const result = await 함수();
 
     if (result?.msg1) {
-      complete(실패메시지 + " : " + result?.msg1);
+      complete(실패메시지 + ' : ' + result?.msg1);
     } else if (result) {
       complete(성공메시지);
     } else {
@@ -81,8 +82,8 @@ const Log = () => {
     }
 
     if (abortControllerRef.current?.signal.aborted) {
-      loading("확인 작업이 중단되었습니다.");
-      complete("확인 작업이 중단되었습니다.");
+      loading('확인 작업이 중단되었습니다.');
+      complete('확인 작업이 중단되었습니다.');
       return;
     }
 
@@ -96,62 +97,69 @@ const Log = () => {
     await 토큰발급영역();
 
     if (abortControllerRef.current?.signal.aborted) {
-      loading("확인 작업이 중단되었습니다.");
-      complete("확인 작업이 중단되었습니다.");
+      loading('확인 작업이 중단되었습니다.');
+      complete('확인 작업이 중단되었습니다.');
       return;
     }
-
-    const 반복실행 = async () => {
-      if (abortControllerRef.current?.signal.aborted) {
-        loading("확인 작업이 중단되었습니다.");
-        complete("확인 작업이 중단되었습니다.");
-        return;
-      }
-
-      const 주식잔고 = await 매도및물타기영역();
-
-      if (abortControllerRef.current?.signal.aborted) {
-        loading("확인 작업이 중단되었습니다.");
-        complete("확인 작업이 중단되었습니다.");
-        return;
-      }
-
-      await 매수영역(주식잔고);
-      반복실행();
-    };
 
     반복실행();
   };
 
+  const 반복실행 = async () => {
+    set진행중인가요(true);
+    if (abortControllerRef.current?.signal.aborted) {
+      loading('확인 작업이 중단되었습니다.');
+      complete('확인 작업이 중단되었습니다.');
+      return;
+    }
+
+    const 주식잔고 = await 매도및물타기영역();
+
+    if (abortControllerRef.current?.signal.aborted) {
+      loading('확인 작업이 중단되었습니다.');
+      complete('확인 작업이 중단되었습니다.');
+      return;
+    }
+
+    await 매수영역(주식잔고);
+    set진행중인가요(false);
+  };
+
+  useEffect(() => {
+    if (!진행중인가요 && start) {
+      반복실행();
+    }
+  }, [진행중인가요]);
+
   const 토큰발급영역 = async () => {
     const isKey = await 확인({
-      로딩메시지: "발급받은 키가 있는지 확인 중입니다.",
-      성공메시지: "발급받은 키가 있습니다.",
-      실패메시지: "발급받은 키가 없습니다.",
+      로딩메시지: '발급받은 키가 있는지 확인 중입니다.',
+      성공메시지: '발급받은 키가 있습니다.',
+      실패메시지: '발급받은 키가 없습니다.',
       함수: 발급받은키확인,
     });
     if (!isKey) return;
 
     const isToken = await 확인({
-      로딩메시지: "발급된 토큰이 있는지 확인 중입니다.",
-      성공메시지: "발급된 토큰이 있습니다.",
-      실패메시지: "발급된 토큰이 없습니다. 토큰을 발급합니다.",
+      로딩메시지: '발급된 토큰이 있는지 확인 중입니다.',
+      성공메시지: '발급된 토큰이 있습니다.',
+      실패메시지: '발급된 토큰이 없습니다. 토큰을 발급합니다.',
       함수: 발급된토큰확인,
     });
 
     if (isToken) {
       const is남은시간 = await 확인({
-        로딩메시지: "남은 시간을 확인합니다.",
-        성공메시지: "남은 시간이 있습니다.",
-        실패메시지: "남은 시간이 없습니다. 토큰을 발급합니다.",
+        로딩메시지: '남은 시간을 확인합니다.',
+        성공메시지: '남은 시간이 있습니다.',
+        실패메시지: '남은 시간이 없습니다. 토큰을 발급합니다.',
         함수: 토큰남은시간확인,
       });
 
       if (!is남은시간) {
         const is발급 = await 확인({
-          로딩메시지: "토큰을 발급합니다.",
-          성공메시지: "토큰이 발급되었습니다.",
-          실패메시지: "토큰 발급에 실패했습니다.",
+          로딩메시지: '토큰을 발급합니다.',
+          성공메시지: '토큰이 발급되었습니다.',
+          실패메시지: '토큰 발급에 실패했습니다.',
           함수: 토큰발급,
         });
 
@@ -159,9 +167,9 @@ const Log = () => {
       }
     } else {
       const is발급 = await 확인({
-        로딩메시지: "토큰을 발급합니다.",
-        성공메시지: "토큰이 발급되었습니다.",
-        실패메시지: "토큰 발급에 실패했습니다.",
+        로딩메시지: '토큰을 발급합니다.',
+        성공메시지: '토큰이 발급되었습니다.',
+        실패메시지: '토큰 발급에 실패했습니다.',
         함수: 토큰발급,
       });
 
@@ -171,9 +179,9 @@ const Log = () => {
 
   const 매도및물타기영역 = async () => {
     const 주식잔고 = await 작업({
-      로딩메시지: "주식잔고를 확인합니다.",
-      성공메시지: "주식잔고가 있습니다.",
-      실패메시지: "주식잔고가 없습니다.",
+      로딩메시지: '주식잔고를 확인합니다.',
+      성공메시지: '주식잔고가 있습니다.',
+      실패메시지: '주식잔고가 없습니다.',
       함수: 주식잔고확인,
     });
 
@@ -220,16 +228,16 @@ const Log = () => {
 
   const 매수영역 = async (주식잔고) => {
     const 분석할데이터 = await 작업({
-      로딩메시지: "분석할 데이터를 조회중입니다...",
-      성공메시지: "분석할 데이터를 조회했습니다.",
-      실패메시지: "분석할 데이터 조회에 실패했습니다.",
+      로딩메시지: '분석할 데이터를 조회중입니다...',
+      성공메시지: '분석할 데이터를 조회했습니다.',
+      실패메시지: '분석할 데이터 조회에 실패했습니다.',
       함수: 데이터가져오기,
     });
 
     const 전처리된분석데이터 = await 작업({
-      로딩메시지: "분석할 데이터를 전처리중입니다...",
-      성공메시지: "분석할 데이터를 전처리했습니다.",
-      실패메시지: "분석할 데이터 전처리에 실패했습니다.",
+      로딩메시지: '분석할 데이터를 전처리중입니다...',
+      성공메시지: '분석할 데이터를 전처리했습니다.',
+      실패메시지: '분석할 데이터 전처리에 실패했습니다.',
       함수: () => 전처리(분석할데이터),
     });
 
@@ -237,9 +245,9 @@ const Log = () => {
       models.length > 0
         ? models
         : await 작업({
-            로딩메시지: "모델을 로딩중입니다...",
-            성공메시지: "모델을 로딩했습니다.",
-            실패메시지: "모델 로딩에 실패했습니다.",
+            로딩메시지: '모델을 로딩중입니다...',
+            성공메시지: '모델을 로딩했습니다.',
+            실패메시지: '모델 로딩에 실패했습니다.',
             함수: async () => {
               const loadedModels = await Promise.all(
                 aiModels.ai_models.map((model) =>
@@ -253,9 +261,9 @@ const Log = () => {
 
     // 모든 모델에 대해 예측 수행
     const 예측결과들 = await 작업({
-      로딩메시지: "예측중입니다...",
-      성공메시지: "예측이 완료되었습니다.",
-      실패메시지: "예측에 실패했습니다.",
+      로딩메시지: '예측중입니다...',
+      성공메시지: '예측이 완료되었습니다.',
+      실패메시지: '예측에 실패했습니다.',
       함수: async () => {
         const predictions = await Promise.all(
           모델들.map((model) => 예측(model, 전처리된분석데이터))
@@ -265,9 +273,9 @@ const Log = () => {
     });
 
     const 분석된데이터 = await 작업({
-      로딩메시지: "예측 분석중입니다...",
-      성공메시지: "분석이 완료되었습니다.",
-      실패메시지: "분석에 실패했습니다.",
+      로딩메시지: '예측 분석중입니다...',
+      성공메시지: '분석이 완료되었습니다.',
+      실패메시지: '분석에 실패했습니다.',
       함수: async () => {
         // 예측 결과의 평균 계산
         const 예측결과평균 = 예측결과들[0].map(
@@ -320,7 +328,7 @@ const Log = () => {
           함수: () =>
             매수({
               ovrs_pdno: item.name,
-              ovrs_cblc_qty: "1",
+              ovrs_cblc_qty: '1',
               now_pric2: 현재가.last,
             }),
         });
@@ -333,7 +341,7 @@ const Log = () => {
             return prev;
           });
         } else {
-          console.log("매수실패");
+          console.log('매수실패');
         }
       }
     }
@@ -377,7 +385,7 @@ const Log = () => {
               <Loader2 className="w-5 h-5 animate-spin" />
             </figure>
           )}
-          {start ? "중지" : "시작"}
+          {start ? '중지' : '시작'}
         </Button>
       </section>
       {log.map(
