@@ -15,7 +15,7 @@ const useToken = () => {
   // 1. 발급된 토큰이 있는지 확인
   const 발급된토큰확인 = async (): Promise<boolean> => {
     await delay(500);
-    return !!key.access_token;
+    return !!key.access_token || !!realKey.access_token;
   };
 
   // 2. 없다면 토큰 발급

@@ -10,6 +10,7 @@ import useAi from "@/hooks/useAi";
 
 import aiModels from "@/json/ai_models.json";
 import useQuotations from "@/hooks/useQuotations";
+import { delay } from "@/utils/util";
 
 const Log = () => {
   const [start, setStart] = useState(false);
@@ -186,6 +187,8 @@ const Log = () => {
       함수: 주식잔고확인,
     });
 
+    await delay(1000);
+
     const 미체결 = await 작업({
       로딩메시지: "미체결내역을 확인합니다.",
       성공메시지: "미체결내역이 있습니다.",
@@ -206,12 +209,16 @@ const Log = () => {
 
       if (!is매도) {
         // 이미 체결내역에 있으면 굳이 물타기할 필요가 없음
-        if (미체결?.output?.find((order) => order.pdno === item.ovrs_ordno)) {
+        if (
+          미체결?.output?.find((order) => {
+            return order.pdno === item.ovrs_pdno;
+          })
+        ) {
           loading(
-            `${item.ovrs_ordno} (${item.ovrs_item_name}) 이미 체결내역에 있습니다.`
+            `${item.ovrs_pdno} (${item.ovrs_item_name}) 이미 체결내역에 있습니다.`
           );
           complete(
-            `${item.ovrs_ordno} (${item.ovrs_item_name}) 이미 체결내역에 있습니다.`
+            `${item.ovrs_pdno} (${item.ovrs_item_name}) 이미 체결내역에 있습니다.`
           );
           continue;
         }
