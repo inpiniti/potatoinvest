@@ -49,6 +49,28 @@ const useTrading = () => {
     return allOutput1;
   };
 
+  // 미체결내역
+  const 미체결내역 = async () => {
+    const payload = {
+      CANO,
+      ACNT_PRDT_CD,
+      OVRS_EXCG_CD: "NASD",
+      SORT_SQN: "DS",
+      CTX_AREA_FK200: "",
+      CTX_AREA_NK200: "",
+    };
+
+    const response = await api.trading.inquireNccs(payload);
+    const data = await response.json();
+
+    if (response.status !== 200) {
+      console.error("미체결내역 실패", response.status, data);
+      return false;
+    }
+
+    return data;
+  };
+
   const 매도 = async (item: Item) => {
     const payload = {
       tr: "매도",
@@ -114,7 +136,7 @@ const useTrading = () => {
     return Number(item.evlu_pfls_rt) < -2;
   };
 
-  return { 주식잔고확인, 매도확인, 물타기확인, 매도, 매수 };
+  return { 주식잔고확인, 매도확인, 물타기확인, 미체결내역, 매도, 매수 };
 };
 
 export default useTrading;

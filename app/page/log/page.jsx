@@ -20,7 +20,8 @@ const Log = () => {
 
   const { 발급받은키확인 } = useKey();
   const { 발급된토큰확인, 토큰발급, 토큰남은시간확인 } = useToken();
-  const { 주식잔고확인, 매도확인, 물타기확인, 매도, 매수 } = useTrading();
+  const { 주식잔고확인, 매도확인, 물타기확인, 미체결내역, 매도, 매수 } =
+    useTrading();
   const { 데이터가져오기, 전처리, 역직렬화, 예측 } = useAi();
   const { 현재가상세 } = useQuotations();
 
@@ -185,9 +186,17 @@ const Log = () => {
       함수: 주식잔고확인,
     });
 
+    const 미체결 = await 작업({
+      로딩메시지: "미체결내역을 확인합니다.",
+      성공메시지: "미체결내역이 있습니다.",
+      실패메시지: "미체결내역이 없습니다.",
+      함수: 미체결내역,
+    });
+
     let index = 0;
     for (const item of 주식잔고 || []) {
       index++;
+
       const is매도 = await 확인({
         로딩메시지: `${index}/${주식잔고.length} ${item.ovrs_pdno} (${item.ovrs_item_name}) 매도를 해도 될지 계산중입니다...`,
         성공메시지: `${index}/${주식잔고.length} ${item.ovrs_pdno} (${item.ovrs_item_name}) 매도를 해도 될 것 같습니다.`,
@@ -196,6 +205,17 @@ const Log = () => {
       });
 
       if (!is매도) {
+        // 이미 체결내역에 있으면 굳이 물타기할 필요가 없음
+        if (미체결?.output?.find((order) => order.pdno === item.ovrs_ordno)) {
+          loading(
+            `${item.ovrs_ordno} (${item.ovrs_item_name}) 이미 체결내역에 있습니다.`
+          );
+          complete(
+            `${item.ovrs_ordno} (${item.ovrs_item_name}) 이미 체결내역에 있습니다.`
+          );
+          continue;
+        }
+
         const is물타기 = await 확인({
           로딩메시지: `${index}/${주식잔고.length} ${item.ovrs_pdno} (${item.ovrs_item_name}) 물타기를 해도 될지 계산중입니다...`,
           성공메시지: `${index}/${주식잔고.length} ${item.ovrs_pdno} (${item.ovrs_item_name}) 물타기를 해도 될 것 같습니다.`,

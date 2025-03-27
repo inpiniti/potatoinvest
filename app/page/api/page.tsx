@@ -1,34 +1,35 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
+} from "@/components/ui/accordion";
 
-import { Title } from '@/components/title';
+import { Title } from "@/components/title";
 
-import { Button } from '@/components/ui/button';
-import TokenP from './TokenP';
-import Price from './quotations/Price';
-import DailyPrice from './quotations/DailyPrice';
+import { Button } from "@/components/ui/button";
+import TokenP from "./TokenP";
+import Price from "./quotations/Price";
+import DailyPrice from "./quotations/DailyPrice";
 
-import AccordionSection from '@/components/accordionSection';
-import ApiContent from './ApiContent';
-import InquireBalance from './trading/InquireBalance';
-import Order from './trading/Order';
-import OrderRvsecncl from './trading/OrderRvsecncl';
-import OrderResv from './trading/OrderResv';
-import OrderResvCcnl from './trading/OrderResvCcnl';
-import InquireCcnl from './trading/InquireCcnl';
-import InquirePresentBalance from './trading/InquirePresentBalance';
-import InquireBuyableAmount from './trading/InquireBuyableAmount';
-import InquireSearch from './quotations/InquireSearch';
-import PriceDetail from './quotations/PriceDetail';
-import InquirePeriodProfit from './trading/InquirePeriodProfit';
+import AccordionSection from "@/components/accordionSection";
+import ApiContent from "./ApiContent";
+import InquireBalance from "./trading/InquireBalance";
+import Order from "./trading/Order";
+import OrderRvsecncl from "./trading/OrderRvsecncl";
+import OrderResv from "./trading/OrderResv";
+import OrderResvCcnl from "./trading/OrderResvCcnl";
+import InquireCcnl from "./trading/InquireCcnl";
+import InquirePresentBalance from "./trading/InquirePresentBalance";
+import InquireBuyableAmount from "./trading/InquireBuyableAmount";
+import InquireSearch from "./quotations/InquireSearch";
+import PriceDetail from "./quotations/PriceDetail";
+import InquirePeriodProfit from "./trading/InquirePeriodProfit";
+import InquireNccs from "./trading/inquireNccs";
 
 const Log = () => {
   const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
@@ -72,10 +73,7 @@ const Log = () => {
         <OrderRvsecncl />
         <OrderResv />
         <OrderResvCcnl />
-        <ApiContent
-          title="해외주식 미체결내역"
-          endPoint="/trading/inquire-nccs"
-        />
+        <InquireNccs />
         <InquireBalance />
         <InquireCcnl />
         <InquirePresentBalance />
