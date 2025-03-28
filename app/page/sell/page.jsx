@@ -36,7 +36,7 @@ const Sell = () => {
           NATN_CD: '', // 국가코드 : 공란
           CRCY_CD: '', // 통화코드 : 공란
           PDNO: '', // 상품번호 : 공란
-          INQR_STRT_DT: dayjs('2025.03.25').format('YYYYMMDD'), // 조회시작일자
+          INQR_STRT_DT: dayjs('2025-03-25').format('YYYYMMDD'), // 조회시작일자
           INQR_END_DT: dayjs().format('YYYYMMDD'), // 조회종료일자
           WCRC_FRCR_DVSN_CD, // 원화외화구분코드 : 01: 외화, 02: 원화
           CTX_AREA_FK200: '', // 연속조회검색조건200 : 공란
