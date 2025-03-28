@@ -25,7 +25,8 @@ const Sell = () => {
   const [expandedRows, setExpandedRows] = useState({}); // 추가된 상태
 
   const getList = useCallback(async () => {
-    alert(cano && acntPrdtCd);
+    alert('cano : ' + String(cano));
+    alert('acntPrdtCd : ' + String(acntPrdtCd));
     if (cano && acntPrdtCd) {
       const payload = {
         CANO: cano,
@@ -41,15 +42,15 @@ const Sell = () => {
         CTX_AREA_NK200: '', // 연속조회키200 : 공란
       };
 
-      alert(payload);
+      alert('payload : ' + JSON.stringify(payload));
 
       const response = await api.trading.inquirePeriodProfit(payload);
 
-      alert(response);
+      alert('response : ' + JSON.stringify(response));
 
       const data = await response.json();
 
-      alert(data);
+      alert('data : ' + JSON.stringify(data));
 
       setList(
         data?.output1?.map((item) => {
