@@ -2,11 +2,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const navList = [
-  {
-    name: '실시간 데이터',
-    path: '/realtime',
-    href: '/page/realtime',
-  },
+  // {
+  //   name: '실시간 데이터',
+  //   path: '/realtime',
+  //   href: '/page/realtime',
+  // },
   {
     name: '구매내역',
     path: '/buy',
@@ -22,35 +22,36 @@ const navList = [
     path: '/log',
     href: '/page/log',
   },
-  {
-    name: '자산',
-    path: '/money',
-    href: '/page/money',
-  },
-  {
-    name: '설정',
-    path: '/setting',
-    href: '/page/setting',
-  },
-  {
-    name: '패치노트',
-    path: '/patchNotes',
-    href: '/page/patchNotes',
-  },
+  // {
+  //   name: '자산',
+  //   path: '/money',
+  //   href: '/page/money',
+  // },
+
+  // {
+  //   name: '패치노트',
+  //   path: '/patchNotes',
+  //   href: '/page/patchNotes',
+  // },
   {
     name: 'API',
     path: '/api',
     href: '/page/api',
   },
+  // {
+  //   name: '개발노트',
+  //   path: '/note',
+  //   href: '/page/note',
+  // },
+  // {
+  //   name: '이슈',
+  //   path: '/issue',
+  //   href: '/page/issue',
+  // },
   {
-    name: '개발노트',
-    path: '/note',
-    href: '/page/note',
-  },
-  {
-    name: '이슈',
-    path: '/issue',
-    href: '/page/issue',
+    name: '설정',
+    path: '/setting',
+    href: '/page/setting',
   },
 ];
 
