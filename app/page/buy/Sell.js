@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Drawer,
@@ -9,10 +9,11 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer';
+} from "@/components/ui/drawer";
 
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import useTrading from "@/hooks/useTrading";
 
 const Sell = ({
   ovrs_pdno,
