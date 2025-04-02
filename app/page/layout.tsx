@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Nav from './Nav';
-import Header from './Header';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Nav from "./Nav";
+import Header from "./Header";
 
 const queryClient = new QueryClient();
 
