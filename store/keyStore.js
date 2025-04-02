@@ -1,22 +1,22 @@
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
-import { encrypt, decrypt } from '@/utils/crypto';
+import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
+import { encrypt, decrypt } from "@/utils/crypto";
 
-import { tempKeyStore } from './tempKeyStore';
+import { tempKeyStore } from "./tempKeyStore";
 
 export const keyStore = create(
   devtools(
     persist(
       (set) => ({
         key: {
-          appKey: '',
-          secretKey: '',
-          vtsAppKey: '',
-          vtsSecretKey: '',
-          approval_key: '', // 웹소캣 접속키
-          isVts: true,
-          account: '',
-          vtsAccount: '',
+          appKey: "",
+          secretKey: "",
+          vtsAppKey: "",
+          vtsSecretKey: "",
+          approval_key: "", // 웹소캣 접속키
+          isVts: false,
+          account: "",
+          vtsAccount: "",
         },
         setIsVts: (isVts) => {
           set({ key: { ...keyStore.getState().key, isVts } });
@@ -45,10 +45,10 @@ export const keyStore = create(
         },
       }),
       {
-        name: 'key',
+        name: "key",
         getStorage: () => localStorage,
       }
     ),
-    { name: 'key' }
+    { name: "key" }
   )
 );
