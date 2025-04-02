@@ -2,6 +2,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const navList = [
+  {
+    name: '자동매매',
+    path: '/log',
+    href: '/page/log',
+  },
   // {
   //   name: '실시간 데이터',
   //   path: '/realtime',
@@ -16,11 +21,6 @@ const navList = [
     name: '판매내역',
     path: '/sell',
     href: '/page/sell',
-  },
-  {
-    name: '자동매매',
-    path: '/log',
-    href: '/page/log',
   },
   // {
   //   name: '자산',

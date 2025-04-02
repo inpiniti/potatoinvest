@@ -1,21 +1,24 @@
-"use client";
+'use client';
 
-import { Title } from "@/components/title";
-import Password from "./Password";
-import KeySetting from "./KeySetting";
-import AccordionSection from "@/components/accordionSection";
-import SettingContent from "./SettingContent";
-import { tempKeyStore } from "@/store/tempKeyStore";
-import dayjs from "dayjs";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { keyStore } from "@/store/keyStore";
-import { Button } from "@/components/ui/button";
-import useToken from "@/hooks/useToken";
+import { Title } from '@/components/title';
+import Password from './Password';
+import KeySetting from './KeySetting';
+import AccordionSection from '@/components/accordionSection';
+import SettingContent from './SettingContent';
+import { tempKeyStore } from '@/store/tempKeyStore';
+import dayjs from 'dayjs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { keyStore } from '@/store/keyStore';
+import { settingStore } from '@/store/settingStore';
+import { Button } from '@/components/ui/button';
+import useToken from '@/hooks/useToken';
 
 const Setting = () => {
   const { key: tempKey, realKey } = tempKeyStore();
   const { key, setIsVts } = keyStore();
+
+  const { setting, setSetting } = settingStore();
 
   const { 토큰발급 } = useToken();
 
@@ -38,7 +41,7 @@ const Setting = () => {
             <Tabs
               defaultValue="isVts"
               value={String(key.isVts)}
-              onValueChange={(e) => setIsVts(e === "true")}
+              onValueChange={(e) => setIsVts(e === 'true')}
             >
               <TabsList>
                 <TabsTrigger value="false">실전계좌</TabsTrigger>
@@ -53,7 +56,15 @@ const Setting = () => {
           title="최소 매수 금액"
           value={
             <div className="flex items-center gap-2">
-              <Input className="w-24" />
+              <Input
+                className="w-24"
+                value={setting.other.minBuyAmount}
+                onChange={(e) =>
+                  setSetting({
+                    other: { ...setting.other, minBuyAmount: e.target.value },
+                  })
+                }
+              />
             </div>
           }
         />
@@ -61,15 +72,47 @@ const Setting = () => {
           title="최소예측률 (%)"
           value={
             <div className="flex items-center gap-2">
-              <Input className="w-24" defaultValue="60" />
+              <Input
+                className="w-24"
+                value={setting.other.minPredictRate}
+                onChange={(e) =>
+                  setSetting({
+                    other: { ...setting.other, minPredictRate: e.target.value },
+                  })
+                }
+              />
             </div>
           }
         />
         <SettingContent
-          title="판매기준율 (%)"
+          title="매도 기준 (%)"
           value={
             <div className="flex items-center gap-2">
-              <Input className="w-24" defaultValue="2" />
+              <Input
+                className="w-24"
+                value={setting.other.sellRate}
+                onChange={(e) =>
+                  setSetting({
+                    other: { ...setting.other, sellRate: e.target.value },
+                  })
+                }
+              />
+            </div>
+          }
+        />
+        <SettingContent
+          title="매수 기준 (%)"
+          value={
+            <div className="flex items-center gap-2">
+              <Input
+                className="w-24"
+                value={setting.other.buyRate}
+                onChange={(e) =>
+                  setSetting({
+                    other: { ...setting.other, buyRate: e.target.value },
+                  })
+                }
+              />
             </div>
           }
         />
@@ -80,12 +123,12 @@ const Setting = () => {
         <SettingContent title="접근토큰유형" value={realKey.token_type} />
         <SettingContent
           title="접근토큰 유효기간"
-          value={dayjs(realKey.expires_in).format("HH:mm:ss")}
+          value={dayjs(realKey.expires_in).format('HH:mm:ss')}
         />
         <SettingContent
           title="접근토큰 유효기간(일시표시)"
           value={dayjs(realKey.access_token_token_expired).format(
-            "MM/DD HH:mm:ss"
+            'MM/DD HH:mm:ss'
           )}
         />
         <SettingContent
@@ -99,12 +142,12 @@ const Setting = () => {
         <SettingContent title="접근토큰유형" value={tempKey.token_type} />
         <SettingContent
           title="접근토큰 유효기간"
-          value={dayjs(tempKey.expires_in).format("HH:mm:ss")}
+          value={dayjs(tempKey.expires_in).format('HH:mm:ss')}
         />
         <SettingContent
           title="접근토큰 유효기간(일시표시)"
           value={dayjs(tempKey.access_token_token_expired).format(
-            "MM/DD HH:mm:ss"
+            'MM/DD HH:mm:ss'
           )}
         />
       </AccordionSection>
@@ -114,10 +157,6 @@ const Setting = () => {
         <KeySetting filed="secretKey" label="실전계좌 secret key" />
         <KeySetting filed="vtsAppKey" label="모의투자계좌 app key" />
         <KeySetting filed="vtsSecretKey" label="모의투자계좌 secret key" />
-      </AccordionSection>
-      <AccordionSection title="기타">
-        <div>key</div>
-        <div>실전계좌 VS 모의투자계좌</div>
       </AccordionSection>
     </div>
   );
