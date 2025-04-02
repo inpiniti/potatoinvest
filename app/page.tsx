@@ -1,23 +1,14 @@
-'use client';
+"use client";
 
-import { keyStore } from '@/store/keyStore';
-import { useRouter } from 'next/navigation';
-import { FaUser } from 'react-icons/fa';
-import { MdAlternateEmail } from 'react-icons/md';
+import { useRouter } from "next/navigation";
+import { FaUser } from "react-icons/fa";
+import { MdAlternateEmail } from "react-icons/md";
 
 export default function Home() {
-  const { key } = keyStore();
-
   const router = useRouter();
 
   const handleClick = () => {
-    if (!key.account) {
-      // 계좌번호가 없을 때
-      // next 페이지 useRouter
-      // /start/account로 이동
-
-      router.push('/start/account');
-    }
+    router.push("/start/account");
   };
 
   return (
