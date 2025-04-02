@@ -175,6 +175,7 @@ export default function Keys() {
                 value={keys.appKey}
                 onChange={handleKeyChange("appKey")}
                 placeholder="App Key를 입력해주세요"
+                type="password"
               />
             </div>
           </div>
