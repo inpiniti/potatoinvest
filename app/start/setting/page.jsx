@@ -189,14 +189,17 @@ export default function Setting() {
               <span className="text-neutral-500">원</span>
             </div>
             <p className="text-xs text-neutral-500">
-              최소 1,000원 이상 입력해주세요.
+              예: 최소매수금액이 <span className="text-blue-400">10,000원</span>
+              인 경우, 구매하는 종목의 가격이{" "}
+              <span className="text-blue-400">1,000원</span>이라면{" "}
+              <span className="text-blue-400">10주</span>를 매수합니다.
             </p>
           </div>
 
           {/* 최소예측률 입력 필드 */}
           <div className="flex flex-col gap-2 w-full mt-4">
             <label className="font-medium text-neutral-700">
-              최소예측률 (%)
+              최소 상승 예측률 (%)
             </label>
             <div className="flex gap-2 w-full whitespace-nowrap items-center bg-neutral-100 p-4 rounded-lg">
               <input
@@ -211,7 +214,11 @@ export default function Setting() {
               <span className="text-neutral-500">%</span>
             </div>
             <p className="text-xs text-neutral-500">
-              0~100% 사이의 값을 입력해주세요.
+              50% 이하는 내려갈 확률이 높고,{" "}
+              <span className="text-blue-400">
+                50% 이상은 올라갈 확률이 높습니다.
+              </span>{" "}
+              70%이상의 종목은 거의 없습니다.
             </p>
           </div>
 
