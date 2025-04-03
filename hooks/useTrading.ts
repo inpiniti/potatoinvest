@@ -5,7 +5,7 @@ import { settingStore } from '@/store/settingStore';
 
 const useTrading = () => {
   const api = useApi();
-  const setting = settingStore();
+  const { setting } = settingStore();
   const [CANO, ACNT_PRDT_CD] = useAccount();
 
   // 주식잔고 확인

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { keyStore } from "@/store/keyStore";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa"; // 뒤로가기 아이콘 추가
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { keyStore } from '@/store/keyStore';
+import { FaArrowLeft, FaArrowRight } from 'react-icons/fa'; // 뒤로가기 아이콘 추가
 
 export default function Keys() {
   /**
@@ -20,8 +20,8 @@ export default function Keys() {
    * @property {string} secretKey - Secret Key
    */
   const [keys, setKeys] = useState({
-    appKey: "",
-    secretKey: "",
+    appKey: '',
+    secretKey: '',
   });
 
   /**
@@ -58,8 +58,8 @@ export default function Keys() {
 
       // 저장된 키 정보가 있으면 입력 필드에 설정
       const updatedKeys = {
-        appKey: savedKey.appKey || "",
-        secretKey: savedKey.secretKey || "",
+        appKey: savedKey.appKey || '',
+        secretKey: savedKey.secretKey || '',
       };
 
       setKeys(updatedKeys);
@@ -70,7 +70,7 @@ export default function Keys() {
           updatedKeys.secretKey.trim().length > 0
       );
     } catch (error) {
-      console.error("키 정보 불러오기 실패:", error);
+      console.error('키 정보 불러오기 실패:', error);
     }
   }, []);
 
@@ -120,18 +120,18 @@ export default function Keys() {
 
     // 앱 키 암호화해서 저장
     setKey({
-      filed: "appKey",
+      filed: 'appKey',
       appKey: keys.appKey,
     });
 
     // 시크릿 키 암호화해서 저장
     setKey({
-      filed: "secretKey",
+      filed: 'secretKey',
       secretKey: keys.secretKey,
     });
 
     // 토큰 화면으로 이동
-    router.push("/start/token");
+    router.push('/start/token');
   };
 
   /**
@@ -141,7 +141,7 @@ export default function Keys() {
    * 계좌번호 입력 화면(/start/account)으로 이동합니다.
    */
   const handleBack = () => {
-    router.push("/start/account");
+    router.push('/start/account');
   };
 
   return (
@@ -152,7 +152,7 @@ export default function Keys() {
         {/* 이미지 부분 */}
         <div className="relative w-40 h-40 rounded-full overflow-hidden shadow-lg">
           <Image
-            src="/images/key.jpg"
+            src="/images/key.webp"
             alt="API 키 입력 아이콘"
             layout="fill"
             objectFit="cover"
@@ -173,7 +173,7 @@ export default function Keys() {
               <input
                 className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
                 value={keys.appKey}
-                onChange={handleKeyChange("appKey")}
+                onChange={handleKeyChange('appKey')}
                 placeholder="App Key를 입력해주세요"
                 type="password"
               />
@@ -187,7 +187,7 @@ export default function Keys() {
               <input
                 className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
                 value={keys.secretKey}
-                onChange={handleKeyChange("secretKey")}
+                onChange={handleKeyChange('secretKey')}
                 placeholder="Secret Key를 입력해주세요"
                 type="password"
               />
@@ -212,8 +212,8 @@ export default function Keys() {
             <button
               className={`rounded-full border border-solid border-transparent transition-colors flex items-center justify-center ${
                 isValid
-                  ? "bg-foreground text-background hover:bg-[#383838] dark:hover:bg-[#ccc] cursor-pointer"
-                  : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
+                  ? 'bg-foreground text-background hover:bg-[#383838] dark:hover:bg-[#ccc] cursor-pointer'
+                  : 'bg-neutral-300 text-neutral-500 cursor-not-allowed'
               } font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:ml-auto`}
               onClick={handleSubmit}
               disabled={!isValid}

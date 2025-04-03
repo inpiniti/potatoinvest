@@ -16,38 +16,40 @@ import { useState } from 'react';
 import useTrading from '@/hooks/useTrading';
 import { toast } from 'sonner';
 
-const Sell = ({
+const BuyMore = ({
   ovrs_pdno,
   ovrs_item_name,
   pchs_avg_pric,
   ovrs_cblc_qty,
   evlu_pfls_rt,
-  onSellComplete,
+  onBuyComplete,
 }) => {
-  const { 매도 } = useTrading();
+  const { 매수 } = useTrading();
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   /**
-   * 매도 요청을 처리하는 함수
-   * @param {Object} params - 매도 파라미터
+   * 매수 요청을 처리하는 함수
+   * @param {Object} params - 매수 파라미터
    * @returns {Promise<void>}
    */
-  const handleSell = async (params) => {
+  const handleBuy = async (params) => {
     try {
       setLoading(true);
-      await 매도(params);
-      toast.success('매도 요청이 완료되었습니다.', {
-        description: `${params.ovrs_pdno} ${params.ovrs_cblc_qty}주 (${params.now_pric2}$)`,
+      await 매수(params);
+      toast.success('매수 요청이 완료되었습니다.', {
+        description: `${params.ovrs_pdno} ${params.ovrs_cblc_qty || 1}주 (${
+          params.now_pric2
+        }$)`,
       });
       setIsOpen(false);
 
-      if (onSellComplete) {
-        onSellComplete();
+      if (onBuyComplete) {
+        onBuyComplete();
       }
     } catch (error) {
-      console.error('매도 요청 실패:', error);
-      toast.error('매도 요청이 실패했습니다.', {
+      console.error('매수 요청 실패:', error);
+      toast.error('매수 요청이 실패했습니다.', {
         description: error.message || '다시 시도해주세요.',
       });
     } finally {
@@ -58,79 +60,77 @@ const Sell = ({
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
-        <Button variant="default" className="bg-blue-400 hover:bg-blue-500">
-          매도
-        </Button>
+        <Button className="bg-red-400 hover:bg-red-500">매수</Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>매도 - {ovrs_pdno}</DrawerTitle>
+          <DrawerTitle>매수 - {ovrs_pdno}</DrawerTitle>
           <DrawerDescription>{ovrs_item_name}</DrawerDescription>
         </DrawerHeader>
         <div className="px-4 flex gap-2 flex-wrap">
-          <div>매입가 : ${pchs_avg_pric}</div>
-          <div>수량 : {ovrs_cblc_qty}주</div>
+          <div>현재 매입가 : ${pchs_avg_pric}</div>
+          <div>보유 수량 : {ovrs_cblc_qty}주</div>
           <div className={evlu_pfls_rt > 0 ? 'text-red-500' : 'text-blue-500'}>
             수익률 : {evlu_pfls_rt}%
           </div>
         </div>
         <div className="px-4 flex flex-col gap-2 py-4">
-          <h3 className="font-medium text-sm mb-2">매도 가격 설정</h3>
+          <h3 className="font-medium text-sm mb-2">매수 가격 설정</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <Button
-              className="bg-blue-400 hover:bg-blue-500"
+              className="bg-red-400 hover:bg-red-500"
               onClick={() =>
-                handleSell({
+                handleBuy({
                   ovrs_pdno,
-                  ovrs_cblc_qty,
-                  now_pric2: (pchs_avg_pric * 1.02).toFixed(2),
+                  ovrs_cblc_qty: 1, // 기본 1주 매수
+                  now_pric2: (pchs_avg_pric * 0.98).toFixed(2),
                 })
               }
               disabled={loading}
             >
-              +2% (${(pchs_avg_pric * 1.02).toFixed(2)})
+              -2% (${(pchs_avg_pric * 0.98).toFixed(2)})
             </Button>
 
             <Button
-              className="bg-blue-400 hover:bg-blue-500"
+              className="bg-red-400 hover:bg-red-500"
               onClick={() =>
-                handleSell({
+                handleBuy({
                   ovrs_pdno,
-                  ovrs_cblc_qty,
-                  now_pric2: (pchs_avg_pric * 1.05).toFixed(2),
+                  ovrs_cblc_qty: 1,
+                  now_pric2: (pchs_avg_pric * 0.95).toFixed(2),
                 })
               }
               disabled={loading}
             >
-              +5% (${(pchs_avg_pric * 1.05).toFixed(2)})
+              -5% (${(pchs_avg_pric * 0.95).toFixed(2)})
             </Button>
 
             <Button
-              className="bg-blue-400 hover:bg-blue-500"
+              className="bg-red-400 hover:bg-red-500"
               onClick={() =>
-                handleSell({
+                handleBuy({
                   ovrs_pdno,
-                  ovrs_cblc_qty,
-                  now_pric2: (pchs_avg_pric * 1.1).toFixed(2),
+                  ovrs_cblc_qty: 1,
+                  now_pric2: (pchs_avg_pric * 0.9).toFixed(2),
                 })
               }
               disabled={loading}
             >
-              +10% (${(pchs_avg_pric * 1.1).toFixed(2)})
+              -10% (${(pchs_avg_pric * 0.9).toFixed(2)})
             </Button>
 
             <Button
-              className="bg-blue-400 hover:bg-blue-500"
+              className="bg-red-400 hover:bg-red-500"
               onClick={() =>
-                handleSell({
+                handleBuy({
                   ovrs_pdno,
-                  ovrs_cblc_qty,
-                  now_pric2: (pchs_avg_pric * 1.3).toFixed(2),
+                  ovrs_cblc_qty: 1,
+                  now_pric2: (pchs_avg_pric * 0.7).toFixed(2),
                 })
               }
               disabled={loading}
             >
-              +30% (${(pchs_avg_pric * 1.3).toFixed(2)})
+              -30% (${(pchs_avg_pric * 0.7).toFixed(2)})
             </Button>
           </div>
         </div>
@@ -148,4 +148,4 @@ const Sell = ({
   );
 };
 
-export default Sell;
+export default BuyMore;
