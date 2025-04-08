@@ -50,6 +50,7 @@ const useApi = () => {
           url: "/api/koreainvestment/quotations/price",
           payload: { excd, symb },
         }),
+      // 기간별 시세
       dailyprice: ({ excd, symb, gubn, modp }) =>
         _fetch({
           url: "/api/koreainvestment/quotations/dailyprice",

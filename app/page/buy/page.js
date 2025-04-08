@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge"; // 추가: 결제중 배지
+
 import { ArrowDown, ArrowUp, Loader2 } from "lucide-react"; // 추가: 로딩 아이콘
 
 import useApi from "@/hooks/useApi";
@@ -9,158 +9,12 @@ import useAccount from "@/hooks/useAccount";
 import useAi from "@/hooks/useAi"; // AI 훅 추가
 import aiModels from "@/json/ai_models.json"; // AI 모델 데이터 추가
 
-import { logos } from "@/json/logoData";
-
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Sell from "./Sell";
-import BuyMore from "./BuyMore";
+
 import useTrading from "@/hooks/useTrading";
 import { Button } from "@/components/ui/button";
 
-// 예측 진행률을 시각적으로 표현하는 Progress 컴포넌트
-const PredictionProgress = ({ value }) => {
-  // 값이 없으면 "-" 표시
-  if (value === undefined || value === null) {
-    return <div className="text-neutral-400">예측 정보 없음</div>;
-  }
-
-  // 퍼센트로 변환 (0~1 값을 0~100%로)
-  const percent = Math.round(value * 100);
-
-  // 색상 결정: 높을수록 빨간색(상승), 낮을수록 파란색(하락)
-  const getColor = () => {
-    if (percent >= 80) return "bg-red-500";
-    if (percent >= 65) return "bg-orange-500";
-    if (percent >= 50) return "bg-yellow-500";
-    if (percent >= 35) return "bg-blue-300";
-    return "bg-blue-500";
-  };
-
-  return (
-    <div className="w-full">
-      <div className="flex justify-between mb-1 text-xs">
-        <span className="font-medium">상승 예측</span>
-        <span className={percent >= 50 ? "text-red-500" : "text-blue-500"}>
-          {percent}%
-        </span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
-        <div
-          className={`h-2.5 rounded-full ${getColor()}`}
-          style={{ width: `${percent}%` }}
-        ></div>
-      </div>
-    </div>
-  );
-};
-
-// 추출된 StockCard 컴포넌트
-const StockCard = ({ item, onSellComplete, predictions }) => {
-  const logo = logos.find((logo) => logo.name === item.ovrs_pdno) || {};
-  const colorClass = item.evlu_pfls_rt > 0 ? "text-red-400" : "text-blue-400";
-
-  // 해당 종목의 예측값 찾기
-  const prediction = predictions?.find((pred) => pred.name === item.ovrs_pdno);
-  const predictionValue = prediction?.예측결과;
-
-  return (
-    <Card className="overflow-hidden p-0">
-      {/* 카드 헤더 */}
-      <div className="p-4 flex items-center justify-between border-b">
-        <div className="flex items-center gap-3">
-          <Avatar className="border w-10 h-10">
-            <AvatarImage
-              src={`https://s3-symbol-logo.tradingview.com/${logo.logoid}--big.svg`}
-              alt={item.ovrs_item_name || "로고"}
-            />
-            <AvatarFallback>{item.ovrs_pdno?.slice(0, 2)}</AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="font-bold text-lg flex items-center gap-2">
-              {item.ovrs_pdno}
-              {item.결제중 && (
-                <Badge
-                  variant="outline"
-                  className="bg-amber-50 text-amber-700 border-amber-200 text-xs"
-                >
-                  결제중
-                </Badge>
-              )}
-            </div>
-            <div className="text-sm text-neutral-500">
-              {item.ovrs_item_name}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 카드 바디 */}
-      <div className="p-4 grid grid-cols-2 gap-4">
-        <div>
-          <div className="text-xs font-medium text-neutral-500 mb-1">
-            매입평균가격
-          </div>
-          <div className="font-medium">
-            ${Number(item.pchs_avg_pric).toFixed(2)} × {item.ovrs_cblc_qty} 주
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-xs font-medium text-neutral-500 mb-1">
-            현재가격
-          </div>
-          <div className={`font-bold ${colorClass}`}>
-            ${Number(item.now_pric2).toFixed(2)}
-          </div>
-        </div>
-        <div>
-          <div className="text-xs font-medium text-neutral-500 mb-1">
-            매입금액
-          </div>
-          <div className="font-medium">
-            $
-            {(Number(item.pchs_avg_pric) * Number(item.ovrs_cblc_qty)).toFixed(
-              2
-            )}
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-xs font-medium text-neutral-500 mb-1">
-            평가손익
-          </div>
-          <div className={`font-bold ${colorClass}`}>
-            {Number(item.evlu_pfls_rt).toFixed(2)}%
-          </div>
-        </div>
-
-        {/* AI 예측 정보 - 전체 너비로 추가 */}
-        <div className="col-span-2 mt-2">
-          <PredictionProgress value={predictionValue} />
-        </div>
-      </div>
-
-      {/* 카드 푸터 */}
-      <div className="p-4 border-t bg-gray-50 flex justify-end gap-2">
-        <Sell
-          ovrs_pdno={item.ovrs_pdno}
-          ovrs_item_name={item.ovrs_item_name}
-          pchs_avg_pric={Number(item.pchs_avg_pric).toFixed(2)}
-          ovrs_cblc_qty={item.ovrs_cblc_qty}
-          evlu_pfls_rt={item.evlu_pfls_rt}
-          onSellComplete={onSellComplete}
-        />
-        <BuyMore
-          ovrs_pdno={item.ovrs_pdno}
-          ovrs_item_name={item.ovrs_item_name}
-          pchs_avg_pric={Number(item.pchs_avg_pric).toFixed(2)}
-          ovrs_cblc_qty={item.ovrs_cblc_qty}
-          evlu_pfls_rt={item.evlu_pfls_rt}
-          onSellComplete={onSellComplete}
-        />
-      </div>
-    </Card>
-  );
-};
+import StockCard from "./StockCard"; // StockCard 컴포넌트 임포트
 
 const Buy = () => {
   const api = useApi();

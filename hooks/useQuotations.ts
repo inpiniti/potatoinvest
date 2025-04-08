@@ -30,7 +30,32 @@ const useQuotations = () => {
     }
   };
 
-  return { 조건검색, 현재가상세 };
+  const 기간별시세 = async ({
+    종목코드,
+    구분 = "0",
+    수정주가반영여부 = "0",
+  }: {
+    종목코드: string;
+    구분: string;
+    수정주가반영여부: string;
+  }) => {
+    const response = await api.quotations.dailyprice({
+      excd: "NAS",
+      symb: 종목코드,
+      gubn: 구분,
+      modp: 수정주가반영여부,
+    });
+
+    const json = await response.json();
+
+    if (json?.output2) {
+      return json.output2;
+    } else {
+      return json;
+    }
+  };
+
+  return { 조건검색, 현재가상세, 기간별시세 };
 };
 
 export default useQuotations;
