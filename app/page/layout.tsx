@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import useToken from '@/hooks/useToken';
-import Nav from './Nav';
-import Header from './Header';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import useToken from "@/hooks/useToken";
+import Nav from "./Nav";
+import Header from "./Header";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +26,7 @@ export default function PageLayout({
   const checkToken = useCallback(async () => {
     try {
       const hasValidToken = await 발급된토큰확인();
-      console.log('발급된 토큰 확인:', hasValidToken);
+      console.log("발급된 토큰 확인:", hasValidToken);
 
       // 토큰 상태 업데이트
       setIsTokenValid(hasValidToken);
@@ -36,14 +36,14 @@ export default function PageLayout({
 
       // 첫 번째 체크에서 토큰이 없으면 리다이렉트하지 않고 추가 체크 진행
       if (!hasValidToken && checkCount > 0) {
-        router.push('/');
+        router.push("/");
       }
     } catch (error) {
-      console.error('토큰 확인 중 오류 발생:', error);
+      console.error("토큰 확인 중 오류 발생:", error);
 
       // 첫 번째 체크 후에만 리다이렉트
       if (checkCount > 0) {
-        router.push('/');
+        router.push("/");
       }
     } finally {
       // 첫 번째 체크 후에 로딩 상태 해제
@@ -56,7 +56,7 @@ export default function PageLayout({
   // 컴포넌트 마운트 시 토큰 첫 체크
   useEffect(() => {
     checkToken();
-  }, [checkToken]);
+  }, []);
 
   // 첫 번째 체크 후 토큰이 유효하지 않으면 추가 체크 수행
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function PageLayout({
 
       return () => clearTimeout(timeout);
     }
-  }, [checkCount, isTokenValid, checkToken]);
+  }, [checkCount, isTokenValid]);
 
   return (
     <QueryClientProvider client={queryClient}>
