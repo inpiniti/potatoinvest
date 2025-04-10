@@ -506,9 +506,15 @@ const Log = () => {
 
       if (현재가) {
         const 매수결과 = await 작업({
-          로딩메시지: `${item.name} (${item.description}) (${현재가.last}) 매수중입니다...`,
-          성공메시지: `${item.name} (${item.description}) (${현재가.last}) 매수가 완료되었습니다.`,
-          실패메시지: `${item.name} (${item.description}) (${현재가.last}) 매수에 실패했습니다.`,
+          로딩메시지: `${item.name} (${
+            item.description
+          }) (${현재가.last.toFixed(2)}) 매수중입니다...`,
+          성공메시지: `${item.name} (${
+            item.description
+          }) (${현재가.last.toFixed(2)}) 매수가 완료되었습니다.`,
+          실패메시지: `${item.name} (${
+            item.description
+          }) (${현재가.last.toFixed(2)}) 매수에 실패했습니다.`,
           함수: () =>
             매수({
               ovrs_pdno: item.name,

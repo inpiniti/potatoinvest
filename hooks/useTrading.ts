@@ -105,9 +105,10 @@ const useTrading = () => {
       OVRS_EXCG_CD: "NASD",
       PDNO: item.ovrs_pdno,
       ORD_QTY: "1",
-      OVRS_ORD_UNPR: (Math.round(Number(item.now_pric2) * 100) / 100).toFixed(
-        2
-      ),
+      OVRS_ORD_UNPR: (
+        (Math.round(Number(item.now_pric2) * 100) / 100) *
+        0.98
+      ).toFixed(2),
     };
 
     const response = await api.trading.order(payload);
