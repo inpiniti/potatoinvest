@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
 
 export const settingStore = create(
   devtools(
@@ -9,6 +9,12 @@ export const settingStore = create(
           other: {
             // 최소 예측률
             minPredictRate: 70,
+
+            // 매도 예측률
+            sellPredictRate: 60, // 보다 작으면 판매
+
+            // 매수 예측률
+            buyPredictRate: 60, // 보다 커야 물타기 함
 
             // 최소매수금액
             minBuyAmount: 10000,
@@ -26,10 +32,10 @@ export const settingStore = create(
           })),
       }),
       {
-        name: 'setting',
+        name: "setting",
         getStorage: () => localStorage,
       }
     ),
-    { name: 'setting' }
+    { name: "setting" }
   )
 );

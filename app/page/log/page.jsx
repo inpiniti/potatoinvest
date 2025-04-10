@@ -20,6 +20,9 @@ const Log = () => {
   const abortControllerRef = useRef(null);
   const [진행중인가요, set진행중인가요] = useState(false);
 
+  // 예측 결과를 저장하는 상태 추가
+  const [예측결과맵, set예측결과맵] = useState({});
+
   const { 발급받은키확인 } = useKey();
   const { 발급된토큰확인, 토큰발급, 토큰남은시간확인 } = useToken();
   const { 주식잔고확인, 매도확인, 물타기확인, 미체결내역, 매도, 매수 } =
@@ -110,6 +113,108 @@ const Log = () => {
     반복실행();
   };
 
+  // 예측 분석 실행 함수 (매도 및 물타기 판단에 사용)
+  const 예측분석실행 = async () => {
+    // 분석 데이터 가져오기
+    const 분석할데이터 = await 작업({
+      로딩메시지: "분석할 데이터를 조회중입니다...",
+      성공메시지: "분석할 데이터를 조회했습니다.",
+      실패메시지: "분석할 데이터 조회에 실패했습니다.",
+      함수: 데이터가져오기,
+    });
+
+    if (!분석할데이터 || 분석할데이터.length === 0) {
+      loading("분석할 데이터가 없습니다.");
+      complete("분석할 데이터가 없어 예측을 진행할 수 없습니다.");
+      return null;
+    }
+
+    // 데이터 전처리
+    const 전처리된분석데이터 = await 작업({
+      로딩메시지: "분석할 데이터를 전처리중입니다...",
+      성공메시지: "분석할 데이터를 전처리했습니다.",
+      실패메시지: "분석할 데이터 전처리에 실패했습니다.",
+      함수: () => 전처리(분석할데이터),
+    });
+
+    // AI 모델 로딩
+    const 모델들 =
+      models.length > 0
+        ? models
+        : await 작업({
+            로딩메시지: "모델을 로딩중입니다...",
+            성공메시지: "모델을 로딩했습니다.",
+            실패메시지: "모델 로딩에 실패했습니다.",
+            함수: async () => {
+              const loadedModels = await Promise.all(
+                aiModels.ai_models.map((model) =>
+                  역직렬화(model.model, model.weights)
+                )
+              );
+              setModels(loadedModels);
+              return loadedModels;
+            },
+          });
+
+    // 모든 모델에 대해 예측 수행
+    const 예측결과들 = await 작업({
+      로딩메시지: "예측중입니다...",
+      성공메시지: "예측이 완료되었습니다.",
+      실패메시지: "예측에 실패했습니다.",
+      함수: async () => {
+        const predictions = await Promise.all(
+          모델들.map((model) => 예측(model, 전처리된분석데이터))
+        );
+        return predictions.slice(0, 100);
+      },
+    });
+
+    // 예측 결과 분석
+    const 분석된데이터 = await 작업({
+      로딩메시지: "예측 분석중입니다...",
+      성공메시지: "분석이 완료되었습니다.",
+      실패메시지: "분석에 실패했습니다.",
+      함수: async () => {
+        // 예측 결과의 평균 계산
+        const 예측결과평균 = 예측결과들[0].map(
+          (_, colIndex) =>
+            예측결과들.reduce((sum, row) => sum + row[colIndex], 0) /
+            예측결과들.length
+        );
+
+        // 분석할 데이터에 예측 결과 추가
+        const 최종분석데이터 = 분석할데이터.map((row, index) => ({
+          ...row,
+          예측결과: 예측결과평균[index],
+        }));
+
+        // 예측 결과를 맵으로 변환하여 저장
+        const 예측결과객체 = {};
+        최종분석데이터.forEach((item) => {
+          예측결과객체[item.name] = item.예측결과;
+        });
+
+        // 상태 업데이트
+        set예측결과맵(예측결과객체);
+
+        loading(
+          `총 ${최종분석데이터.length}개 종목의 예측 분석이 완료되었습니다.`
+        );
+        complete(
+          `예측 분석 완료: 상위 5개 종목 - ${최종분석데이터
+            .sort((a, b) => b.예측결과 - a.예측결과)
+            .slice(0, 5)
+            .map((i) => `${i.name}(${(i.예측결과 * 100).toFixed(1)}%)`)
+            .join(", ")}`
+        );
+
+        return 최종분석데이터.sort((a, b) => b.예측결과 - a.예측결과);
+      },
+    });
+
+    return 분석된데이터;
+  };
+
   const 반복실행 = async () => {
     set진행중인가요(true);
     if (abortControllerRef.current?.signal.aborted) {
@@ -117,6 +222,9 @@ const Log = () => {
       complete("확인 작업이 중단되었습니다.");
       return;
     }
+
+    // 매 사이클마다 예측 분석 실행
+    await 예측분석실행();
 
     const 주식잔고 = await 매도및물타기영역();
 
@@ -203,11 +311,18 @@ const Log = () => {
     for (const item of 주식잔고 || []) {
       index++;
 
+      // 종목의 예측 결과 가져오기
+      const 종목예측결과 = 예측결과맵[item.ovrs_pdno] || 0;
+      const 예측결과퍼센트 = (종목예측결과 * 100).toFixed(1);
+
+      // 매도 판단 기준: 예측 결과가 매도 기준치보다 낮으면 매도
+      const 매도기준치 = setting.other.sellPredictRate / 100;
+
       const is매도 = await 확인({
         로딩메시지: `${index}/${주식잔고.length} ${item.ovrs_pdno} (${item.ovrs_item_name}) 매도를 해도 될지 계산중입니다...`,
         성공메시지: `${index}/${주식잔고.length} ${item.ovrs_pdno} (${item.ovrs_item_name}) 매도를 해도 될 것 같습니다.`,
         실패메시지: `${index}/${주식잔고.length} ${item.ovrs_pdno} (${item.ovrs_item_name}) 조금 더 기다렸다가 매도해야 할 것 같습니다.`,
-        함수: () => 매도확인(item),
+        함수: () => 매도확인({ ...item, 예측결과: 종목예측결과, 매도기준치 }),
       });
 
       if (!is매도) {
@@ -226,11 +341,15 @@ const Log = () => {
           continue;
         }
 
+        // 물타기 판단 기준: 예측 결과가 물타기 기준치보다 높으면 물타기
+        const 물타기기준치 = setting.other.buyPredictRate / 100;
+
         const is물타기 = await 확인({
           로딩메시지: `${index}/${주식잔고.length} ${item.ovrs_pdno} (${item.ovrs_item_name}) 물타기를 해도 될지 계산중입니다...`,
           성공메시지: `${index}/${주식잔고.length} ${item.ovrs_pdno} (${item.ovrs_item_name}) 물타기를 해도 될 것 같습니다.`,
           실패메시지: `${index}/${주식잔고.length} ${item.ovrs_pdno} (${item.ovrs_item_name}) 조금 더 기다렸다가 물타기해야 할 것 같습니다.`,
-          함수: () => 물타기확인(item),
+          함수: () =>
+            물타기확인({ ...item, 예측결과: 종목예측결과, 물타기기준치 }),
         });
 
         if (is물타기) {

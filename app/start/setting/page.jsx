@@ -18,12 +18,16 @@ export default function Setting() {
    * @type {[Object, Function]} 설정 값 객체와 업데이트 함수
    * @property {number} minBuyAmount - 최소매수금액
    * @property {number} minPredictRate - 최소예측률
+   * @property {number} sellPredictRate - 매도예측률
+   * @property {number} buyPredictRate - 매수예측률
    * @property {number} sellRate - 매도기준(%)
    * @property {number} buyRate - 매수기준(%)
    */
   const [settings, setSettings] = useState({
     minBuyAmount: 10000,
     minPredictRate: 70,
+    sellPredictRate: 60,
+    buyPredictRate: 60,
     sellRate: 2,
     buyRate: -10,
   });
@@ -54,11 +58,19 @@ export default function Setting() {
     try {
       // 저장된 설정 정보가 있으면 입력 필드에 설정
       if (setting && setting.other) {
-        const { minBuyAmount, minPredictRate, sellRate, buyRate } =
-          setting.other;
+        const {
+          minBuyAmount,
+          minPredictRate,
+          sellPredictRate,
+          buyPredictRate,
+          sellRate,
+          buyRate,
+        } = setting.other;
         setSettings({
           minBuyAmount: minBuyAmount || 10000,
           minPredictRate: minPredictRate || 70,
+          sellPredictRate: sellPredictRate || 60,
+          buyPredictRate: buyPredictRate || 60,
           sellRate: sellRate || 2,
           buyRate: buyRate || -10,
         });
@@ -107,20 +119,38 @@ export default function Setting() {
    * 검사 조건:
    * 1. 최소매수금액: 1000원 이상
    * 2. 최소예측률: 0~100% 사이
-   * 3. 매도기준: 양수
-   * 4. 매수기준: 음수
+   * 3. 매도예측률: 0~100% 사이
+   * 4. 매수예측률: 0~100% 사이
+   * 5. 매도기준: 양수
+   * 6. 매수기준: 음수
    */
   const validateSettings = (updatedSettings) => {
-    const { minBuyAmount, minPredictRate, sellRate, buyRate } = updatedSettings;
+    const {
+      minBuyAmount,
+      minPredictRate,
+      sellPredictRate,
+      buyPredictRate,
+      sellRate,
+      buyRate,
+    } = updatedSettings;
 
     const isValidAmount = !isNaN(minBuyAmount) && minBuyAmount >= 1000;
     const isValidPredictRate =
       !isNaN(minPredictRate) && minPredictRate >= 0 && minPredictRate <= 100;
+    const isValidSellPredictRate =
+      !isNaN(sellPredictRate) && sellPredictRate >= 0 && sellPredictRate <= 100;
+    const isValidBuyPredictRate =
+      !isNaN(buyPredictRate) && buyPredictRate >= 0 && buyPredictRate <= 100;
     const isValidSellRate = !isNaN(sellRate) && sellRate > 0;
     const isValidBuyRate = !isNaN(buyRate) && buyRate < 0;
 
     setIsValid(
-      isValidAmount && isValidPredictRate && isValidSellRate && isValidBuyRate
+      isValidAmount &&
+        isValidPredictRate &&
+        isValidSellPredictRate &&
+        isValidBuyPredictRate &&
+        isValidSellRate &&
+        isValidBuyRate
     );
   };
 
@@ -140,6 +170,8 @@ export default function Setting() {
       other: {
         minBuyAmount: settings.minBuyAmount,
         minPredictRate: settings.minPredictRate,
+        sellPredictRate: settings.sellPredictRate,
+        buyPredictRate: settings.buyPredictRate,
         sellRate: settings.sellRate,
         buyRate: settings.buyRate,
       },
@@ -220,6 +252,42 @@ export default function Setting() {
               </span>{" "}
               70%이상의 종목은 거의 없습니다.
             </p>
+          </div>
+
+          <div className="flex flex-col gap-2 w-full mt-4">
+            <label className="font-medium text-neutral-700">
+              매도 예측률 (%)
+            </label>
+            <div className="flex gap-2 w-full whitespace-nowrap items-center bg-neutral-100 p-4 rounded-lg">
+              <input
+                type="number"
+                className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
+                value={settings.sellPredictRate}
+                onChange={handleChange("sellPredictRate")}
+                placeholder="매도예측률을 입력해주세요"
+                min="0"
+                max="100"
+              />
+              <span className="text-neutral-500">%</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 w-full mt-4">
+            <label className="font-medium text-neutral-700">
+              매수 예측률 (%)
+            </label>
+            <div className="flex gap-2 w-full whitespace-nowrap items-center bg-neutral-100 p-4 rounded-lg">
+              <input
+                type="number"
+                className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
+                value={settings.buyPredictRate}
+                onChange={handleChange("buyPredictRate")}
+                placeholder="매수예측률을 입력해주세요"
+                min="0"
+                max="100"
+              />
+              <span className="text-neutral-500">%</span>
+            </div>
           </div>
 
           {/* 매도기준 입력 필드 */}
