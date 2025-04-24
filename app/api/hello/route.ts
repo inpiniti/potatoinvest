@@ -142,6 +142,9 @@ const crawling = async (countryCode: string) => {
       "CCI20", // 상품 채널 지수 20
       "Stoch.K", // 스토캐스틱 K
       "Stoch.D", // 스토캐스틱 D
+
+      "close", // 종가
+      "change", // 변화
     ];
 
     // const 오버뷰 = [
