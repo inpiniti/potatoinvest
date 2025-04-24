@@ -771,7 +771,7 @@ const RealTime = () => {
                                 : "text-gray-700"
                             }`}
                           >
-                            {stockDetail.last} 달러
+                            {Number(stockDetail.last).toFixed(3)} $
                           </p>
                           <p
                             className={`text-sm ${
