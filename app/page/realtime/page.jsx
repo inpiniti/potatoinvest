@@ -771,7 +771,7 @@ const RealTime = () => {
                                 : "text-gray-700"
                             }`}
                           >
-                            {formatPrice(stockDetail.last)} 원
+                            {stockDetail.last} 달러
                           </p>
                           <p
                             className={`text-sm ${
@@ -782,7 +782,6 @@ const RealTime = () => {
                                 : "text-gray-500"
                             }`}
                           >
-                            {stockDetail.t_xsgn === "2" ? "+" : ""}
                             {stockDetail.t_xrat}% (
                             {formatPrice(stockDetail.t_xdif)})
                           </p>
@@ -802,7 +801,7 @@ const RealTime = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                      <div className="grid grid-cols-4 gap-4 pt-2">
                         <div>
                           <p className="text-xs text-gray-500">시가</p>
                           <p className="text-sm font-medium">
