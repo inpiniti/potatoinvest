@@ -104,11 +104,10 @@ const useTrading = () => {
       ACNT_PRDT_CD,
       OVRS_EXCG_CD: "NASD",
       PDNO: item.ovrs_pdno,
-      ORD_QTY: "1",
-      OVRS_ORD_UNPR: (
-        (Math.round(Number(item.now_pric2) * 100) / 100) *
-        0.98
-      ).toFixed(2),
+      ORD_QTY: item.ord_qty ?? "1",
+      OVRS_ORD_UNPR: (Math.round(Number(item.now_pric2) * 100) / 100).toFixed(
+        2
+      ),
     };
 
     const response = await api.trading.order(payload);
@@ -127,6 +126,7 @@ const useTrading = () => {
     ovrs_pdno: string; // 해외종목코드
     ovrs_cblc_qty: string; // 해외주문수량
     now_pric2: string; // 해외주문단가
+    ord_qty?: string; // 주문수량
     예측결과: number; // 예측결과
     매도기준치: number; // 매도기준치
     물타기기준치: number; // 물타기기준치

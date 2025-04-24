@@ -26,6 +26,7 @@ import {
   LineChart,
   ArrowLeft,
   ArrowRight,
+  RefreshCw,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useTrading from "@/hooks/useTrading";
@@ -69,6 +70,7 @@ const RealTime = () => {
   const [sortField, setSortField] = useState("close");
   const [sortOrder, setSortOrder] = useState("desc");
   const [isLoading, setIsLoading] = useState(true);
+  const [pendingLoading, setPendingLoading] = useState(false);
   const [models, setModels] = useState([]); // 모델 상태 추가
 
   // 선택된 종목과 상세 정보 상태 추가
@@ -125,6 +127,7 @@ const RealTime = () => {
         const response = await 매수({
           ovrs_pdno: stockCode,
           now_pric2: String(price),
+          ord_qty: String(quantity),
         });
 
         if (response.rt_cd === "0") {
@@ -261,6 +264,19 @@ const RealTime = () => {
     }
   };
 
+  // 미체결내역 및 구매내역 조회 함수를 수정합니다
+  const 미체결및구매내역조회 = async () => {
+    try {
+      setPendingLoading(true);
+      await 미체결내역조회();
+      await 구매내역조회();
+    } catch (error) {
+      console.error("미체결/구매내역 조회 실패:", error);
+    } finally {
+      setPendingLoading(false);
+    }
+  };
+
   // Check if stock is in settlement
   const isInSettlement = useCallback(
     (stockCode) => {
@@ -280,7 +296,7 @@ const RealTime = () => {
   // Load data and pending transactions on component mount
   useEffect(() => {
     fetchDataAndPredict();
-    //미체결내역조회();
+    미체결및구매내역조회();
   }, []);
 
   // Sort data
@@ -422,12 +438,16 @@ const RealTime = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {
-              미체결내역조회();
-              구매내역조회();
-            }}
+            onClick={미체결및구매내역조회}
+            disabled={pendingLoading}
+            className="flex items-center gap-1"
           >
-            미체결 갱신
+            {pendingLoading ? (
+              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+            ) : (
+              <RefreshCw className="h-3 w-3 mr-1" />
+            )}
+            미체결/보유 갱신
           </Button>
           <Button
             variant="outline"
@@ -730,12 +750,12 @@ const RealTime = () => {
               <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="flex flex-col gap-4">
               {stockDetail && (
                 <>
                   {/* 현재가 정보 */}
                   <Card>
-                    <CardHeader className="pb-2">
+                    <CardHeader>
                       <CardTitle className="text-lg">현재가 정보</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
@@ -813,7 +833,7 @@ const RealTime = () => {
 
                   {/* 매수 옵션 카드 추가 */}
                   <Card>
-                    <CardHeader className="pb-2">
+                    <CardHeader>
                       <CardTitle className="text-lg">매수 옵션</CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -831,15 +851,24 @@ const RealTime = () => {
                             type="number"
                             className="col-span-2 w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                             placeholder="구매 수량 입력"
-                            defaultValue={1}
+                            defaultValue={
+                              stockDetail?.last && Number(stockDetail.last) > 0
+                                ? Math.max(
+                                    1,
+                                    Math.floor(
+                                      100000 / (Number(stockDetail.last) * 1500)
+                                    )
+                                  )
+                                : 1
+                            }
                             min={1}
                           />
                         </div>
 
-                        {/* 구매 버튼 그룹 */}
-                        <div className="space-y-2">
+                        {/* 구매 버튼 그룹 - 가로 배치로 수정 */}
+                        <div className="flex flex-col flex-row gap-2">
                           <Button
-                            className="w-full bg-green-600 hover:bg-green-700"
+                            className="flex-1 bg-green-600 hover:bg-green-700 text-sm"
                             onClick={() => {
                               const quantity =
                                 document.getElementById("quantity").value || 1;
@@ -854,11 +883,11 @@ const RealTime = () => {
                               );
                             }}
                           >
-                            현재가 {formatPrice(stockDetail.last)}원에 매수
+                            매수
                           </Button>
 
                           <Button
-                            className="w-full bg-blue-600 hover:bg-blue-700"
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-sm"
                             onClick={() => {
                               const quantity =
                                 document.getElementById("quantity").value || 1;
@@ -873,17 +902,11 @@ const RealTime = () => {
                               );
                             }}
                           >
-                            1% 할인{" "}
-                            {formatPrice(
-                              Math.round(
-                                Number(stockDetail.last) * 0.99 * 100
-                              ) / 100
-                            )}
-                            원에 매수
+                            -1% 매수
                           </Button>
 
                           <Button
-                            className="w-full bg-purple-600 hover:bg-purple-700"
+                            className="flex-1 bg-purple-600 hover:bg-purple-700 text-sm"
                             onClick={() => {
                               const quantity =
                                 document.getElementById("quantity").value || 1;
@@ -898,13 +921,7 @@ const RealTime = () => {
                               );
                             }}
                           >
-                            2% 할인{" "}
-                            {formatPrice(
-                              Math.round(
-                                Number(stockDetail.last) * 0.98 * 100
-                              ) / 100
-                            )}
-                            원에 매수
+                            -2% 매수
                           </Button>
                         </div>
 
@@ -917,8 +934,8 @@ const RealTime = () => {
                   </Card>
 
                   {/* 추가 정보 */}
-                  <Card>
-                    <CardHeader className="pb-2">
+                  <Card className="hidden sm:block">
+                    <CardHeader>
                       <CardTitle className="text-lg">추가 정보</CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -999,8 +1016,8 @@ const RealTime = () => {
 
                   {/* AI 분석 정보 */}
                   {selectedStock?.예측결과 !== undefined && (
-                    <Card>
-                      <CardHeader className="pb-2">
+                    <Card className="hidden sm:block">
+                      <CardHeader>
                         <CardTitle className="text-lg">AI 분석 정보</CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -1037,52 +1054,48 @@ const RealTime = () => {
             </div>
           )}
 
-          <DialogFooter className="flex justify-between items-center">
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => navigateToStock("prev")}
-                disabled={detailLoading || sortedData.length <= 1}
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="sr-only">이전 종목</span>
-              </Button>
+          <DialogFooter className="flex flex-row justify-end items-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => navigateToStock("prev")}
+              disabled={detailLoading || sortedData.length <= 1}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">이전 종목</span>
+            </Button>
 
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => navigateToStock("next")}
-                disabled={detailLoading || sortedData.length <= 1}
-              >
-                <ArrowRight className="h-4 w-4" />
-                <span className="sr-only">다음 종목</span>
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => navigateToStock("next")}
+              disabled={detailLoading || sortedData.length <= 1}
+            >
+              <ArrowRight className="h-4 w-4" />
+              <span className="sr-only">다음 종목</span>
+            </Button>
 
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                onClick={() =>
-                  fetchStockDetail(selectedStock?.name || selectedStock?.code)
-                }
-                disabled={detailLoading}
-                variant="outline"
-              >
-                {detailLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                ) : null}
-                새로고침
-              </Button>
+            <Button
+              type="button"
+              onClick={() =>
+                fetchStockDetail(selectedStock?.name || selectedStock?.code)
+              }
+              disabled={detailLoading}
+              variant="outline"
+            >
+              {detailLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+              ) : null}
+              새로고침
+            </Button>
 
-              <DialogClose asChild>
-                <Button type="button" variant="secondary">
-                  닫기
-                </Button>
-              </DialogClose>
-            </div>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                닫기
+              </Button>
+            </DialogClose>
           </DialogFooter>
         </DialogContent>
       </Dialog>
