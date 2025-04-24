@@ -76,6 +76,7 @@ const BuyMore = ({
         </div>
         <div className="px-4 flex flex-col gap-2 py-4">
           <h3 className="font-medium text-sm mb-2">매수 가격 설정</h3>
+          매입가 기준구매만 있는데, 현재가 기준 구매도 있어야 할듯..
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <Button
               className="bg-red-400 hover:bg-red-500"
