@@ -14,7 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import useTrading from "@/hooks/useTrading";
-import { toast } from "sonner";
 
 const BuyMore = ({
   ovrs_pdno,
