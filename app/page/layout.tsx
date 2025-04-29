@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import useToken from "@/hooks/useToken";
 import Nav from "./Nav";
 import Header from "./Header";
+import { Toaster } from "sonner";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +88,7 @@ export default function PageLayout({
               // 토큰이 유효할 때만 children 표시
               children
             ) : null}
+            <Toaster />
           </div>
         </main>
       </div>

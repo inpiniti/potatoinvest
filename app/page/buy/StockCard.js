@@ -136,6 +136,7 @@ const StockCard = ({ item, onSellComplete, predictions }) => {
           pchs_avg_pric={Number(item.pchs_avg_pric).toFixed(2)}
           ovrs_cblc_qty={item.ovrs_cblc_qty}
           evlu_pfls_rt={item.evlu_pfls_rt}
+          now_pric2={item.now_pric2}
           onSellComplete={onSellComplete}
         />
       </div>
