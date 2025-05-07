@@ -33,15 +33,21 @@ const Log = () => {
   const { loading: detailLoading, fetchStockDetail } = useStockDetail();
 
   // 종목 탐색 관련 훅 사용
-  const { selectedStock, setSelectedStock, moveToNextStock, moveToPrevStock } =
-    useStockNav({
-      activeTab,
-      setActiveTab, // 추가: 탭 변경 함수 전달
-      필터링된분석데이터,
-      체결데이터,
-      구매데이터,
-      onStockChange: fetchStockDetail, // 종목 변경 시 상세 정보 조회 함수 호출
-    });
+  const {
+    selectedStock,
+    setSelectedStock,
+    moveToNextStock,
+    moveToPrevStock,
+    isLoadingAnalysis,
+  } = useStockNav({
+    activeTab,
+    setActiveTab,
+    필터링된분석데이터,
+    체결데이터,
+    구매데이터,
+    onStockChange: fetchStockDetail,
+    refreshAnalysisData: fetch분석데이터, // 분석 데이터 새로고침 함수 전달
+  });
 
   return (
     <div className="space-y-4">
@@ -51,7 +57,7 @@ const Log = () => {
         movePrevStock={moveToPrevStock}
         moveNextStock={moveToNextStock}
         refreshAll={refreshAll}
-        isLoading={isLoading("any")}
+        isLoading={isLoading("any") || isLoadingAnalysis}
         activeTab={activeTab}
         필터링된분석데이터={필터링된분석데이터}
         체결데이터={체결데이터}

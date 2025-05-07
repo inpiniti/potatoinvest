@@ -7,8 +7,10 @@ const useStockNav = ({
   체결데이터,
   구매데이터,
   onStockChange, // 새로 추가: 종목 변경 시 호출될 콜백 함수
+  refreshAnalysisData, // 분석 데이터 새로고침 함수 추가
 }) => {
   const [selectedStock, setSelectedStock] = useState(null);
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
 
   // 선택된 종목 변경 시 콜백 호출하는 래퍼 함수
   const handleSelectStock = useCallback(
@@ -45,19 +47,69 @@ const useStockNav = ({
     return [];
   };
 
-  const moveToNextStock = useCallback(() => {
+  // 분석 데이터 새로고침 후 첫 번째 아이콘 선택 함수
+  const loadAnalysisAndSelectFirst = useCallback(async () => {
+    // 로딩 상태 설정
+    setIsLoadingAnalysis(true);
+
+    try {
+      // 먼저 분석 탭으로 이동
+      setActiveTab("분석");
+
+      // 분석 데이터 새로고침 (비동기)
+      if (refreshAnalysisData) {
+        await refreshAnalysisData();
+      }
+
+      // 새로고침 후 데이터에서 첫 번째 항목 선택
+      if (필터링된분석데이터 && 필터링된분석데이터.length > 0) {
+        const firstStock =
+          필터링된분석데이터[0]?.name ||
+          필터링된분석데이터[0]?.code ||
+          필터링된분석데이터[0]?.ovrs_pdno ||
+          필터링된분석데이터[0]?.pdno;
+
+        if (firstStock) {
+          handleSelectStock(firstStock);
+        }
+      }
+    } finally {
+      setIsLoadingAnalysis(false);
+    }
+  }, [
+    필터링된분석데이터,
+    setActiveTab,
+    refreshAnalysisData,
+    handleSelectStock,
+  ]);
+
+  const moveToNextStock = useCallback(async () => {
     // 현재 활성화된 탭의 데이터
     let currentData = getDataForTab(activeTab);
 
     // 현재 탭에 데이터가 없으면 다음 탭으로 이동
     if (currentData.length === 0) {
       const nextTab = getNextTab(activeTab);
+
+      // 구매 탭에서 분석 탭으로 이동하는 경우 특별 처리
+      if (activeTab === "구매" && nextTab === "분석") {
+        await loadAnalysisAndSelectFirst();
+        return;
+      }
+
       setActiveTab(nextTab);
       currentData = getDataForTab(nextTab);
 
       // 다음 탭에도 데이터가 없으면 그 다음 탭으로
       if (currentData.length === 0) {
         const nextNextTab = getNextTab(nextTab);
+
+        // 분석 탭으로 이동하는 경우 특별 처리
+        if (nextNextTab === "분석") {
+          await loadAnalysisAndSelectFirst();
+          return;
+        }
+
         setActiveTab(nextNextTab);
         currentData = getDataForTab(nextNextTab);
 
@@ -96,6 +148,13 @@ const useStockNav = ({
     // 현재 탭의 마지막 항목인 경우 다음 탭으로 이동
     if (currentIndex === currentData.length - 1) {
       const nextTab = getNextTab(activeTab);
+
+      // 구매 탭에서 분석 탭으로 이동하는 경우 특별 처리
+      if (activeTab === "구매" && nextTab === "분석") {
+        await loadAnalysisAndSelectFirst();
+        return;
+      }
+
       setActiveTab(nextTab);
 
       // 다음 탭의 데이터
@@ -104,6 +163,13 @@ const useStockNav = ({
       // 다음 탭에 데이터가 없으면 그 다음 탭으로
       if (nextTabData.length === 0) {
         const nextNextTab = getNextTab(nextTab);
+
+        // 분석 탭으로 이동하는 경우 특별 처리
+        if (nextNextTab === "분석") {
+          await loadAnalysisAndSelectFirst();
+          return;
+        }
+
         setActiveTab(nextNextTab);
         const nextNextTabData = getDataForTab(nextNextTab);
 
@@ -268,6 +334,7 @@ const useStockNav = ({
     setSelectedStock: handleSelectStock, // 래퍼 함수로 교체
     moveToNextStock,
     moveToPrevStock,
+    isLoadingAnalysis, // 분석 데이터 로딩 상태 노출
   };
 };
 
