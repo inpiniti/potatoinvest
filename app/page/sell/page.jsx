@@ -16,6 +16,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Loader2 } from 'lucide-react'; // 로딩 아이콘 추가
+// 새로 추가할 탭 컴포넌트 임포트
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Sell = () => {
   const api = useApi();
@@ -25,6 +27,9 @@ const Sell = () => {
   const [list, setList] = useState([]);
   const [expandedRows, setExpandedRows] = useState({}); // 행 확장 상태
   const [loading, setLoading] = useState(true); // 로딩 상태 추가
+
+  // 뷰 타입 상태 (일별/월별)
+  const [viewType, setViewType] = useState('daily');
 
   /**
    * 매매 내역을 조회하는 함수
@@ -193,142 +198,356 @@ const Sell = () => {
     return (Math.floor(parseFloat(rate) * 100) / 100).toFixed(2);
   };
 
+  /**
+   * 매매일 기준으로 데이터를 그룹화합니다.
+   * 각 그룹마다 총 수익과 총 투자금액을 계산합니다.
+   */
+  const groupedDailyData = list?.reduce((acc, item) => {
+    const existingGroup = acc.find((group) => group.trad_day === item.trad_day);
+    if (existingGroup) {
+      existingGroup.totalProfit += Number(item.ovrs_rlzt_pfls_amt);
+      existingGroup.totalInvestment += Number(item.frcr_pchs_amt1);
+    } else {
+      acc.push({
+        trad_day: item.trad_day,
+        totalProfit: Number(item.ovrs_rlzt_pfls_amt),
+        totalInvestment: Number(item.frcr_pchs_amt1),
+      });
+    }
+    return acc;
+  }, []);
+
+  /**
+   * 월별로 데이터를 그룹화합니다.
+   * 각 월마다 총 수익과 총 투자금액을 계산합니다.
+   */
+  const groupedMonthlyData = list?.reduce((acc, item) => {
+    // 'YYYYMMDD' 형식에서 'YYYYMM' 추출
+    const yearMonth = item.trad_day ? item.trad_day.substring(0, 6) : null;
+    if (!yearMonth) return acc;
+
+    const existingGroup = acc.find((group) => group.yearMonth === yearMonth);
+    if (existingGroup) {
+      existingGroup.totalProfit += Number(item.ovrs_rlzt_pfls_amt);
+      existingGroup.totalInvestment += Number(item.frcr_pchs_amt1);
+      // 해당 월에 포함된 거래일 목록 업데이트
+      if (!existingGroup.tradingDays.includes(item.trad_day)) {
+        existingGroup.tradingDays.push(item.trad_day);
+      }
+    } else {
+      acc.push({
+        yearMonth,
+        totalProfit: Number(item.ovrs_rlzt_pfls_amt),
+        totalInvestment: Number(item.frcr_pchs_amt1),
+        tradingDays: [item.trad_day],
+      });
+    }
+    return acc;
+  }, []);
+
+  /**
+   * 그룹화된 데이터에 수익률을 추가합니다.
+   */
+  const groupedDailyWithYield = groupedDailyData?.map((group) => ({
+    trad_day: group.trad_day,
+    totalProfit: group.totalProfit,
+    yield: group.totalInvestment
+      ? (
+          Math.floor((group.totalProfit / group.totalInvestment) * 100 * 100) /
+          100
+        ).toFixed(2)
+      : '0.00',
+  }));
+
+  /**
+   * 월별 그룹화된 데이터에 수익률을 추가합니다.
+   */
+  const groupedMonthlyWithYield = groupedMonthlyData?.map((group) => ({
+    yearMonth: group.yearMonth,
+    totalProfit: group.totalProfit,
+    yield: group.totalInvestment
+      ? (
+          Math.floor((group.totalProfit / group.totalInvestment) * 100 * 100) /
+          100
+        ).toFixed(2)
+      : '0.00',
+    tradingDays: group.tradingDays,
+  }));
+
   return (
     <div className="w-full">
-      <div className="border rounded-md !bg-white">
-        {loading ? (
-          // 로딩 상태 표시
-          <div className="flex flex-col items-center justify-center h-64 p-4">
-            <Loader2 className="h-12 w-12 animate-spin text-gray-400 mb-4" />
-            <p className="text-gray-500">매매 내역을 불러오는 중입니다...</p>
-          </div>
-        ) : groupedWithYield?.length > 0 ? (
-          // 데이터가 있을 경우 테이블 표시
-          <Table className="w-full">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-center">매매일</TableHead>
-                <TableHead className="text-center">실현손익금액</TableHead>
-                <TableHead className="text-center">수익률</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {groupedWithYield?.map((item) => (
-                <>
-                  <TableRow
-                    key={item?.trad_day}
-                    onClick={() => toggleRow(item?.trad_day)}
-                    className="cursor-pointer hover:bg-gray-50"
-                  >
-                    <TableCell>
-                      {item?.trad_day &&
-                        dayjs(item?.trad_day).format('YYYY년 MM월 DD일')}
-                    </TableCell>
-                    <TableCell
-                      className={
-                        item?.totalProfit > 0
-                          ? 'text-red-500'
-                          : item?.totalProfit < 0
-                          ? 'text-blue-500'
-                          : ''
-                      }
-                    >
-                      {formatNumber(item?.totalProfit)}원
-                    </TableCell>
-                    <TableCell
-                      className={
-                        parseFloat(item?.yield) > 0
-                          ? 'text-red-500'
-                          : parseFloat(item?.yield) < 0
-                          ? 'text-blue-500'
-                          : ''
-                      }
-                    >
-                      {item?.yield}%
-                    </TableCell>
-                  </TableRow>
-                  {expandedRows[item?.trad_day] && (
-                    <TableRow>
-                      <TableCell colSpan={3} className="bg-gray-100 p-0">
-                        <Table className="w-full">
-                          <TableHeader className="bg-gray-50 border-b">
-                            <TableRow>
-                              <TableHead className="text-center w-16">
-                                로고
-                              </TableHead>
-                              <TableHead className="text-center">
-                                종목코드
-                              </TableHead>
-                              {/* 종목명 컬럼 제거 */}
-                              <TableHead className="text-center">
-                                실현손익금액
-                              </TableHead>
-                              <TableHead className="text-center">
-                                수익률
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {list
-                              ?.filter(
-                                (_item) => _item.trad_day === item?.trad_day
-                              )
-                              .map((item) => (
-                                <TableRow key={item?.ovrs_pdno}>
-                                  <TableCell className="items-center justify-center flex">
-                                    <Avatar className="border w-8 h-8">
-                                      <AvatarImage
-                                        src={`https://s3-symbol-logo.tradingview.com/${item.logo}--big.svg`}
-                                        alt={item.ovrs_pdno}
-                                      />
-                                      <AvatarFallback>
-                                        {item.ovrs_pdno?.slice(0, 2)}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  </TableCell>
-                                  <TableCell>{item.ovrs_pdno}</TableCell>
-                                  {/* 종목명 셀 제거 */}
-                                  <TableCell
-                                    className={
-                                      Number(item?.ovrs_rlzt_pfls_amt) > 0
-                                        ? 'text-red-500'
-                                        : Number(item?.ovrs_rlzt_pfls_amt) < 0
-                                        ? 'text-blue-500'
-                                        : ''
-                                    }
-                                  >
-                                    {formatNumber(item?.ovrs_rlzt_pfls_amt)}원
-                                  </TableCell>
-                                  <TableCell
-                                    className={
-                                      Number(item.pftrt) > 0
-                                        ? 'text-red-500'
-                                        : Number(item.pftrt) < 0
-                                        ? 'text-blue-500'
-                                        : ''
-                                    }
-                                  >
-                                    {formatRate(item.pftrt)}%
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                          </TableBody>
-                        </Table>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          // 데이터가 없을 경우 메시지 표시
-          <div className="flex items-center justify-center h-64 p-4">
-            <p className="text-gray-500">매매 내역이 없습니다.</p>
-          </div>
-        )}
-      </div>
+      {/* 탭 추가 */}
+      <Tabs defaultValue="daily" className="w-full" onValueChange={setViewType}>
+        <div className="flex justify-between items-center mb-4">
+          <TabsList>
+            <TabsTrigger value="daily">일별 조회</TabsTrigger>
+            <TabsTrigger value="monthly">월별 조회</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <div className="border rounded-md !bg-white">
+          {loading ? (
+            // 로딩 상태 표시
+            <div className="flex flex-col items-center justify-center h-64 p-4">
+              <Loader2 className="h-12 w-12 animate-spin text-gray-400 mb-4" />
+              <p className="text-gray-500">매매 내역을 불러오는 중입니다...</p>
+            </div>
+          ) : (
+            <>
+              {/* 일별 조회 컨텐츠 */}
+              <TabsContent value="daily" className="mt-0">
+                {groupedDailyWithYield?.length > 0 ? (
+                  <DailyView
+                    groupedData={groupedDailyWithYield}
+                    expandedRows={expandedRows}
+                    toggleRow={toggleRow}
+                    list={list}
+                    formatNumber={formatNumber}
+                    formatRate={formatRate}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-64 p-4">
+                    <p className="text-gray-500">매매 내역이 없습니다.</p>
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* 월별 조회 컨텐츠 */}
+              <TabsContent value="monthly" className="mt-0">
+                {groupedMonthlyWithYield?.length > 0 ? (
+                  <MonthlyView
+                    groupedData={groupedMonthlyWithYield}
+                    expandedRows={expandedRows}
+                    toggleRow={toggleRow}
+                    list={list}
+                    formatNumber={formatNumber}
+                    formatRate={formatRate}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-64 p-4">
+                    <p className="text-gray-500">매매 내역이 없습니다.</p>
+                  </div>
+                )}
+              </TabsContent>
+            </>
+          )}
+        </div>
+      </Tabs>
     </div>
+  );
+};
+
+// 일별 조회 컴포넌트
+const DailyView = ({
+  groupedData,
+  expandedRows,
+  toggleRow,
+  list,
+  formatNumber,
+  formatRate,
+}) => {
+  return (
+    <Table className="w-full">
+      <TableHeader>
+        <TableRow>
+          <TableHead className="text-center">매매일</TableHead>
+          <TableHead className="text-center">실현손익금액</TableHead>
+          <TableHead className="text-center">수익률</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {groupedData?.map((item) => (
+          <>
+            <TableRow
+              key={item?.trad_day}
+              onClick={() => toggleRow(item?.trad_day)}
+              className="cursor-pointer hover:bg-gray-50"
+            >
+              <TableCell>
+                {item?.trad_day &&
+                  dayjs(item?.trad_day).format('YYYY년 MM월 DD일')}
+              </TableCell>
+              <TableCell
+                className={
+                  item?.totalProfit > 0
+                    ? 'text-red-500'
+                    : item?.totalProfit < 0
+                    ? 'text-blue-500'
+                    : ''
+                }
+              >
+                {formatNumber(item?.totalProfit)}원
+              </TableCell>
+              <TableCell
+                className={
+                  parseFloat(item?.yield) > 0
+                    ? 'text-red-500'
+                    : parseFloat(item?.yield) < 0
+                    ? 'text-blue-500'
+                    : ''
+                }
+              >
+                {item?.yield}%
+              </TableCell>
+            </TableRow>
+            {expandedRows[item?.trad_day] && (
+              <DetailRow
+                tradDay={item?.trad_day}
+                list={list}
+                formatNumber={formatNumber}
+                formatRate={formatRate}
+              />
+            )}
+          </>
+        ))}
+      </TableBody>
+    </Table>
+  );
+};
+
+// 월별 조회 컴포넌트
+const MonthlyView = ({
+  groupedData,
+  expandedRows,
+  toggleRow,
+  list,
+  formatNumber,
+  formatRate,
+}) => {
+  return (
+    <Table className="w-full">
+      <TableHeader>
+        <TableRow>
+          <TableHead className="text-center">매매월</TableHead>
+          <TableHead className="text-center">실현손익금액</TableHead>
+          <TableHead className="text-center">수익률</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {groupedData?.map((item) => (
+          <>
+            <TableRow
+              key={item?.yearMonth}
+              onClick={() => toggleRow(item?.yearMonth)}
+              className="cursor-pointer hover:bg-gray-50"
+            >
+              <TableCell>
+                {dayjs(item?.yearMonth + '01').format('YYYY년 MM월')}
+              </TableCell>
+              <TableCell
+                className={
+                  item?.totalProfit > 0
+                    ? 'text-red-500'
+                    : item?.totalProfit < 0
+                    ? 'text-blue-500'
+                    : ''
+                }
+              >
+                {formatNumber(item?.totalProfit)}원
+              </TableCell>
+              <TableCell
+                className={
+                  parseFloat(item?.yield) > 0
+                    ? 'text-red-500'
+                    : parseFloat(item?.yield) < 0
+                    ? 'text-blue-500'
+                    : ''
+                }
+              >
+                {item?.yield}%
+              </TableCell>
+            </TableRow>
+            {expandedRows[item?.yearMonth] && (
+              <TableRow>
+                <TableCell colSpan={3} className="bg-gray-100 p-0">
+                  <div className="p-4">
+                    <h4 className="font-medium mb-2">
+                      {dayjs(item?.yearMonth + '01').format('YYYY년 MM월')} 거래
+                      내역
+                    </h4>
+                    {item.tradingDays.map((tradDay) => (
+                      <div key={tradDay} className="mb-4">
+                        <h5 className="text-sm font-medium mb-2 pb-1 border-b">
+                          {dayjs(tradDay).format('MM월 DD일')} 거래
+                        </h5>
+                        <DetailRow
+                          tradDay={tradDay}
+                          list={list}
+                          formatNumber={formatNumber}
+                          formatRate={formatRate}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </>
+        ))}
+      </TableBody>
+    </Table>
+  );
+};
+
+// 상세 거래 행 컴포넌트 (재사용)
+const DetailRow = ({ tradDay, list, formatNumber, formatRate }) => {
+  return (
+    <TableRow>
+      <TableCell colSpan={3} className="bg-gray-100 p-0">
+        <Table className="w-full">
+          <TableHeader className="bg-gray-50 border-b">
+            <TableRow>
+              <TableHead className="text-center w-16">로고</TableHead>
+              <TableHead className="text-center">종목코드</TableHead>
+              <TableHead className="text-center">실현손익금액</TableHead>
+              <TableHead className="text-center">수익률</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {list
+              ?.filter((_item) => _item.trad_day === tradDay)
+              .map((item) => (
+                <TableRow key={item?.ovrs_pdno}>
+                  <TableCell className="items-center justify-center flex">
+                    <Avatar className="border w-8 h-8">
+                      <AvatarImage
+                        src={`https://s3-symbol-logo.tradingview.com/${item.logo}--big.svg`}
+                        alt={item.ovrs_pdno}
+                      />
+                      <AvatarFallback>
+                        {item.ovrs_pdno?.slice(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </TableCell>
+                  <TableCell>{item.ovrs_pdno}</TableCell>
+                  <TableCell
+                    className={
+                      Number(item?.ovrs_rlzt_pfls_amt) > 0
+                        ? 'text-red-500'
+                        : Number(item?.ovrs_rlzt_pfls_amt) < 0
+                        ? 'text-blue-500'
+                        : ''
+                    }
+                  >
+                    {formatNumber(item?.ovrs_rlzt_pfls_amt)}원
+                  </TableCell>
+                  <TableCell
+                    className={
+                      Number(item.pftrt) > 0
+                        ? 'text-red-500'
+                        : Number(item.pftrt) < 0
+                        ? 'text-blue-500'
+                        : ''
+                    }
+                  >
+                    {formatRate(item.pftrt)}%
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableCell>
+    </TableRow>
   );
 };
 
