@@ -27,12 +27,16 @@ export async function POST(request: NextRequest) {
   const endpoint = 'uapi/overseas-stock/v1/trading/inquire-period-profit';
   const url = `https://${domain}.koreainvestment.com:${port}/${endpoint}`;
 
+  // 연속 조회 여부 판단하여 tr_cont 헤더 설정
+  const isContinuousQuery = !!(CTX_AREA_FK200 || CTX_AREA_NK200);
+
   const headers = {
     'Content-Type': 'application/json; charset=UTF-8',
     Authorization: `Bearer ${token}`,
     appkey: decrypt(solt, appkey),
     appsecret: decrypt(solt, appsecret),
     tr_id: 'TTTS3039R', // 거래ID
+    tr_cont: isContinuousQuery ? 'N' : '', // 연속 조회 시 'N', 최초 조회 시 빈 문자열
   };
 
   const payload = {

@@ -41,38 +41,68 @@ const Sell = () => {
   const getList = useCallback(async () => {
     try {
       setLoading(true); // 로딩 시작
+      let allData = []; // 모든 페이지의 데이터를 저장할 배열
+      let hasMore = true; // 더 많은 데이터가 있는지 여부
+      let ctxAreaNk200 = ''; // 연속 조회 키
+      let ctxAreaFk200 = ''; // 연속 조회 검색 조건
 
       if (cano && acntPrdtCd) {
-        const payload = {
-          CANO: cano,
-          ACNT_PRDT_CD: acntPrdtCd,
-          OVRS_EXCG_CD: 'NASD',
-          NATN_CD: '', // 국가코드 : 공란
-          CRCY_CD: '', // 통화코드 : 공란
-          PDNO: '', // 상품번호 : 공란
-          INQR_STRT_DT: dayjs().subtract(1, 'month').format('YYYYMMDD'), // 조회시작일자: 1달 전
-          INQR_END_DT: dayjs().format('YYYYMMDD'), // 조회종료일자: 오늘
-          WCRC_FRCR_DVSN_CD, // 원화외화구분코드 : 01: 외화, 02: 원화
-          CTX_AREA_FK200: '', // 연속조회검색조건200 : 공란
-          CTX_AREA_NK200: '', // 연속조회키200 : 공란
-        };
+        // 모든 페이지를 가져올 때까지 반복
+        while (hasMore) {
+          const payload = {
+            CANO: cano,
+            ACNT_PRDT_CD: acntPrdtCd,
+            OVRS_EXCG_CD: 'NASD',
+            NATN_CD: '', // 국가코드 : 공란
+            CRCY_CD: '', // 통화코드 : 공란
+            PDNO: '', // 상품번호 : 공란
+            INQR_STRT_DT: dayjs().subtract(1, 'month').format('YYYYMMDD'), // 조회시작일자: 1달 전
+            INQR_END_DT: dayjs().format('YYYYMMDD'), // 조회종료일자: 오늘
+            WCRC_FRCR_DVSN_CD, // 원화외화구분코드 : 01: 외화, 02: 원화
+            CTX_AREA_FK200: ctxAreaFk200, // 연속조회검색조건200 : 공란
+            CTX_AREA_NK200: ctxAreaNk200, // 연속조회키200 : 이전 응답에서 받은 값
+          };
 
-        const response = await api.trading.inquirePeriodProfit(payload);
+          const response = await api.trading.inquirePeriodProfit(payload);
+          const data = await response.json();
 
-        const data = await response.json();
+          // 응답 데이터 확인 및 로깅
+          console.log('API 응답:', data);
 
-        // 로고 정보 추가
-        const enrichedData =
-          data?.output1?.map((item) => {
-            // 종목에 맞는 로고 찾기
-            const logoItem = logos.find((logo) => logo.name === item.ovrs_pdno);
-            return {
-              ...item,
-              logo: logoItem?.logoid || '',
-            };
-          }) || [];
+          if (data?.output1?.length > 0) {
+            // 현재 페이지 데이터 처리
+            const currentPageData = data.output1.map((item) => {
+              // 종목에 맞는 로고 찾기
+              const logoItem = logos.find(
+                (logo) => logo.name === item.ovrs_pdno
+              );
+              return {
+                ...item,
+                logo: logoItem?.logoid || '',
+              };
+            });
 
-        setList(enrichedData);
+            // 전체 데이터에 현재 페이지 데이터 추가
+            allData = [...allData, ...currentPageData];
+
+            // 연속 조회 키가 있는지 확인
+            if (data.ctx_area_nk200 && data.ctx_area_nk200.trim() !== '') {
+              ctxAreaNk200 = data.ctx_area_nk200; // 다음 페이지 조회 시 사용할 키 업데이트
+              console.log('다음 페이지 조회 키:', ctxAreaNk200);
+              ctxAreaFk200 = data.ctx_area_fk200; // 다음 페이지 조회 시 사용할 검색 조건 업데이트
+              console.log('다음 페이지 조회 조건:', ctxAreaFk200);
+            } else {
+              // 연속 조회 키가 없으면 모든 데이터를 가져온 것
+              hasMore = false;
+            }
+          } else {
+            // 더 이상 데이터가 없음
+            hasMore = false;
+          }
+        }
+
+        console.log(`총 ${allData.length}개의 매매 내역을 가져왔습니다.`);
+        setList(allData);
       }
     } catch (error) {
       console.error('매매 내역 조회 중 오류:', error);
@@ -80,8 +110,6 @@ const Sell = () => {
     } finally {
       setLoading(false); // 로딩 종료
     }
-
-    // 무한 로딩이 되기 떄문에 빈 배열을 넣어줌
   }, []);
 
   /**
@@ -168,7 +196,6 @@ const Sell = () => {
   return (
     <div className="w-full">
       <div className="border rounded-md !bg-white">
-        // 리턴값에 ctx_area_nk200 이게 있다면 다시 루프면 돌면 좋을듯..
         {loading ? (
           // 로딩 상태 표시
           <div className="flex flex-col items-center justify-center h-64 p-4">
