@@ -54,7 +54,7 @@ const TabPanel = ({
               </div>
             </div>
           ) : data.length > 0 ? (
-            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 place-items-center relative">
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 place-items-center relative gap-y-4">
               {data.map((item) => (
                 <StockIcon
                   key={

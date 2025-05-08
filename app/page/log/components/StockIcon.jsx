@@ -121,7 +121,7 @@ const StockIcon = ({
                 : "bg-gray-200 text-gray-600"
             }`}
           >
-            {displayName.substring(0, 2)}
+            {displayName.substring(0, 1)}
           </AvatarFallback>
         </Avatar>
 
