@@ -91,7 +91,7 @@ const StockIcon = ({
 
   return (
     <div
-      className="flex flex-col items-center w-24 mb-4 cursor-pointer"
+      className="flex flex-col items-center w-20 mb-2 px-1"
       onClick={handleClick}
     >
       <div
@@ -115,7 +115,7 @@ const StockIcon = ({
             }`}
           />
           <AvatarFallback
-            className={`text-lg font-bold ${
+            className={`text-md font-bold rounded-2xl ${
               isSelected
                 ? "bg-white text-gray-800"
                 : "bg-gray-200 text-gray-600"
@@ -144,13 +144,13 @@ const StockIcon = ({
       </div>
 
       <div
-        className={`mt-2 text-center ${
+        className={`mt-1 text-center ${
           isSelected ? "font-medium" : "font-normal"
         }`}
       >
         {/* 종목코드 표시 */}
         <p
-          className={`text-xs truncate w-20 text-center ${
+          className={`text-xs truncate w-full text-center ${
             isSelected ? "font-semibold text-black" : "text-gray-600"
           }`}
         >

@@ -29,10 +29,10 @@ const TabPanel = ({
   return (
     <TabsContent value={value} className="mt-4">
       <Card className={isRefreshing ? "animate-pulse" : ""}>
-        <CardContent className="p-4">
+        <CardContent className="p-2">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <h3 className="text-lg font-semibold">{title}</h3>
+              <h3 className="text-lg font-semibold px-8">{title}</h3>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -44,18 +44,6 @@ const TabPanel = ({
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onRefresh}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-              ) : (
-                "갱신"
-              )}
-            </Button>
           </div>
 
           {isLoading ? (
@@ -66,7 +54,7 @@ const TabPanel = ({
               </div>
             </div>
           ) : data.length > 0 ? (
-            <div className="flex flex-wrap gap-1 justify-start">
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 place-items-center relative">
               {data.map((item) => (
                 <StockIcon
                   key={
