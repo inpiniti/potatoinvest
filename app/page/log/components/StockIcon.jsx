@@ -12,7 +12,26 @@ const StockIcon = ({
 }) => {
   const logoUrl = getLogoUrl(item);
   const displayName = (item.name || item.code || "N/A").substring(0, 6);
-  const isSelected = selectedStock === (item.name || item.code);
+  // 선택 여부 검사 - 객체 비교로 변경
+  const isSelected = (() => {
+    if (!selectedStock) return false;
+
+    // item의 코드 추출
+    const itemCode = item.name || item.code || item.ovrs_pdno || item.pdno;
+
+    if (typeof selectedStock === "object") {
+      // selectedStock이 객체인 경우
+      const selectedCode =
+        selectedStock.name ||
+        selectedStock.code ||
+        selectedStock.ovrs_pdno ||
+        selectedStock.pdno;
+      return itemCode === selectedCode;
+    } else {
+      // selectedStock이 문자열인 경우 (이전 버전 호환성)
+      return itemCode === selectedStock;
+    }
+  })();
   const isLoading = loading && isSelected;
 
   // 예측 결과(확률) 계산
@@ -55,19 +74,18 @@ const StockIcon = ({
   // 미체결 내역에 있는지 확인하여 체결 중 상태 판단
   // 보유 종목 탭에서만 체결 중 표시
   const isPendingOrder =
-    item.type === "구매" &&
     체결데이터 &&
-    체결데이터.some(
-      (order) =>
-        order.name === item.name ||
-        order.code === item.code ||
-        order.pdno === item.pdno ||
-        order.ovrs_pdno === item.ovrs_pdno
-    );
+    체결데이터.some((order) => {
+      // 종목 코드 추출
+      const itemCode = item.name || item.code || item.ovrs_pdno || item.pdno;
+      const orderCode = order.name || order.pdno;
+
+      // 정확히 동일한 종목코드인 경우만 체결 중으로 간주
+      return itemCode === orderCode;
+    });
 
   const handleClick = () => {
-    const stockCode = item.name || item.code;
-    onSelect(stockCode);
+    onSelect(item);
     //fetchDetail(stockCode);
   };
 

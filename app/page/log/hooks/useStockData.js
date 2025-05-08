@@ -196,7 +196,7 @@ const useStockData = () => {
         const 소팅된데이터 = 처리된구매데이터.sort((a, b) => {
           const aPerf = a.evlu_pfls_rt !== undefined ? a.evlu_pfls_rt : 0;
           const bPerf = b.evlu_pfls_rt !== undefined ? b.evlu_pfls_rt : 0;
-          return bPerf - aPerf; // 내림차순 정렬 (가장 높은 수익률 순)
+          return aPerf - bPerf; // 오름차순 정렬 (가장 낮은 수익률 순)
         });
 
         set구매데이터(소팅된데이터);

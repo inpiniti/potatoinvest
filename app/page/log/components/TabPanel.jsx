@@ -69,9 +69,15 @@ const TabPanel = ({
             <div className="flex flex-wrap gap-1 justify-start">
               {data.map((item) => (
                 <StockIcon
-                  key={item.name || item.code}
+                  key={
+                    item.name ||
+                    item.code ||
+                    item.ovrs_pdno ||
+                    item.pdno ||
+                    Math.random()
+                  }
                   item={item}
-                  selectedStock={selectedStock}
+                  selectedStock={selectedStock} // 이제 객체가 전달됨
                   onSelect={setSelectedStock}
                   fetchDetail={fetchStockDetail}
                   loading={detailLoading}

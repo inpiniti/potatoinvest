@@ -3,7 +3,8 @@ import TabPanel from "./TabPanel";
 const AnalysisTab = ({
   data,
   isLoading,
-  selectedStock,
+  selectedStock, // 호환성용 (코드만)
+  selectedStockObject, // 전체 객체
   setSelectedStock,
   onRefresh,
   fetchStockDetail,
