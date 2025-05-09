@@ -27,7 +27,7 @@ const TabPanel = ({
   isRefreshing, // 새로운 prop 추가
 }) => {
   return (
-    <TabsContent value={value} className="mt-4">
+    <TabsContent value={value}>
       <Card className={isRefreshing ? 'animate-pulse' : ''}>
         <CardContent className="p-2">
           {isLoading ? (

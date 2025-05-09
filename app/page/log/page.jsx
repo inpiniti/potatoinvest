@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import useStockData from "./hooks/useStockData";
-import useStockNav from "./hooks/useStockNav";
-import useStockDetail from "./hooks/useStockDetail";
-import useStockBuy from "./hooks/useStockBuy"; // 새로 추가한 매수 훅
-import useStockSell from "./hooks/useStockSell"; // 매도 훅 추가
+import { useState } from 'react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import useStockData from './hooks/useStockData';
+import useStockNav from './hooks/useStockNav';
+import useStockDetail from './hooks/useStockDetail';
+import useStockBuy from './hooks/useStockBuy'; // 새로 추가한 매수 훅
+import useStockSell from './hooks/useStockSell'; // 매도 훅 추가
 
 // 컴포넌트 임포트
-import Header from "./components/Header";
-import AnalysisTab from "./components/AnalysisTab";
-import OrderTab from "./components/OrderTab";
-import PortfolioTab from "./components/PortfolioTab";
+import Header from './components/Header';
+import AnalysisTab from './components/AnalysisTab';
+import OrderTab from './components/OrderTab';
+import PortfolioTab from './components/PortfolioTab';
 
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 const Log = () => {
-  const [activeTab, setActiveTab] = useState("분석");
+  const [activeTab, setActiveTab] = useState('분석');
   const [autoBuy, setAutoBuy] = useState(false); // 자동 매수 활성화 여부
   const [autoSell, setAutoSell] = useState(false); // 자동 매도 활성화 여부 추가
 
@@ -74,7 +74,7 @@ const Log = () => {
       };
 
       // 보유종목 탭인 경우 구매 조건 추가
-      if (activeTab === "구매" && stockObject) {
+      if (activeTab === '구매' && stockObject) {
         options.buyCondition = {
           evluPflsRt: stockObject.evlu_pfls_rt,
           buyPrice: Number(stockObject.pchs_avg_pric || 0),
@@ -92,8 +92,8 @@ const Log = () => {
     setAutoBuy(newState);
     toast.info(
       newState
-        ? "자동 매수가 활성화되었습니다"
-        : "자동 매수가 비활성화되었습니다"
+        ? '자동 매수가 활성화되었습니다'
+        : '자동 매수가 비활성화되었습니다'
     );
   };
 
@@ -103,20 +103,20 @@ const Log = () => {
     setAutoSell(newState);
     toast.info(
       newState
-        ? "자동 매도가 활성화되었습니다"
-        : "자동 매도가 비활성화되었습니다"
+        ? '자동 매도가 활성화되었습니다'
+        : '자동 매도가 비활성화되었습니다'
     );
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* 헤더 및 새로고침 버튼 */}
       <Header
         selectedStockObject={selectedStock} // 객체 그대로 전달
         movePrevStock={moveToPrevStock}
         moveNextStock={moveToNextStock}
         refreshAll={refreshAll}
-        isLoading={isLoading("any") || isLoadingAnalysis}
+        isLoading={isLoading('any') || isLoadingAnalysis}
         activeTab={activeTab}
         필터링된분석데이터={필터링된분석데이터}
         체결데이터={체결데이터}
@@ -146,7 +146,7 @@ const Log = () => {
               체결데이터,
             };
 
-            if (activeTab === "구매") {
+            if (activeTab === '구매') {
               options.buyCondition = {
                 evluPflsRt: selectedStock.evlu_pfls_rt,
                 buyPrice: Number(selectedStock.pchs_avg_pric || 0),
@@ -168,10 +168,10 @@ const Log = () => {
 
             if (
               !stockCode ||
-              typeof stockCode !== "string" ||
+              typeof stockCode !== 'string' ||
               !stockCode.trim()
             ) {
-              toast.error("유효한 종목코드가 없습니다");
+              toast.error('유효한 종목코드가 없습니다');
               return;
             }
 
@@ -181,16 +181,16 @@ const Log = () => {
             });
 
             if (isPending) {
-              toast.warning("해당 종목은 현재 체결 중입니다");
+              toast.warning('해당 종목은 현재 체결 중입니다');
               return;
             }
 
             // 보유 종목에서는 수익률이 -10% 이하일 때만 매수 가능
-            if (activeTab === "구매") {
+            if (activeTab === '구매') {
               const profitRate = parseFloat(selectedStock.evlu_pfls_rt);
               if (!isNaN(profitRate) && profitRate > -10) {
                 toast.warning(
-                  "보유 종목은 손실률이 -10% 미만일 때만 매수 가능합니다"
+                  '보유 종목은 손실률이 -10% 미만일 때만 매수 가능합니다'
                 );
                 return;
               }
@@ -199,14 +199,14 @@ const Log = () => {
             buyStock(stockCode.trim(), detailData);
           } else {
             toast.warning(
-              "매수할 종목이 선택되지 않았거나 상세 정보가 없습니다"
+              '매수할 종목이 선택되지 않았거나 상세 정보가 없습니다'
             );
           }
         }}
         onSellCurrentStock={() => {
           // 수동으로 현재 선택된 종목 매도 (보유 종목 탭에서만 가능)
-          if (activeTab !== "구매") {
-            toast.warning("보유 종목 탭에서만 매도가 가능합니다");
+          if (activeTab !== '구매') {
+            toast.warning('보유 종목 탭에서만 매도가 가능합니다');
             return;
           }
 
@@ -219,10 +219,10 @@ const Log = () => {
 
             if (
               !stockCode ||
-              typeof stockCode !== "string" ||
+              typeof stockCode !== 'string' ||
               !stockCode.trim()
             ) {
-              toast.error("유효한 종목코드가 없습니다");
+              toast.error('유효한 종목코드가 없습니다');
               return;
             }
 
@@ -233,7 +233,7 @@ const Log = () => {
             });
 
             if (isPending) {
-              toast.warning("해당 종목은 현재 체결 중입니다");
+              toast.warning('해당 종목은 현재 체결 중입니다');
               return;
             }
 
@@ -243,7 +243,7 @@ const Log = () => {
               : 0;
 
             if (quantity <= 0) {
-              toast.warning("매도할 수 있는 수량이 없습니다");
+              toast.warning('매도할 수 있는 수량이 없습니다');
               return;
             }
 
@@ -252,7 +252,7 @@ const Log = () => {
 
             sellStock(stockCode.trim(), detailData, quantity, avgPrice);
           } else {
-            toast.info("매도할 종목이 선택되지 않았거나 상세 정보가 없습니다");
+            toast.info('매도할 종목이 선택되지 않았거나 상세 정보가 없습니다');
           }
         }}
       />
@@ -261,7 +261,7 @@ const Log = () => {
       <Tabs defaultValue="분석" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="분석" className="relative">
-            분석 데이터
+            분석
             {필터링된분석데이터.length > 0 && (
               <Badge className="ml-1.5 px-1 min-w-[20px] h-5 flex items-center justify-center">
                 {필터링된분석데이터.length}
@@ -269,7 +269,7 @@ const Log = () => {
             )}
           </TabsTrigger>
           <TabsTrigger value="체결" className="relative">
-            미체결 내역
+            미체결
             {체결데이터.length > 0 && (
               <Badge className="ml-1.5 px-1 min-w-[20px] h-5 flex items-center justify-center">
                 {체결데이터.length}
@@ -277,7 +277,7 @@ const Log = () => {
             )}
           </TabsTrigger>
           <TabsTrigger value="구매" className="relative">
-            보유 종목
+            보유
             {구매데이터.length > 0 && (
               <Badge className="ml-1.5 px-1 min-w-[20px] h-5 flex items-center justify-center">
                 {구매데이터.length}
@@ -289,13 +289,13 @@ const Log = () => {
         {/* 각 탭 내용 */}
         <AnalysisTab
           data={필터링된분석데이터}
-          isLoading={isLoading("분석")}
+          isLoading={isLoading('분석')}
           selectedStock={selectedStock}
           setSelectedStock={setSelectedStock}
           onRefresh={fetch분석데이터}
           fetchStockDetail={(stockCode) =>
             fetchStockDetail(stockCode, {
-              activeTab: "분석",
+              activeTab: '분석',
               autoBuy,
               onBuy: buyStock,
               체결데이터,
@@ -306,13 +306,13 @@ const Log = () => {
 
         <OrderTab
           data={체결데이터}
-          isLoading={isLoading("체결")}
+          isLoading={isLoading('체결')}
           selectedStock={selectedStock}
           setSelectedStock={setSelectedStock}
           onRefresh={fetch체결데이터}
           fetchStockDetail={(stockCode) =>
             fetchStockDetail(stockCode, {
-              activeTab: "체결",
+              activeTab: '체결',
               autoBuy,
               onBuy: buyStock,
             })
@@ -322,7 +322,7 @@ const Log = () => {
 
         <PortfolioTab
           data={구매데이터}
-          isLoading={isLoading("구매")}
+          isLoading={isLoading('구매')}
           selectedStock={selectedStock}
           setSelectedStock={setSelectedStock}
           onRefresh={fetch구매데이터}
@@ -334,7 +334,7 @@ const Log = () => {
 
             if (stockItem) {
               fetchStockDetail(stockCode, {
-                activeTab: "구매",
+                activeTab: '구매',
                 autoBuy,
                 autoSell,
                 onBuy: buyStock,
@@ -348,7 +348,7 @@ const Log = () => {
               });
             } else {
               fetchStockDetail(stockCode, {
-                activeTab: "구매",
+                activeTab: '구매',
                 autoBuy,
                 autoSell,
                 onBuy: buyStock,
