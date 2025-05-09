@@ -1,6 +1,6 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getLogoUrl } from "../utils/logoUtils";
-import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getLogoUrl } from '../utils/logoUtils';
+import { Badge } from '@/components/ui/badge';
 
 const StockIcon = ({
   item,
@@ -11,7 +11,7 @@ const StockIcon = ({
   체결데이터,
 }) => {
   const logoUrl = getLogoUrl(item);
-  const displayName = (item.name || item.code || "N/A").substring(0, 6);
+  const displayName = (item.name || item.code || 'N/A').substring(0, 6);
   // 선택 여부 검사 - 객체 비교로 변경
   const isSelected = (() => {
     if (!selectedStock) return false;
@@ -19,7 +19,7 @@ const StockIcon = ({
     // item의 코드 추출
     const itemCode = item.name || item.code || item.ovrs_pdno || item.pdno;
 
-    if (typeof selectedStock === "object") {
+    if (typeof selectedStock === 'object') {
       // selectedStock이 객체인 경우
       const selectedCode =
         selectedStock.name ||
@@ -38,34 +38,34 @@ const StockIcon = ({
   const predictionValue =
     item.예측결과 !== undefined
       ? `${(item.예측결과 * 100).toFixed(0)}%`
-      : "N/A";
+      : 'N/A';
 
   // 데이터 타입에 따라 다른 정보 표시
   let additionalInfo = null;
 
-  if (item.type === "분석" && item.perf_1_m !== undefined) {
+  if (item.type === '분석' && item.perf_1_m !== undefined) {
     // 분석 데이터: 한달 성과(하락률) 계산
     const monthlyPerf = item.perf_1_m.toFixed(1);
     additionalInfo = (
       <span
         className={`text-[10px] ${
-          parseFloat(monthlyPerf) >= 0 ? "text-green-600" : "text-red-600"
+          parseFloat(monthlyPerf) >= 0 ? 'text-green-600' : 'text-red-600'
         }`}
       >
-        ({monthlyPerf > 0 ? "+" : ""}
+        ({monthlyPerf > 0 ? '+' : ''}
         {monthlyPerf}%)
       </span>
     );
-  } else if (item.type === "구매" && item.evlu_pfls_rt !== undefined) {
+  } else if (item.type === '구매' && item.evlu_pfls_rt !== undefined) {
     // 보유 종목: 구매 후 변동량(수익률) 표시
     const changeValue = Number(item.evlu_pfls_rt).toFixed(2);
     additionalInfo = (
       <span
         className={`text-[10px] ${
-          parseFloat(changeValue) >= 0 ? "text-green-600" : "text-red-600"
+          parseFloat(changeValue) >= 0 ? 'text-green-600' : 'text-red-600'
         } font-semibold`}
       >
-        ({changeValue > 0 ? "+" : ""}
+        ({changeValue > 0 ? '+' : ''}
         {changeValue}%)
       </span>
     );
@@ -90,16 +90,13 @@ const StockIcon = ({
   };
 
   return (
-    <div
-      className="flex flex-col items-center w-20 mb-2 px-1"
-      onClick={handleClick}
-    >
+    <div className="flex flex-col items-center w-20 mb-2" onClick={handleClick}>
       <div
         className={`relative rounded-2xl overflow-hidden flex items-center justify-center
           ${
             isSelected
-              ? "ring-2 ring-red-500 ring-offset-2 bg-white shadow-lg transform scale-105 transition-all"
-              : "bg-gray-50 filter grayscale-[50%] opacity-90 transition-all hover:grayscale-0 hover:opacity-100"
+              ? 'ring-2 ring-red-500 ring-offset-2 bg-white shadow-lg transform scale-105 transition-all'
+              : 'bg-gray-50 filter grayscale-[50%] opacity-90 transition-all hover:grayscale-0 hover:opacity-100'
           }`}
       >
         <Avatar className="w-14 h-14 rounded-2xl">
@@ -109,16 +106,16 @@ const StockIcon = ({
             className={`object-contain ${
               isSelected
                 ? isLoading
-                  ? "brightness-90 filter grayscale-[70%]"
-                  : "brightness-110"
-                : "brightness-90"
+                  ? 'brightness-90 filter grayscale-[70%]'
+                  : 'brightness-110'
+                : 'brightness-90'
             }`}
           />
           <AvatarFallback
             className={`text-md font-bold rounded-2xl ${
               isSelected
-                ? "bg-white text-gray-800"
-                : "bg-gray-200 text-gray-600"
+                ? 'bg-white text-gray-800'
+                : 'bg-gray-200 text-gray-600'
             }`}
           >
             {displayName.substring(0, 1)}
@@ -129,7 +126,7 @@ const StockIcon = ({
         {isLoading && (
           <div
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            style={{ background: "rgba(255, 255, 255, 0.15)" }}
+            style={{ background: 'rgba(255, 255, 255, 0.15)' }}
           >
             <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
@@ -145,13 +142,13 @@ const StockIcon = ({
 
       <div
         className={`mt-1 text-center ${
-          isSelected ? "font-medium" : "font-normal"
+          isSelected ? 'font-medium' : 'font-normal'
         }`}
       >
         {/* 종목코드 표시 */}
         <p
           className={`text-xs truncate w-full text-center ${
-            isSelected ? "font-semibold text-black" : "text-gray-600"
+            isSelected ? 'font-semibold text-black' : 'text-gray-600'
           }`}
         >
           {displayName}
@@ -164,11 +161,11 @@ const StockIcon = ({
             className={`text-xs ${
               isSelected
                 ? parseInt(predictionValue) >= 60
-                  ? "text-green-600 font-bold"
-                  : "text-red-600 font-bold"
+                  ? 'text-green-600 font-bold'
+                  : 'text-red-600 font-bold'
                 : parseInt(predictionValue) >= 60
-                ? "text-green-500"
-                : "text-red-400"
+                ? 'text-green-500'
+                : 'text-red-400'
             }`}
           >
             {predictionValue}
