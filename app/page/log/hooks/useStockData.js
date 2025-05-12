@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
-import useApi from "@/hooks/useApi";
-import useAi from "@/hooks/useAi";
-import useTrading from "@/hooks/useTrading";
-import useAccount from "@/hooks/useAccount";
-import aiModels from "@/json/ai_models.json";
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import useApi from '@/hooks/useApi';
+import useAi from '@/hooks/useAi';
+import useTrading from '@/hooks/useTrading';
+import useAccount from '@/hooks/useAccount';
+import aiModels from '@/json/ai_models.json';
 
 const useStockData = () => {
   const api = useApi();
@@ -26,7 +26,7 @@ const useStockData = () => {
 
   // 분석 데이터 가져오기 및 AI 예측
   const fetch분석데이터 = useCallback(async () => {
-    console.log("fetch분석데이터");
+    console.log('fetch분석데이터');
     try {
       set분석데이터로딩(true);
 
@@ -48,7 +48,7 @@ const useStockData = () => {
           setModels(loadedModels);
           사용할모델들 = loadedModels;
         } catch (modelError) {
-          console.warn("모델 로딩 실패:", modelError);
+          console.warn('모델 로딩 실패:', modelError);
         }
       }
 
@@ -68,13 +68,22 @@ const useStockData = () => {
       const 최종분석데이터 = 데이터.map((row, index) => ({
         ...row,
         예측결과: 예측결과평균[index],
-        type: "분석",
+        type: '분석',
       }));
 
       set분석데이터(최종분석데이터);
     } catch (error) {
-      console.error("분석 데이터 로드 실패:", error);
-      set분석데이터([]);
+      console.error('분석 데이터 로드 실패:', error);
+
+      // 재시도 로직
+      if (retryCount > 0) {
+        console.warn(`분석 데이터 재시도 중... 남은 시도 횟수: ${retryCount}`);
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // 2초 대기
+        return fetch분석데이터(retryCount - 1);
+      } else {
+        console.error('분석 데이터 재시도 실패: 모든 시도 종료');
+        set분석데이터([]); // 빈 데이터로 설정
+      }
     } finally {
       set분석데이터로딩(false);
     }
@@ -84,10 +93,10 @@ const useStockData = () => {
   const 필터링된분석데이터 = useMemo(() => {
     // 미체결/보유 종목 코드 세트 생성
     const 미체결종목코드 = new Set(
-      체결데이터.map((item) => item.name || item.pdno || "")
+      체결데이터.map((item) => item.name || item.pdno || '')
     );
     const 보유종목코드 = new Set(
-      구매데이터.map((item) => item.name || item.ovrs_pdno || "")
+      구매데이터.map((item) => item.name || item.ovrs_pdno || '')
     );
 
     return 분석데이터
@@ -100,7 +109,7 @@ const useStockData = () => {
       })
       .filter((item) => {
         // 미체결 종목과 보유 중인 종목 제거
-        const itemCode = item.name || item.code || "";
+        const itemCode = item.name || item.code || '';
         return !미체결종목코드.has(itemCode) && !보유종목코드.has(itemCode);
       })
       .sort((a, b) => {
@@ -121,7 +130,7 @@ const useStockData = () => {
         // 처리된 미체결 데이터를 일단 생성
         let 처리된체결데이터 = (data.output || []).map((item) => ({
           ...item,
-          type: "체결",
+          type: '체결',
           name: item.pdno,
         }));
 
@@ -143,7 +152,7 @@ const useStockData = () => {
         set체결데이터(처리된체결데이터);
       }
     } catch (error) {
-      console.error("체결 데이터 로드 실패:", error);
+      console.error('체결 데이터 로드 실패:', error);
       set체결데이터([]);
     } finally {
       set체결데이터로딩(false);
@@ -158,10 +167,10 @@ const useStockData = () => {
         const payload = {
           CANO: cano,
           ACNT_PRDT_CD: acntPrdtCd,
-          OVRS_EXCG_CD: "NASD",
-          TR_CRCY_CD: "USD",
-          CTX_AREA_FK200: "",
-          CTX_AREA_NK200: "",
+          OVRS_EXCG_CD: 'NASD',
+          TR_CRCY_CD: 'USD',
+          CTX_AREA_FK200: '',
+          CTX_AREA_NK200: '',
         };
 
         const response = await api.trading.inquireBalance(payload);
@@ -170,7 +179,7 @@ const useStockData = () => {
         // 처리된 구매 데이터 생성
         let 처리된구매데이터 = (data.output1 || []).map((item) => ({
           ...item,
-          type: "구매",
+          type: '구매',
           name: item.ovrs_pdno,
         }));
 
@@ -202,7 +211,7 @@ const useStockData = () => {
         set구매데이터(소팅된데이터);
       }
     } catch (error) {
-      console.error("구매 데이터 로드 실패:", error);
+      console.error('구매 데이터 로드 실패:', error);
       set구매데이터([]);
     } finally {
       set구매데이터로딩(false);
@@ -212,7 +221,7 @@ const useStockData = () => {
   // 컴포넌트 마운트 시 데이터 로드
   useEffect(() => {
     const loadInitialData = async () => {
-      console.log("loadInitialData");
+      console.log('loadInitialData');
       await fetch분석데이터();
     };
     loadInitialData();
@@ -229,10 +238,10 @@ const useStockData = () => {
   // 특정 데이터 타입의 로딩 상태 확인
   const isLoading = useCallback(
     (type) => {
-      if (type === "분석") return 분석데이터로딩;
-      if (type === "체결") return 체결데이터로딩;
-      if (type === "구매") return 구매데이터로딩;
-      if (type === "any")
+      if (type === '분석') return 분석데이터로딩;
+      if (type === '체결') return 체결데이터로딩;
+      if (type === '구매') return 구매데이터로딩;
+      if (type === 'any')
         return 분석데이터로딩 || 체결데이터로딩 || 구매데이터로딩;
       return false;
     },
