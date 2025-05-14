@@ -28,29 +28,25 @@ const useStockBuy = () => {
 
       try {
         // 현재가에서 2% 할인된 가격 계산
-        const discountPrice = Math.round(currentPrice * 0.98 * 100) / 100;
+        //const discountPrice = Math.round(currentPrice * 0.98 * 100) / 100;
+        // 할인 없이 현재가 그대로 사용
+        const orderPrice = Math.round(currentPrice * 100) / 100;
 
-        // 10만원어치 수량 계산 (환율 기본값 1300 사용)
+        // 30만원어치 수량 계산 (환율 기본값 1500 사용)
         const exchangeRate = stockDetail.t_rate
           ? parseFloat(stockDetail.t_rate)
           : 1500;
 
-        const dollarAmount = 100000 / exchangeRate;
-        let quantity = Math.floor(dollarAmount / discountPrice);
+        const dollarAmount = 300000 / exchangeRate;
+        let quantity = Math.floor(dollarAmount / orderPrice);
 
         // 최소 1주 구매
         if (quantity < 1) quantity = 1;
 
-        console.log("매수 정보:", {
-          종목코드: cleanStockCode,
-          매수가격: discountPrice,
-          수량: quantity,
-        });
-
         // 간소화된 매수 요청
         const response = await 매수({
           ovrs_pdno: cleanStockCode,
-          now_pric2: String(discountPrice.toFixed(2)),
+          now_pric2: String(orderPrice.toFixed(2)),
           ord_qty: String(quantity),
         });
 
