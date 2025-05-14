@@ -1,12 +1,12 @@
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
 import {
   ArrowLeft,
   ArrowRight,
@@ -14,8 +14,8 @@ import {
   RefreshCw,
   ShoppingCart,
   TrendingDown,
-} from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const Header = ({
   selectedStockObject,
@@ -49,15 +49,15 @@ const Header = ({
       selectedStockObject.code ||
       selectedStockObject.ovrs_pdno ||
       selectedStockObject.pdno ||
-      ''
+      ""
     );
   };
 
   // 현재 탭에 데이터가 있는지 확인
   const hasData =
-    (activeTab === '분석' && 필터링된분석데이터.length > 0) ||
-    (activeTab === '체결' && 체결데이터.length > 0) ||
-    (activeTab === '구매' && 구매데이터.length > 0);
+    (activeTab === "분석" && 필터링된분석데이터.length > 0) ||
+    (activeTab === "체결" && 체결데이터.length > 0) ||
+    (activeTab === "구매" && 구매데이터.length > 0);
 
   // 현재 종목 표시용 - 객체 또는 코드 사용
   const currentStockDisplay = getStockDisplayName();
@@ -83,7 +83,7 @@ const Header = ({
   }, [autoPlay, hasData, isLoading, moveNextStock, interval]);
 
   // 현재 종목이 보유 종목인지 확인
-  const isPortfolioStock = activeTab === '구매';
+  const isPortfolioStock = activeTab === "구매";
 
   return (
     <div className="space-y-2">
@@ -104,12 +104,12 @@ const Header = ({
               {currentStockDisplay}
 
               {/* 보유종목인 경우 변동율 표시 */}
-              {activeTab === '구매' && selectedStockObject?.evlu_pfls_rt && (
+              {activeTab === "구매" && selectedStockObject?.evlu_pfls_rt && (
                 <span
                   className={`text-sm ${
                     parseFloat(selectedStockObject.evlu_pfls_rt) >= 0
-                      ? 'text-green-600'
-                      : 'text-red-600'
+                      ? "text-green-600"
+                      : "text-red-600"
                   }`}
                 >
                   ({selectedStockObject.evlu_pfls_rt})
@@ -174,9 +174,9 @@ const Header = ({
               </TooltipTrigger>
               <TooltipContent>
                 <p>
-                  {activeTab === '구매'
-                    ? '손실률 -10% 이하 보유 종목 자동 추가 매수'
-                    : '선택된 종목 자동 매수'}
+                  {activeTab === "구매"
+                    ? "손실률 -5% 이하 보유 종목 자동 추가 매수"
+                    : "선택된 종목 자동 매수"}
                 </p>
               </TooltipContent>
             </Tooltip>

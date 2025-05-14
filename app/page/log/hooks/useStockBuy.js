@@ -95,8 +95,8 @@ const useStockBuy = () => {
       // 보유 종목에서는 수익률이 -10% 이하일 때만 매수
       const profitRate = parseFloat(stockItem.evlu_pfls_rt);
 
-      // 손실률이 -10% 이하(더 작은)인 경우에만 매수
-      const shouldBuy = !isNaN(profitRate) && profitRate <= -10;
+      // 손실률이 -5% 이하(더 작은)인 경우에만 매수
+      const shouldBuy = !isNaN(profitRate) && profitRate <= -5;
 
       if (shouldBuy) {
         console.log(

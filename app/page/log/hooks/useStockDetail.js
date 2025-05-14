@@ -149,10 +149,10 @@ const useStockDetail = () => {
         return true;
 
       case "구매":
-        // 보유종목 탭에서는 -10% 이하인 종목만 매수
+        // 보유종목 탭에서는 -5% 이하인 종목만 매수
         const evluPflsRt = buyCondition?.evluPflsRt;
 
-        // 평가손익률이 -10% 이하인 경우만 매수
+        // 평가손익률이 -5% 이하인 경우만 매수
         if (evluPflsRt !== undefined && evluPflsRt !== null) {
           // evlu_pfls_rt는 문자열 퍼센트 값으로 제공될 수 있으므로 숫자로 변환
           const profitRate =
@@ -161,7 +161,7 @@ const useStockDetail = () => {
               : Number(evluPflsRt);
 
           console.log(`[${detail.rsym}] 평가손익률: ${profitRate}%`);
-          return profitRate <= -10; // -10% 이하 손실 중인 종목만 매수
+          return profitRate <= -5; // -5% 이하 손실 중인 종목만 매수
         }
 
         return false;
