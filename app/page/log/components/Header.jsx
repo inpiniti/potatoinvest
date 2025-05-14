@@ -175,7 +175,7 @@ const Header = ({
               <TooltipContent>
                 <p>
                   {activeTab === "구매"
-                    ? "손실률 -5% 이하 보유 종목 자동 추가 매수"
+                    ? "손실률 -10% 이하 보유 종목 자동 추가 매수"
                     : "선택된 종목 자동 매수"}
                 </p>
               </TooltipContent>

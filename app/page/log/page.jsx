@@ -185,12 +185,12 @@ const Log = () => {
               return;
             }
 
-            // 보유 종목에서는 수익률이 -5% 이하일 때만 매수 가능
+            // 보유 종목에서는 수익률이 -10% 이하일 때만 매수 가능
             if (activeTab === "구매") {
               const profitRate = parseFloat(selectedStock.evlu_pfls_rt);
-              if (!isNaN(profitRate) && profitRate > -5) {
+              if (!isNaN(profitRate) && profitRate > -10) {
                 toast.warning(
-                  "보유 종목은 손실률이 -5% 미만일 때만 매수 가능합니다"
+                  "보유 종목은 손실률이 -10% 미만일 때만 매수 가능합니다"
                 );
                 return;
               }
