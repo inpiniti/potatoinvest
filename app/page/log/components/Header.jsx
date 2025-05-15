@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from "react";
+
 import NavigationHeader from "./header/NavigationHeader";
+import StockNavigation from "./header/navigation/StockNavigation";
+import AutoPlayToggle from "./header/navigation/AutoPlayToggle";
+import BuyToggle from "./header/navigation/BuyToggle";
+import SellToggle from "./header/navigation/SellToggle";
+
 import ActionButtons from "./header/ActionButtons";
+import BuyButton from "./header/buttons/BuyButton";
+import SellButton from "./header/buttons/SellButton";
+import DetailRefreshButton from "./header/buttons/DetailRefreshButton";
+import RefreshAllButton from "./header/buttons/RefreshAllButton";
 
 const Header = ({
   selectedStockObject,
@@ -73,33 +83,63 @@ const Header = ({
   return (
     <div className="space-y-2">
       {/* 상단 네비게이션 헤더 */}
-      <NavigationHeader
-        selectedStockObject={selectedStockObject}
-        currentStockDisplay={currentStockDisplay}
-        movePrevStock={movePrevStock}
-        moveNextStock={moveNextStock}
-        autoPlay={autoPlay}
-        toggleAutoPlay={toggleAutoPlay}
-        hasData={hasData}
-        isLoading={isLoading}
-        activeTab={activeTab}
-        autoBuy={autoBuy}
-        onToggleAutoBuy={onToggleAutoBuy}
-        autoSell={autoSell}
-        onToggleAutoSell={onToggleAutoSell}
-        isPortfolioStock={isPortfolioStock}
-      />
+      <NavigationHeader>
+        <StockNavigation
+          currentStockDisplay={currentStockDisplay}
+          selectedStockObject={selectedStockObject}
+          movePrevStock={movePrevStock}
+          moveNextStock={moveNextStock}
+          hasData={hasData}
+          isLoading={isLoading}
+          autoPlay={autoPlay}
+          activeTab={activeTab}
+        />
+        <div className="flex items-center gap-2">
+          <AutoPlayToggle
+            autoPlay={autoPlay}
+            toggleAutoPlay={toggleAutoPlay}
+            hasData={hasData}
+            isLoading={isLoading}
+          />
+          <BuyToggle
+            autoBuy={autoBuy}
+            onToggleAutoBuy={onToggleAutoBuy}
+            isLoading={isLoading}
+            activeTab={activeTab}
+          />
+          <SellToggle
+            autoSell={autoSell}
+            onToggleAutoSell={onToggleAutoSell}
+            isLoading={isLoading}
+          />
+        </div>
+      </NavigationHeader>
 
       {/* 하단 액션 버튼 */}
-      <ActionButtons
-        currentStockDisplay={currentStockDisplay}
-        isLoading={isLoading}
-        onBuyCurrentStock={onBuyCurrentStock}
-        onSellCurrentStock={onSellCurrentStock}
-        isPortfolioStock={isPortfolioStock}
-        onRefreshDetail={onRefreshDetail}
-        refreshAll={refreshAll}
-      />
+      <ActionButtons>
+        <BuyButton
+          onClick={onBuyCurrentStock}
+          disabled={isLoading || !currentStockDisplay}
+        />
+
+        {isPortfolioStock && (
+          <SellButton
+            onClick={onSellCurrentStock}
+            disabled={isLoading || !currentStockDisplay}
+          />
+        )}
+
+        <DetailRefreshButton
+          onClick={onRefreshDetail}
+          disabled={isLoading || !currentStockDisplay}
+        />
+
+        <RefreshAllButton
+          onClick={refreshAll}
+          disabled={isLoading}
+          isLoading={isLoading}
+        />
+      </ActionButtons>
     </div>
   );
 };
