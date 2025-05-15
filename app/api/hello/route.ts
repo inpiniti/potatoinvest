@@ -380,7 +380,14 @@ const crawling = async (countryCode: string) => {
           range: [0, 99999],
           sort: { sortBy: 'market_cap_basic', sortOrder: 'desc' },
           symbols: {},
-          markets: ['korea'],
+          markets: ['america'],
+          filter: [
+            {
+              left: 'exchange',
+              operation: 'in_range',
+              right: ['NASDAQ'],
+            },
+          ],
           filter2: {
             operator: 'and',
             operands: [
