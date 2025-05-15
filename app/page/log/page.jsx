@@ -11,9 +11,9 @@ import useStockSell from "./hooks/useStockSell"; // 매도 훅 추가
 
 // 컴포넌트 임포트
 import Header from "./components/Header";
-import AnalysisTab from "./components/AnalysisTab";
-import OrderTab from "./components/OrderTab";
-import PortfolioTab from "./components/PortfolioTab";
+import AnalysisTab from "./components/tabPanel/AnalysisTab";
+import OrderTab from "./components/tabPanel/OrderTab";
+import PortfolioTab from "./components/tabPanel/PortfolioTab";
 
 import { toast } from "sonner";
 

@@ -1,4 +1,4 @@
-import TabPanel from "./TabPanel";
+import TabPanel from "../TabPanel";
 
 const OrderTab = ({
   data,
