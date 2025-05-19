@@ -93,7 +93,7 @@ const useStockDetail = () => {
 
               if (sellQuantity > 0) {
                 // 이 부분 잘못됨
-                options.onSell(cleanStockCode, detail, sellQuantity, avgPrice);
+                //options.onSell(cleanStockCode, detail, sellQuantity, avgPrice);
                 // 위 코드 대신 현재가도 넘기도록 변경
                 options.onSell(
                   cleanStockCode,
