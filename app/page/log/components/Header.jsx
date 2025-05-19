@@ -1,28 +1,28 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
-import NavigationHeader from "./header/NavigationHeader";
-import StockNavigation from "./header/navigation/StockNavigation";
-import AutoPlayToggle from "./header/navigation/AutoPlayToggle";
-import BuyToggle from "./header/navigation/BuyToggle";
-import SellToggle from "./header/navigation/SellToggle";
+import NavigationHeader from './header/NavigationHeader';
+import StockNavigation from './header/navigation/StockNavigation';
+import AutoPlayToggle from './header/navigation/AutoPlayToggle';
+import BuyToggle from './header/navigation/BuyToggle';
+import SellToggle from './header/navigation/SellToggle';
 
-import ActionButtons from "./header/ActionButtons";
-import BuyButton from "./header/buttons/BuyButton";
-import SellButton from "./header/buttons/SellButton";
-import DetailRefreshButton from "./header/buttons/DetailRefreshButton";
-import RefreshAllButton from "./header/buttons/RefreshAllButton";
+import ActionButtons from './header/ActionButtons';
+import BuyButton from './header/buttons/BuyButton';
+import SellButton from './header/buttons/SellButton';
+import DetailRefreshButton from './header/buttons/DetailRefreshButton';
+import RefreshAllButton from './header/buttons/RefreshAllButton';
 
 const Header = ({
   selectedStockObject,
   movePrevStock,
   moveNextStock,
-  refreshAll,
+  //refreshAll,
   isLoading,
   activeTab,
   필터링된분석데이터,
   체결데이터,
   구매데이터,
-  onRefreshDetail,
+  //onRefreshDetail,
   autoBuy,
   onToggleAutoBuy,
   autoSell,
@@ -44,15 +44,15 @@ const Header = ({
       selectedStockObject.code ||
       selectedStockObject.ovrs_pdno ||
       selectedStockObject.pdno ||
-      ""
+      ''
     );
   };
 
   // 현재 탭에 데이터가 있는지 확인
   const hasData =
-    (activeTab === "분석" && 필터링된분석데이터.length > 0) ||
-    (activeTab === "체결" && 체결데이터.length > 0) ||
-    (activeTab === "구매" && 구매데이터.length > 0);
+    (activeTab === '분석' && 필터링된분석데이터.length > 0) ||
+    (activeTab === '체결' && 체결데이터.length > 0) ||
+    (activeTab === '구매' && 구매데이터.length > 0);
 
   // 현재 종목 표시용 - 객체 또는 코드 사용
   const currentStockDisplay = getStockDisplayName();
@@ -78,7 +78,7 @@ const Header = ({
   }, [autoPlay, hasData, isLoading, moveNextStock, interval]);
 
   // 현재 종목이 보유 종목인지 확인
-  const isPortfolioStock = activeTab === "구매";
+  const isPortfolioStock = activeTab === '구매';
 
   return (
     <div className="space-y-2">
@@ -130,12 +130,12 @@ const Header = ({
         )}
 
         <DetailRefreshButton
-          onClick={onRefreshDetail}
+          //onClick={onRefreshDetail}
           disabled={isLoading || !currentStockDisplay}
         />
 
         <RefreshAllButton
-          onClick={refreshAll}
+          //onClick={refreshAll}
           disabled={isLoading}
           isLoading={isLoading}
         />

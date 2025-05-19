@@ -1,13 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Info } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { TabsContent } from '@/components/ui/tabs';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import StockIcon from './StockIcon';
 
 const TabPanel = ({
@@ -21,7 +14,7 @@ const TabPanel = ({
   emptyMessage,
   selectedStock,
   setSelectedStock,
-  fetchStockDetail,
+  //fetchStockDetail,
   detailLoading,
   체결데이터, // 체결 데이터를 props로 받음
   isRefreshing, // 새로운 prop 추가
@@ -51,7 +44,7 @@ const TabPanel = ({
                   item={item}
                   selectedStock={selectedStock} // 이제 객체가 전달됨
                   onSelect={setSelectedStock}
-                  fetchDetail={fetchStockDetail}
+                  //fetchDetail={fetchStockDetail}
                   loading={detailLoading}
                   체결데이터={value === '구매' ? 체결데이터 : null} // 보유 종목 탭에서만 체결데이터 전달
                 />

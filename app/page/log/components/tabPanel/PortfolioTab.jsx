@@ -1,4 +1,4 @@
-import TabPanel from "../TabPanel";
+import TabPanel from '../TabPanel';
 
 const PortfolioTab = ({
   data,
@@ -6,7 +6,7 @@ const PortfolioTab = ({
   selectedStock,
   setSelectedStock,
   onRefresh,
-  fetchStockDetail,
+  //fetchStockDetail,
   detailLoading,
   체결데이터, // 체결 데이터를 props로 받음
 }) => {
@@ -22,7 +22,7 @@ const PortfolioTab = ({
       emptyMessage="보유 중인 종목이 없습니다."
       selectedStock={selectedStock}
       setSelectedStock={setSelectedStock}
-      fetchStockDetail={fetchStockDetail}
+      //fetchStockDetail={fetchStockDetail}
       detailLoading={detailLoading}
       체결데이터={체결데이터} // 체결 데이터 전달
     />

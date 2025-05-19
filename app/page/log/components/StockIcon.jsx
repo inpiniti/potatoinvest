@@ -2,14 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getLogoUrl } from '../utils/logoUtils';
 import { Badge } from '@/components/ui/badge';
 
-const StockIcon = ({
-  item,
-  selectedStock,
-  onSelect,
-  fetchDetail,
-  loading,
-  체결데이터,
-}) => {
+const StockIcon = ({ item, selectedStock, onSelect, loading, 체결데이터 }) => {
   const logoUrl = getLogoUrl(item);
   const displayName = (item.name || item.code || 'N/A').substring(0, 6);
   // 선택 여부 검사 - 객체 비교로 변경
@@ -86,7 +79,6 @@ const StockIcon = ({
 
   const handleClick = () => {
     onSelect(item);
-    //fetchDetail(stockCode);
   };
 
   return (

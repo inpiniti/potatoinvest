@@ -1,4 +1,4 @@
-import TabPanel from "../TabPanel";
+import TabPanel from '../TabPanel';
 
 const OrderTab = ({
   data,
@@ -6,7 +6,7 @@ const OrderTab = ({
   selectedStock,
   setSelectedStock,
   onRefresh,
-  fetchStockDetail,
+  //fetchStockDetail,
   detailLoading,
 }) => {
   return (
@@ -21,7 +21,7 @@ const OrderTab = ({
       emptyMessage="현재 미체결 내역이 없습니다."
       selectedStock={selectedStock}
       setSelectedStock={setSelectedStock}
-      fetchStockDetail={fetchStockDetail}
+      //fetchStockDetail={fetchStockDetail}
       detailLoading={detailLoading}
     />
   );
