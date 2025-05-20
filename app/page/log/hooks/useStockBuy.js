@@ -1,10 +1,28 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import useTrading from "@/hooks/useTrading";
 import { toast } from "sonner";
+import { settingStore } from "@/store/settingStore";
 
 const useStockBuy = () => {
   const [buying, setBuying] = useState(false);
   const { 매수 } = useTrading();
+
+  // 추가: settingStore에서 설정값 가져오기
+  const { setting } = settingStore();
+  const [buySettings, setBuySettings] = useState({
+    minBuyAmount: 10000,
+    buyRate: -10,
+  });
+
+  // 추가: 설정값 로드
+  useEffect(() => {
+    if (setting && setting.other) {
+      setBuySettings({
+        minBuyAmount: setting.other.minBuyAmount || 10000,
+        buyRate: setting.other.buyRate || -10,
+      });
+    }
+  }, [setting]);
 
   // 종목 매수 함수
   const buyStock = useCallback(
@@ -37,7 +55,8 @@ const useStockBuy = () => {
           ? parseFloat(stockDetail.t_rate)
           : 1500;
 
-        const dollarAmount = 300000 / exchangeRate;
+        // 수정: 하드코딩된 300000 대신 설정값 사용
+        const dollarAmount = buySettings.minBuyAmount / exchangeRate;
         let quantity = Math.floor(dollarAmount / orderPrice);
 
         // 최소 1주 구매
@@ -67,50 +86,59 @@ const useStockBuy = () => {
         setBuying(false);
       }
     },
-    [매수]
+    [매수, buySettings] // 의존성 배열에 buySettings 추가
   );
 
   // shouldBuyStock 함수 추가
-  const shouldBuyStock = (stockItem, 체결데이터, activeTab) => {
-    // 해당 종목이 체결 중인지 확인 (정확한 코드 매칭)
-    const stockCode =
-      stockItem.name || stockItem.code || stockItem.ovrs_pdno || stockItem.pdno;
+  const shouldBuyStock = useCallback(
+    (stockItem, 체결데이터, activeTab) => {
+      // 해당 종목이 체결 중인지 확인 (정확한 코드 매칭)
+      const stockCode =
+        stockItem.name ||
+        stockItem.code ||
+        stockItem.ovrs_pdno ||
+        stockItem.pdno;
 
-    // 해당 종목이 체결 중인지 확인
-    const isPending = 체결데이터?.some((order) => {
-      const orderCode = order.name || order.pdno;
-      return orderCode === stockCode;
-    });
+      // 해당 종목이 체결 중인지 확인
+      const isPending = 체결데이터?.some((order) => {
+        const orderCode = order.name || order.pdno;
+        return orderCode === stockCode;
+      });
 
-    if (isPending) {
-      console.log(`[${stockCode}] 체결 중이므로 매수 불가`);
-      return false;
-    }
-
-    // 탭에 따라 다른 매수 조건 적용
-    if (activeTab === "분석") {
-      // 분석 탭에서는 기본적으로 매수 가능
-      return true;
-    } else if (activeTab === "구매") {
-      // 보유 종목에서는 수익률이 -10% 이하일 때만 매수
-      const profitRate = parseFloat(stockItem.evlu_pfls_rt);
-
-      // 손실률이 -10% 이하(더 작은)인 경우에만 매수
-      const shouldBuy = !isNaN(profitRate) && profitRate <= -10;
-
-      if (shouldBuy) {
-        console.log(
-          `[${
-            stockItem.name || stockItem.ovrs_pdno
-          }] 수익률 ${profitRate}% - 매수 조건 충족`
-        );
+      if (isPending) {
+        console.log(`[${stockCode}] 체결 중이므로 매수 불가`);
+        return false;
       }
 
-      return shouldBuy;
-    }
+      // 탭에 따라 다른 매수 조건 적용
+      if (activeTab === "분석") {
+        // 분석 탭에서는 기본적으로 매수 가능
+        return true;
+      } else if (activeTab === "구매") {
+        // 보유 종목에서는 설정된 매수기준 이하인 종목만 매수
+        const profitRate = parseFloat(stockItem.evlu_pfls_rt);
 
-    return false;
-  };
+        // 수정: 하드코딩된 -10 대신 설정값 사용
+        const shouldBuy =
+          !isNaN(profitRate) && profitRate <= buySettings.buyRate;
+
+        if (shouldBuy) {
+          console.log(
+            `[${
+              stockItem.name || stockItem.ovrs_pdno
+            }] 수익률 확인: ${profitRate}%, 설정 매수기준: ${
+              buySettings.buyRate
+            }%, 매수 조건 충족: ${shouldBuy}`
+          );
+        }
+
+        return shouldBuy;
+      }
+
+      return false;
+    },
+    [buySettings]
+  ); // 의존성 배열에 buySettings 추가
 
   return {
     buying,
