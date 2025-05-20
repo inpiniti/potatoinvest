@@ -152,129 +152,123 @@ const SettingsToggle = ({ children }) => {
               </Button>
             </DrawerTrigger>
             <DrawerContent>
-              <div className="mx-auto w-full max-w-md">
-                <DrawerHeader>
-                  <DrawerTitle>설정</DrawerTitle>
-                  <DrawerDescription>
-                    여기서 설정한 옵션값을 기준으로 구매 및 매도가 됩니다.
-                  </DrawerDescription>
-                </DrawerHeader>
-                <div className="p-4 pb-0">
-                  {/* 설정 내용 표시 - 쿠키 설정 스타일로 */}
-                  <div className="space-y-6">
-                    {/* Strictly Necessary */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <h4 className="text-sm font-medium">자동 선택</h4>
-                        <p className="text-xs text-muted-foreground">
-                          3초마다 다음 종목이 선택됩니다.
-                        </p>
-                      </div>
-                      {childrenArray[0] || <div className="h-6 w-10"></div>}
-                    </div>
-
-                    {/* Functional Cookies */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <h4 className="text-sm font-medium">자동 매수</h4>
-                        <p className="text-xs text-muted-foreground">
-                          분석된 데이터 및 보유종목중 손실률{" "}
-                          <span className="text-red-400 font-bold">
-                            {settings.buyRate}% 이하
-                          </span>
-                          인 종목을 자동으로 매수합니다.
-                        </p>
-                      </div>
-                      {childrenArray[1] || <div className="h-6 w-10"></div>}
-                    </div>
-
-                    {/* Performance Cookies */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <h4 className="text-sm font-medium">자동 매도</h4>
-                        <p className="text-xs text-muted-foreground">
-                          수익률이{" "}
-                          <span className="text-red-400 font-bold">
-                            {settings.sellRate}% 이상
-                          </span>
-                          인 종목은 자동으로 매도합니다.
-                        </p>
-                      </div>
-                      {childrenArray[2] || <div className="h-6 w-10"></div>}
-                    </div>
-
-                    {/* 최소매수금액 입력 필드 */}
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium">
-                        최소매수금액 (원)
-                      </label>
-                      <div className="flex gap-2 w-full items-center bg-neutral-100 p-2 rounded-lg">
-                        <input
-                          type="number"
-                          className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
-                          value={settings.minBuyAmount}
-                          onChange={handleChange("minBuyAmount")}
-                          placeholder="최소매수금액을 입력해주세요"
-                          min="1000"
-                        />
-                        <span className="text-neutral-500">원</span>
-                      </div>
-                      <p className="text-xs text-neutral-500">
-                        최소 매수 금액을 설정합니다. (최소 1,000원)
+              <DrawerHeader>
+                <DrawerTitle>설정</DrawerTitle>
+                <DrawerDescription>
+                  여기서 설정한 옵션값을 기준으로 구매 및 매도가 됩니다.
+                </DrawerDescription>
+              </DrawerHeader>
+              <div className="p-4 pb-0">
+                {/* 설정 내용 표시 - 쿠키 설정 스타일로 */}
+                <div className="space-y-6">
+                  {/* Strictly Necessary */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <h4 className="text-sm font-medium">자동 선택</h4>
+                      <p className="text-xs text-muted-foreground">
+                        3초마다 다음 종목이 선택됩니다.
                       </p>
                     </div>
+                    {childrenArray[0] || <div className="h-6 w-10"></div>}
+                  </div>
 
-                    {/* 매도기준 입력 필드 */}
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium">
-                        매도기준 (%)
-                      </label>
-                      <div className="flex gap-2 w-full items-center bg-neutral-100 p-2 rounded-lg">
-                        <input
-                          type="number"
-                          className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
-                          value={settings.sellRate}
-                          onChange={handleChange("sellRate")}
-                          placeholder="매도기준을 입력해주세요"
-                          min="0.1"
-                          step="0.1"
-                        />
-                        <span className="text-neutral-500">%</span>
-                      </div>
-                      <p className="text-xs text-neutral-500">
-                        양수 값을 입력해주세요. 예: 2.0은 2% 수익 시 매도
+                  {/* Functional Cookies */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <h4 className="text-sm font-medium">자동 매수</h4>
+                      <p className="text-xs text-muted-foreground">
+                        분석된 데이터 및 보유종목중 손실률{" "}
+                        <span className="text-red-400 font-bold">
+                          {settings.buyRate}% 이하
+                        </span>
+                        인 종목을 자동으로 매수합니다.
                       </p>
                     </div>
+                    {childrenArray[1] || <div className="h-6 w-10"></div>}
+                  </div>
 
-                    {/* 매수기준 입력 필드 */}
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium">
-                        매수기준 (%)
-                      </label>
-                      <div className="flex gap-2 w-full items-center bg-neutral-100 p-2 rounded-lg">
-                        <input
-                          type="number"
-                          className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
-                          value={settings.buyRate}
-                          onChange={handleChange("buyRate")}
-                          placeholder="매수기준을 입력해주세요"
-                          max="-0.1"
-                          step="0.1"
-                        />
-                        <span className="text-neutral-500">%</span>
-                      </div>
-                      <p className="text-xs text-neutral-500">
-                        음수 값을 입력해주세요. 예: -10은 10% 하락 시 매수
+                  {/* Performance Cookies */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <h4 className="text-sm font-medium">자동 매도</h4>
+                      <p className="text-xs text-muted-foreground">
+                        수익률이{" "}
+                        <span className="text-red-400 font-bold">
+                          {settings.sellRate}% 이상
+                        </span>
+                        인 종목은 자동으로 매도합니다.
                       </p>
                     </div>
+                    {childrenArray[2] || <div className="h-6 w-10"></div>}
+                  </div>
+
+                  {/* 최소매수금액 입력 필드 */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium">
+                      최소매수금액 (원)
+                    </label>
+                    <div className="flex gap-2 w-full items-center bg-neutral-100 p-2 rounded-lg">
+                      <input
+                        type="number"
+                        className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
+                        value={settings.minBuyAmount}
+                        onChange={handleChange("minBuyAmount")}
+                        placeholder="최소매수금액을 입력해주세요"
+                        min="1000"
+                      />
+                      <span className="text-neutral-500">원</span>
+                    </div>
+                    <p className="text-xs text-neutral-500">
+                      최소 매수 금액을 설정합니다. (최소 1,000원)
+                    </p>
+                  </div>
+
+                  {/* 매도기준 입력 필드 */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium">매도기준 (%)</label>
+                    <div className="flex gap-2 w-full items-center bg-neutral-100 p-2 rounded-lg">
+                      <input
+                        type="number"
+                        className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
+                        value={settings.sellRate}
+                        onChange={handleChange("sellRate")}
+                        placeholder="매도기준을 입력해주세요"
+                        min="0.1"
+                        step="0.1"
+                      />
+                      <span className="text-neutral-500">%</span>
+                    </div>
+                    <p className="text-xs text-neutral-500">
+                      양수 값을 입력해주세요. 예: 2.0은 2% 수익 시 매도
+                    </p>
+                  </div>
+
+                  {/* 매수기준 입력 필드 */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium">매수기준 (%)</label>
+                    <div className="flex gap-2 w-full items-center bg-neutral-100 p-2 rounded-lg">
+                      <input
+                        type="number"
+                        className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
+                        value={settings.buyRate}
+                        onChange={handleChange("buyRate")}
+                        placeholder="매수기준을 입력해주세요"
+                        max="-0.1"
+                        step="0.1"
+                      />
+                      <span className="text-neutral-500">%</span>
+                    </div>
+                    <p className="text-xs text-neutral-500">
+                      음수 값을 입력해주세요. 예: -10은 10% 하락 시 매수
+                    </p>
                   </div>
                 </div>
-                <DrawerFooter>
-                  <Button className="w-full" onClick={handleSave}>
-                    저장
-                  </Button>
-                </DrawerFooter>
               </div>
+              <DrawerFooter>
+                <Button className="w-full" onClick={handleSave}>
+                  저장
+                </Button>
+              </DrawerFooter>
             </DrawerContent>
           </Drawer>
         </TooltipTrigger>
