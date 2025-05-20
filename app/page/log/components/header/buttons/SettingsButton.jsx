@@ -178,8 +178,11 @@ const SettingsToggle = ({ children }) => {
                       <div className="space-y-0.5">
                         <h4 className="text-sm font-medium">자동 매수</h4>
                         <p className="text-xs text-muted-foreground">
-                          분석된 데이터 및 보유종목중 손실률 10%이하인 종목을
-                          자동으로 매수합니다.
+                          분석된 데이터 및 보유종목중 손실률{" "}
+                          <span className="text-red-400 font-bold">
+                            {settings.buyRate}% 이하
+                          </span>
+                          인 종목을 자동으로 매수합니다.
                         </p>
                       </div>
                       {childrenArray[1] || <div className="h-6 w-10"></div>}
@@ -190,7 +193,11 @@ const SettingsToggle = ({ children }) => {
                       <div className="space-y-0.5">
                         <h4 className="text-sm font-medium">자동 매도</h4>
                         <p className="text-xs text-muted-foreground">
-                          수익률이 2%이상인 종목은 자동으로 매도합니다.
+                          수익률이{" "}
+                          <span className="text-red-400 font-bold">
+                            {settings.sellRate}% 이상
+                          </span>
+                          인 종목은 자동으로 매도합니다.
                         </p>
                       </div>
                       {childrenArray[2] || <div className="h-6 w-10"></div>}
