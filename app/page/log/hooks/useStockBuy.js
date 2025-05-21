@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from "react";
-import useTrading from "@/hooks/useTrading";
-import { toast } from "sonner";
-import { settingStore } from "@/store/settingStore";
+import { useState, useCallback, useEffect } from 'react';
+import useTrading from '@/hooks/useTrading';
+import { toast } from 'sonner';
+import { settingStore } from '@/store/settingStore';
 
 const useStockBuy = () => {
   const [buying, setBuying] = useState(false);
@@ -28,7 +28,7 @@ const useStockBuy = () => {
   const buyStock = useCallback(
     async (stockCode, stockDetail) => {
       if (!stockCode || !stockDetail || !stockDetail.last) {
-        toast.error("매수에 필요한 정보가 부족합니다");
+        toast.error('매수에 필요한 정보가 부족합니다');
         return null;
       }
 
@@ -38,7 +38,7 @@ const useStockBuy = () => {
       // 현재가 추출 및 검증
       const currentPrice = parseFloat(stockDetail.last);
       if (isNaN(currentPrice) || currentPrice <= 0) {
-        toast.error("유효하지 않은 종목 가격입니다");
+        toast.error('유효하지 않은 종목 가격입니다');
         return null;
       }
 
@@ -70,17 +70,17 @@ const useStockBuy = () => {
         });
 
         if (response) {
-          if (response.rt_cd === "0") {
+          if (response.rt_cd === '0') {
             toast.success(`${cleanStockCode} ${quantity}주 매수 주문 완료`);
           } else {
-            toast.error(response.msg1 || "매수 주문 실패");
+            toast.error(response.msg1 || '매수 주문 실패');
           }
         }
 
         return response;
       } catch (error) {
-        console.error("매수 오류:", error);
-        toast.error(`매수 실패: ${error.message || "알 수 없는 오류"}`);
+        console.error('매수 오류:', error);
+        toast.error(`매수 실패: ${error.message || '알 수 없는 오류'}`);
         return null;
       } finally {
         setBuying(false);
@@ -90,60 +90,60 @@ const useStockBuy = () => {
   );
 
   // shouldBuyStock 함수 추가
-  const shouldBuyStock = useCallback(
-    (stockItem, 체결데이터, activeTab) => {
-      // 해당 종목이 체결 중인지 확인 (정확한 코드 매칭)
-      const stockCode =
-        stockItem.name ||
-        stockItem.code ||
-        stockItem.ovrs_pdno ||
-        stockItem.pdno;
+  // const shouldBuyStock = useCallback(
+  //   (stockItem, 체결데이터, activeTab) => {
+  //     // 해당 종목이 체결 중인지 확인 (정확한 코드 매칭)
+  //     const stockCode =
+  //       stockItem.name ||
+  //       stockItem.code ||
+  //       stockItem.ovrs_pdno ||
+  //       stockItem.pdno;
 
-      // 해당 종목이 체결 중인지 확인
-      const isPending = 체결데이터?.some((order) => {
-        const orderCode = order.name || order.pdno;
-        return orderCode === stockCode;
-      });
+  //     // 해당 종목이 체결 중인지 확인
+  //     const isPending = 체결데이터?.some((order) => {
+  //       const orderCode = order.name || order.pdno;
+  //       return orderCode === stockCode;
+  //     });
 
-      if (isPending) {
-        console.log(`[${stockCode}] 체결 중이므로 매수 불가`);
-        return false;
-      }
+  //     if (isPending) {
+  //       console.log(`[${stockCode}] 체결 중이므로 매수 불가`);
+  //       return false;
+  //     }
 
-      // 탭에 따라 다른 매수 조건 적용
-      if (activeTab === "분석") {
-        // 분석 탭에서는 기본적으로 매수 가능
-        return true;
-      } else if (activeTab === "구매") {
-        // 보유 종목에서는 설정된 매수기준 이하인 종목만 매수
-        const profitRate = parseFloat(stockItem.evlu_pfls_rt);
+  //     // 탭에 따라 다른 매수 조건 적용
+  //     if (activeTab === "분석") {
+  //       // 분석 탭에서는 기본적으로 매수 가능
+  //       return true;
+  //     } else if (activeTab === "구매") {
+  //       // 보유 종목에서는 설정된 매수기준 이하인 종목만 매수
+  //       const profitRate = parseFloat(stockItem.evlu_pfls_rt);
 
-        // 수정: 하드코딩된 -10 대신 설정값 사용
-        const shouldBuy =
-          !isNaN(profitRate) && profitRate <= buySettings.buyRate;
+  //       // 수정: 하드코딩된 -10 대신 설정값 사용
+  //       const shouldBuy =
+  //         !isNaN(profitRate) && profitRate <= buySettings.buyRate;
 
-        if (shouldBuy) {
-          console.log(
-            `[${
-              stockItem.name || stockItem.ovrs_pdno
-            }] 수익률 확인: ${profitRate}%, 설정 매수기준: ${
-              buySettings.buyRate
-            }%, 매수 조건 충족: ${shouldBuy}`
-          );
-        }
+  //       if (shouldBuy) {
+  //         console.log(
+  //           `[${
+  //             stockItem.name || stockItem.ovrs_pdno
+  //           }] 수익률 확인: ${profitRate}%, 설정 매수기준: ${
+  //             buySettings.buyRate
+  //           }%, 매수 조건 충족: ${shouldBuy}`
+  //         );
+  //       }
 
-        return shouldBuy;
-      }
+  //       return shouldBuy;
+  //     }
 
-      return false;
-    },
-    [buySettings]
-  ); // 의존성 배열에 buySettings 추가
+  //     return false;
+  //   },
+  //   [buySettings]
+  // ); // 의존성 배열에 buySettings 추가
 
   return {
     buying,
     buyStock,
-    shouldBuyStock,
+    //shouldBuyStock,
   };
 };
 

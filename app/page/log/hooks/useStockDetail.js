@@ -178,6 +178,12 @@ const useStockDetail = () => {
       }
     }
 
+    console.log('탭 :', activeTab);
+    console.log('종목 :', detail.rsym);
+    console.log('평가손익률 :', detail.evlu_pfls_rt);
+    console.log('매수기준 :', buyCondition?.evluPflsRt);
+    console.log('매수기준 설정값 :', detailSettings.buyRate);
+
     // 탭별 매수 조건
     switch (activeTab) {
       case '분석':
