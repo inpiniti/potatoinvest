@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 const useStockNav = ({
   activeTab,
@@ -21,9 +21,9 @@ const useStockNav = ({
   // 탭별 데이터 가져오기 함수
   const getDataForTab = useCallback(
     (tab) => {
-      if (tab === "분석") return 필터링된분석데이터;
-      if (tab === "체결") return 체결데이터;
-      if (tab === "구매") return 구매데이터;
+      if (tab === '분석') return 필터링된분석데이터;
+      if (tab === '체결') return 체결데이터;
+      if (tab === '구매') return 구매데이터;
       return [];
     },
     [필터링된분석데이터, 체결데이터, 구매데이터]
@@ -55,21 +55,21 @@ const useStockNav = ({
     (stockInput) => {
       let stockObject = null;
 
-      if (typeof stockInput === "string") {
+      if (typeof stockInput === 'string') {
         // 문자열(코드)이 전달된 경우 객체 찾기
         stockObject = findStockByCode(stockInput, activeTab);
-      } else if (stockInput && typeof stockInput === "object") {
+      } else if (stockInput && typeof stockInput === 'object') {
         // 이미 객체인 경우 그대로 사용
         stockObject = stockInput;
       }
 
       // 유효한 객체를 찾지 못한 경우
       if (!stockObject) {
-        console.warn("유효한 종목을 찾을 수 없습니다:", stockInput);
+        console.warn('유효한 종목을 찾을 수 없습니다:', stockInput);
         return;
       }
 
-      console.log("선택된 종목:", stockObject);
+      console.log('선택된 종목:', stockObject);
 
       // 상태 업데이트
       setSelectedStock(stockObject);
@@ -89,7 +89,7 @@ const useStockNav = ({
   );
 
   // 탭 순서 정의
-  const tabOrder = ["분석", "구매"];
+  const tabOrder = ['분석', '구매'];
 
   // 다음 탭 가져오기
   const getNextTab = (currentTab) => {
@@ -108,7 +108,7 @@ const useStockNav = ({
     setIsLoadingAnalysis(true);
 
     try {
-      setActiveTab("분석");
+      setActiveTab('분석');
 
       if (refreshAnalysisData) {
         await refreshAnalysisData();
@@ -121,14 +121,14 @@ const useStockNav = ({
         }
       } else {
         // 분석 데이터가 없는 경우 다음 탭으로 이동
-        const nextTab = getNextTab("분석");
+        const nextTab = getNextTab('분석');
         setActiveTab(nextTab);
 
         const nextTabData = getDataForTab(nextTab);
         if (nextTabData && nextTabData.length > 0) {
           handleSelectStock(nextTabData[0]); // 다음 탭의 첫 번째 종목 선택
         } else {
-          console.warn("다음 탭에도 데이터가 없습니다.");
+          console.warn('다음 탭에도 데이터가 없습니다.');
         }
       }
     } finally {
@@ -155,17 +155,17 @@ const useStockNav = ({
 
   // moveToNextStock 함수 - 객체 기반으로 수정
   const moveToNextStock = useCallback(async () => {
-    console.log("moveToNextStock", moveToNextStock);
+    console.log('moveToNextStock', moveToNextStock);
 
     let currentData = getDataForTab(activeTab);
 
-    console.log("currentData", currentData);
+    console.log('currentData', currentData);
 
     if (currentData.length === 0) {
       // 데이터가 없는 경우 다음 탭으로 이동
       const nextTab = getNextTab(activeTab);
 
-      if (activeTab === "구매" && nextTab === "분석") {
+      if (activeTab === '구매' && nextTab === '분석') {
         await loadAnalysisAndSelectFirst();
         return;
       }
@@ -177,7 +177,7 @@ const useStockNav = ({
       if (currentData.length === 0) {
         const nextNextTab = getNextTab(nextTab);
 
-        if (nextNextTab === "분석") {
+        if (nextNextTab === '분석') {
           await loadAnalysisAndSelectFirst();
           return;
         }
@@ -213,7 +213,7 @@ const useStockNav = ({
     if (currentIndex === -1 || currentIndex === currentData.length - 1) {
       const nextTab = getNextTab(activeTab);
 
-      if (activeTab === "구매" && nextTab === "분석") {
+      if (activeTab === '구매' && nextTab === '분석') {
         await loadAnalysisAndSelectFirst();
         return;
       }
@@ -224,7 +224,7 @@ const useStockNav = ({
       if (nextTabData.length === 0) {
         const nextNextTab = getNextTab(nextTab);
 
-        if (nextNextTab === "분석") {
+        if (nextNextTab === '분석') {
           await loadAnalysisAndSelectFirst();
           return;
         }
