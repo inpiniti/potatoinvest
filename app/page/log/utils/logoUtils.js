@@ -32,3 +32,14 @@ export const commonLogoMappings = {
   NFLX: "netflix",
   TSLA: "tesla",
 };
+
+export const getSelectedStockCode = (selectedStock) => {
+  if (!selectedStock) return null;
+
+  return (
+    selectedStock.name ||
+    selectedStock.code ||
+    selectedStock.ovrs_pdno ||
+    selectedStock.pdno
+  );
+};

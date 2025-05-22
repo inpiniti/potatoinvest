@@ -1,17 +1,13 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
-import useStockData from "./hooks/useStockData";
-import useStockNav from "./hooks/useStockNav";
-import useStockDetail from "./hooks/useStockDetail";
-import useStockBuy from "./hooks/useStockBuy"; // 새로 추가한 매수 훅
-import useStockSell from "./hooks/useStockSell"; // 매도 훅 추가
+import { Card } from "@/components/ui/card";
 
-// 컴포넌트 임포트
 import Header from "./components/Header";
-
-import { toast } from "sonner";
+import { EmptyMessage, Loading } from "./components/TabPanel";
+import StockIcon, { IconWrap } from "./components/StockIcon";
 
 import StockNavigation from "./components/header/navigation/StockNavigation";
 import AutoPlayToggle from "./components/header/navigation/AutoPlayToggle";
@@ -22,111 +18,47 @@ import LeftButton from "./components/header/buttons/LeftButton";
 import RightButton from "./components/header/buttons/RightButton";
 import StockDisplay from "./components/header/navigation/StockDisplay";
 import Tab from "./components/header/tab/Tab";
-import { EmptyMessage, Loading } from "./components/TabPanel";
-import StockIcon, { IconWrap } from "./components/StockIcon";
-import { Card } from "@/components/ui/card";
+
+import useStockData from "./hooks/useStockData";
+import useStockNav from "./hooks/useStockNav";
+import useStockDetail from "./hooks/useStockDetail";
+import useStockBuy from "./hooks/useStockBuy";
+import useStockSell from "./hooks/useStockSell";
+import useTab from "./hooks/useTab";
+import useToggle from "./hooks/useToggle";
 
 const Log = () => {
-  const [activeTab, setActiveTab] = useState("분석");
-  const activeTabRef = useRef(activeTab); // useRef로 activeTab 복사
-
-  const handleTabChange = (newTab) => {
-    setActiveTab(newTab);
-    activeTabRef.current = newTab; // useRef를 즉시 업데이트
-  };
-
-  const [autoBuy, setAutoBuy] = useState(false); // 자동 매수 활성화 여부
-  const [autoSell, setAutoSell] = useState(false); // 자동 매도 활성화 여부 추가
+  const { activeTab, activeTabRef, handleTabChange } = useTab();
+  const {
+    autoBuy,
+    autoSell,
+    autoPlay,
+    toggleAutoPlay,
+    toggleAutoBuy,
+    toggleAutoSell,
+  } = useToggle();
 
   // 데이터 관련 훅 사용
   const { 체결데이터, 구매데이터, 필터링된분석데이터, isLoading } =
     useStockData();
 
-  // 상세 정보 조회 훅
-  const { loading: detailLoading, fetchStockDetail } = useStockDetail();
-
-  // 매수 훅
-  const { buying, buyStock } = useStockBuy();
-
-  // 매도 훅
-  const { selling, sellStock } = useStockSell();
-
-  const handleStockChange = useCallback(
-    (stockCode, stockObject) => {
-      console.log("현재 탭 (useRef):", activeTabRef.current); // 항상 최신 값
-      console.log("현재 탭 (useState):", activeTab); // 비동기적으로 업데이트된 값
-      console.log("종목 변경:", stockCode, stockObject);
-
-      const options = {
-        activeTab: activeTabRef.current,
-        autoBuy,
-        autoSell,
-        onBuy: buyStock,
-        onSell: sellStock,
-        stockObject,
-        체결데이터,
-      };
-
-      if (activeTabRef.current === "구매" && stockObject) {
-        options.buyCondition = {
-          evluPflsRt: stockObject.evlu_pfls_rt,
-          buyPrice: Number(stockObject.pchs_avg_pric || 0),
-        };
-      }
-
-      fetchStockDetail(stockCode, options);
-    },
-    [
-      activeTabRef,
-      autoBuy,
-      autoSell,
-      buyStock,
-      sellStock,
-      체결데이터,
-      fetchStockDetail,
-    ]
-  );
+  const { detailing } = useStockDetail();
+  const { buying } = useStockBuy();
+  const { selling } = useStockSell();
 
   // 종목 탐색 관련 훅 사용
-  const {
-    selectedStock,
-    setSelectedStock,
-    moveToNextStock,
-    moveToPrevStock,
-
-    // 자동 순환 관련 추가
-    autoPlay,
-    toggleAutoPlay,
-  } = useStockNav({
-    activeTab,
-    setActiveTab: handleTabChange,
-    필터링된분석데이터,
-    체결데이터,
-    구매데이터,
-    onStockChange: handleStockChange,
-  });
-
-  // 자동 매수 토글 함수
-  const toggleAutoBuy = () => {
-    const newState = !autoBuy;
-    setAutoBuy(newState);
-    toast.info(
-      newState
-        ? "자동 매수가 활성화되었습니다"
-        : "자동 매수가 비활성화되었습니다"
-    );
-  };
-
-  // 자동 매도 토글 함수
-  const toggleAutoSell = () => {
-    const newState = !autoSell;
-    setAutoSell(newState);
-    toast.info(
-      newState
-        ? "자동 매도가 활성화되었습니다"
-        : "자동 매도가 비활성화되었습니다"
-    );
-  };
+  const { selectedStock, setSelectedStock, moveToNextStock, moveToPrevStock } =
+    useStockNav({
+      activeTab,
+      activeTabRef,
+      setActiveTab: handleTabChange,
+      필터링된분석데이터,
+      체결데이터,
+      구매데이터,
+      autoPlay,
+      autoBuy,
+      autoSell,
+    });
 
   return (
     <div className="space-y-2">
@@ -165,7 +97,7 @@ const Log = () => {
                   key={idx}
                   selectedStock={selectedStock}
                   onSelect={setSelectedStock}
-                  loading={detailLoading || buying}
+                  loading={detailing || buying}
                 />
               ))}
             </IconWrap>
@@ -189,7 +121,7 @@ const Log = () => {
                   key={idx}
                   selectedStock={selectedStock}
                   onSelect={setSelectedStock}
-                  loading={detailLoading}
+                  loading={detailing}
                 />
               ))}
             </IconWrap>
@@ -213,7 +145,7 @@ const Log = () => {
                   key={idx}
                   selectedStock={selectedStock}
                   onSelect={setSelectedStock}
-                  loading={detailLoading || buying || selling}
+                  loading={detailing || buying || selling}
                   체결데이터={체결데이터}
                 />
               ))}

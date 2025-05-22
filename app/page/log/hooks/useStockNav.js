@@ -1,29 +1,74 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from "react";
+import { getSelectedStockCode } from "../utils/logoUtils";
+import useStockDetail from "./useStockDetail";
+import useStockBuy from "./useStockBuy";
+import useStockSell from "./useStockSell";
+
+// 탭 순서 정의
+const tabOrder = ["분석", "구매"];
+const interval = 3000; // 기본 3초
 
 const useStockNav = ({
   activeTab,
+  activeTabRef,
   setActiveTab,
   필터링된분석데이터,
   체결데이터,
   구매데이터,
-  onStockChange,
   refreshAnalysisData,
+  autoPlay,
+  autoBuy,
+  autoSell,
 }) => {
   // selectedStock을 객체로 관리
   const [selectedStock, setSelectedStock] = useState(null);
-  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
 
   // 자동 순환 상태 관리 (Header.jsx에서 이동)
-  const [autoPlay, setAutoPlay] = useState(false);
-  const [interval, setInterval] = useState(3000); // 기본 3초
   const autoPlayTimerRef = useRef(null);
+
+  const { fetchStockDetail } = useStockDetail();
+  const { buyStock } = useStockBuy();
+  const { sellStock } = useStockSell();
+
+  // 종목 변경 시 호출되는 함수
+  const onStockChange = useCallback(
+    (stockCode, stockObject) => {
+      const options = {
+        activeTab: activeTabRef.current,
+        autoBuy,
+        autoSell,
+        onBuy: buyStock,
+        onSell: sellStock,
+        stockObject,
+        체결데이터,
+      };
+
+      if (activeTabRef.current === "구매" && stockObject) {
+        options.buyCondition = {
+          evluPflsRt: stockObject.evlu_pfls_rt,
+          buyPrice: Number(stockObject.pchs_avg_pric || 0),
+        };
+      }
+
+      fetchStockDetail(stockCode, options);
+    },
+    [
+      activeTabRef,
+      autoBuy,
+      autoSell,
+      buyStock,
+      sellStock,
+      체결데이터,
+      fetchStockDetail,
+    ]
+  );
 
   // 탭별 데이터 가져오기 함수
   const getDataForTab = useCallback(
     (tab) => {
-      if (tab === '분석') return 필터링된분석데이터;
-      if (tab === '체결') return 체결데이터;
-      if (tab === '구매') return 구매데이터;
+      if (tab === "분석") return 필터링된분석데이터;
+      if (tab === "체결") return 체결데이터;
+      if (tab === "구매") return 구매데이터;
       return [];
     },
     [필터링된분석데이터, 체결데이터, 구매데이터]
@@ -55,21 +100,19 @@ const useStockNav = ({
     (stockInput) => {
       let stockObject = null;
 
-      if (typeof stockInput === 'string') {
+      if (typeof stockInput === "string") {
         // 문자열(코드)이 전달된 경우 객체 찾기
         stockObject = findStockByCode(stockInput, activeTab);
-      } else if (stockInput && typeof stockInput === 'object') {
+      } else if (stockInput && typeof stockInput === "object") {
         // 이미 객체인 경우 그대로 사용
         stockObject = stockInput;
       }
 
       // 유효한 객체를 찾지 못한 경우
       if (!stockObject) {
-        console.warn('유효한 종목을 찾을 수 없습니다:', stockInput);
+        console.warn("유효한 종목을 찾을 수 없습니다:", stockInput);
         return;
       }
-
-      console.log('선택된 종목:', stockObject);
 
       // 상태 업데이트
       setSelectedStock(stockObject);
@@ -88,84 +131,61 @@ const useStockNav = ({
     [activeTab, findStockByCode, onStockChange]
   );
 
-  // 탭 순서 정의
-  const tabOrder = ['분석', '구매'];
-
   // 다음 탭 가져오기
-  const getNextTab = (currentTab) => {
+  const getNextTab = useCallback((currentTab) => {
     const currentIndex = tabOrder.indexOf(currentTab);
     return tabOrder[(currentIndex + 1) % tabOrder.length];
-  };
+  }, []);
 
   // 이전 탭 가져오기
-  const getPrevTab = (currentTab) => {
+  const getPrevTab = useCallback((currentTab) => {
     const currentIndex = tabOrder.indexOf(currentTab);
     return tabOrder[(currentIndex - 1 + tabOrder.length) % tabOrder.length];
-  };
+  }, []);
 
   // 분석 데이터 새로고침 후 첫 번째 아이콘 선택 함수 (수정 필요 없음)
   const loadAnalysisAndSelectFirst = useCallback(async () => {
-    setIsLoadingAnalysis(true);
+    setActiveTab("분석");
 
-    try {
-      setActiveTab('분석');
+    if (refreshAnalysisData) {
+      await refreshAnalysisData();
+    }
 
-      if (refreshAnalysisData) {
-        await refreshAnalysisData();
+    if (필터링된분석데이터 && 필터링된분석데이터.length > 0) {
+      const firstStock = 필터링된분석데이터[0];
+      if (firstStock) {
+        handleSelectStock(firstStock);
       }
+    } else {
+      // 분석 데이터가 없는 경우 다음 탭으로 이동
+      const nextTab = getNextTab("분석");
+      setActiveTab(nextTab);
 
-      if (필터링된분석데이터 && 필터링된분석데이터.length > 0) {
-        const firstStock = 필터링된분석데이터[0];
-        if (firstStock) {
-          handleSelectStock(firstStock);
-        }
+      const nextTabData = getDataForTab(nextTab);
+      if (nextTabData && nextTabData.length > 0) {
+        handleSelectStock(nextTabData[0]); // 다음 탭의 첫 번째 종목 선택
       } else {
-        // 분석 데이터가 없는 경우 다음 탭으로 이동
-        const nextTab = getNextTab('분석');
-        setActiveTab(nextTab);
-
-        const nextTabData = getDataForTab(nextTab);
-        if (nextTabData && nextTabData.length > 0) {
-          handleSelectStock(nextTabData[0]); // 다음 탭의 첫 번째 종목 선택
-        } else {
-          console.warn('다음 탭에도 데이터가 없습니다.');
-        }
+        console.warn("다음 탭에도 데이터가 없습니다.");
       }
-    } finally {
-      setIsLoadingAnalysis(false);
     }
   }, [
     필터링된분석데이터,
     setActiveTab,
     refreshAnalysisData,
     handleSelectStock,
+    getDataForTab,
+    getNextTab,
   ]);
-
-  // 현재 선택된 종목의 코드 추출 함수
-  const getSelectedStockCode = useCallback(() => {
-    if (!selectedStock) return null;
-
-    return (
-      selectedStock.name ||
-      selectedStock.code ||
-      selectedStock.ovrs_pdno ||
-      selectedStock.pdno
-    );
-  }, [selectedStock]);
 
   // moveToNextStock 함수 - 객체 기반으로 수정
   const moveToNextStock = useCallback(async () => {
-    console.log('moveToNextStock', moveToNextStock);
-
     let currentData = getDataForTab(activeTab);
-
-    console.log('currentData', currentData);
 
     if (currentData.length === 0) {
       // 데이터가 없는 경우 다음 탭으로 이동
       const nextTab = getNextTab(activeTab);
 
-      if (activeTab === '구매' && nextTab === '분석') {
+      if (activeTab === "구매" && nextTab === "분석") {
         await loadAnalysisAndSelectFirst();
         return;
       }
@@ -177,7 +197,7 @@ const useStockNav = ({
       if (currentData.length === 0) {
         const nextNextTab = getNextTab(nextTab);
 
-        if (nextNextTab === '분석') {
+        if (nextNextTab === "분석") {
           await loadAnalysisAndSelectFirst();
           return;
         }
@@ -200,7 +220,7 @@ const useStockNav = ({
     }
 
     // 현재 선택된 종목 코드 추출
-    const selectedCode = getSelectedStockCode();
+    const selectedCode = getSelectedStockCode(selectedStock);
 
     // 현재 선택된 종목의 인덱스 찾기
     const currentIndex = currentData.findIndex((item) => {
@@ -213,7 +233,7 @@ const useStockNav = ({
     if (currentIndex === -1 || currentIndex === currentData.length - 1) {
       const nextTab = getNextTab(activeTab);
 
-      if (activeTab === '구매' && nextTab === '분석') {
+      if (activeTab === "구매" && nextTab === "분석") {
         await loadAnalysisAndSelectFirst();
         return;
       }
@@ -224,7 +244,7 @@ const useStockNav = ({
       if (nextTabData.length === 0) {
         const nextNextTab = getNextTab(nextTab);
 
-        if (nextNextTab === '분석') {
+        if (nextNextTab === "분석") {
           await loadAnalysisAndSelectFirst();
           return;
         }
@@ -250,7 +270,6 @@ const useStockNav = ({
     activeTab,
     getDataForTab,
     getNextTab,
-    getSelectedStockCode,
     handleSelectStock,
     loadAnalysisAndSelectFirst,
     selectedStock,
@@ -289,7 +308,7 @@ const useStockNav = ({
     }
 
     // 현재 선택된 종목 코드 추출
-    const selectedCode = getSelectedStockCode();
+    const selectedCode = getSelectedStockCode(selectedStock);
 
     // 현재 선택된 종목의 인덱스 찾기
     const currentIndex = currentData.findIndex((item) => {
@@ -331,20 +350,14 @@ const useStockNav = ({
     activeTab,
     getDataForTab,
     getPrevTab,
-    getSelectedStockCode,
     handleSelectStock,
     selectedStock,
     setActiveTab,
   ]);
 
-  // 자동 순환 토글 함수
-  const toggleAutoPlay = useCallback(() => {
-    setAutoPlay((prev) => !prev);
-  }, []);
-
   // 자동 순환 효과
   useEffect(() => {
-    if (autoPlay && hasData() && !isLoadingAnalysis) {
+    if (autoPlay && hasData()) {
       autoPlayTimerRef.current = setTimeout(() => {
         moveToNextStock();
       }, interval);
@@ -355,20 +368,13 @@ const useStockNav = ({
         clearTimeout(autoPlayTimerRef.current);
       }
     };
-  }, [autoPlay, hasData, isLoadingAnalysis, moveToNextStock, interval]);
+  }, [autoPlay, hasData, moveToNextStock]);
 
   return {
     selectedStock,
     setSelectedStock: handleSelectStock,
     moveToNextStock,
     moveToPrevStock,
-    isLoadingAnalysis,
-    // 자동 순환 관련 추가
-    autoPlay,
-    toggleAutoPlay,
-    hasData: hasData(),
-    interval,
-    setInterval,
   };
 };
 
