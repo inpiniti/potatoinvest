@@ -2,6 +2,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getLogoUrl } from '../utils/logoUtils';
 import { Badge } from '@/components/ui/badge';
 
+const IconWrap = ({ isShow, children }) => {
+  if (!isShow) return null;
+
+  return (
+    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 place-items-center relative gap-y-4">
+      {children}
+    </div>
+  );
+};
+
 const StockIcon = ({ item, selectedStock, onSelect, loading, 체결데이터 }) => {
   const logoUrl = getLogoUrl(item);
   const displayName = (item.name || item.code || 'N/A').substring(0, 6);
@@ -172,3 +182,4 @@ const StockIcon = ({ item, selectedStock, onSelect, loading, 체결데이터 }) 
 };
 
 export default StockIcon;
+export { IconWrap };

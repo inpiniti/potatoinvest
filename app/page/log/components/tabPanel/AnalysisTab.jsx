@@ -4,10 +4,8 @@ const AnalysisTab = ({
   data,
   isLoading,
   selectedStock, // 호환성용 (코드만)
-  selectedStockObject, // 전체 객체
   setSelectedStock,
   onRefresh,
-  //fetchStockDetail,
   detailLoading,
 }) => {
   return (
@@ -22,7 +20,6 @@ const AnalysisTab = ({
       emptyMessage="분석 데이터가 없습니다."
       selectedStock={selectedStock}
       setSelectedStock={setSelectedStock}
-      //fetchStockDetail={fetchStockDetail}
       detailLoading={detailLoading}
     />
   );

@@ -1,34 +1,36 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Tabs, TabsList } from "@/components/ui/tabs";
-import useStockData from "./hooks/useStockData";
-import useStockNav from "./hooks/useStockNav";
-import useStockDetail from "./hooks/useStockDetail";
-import useStockBuy from "./hooks/useStockBuy"; // 새로 추가한 매수 훅
-import useStockSell from "./hooks/useStockSell"; // 매도 훅 추가
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Tabs, TabsList } from '@/components/ui/tabs';
+import useStockData from './hooks/useStockData';
+import useStockNav from './hooks/useStockNav';
+import useStockDetail from './hooks/useStockDetail';
+import useStockBuy from './hooks/useStockBuy'; // 새로 추가한 매수 훅
+import useStockSell from './hooks/useStockSell'; // 매도 훅 추가
 
 // 컴포넌트 임포트
-import Header from "./components/Header";
+import Header from './components/Header';
 
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
-import AnalysisTab from "./components/tabPanel/AnalysisTab";
-import OrderTab from "./components/tabPanel/OrderTab";
-import PortfolioTab from "./components/tabPanel/PortfolioTab";
+import AnalysisTab from './components/tabPanel/AnalysisTab';
+import OrderTab from './components/tabPanel/OrderTab';
+import PortfolioTab from './components/tabPanel/PortfolioTab';
 
-import StockNavigation from "./components/header/navigation/StockNavigation";
-import AutoPlayToggle from "./components/header/navigation/AutoPlayToggle";
-import BuyToggle from "./components/header/navigation/BuyToggle";
-import SellToggle from "./components/header/navigation/SellToggle";
-import SettingsButton from "./components/header/buttons/SettingsButton";
-import LeftButton from "./components/header/buttons/LeftButton";
-import RightButton from "./components/header/buttons/RightButton";
-import StockDisplay from "./components/header/navigation/StockDisplay";
-import Tab from "./components/header/tab/Tab";
+import StockNavigation from './components/header/navigation/StockNavigation';
+import AutoPlayToggle from './components/header/navigation/AutoPlayToggle';
+import BuyToggle from './components/header/navigation/BuyToggle';
+import SellToggle from './components/header/navigation/SellToggle';
+import SettingsButton from './components/header/buttons/SettingsButton';
+import LeftButton from './components/header/buttons/LeftButton';
+import RightButton from './components/header/buttons/RightButton';
+import StockDisplay from './components/header/navigation/StockDisplay';
+import Tab from './components/header/tab/Tab';
+import { EmptyMessage, Loading } from './components/TabPanel';
+import { IconWrap } from './components/StockIcon';
 
 const Log = () => {
-  const [activeTab, setActiveTab] = useState("분석");
+  const [activeTab, setActiveTab] = useState('분석');
   const activeTabRef = useRef(activeTab); // useRef로 activeTab 복사
 
   const handleTabChange = (newTab) => {
@@ -67,9 +69,9 @@ const Log = () => {
 
   const handleStockChange = useCallback(
     (stockCode, stockObject) => {
-      console.log("현재 탭 (useRef):", activeTabRef.current); // 항상 최신 값
-      console.log("현재 탭 (useState):", activeTab); // 비동기적으로 업데이트된 값
-      console.log("종목 변경:", stockCode, stockObject);
+      console.log('현재 탭 (useRef):', activeTabRef.current); // 항상 최신 값
+      console.log('현재 탭 (useState):', activeTab); // 비동기적으로 업데이트된 값
+      console.log('종목 변경:', stockCode, stockObject);
 
       const options = {
         activeTab: activeTabRef.current,
@@ -81,7 +83,7 @@ const Log = () => {
         체결데이터,
       };
 
-      if (activeTabRef.current === "구매" && stockObject) {
+      if (activeTabRef.current === '구매' && stockObject) {
         options.buyCondition = {
           evluPflsRt: stockObject.evlu_pfls_rt,
           buyPrice: Number(stockObject.pchs_avg_pric || 0),
@@ -128,8 +130,8 @@ const Log = () => {
     setAutoBuy(newState);
     toast.info(
       newState
-        ? "자동 매수가 활성화되었습니다"
-        : "자동 매수가 비활성화되었습니다"
+        ? '자동 매수가 활성화되었습니다'
+        : '자동 매수가 비활성화되었습니다'
     );
   };
 
@@ -139,8 +141,8 @@ const Log = () => {
     setAutoSell(newState);
     toast.info(
       newState
-        ? "자동 매도가 활성화되었습니다"
-        : "자동 매도가 비활성화되었습니다"
+        ? '자동 매도가 활성화되었습니다'
+        : '자동 매도가 비활성화되었습니다'
     );
   };
 
@@ -164,86 +166,82 @@ const Log = () => {
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
-          <Tab title="분석" value="분석" dataList={필터링된분석데이터} />
-          <Tab title="미체결" value="체결" dataList={체결데이터} />
-          <Tab title="보유" value="구매" dataList={구매데이터} />
+          <Tab title="분석" value="분석" length={필터링된분석데이터.length} />
+          <Tab title="미체결" value="체결" length={체결데이터.length} />
+          <Tab title="보유" value="구매" length={구매데이터.length} />
         </TabsList>
+        <TabContent value="분석">
+          <Card>
+            <Loading
+              isShow={isLoading('분석')}
+              loadingMessage="분석 데이터를 불러오는 중입니다..."
+            />
+            <IconWrap isShow={!isLoading('분석')}>
+              {필터링된분석데이터.map((item, idx) => (
+                <StockIcon
+                  item={item}
+                  key={idx}
+                  selectedStock={selectedStock}
+                  onSelect={setSelectedStock}
+                  loading={detailLoading || buying}
+                />
+              ))}
+            </IconWrap>
+            <EmptyMessage
+              isShow={!isLoading('분석') && 필터링된분석데이터.length === 0}
+              emptyMessage="현재 분석 데이터가 없습니다."
+            />
+          </Card>
+        </TabContent>
 
-        {/* 각 탭 내용 */}
-        <AnalysisTab
-          data={필터링된분석데이터}
-          isLoading={isLoading("분석")}
-          selectedStock={selectedStock}
-          setSelectedStock={setSelectedStock}
-          onRefresh={fetch분석데이터}
-          // fetchStockDetail={(stockCode) =>
-          //   fetchStockDetail(stockCode, {
-          //     activeTab: '분석',
-          //     autoBuy,
-          //     onBuy: buyStock,
-          //     체결데이터,
-          //   })
-          // }
-          detailLoading={detailLoading || buying || selling}
-        />
+        <TabContent value="체결">
+          <Card>
+            <Loading
+              isShow={isLoading('체결')}
+              loadingMessage="미체결 데이터를 불러오는 중입니다..."
+            />
+            <IconWrap isShow={!isLoading('체결')}>
+              {체결데이터.map((item, idx) => (
+                <StockIcon
+                  item={item}
+                  key={idx}
+                  selectedStock={selectedStock}
+                  onSelect={setSelectedStock}
+                  loading={detailLoading}
+                />
+              ))}
+            </IconWrap>
+            <EmptyMessage
+              isShow={!isLoading('체결') && 체결데이터.length === 0}
+              emptyMessage="현재 미체결 데이터가 없습니다."
+            />
+          </Card>
+        </TabContent>
 
-        <OrderTab
-          data={체결데이터}
-          isLoading={isLoading("체결")}
-          selectedStock={selectedStock}
-          setSelectedStock={setSelectedStock}
-          onRefresh={fetch체결데이터}
-          // fetchStockDetail={(stockCode) =>
-          //   fetchStockDetail(stockCode, {
-          //     activeTab: "체결",
-          //     autoBuy,
-          //     onBuy: buyStock,
-          //   })
-          // }
-          detailLoading={detailLoading || buying}
-        />
-
-        <PortfolioTab
-          data={구매데이터}
-          isLoading={isLoading("구매")}
-          selectedStock={selectedStock}
-          setSelectedStock={setSelectedStock}
-          onRefresh={fetch구매데이터}
-          // fetchStockDetail={(stockCode) => {
-          //   console.log('stockCode:', stockCode);
-          //   // 보유종목 탭이면 선택된 종목에서 정보 추출
-          //   const stockItem = 구매데이터.find(
-          //     (item) => (item.name || item.ovrs_pdno || item.pdno) === stockCode
-          //   );
-
-          //   if (stockItem) {
-          //     fetchStockDetail(stockCode, {
-          //       activeTab: "구매",
-          //       autoBuy,
-          //       autoSell,
-          //       onBuy: buyStock,
-          //       onSell: sellStock,
-          //       buyCondition: {
-          //         evluPflsRt: stockItem.evlu_pfls_rt,
-          //         buyPrice: Number(stockItem.pchs_avg_pric || 0),
-          //       },
-          //       stockObject: stockItem,
-          //       체결데이터,
-          //     });
-          //   } else {
-          //     fetchStockDetail(stockCode, {
-          //       activeTab: "구매",
-          //       autoBuy,
-          //       autoSell,
-          //       onBuy: buyStock,
-          //       onSell: sellStock,
-          //       체결데이터,
-          //     });
-          //   }
-          // }}
-          detailLoading={detailLoading || buying || selling}
-          체결데이터={체결데이터}
-        />
+        <TabContent value="구매">
+          <Card>
+            <Loading
+              isShow={isLoading('구매')}
+              loadingMessage="보유 종목 정보를 불러오는 중입니다..."
+            />
+            <IconWrap isShow={!isLoading('구매')}>
+              {구매데이터.map((item, idx) => (
+                <StockIcon
+                  item={item}
+                  key={idx}
+                  selectedStock={selectedStock}
+                  onSelect={setSelectedStock}
+                  loading={detailLoading || buying || selling}
+                  체결데이터={체결데이터}
+                />
+              ))}
+            </IconWrap>
+            <EmptyMessage
+              isShow={!isLoading('구매') && 구매데이터.length === 0}
+              emptyMessage="현재 보유 종목이 없습니다."
+            />
+          </Card>
+        </TabContent>
       </Tabs>
     </div>
   );

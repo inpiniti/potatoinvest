@@ -4,17 +4,13 @@ import { TabsContent } from '@/components/ui/tabs';
 import StockIcon from './StockIcon';
 
 const TabPanel = ({
-  value,
+  value, // text
   data,
   isLoading,
-  onRefresh,
-  title,
-  description,
-  loadingMessage,
-  emptyMessage,
+  loadingMessage, // text
+  emptyMessage, // text
   selectedStock,
   setSelectedStock,
-  //fetchStockDetail,
   detailLoading,
   체결데이터, // 체결 데이터를 props로 받음
   isRefreshing, // 새로운 prop 추가
@@ -61,4 +57,28 @@ const TabPanel = ({
   );
 };
 
+const Loading = ({ isShow, loadingMessage }) => {
+  if (!isShow) return null;
+
+  return (
+    <div className="flex justify-center items-center h-40">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="h-10 w-10 animate-spin text-gray-400" />
+        <p className="text-gray-500">{loadingMessage}</p>
+      </div>
+    </div>
+  );
+};
+
+const EmptyMessage = ({ isShow, emptyMessage }) => {
+  if (!isShow) return null;
+
+  return (
+    <div className="flex justify-center items-center h-40">
+      <p className="text-gray-500">{emptyMessage}</p>
+    </div>
+  );
+};
+
 export default TabPanel;
+export { Loading, EmptyMessage };
