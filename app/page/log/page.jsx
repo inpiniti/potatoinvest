@@ -42,24 +42,11 @@ const Log = () => {
   const [autoSell, setAutoSell] = useState(false); // 자동 매도 활성화 여부 추가
 
   // 데이터 관련 훅 사용
-  const {
-    분석데이터,
-    체결데이터,
-    구매데이터,
-    필터링된분석데이터,
-    isLoading,
-    refreshAll,
-    fetch분석데이터,
-    fetch체결데이터,
-    fetch구매데이터,
-  } = useStockData();
+  const { 체결데이터, 구매데이터, 필터링된분석데이터, isLoading } =
+    useStockData();
 
   // 상세 정보 조회 훅
-  const {
-    detailData,
-    loading: detailLoading,
-    fetchStockDetail,
-  } = useStockDetail();
+  const { loading: detailLoading, fetchStockDetail } = useStockDetail();
 
   // 매수 훅
   const { buying, buyStock } = useStockBuy();
@@ -109,12 +96,10 @@ const Log = () => {
     setSelectedStock,
     moveToNextStock,
     moveToPrevStock,
-    isLoadingAnalysis,
 
     // 자동 순환 관련 추가
     autoPlay,
     toggleAutoPlay,
-    hasData,
   } = useStockNav({
     activeTab,
     setActiveTab: handleTabChange,
