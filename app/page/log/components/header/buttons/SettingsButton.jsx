@@ -156,12 +156,12 @@ const SettingsToggle = ({ children }) => {
                 <DrawerHeader>
                   <DrawerTitle>설정</DrawerTitle>
                   <DrawerDescription>
-                    여기서 설정한 옵션값을 기준으로 구매 및 매도가 됩니다.
+                    설정한 옵션 기준으로 구매 및 매도가 됩니다.
                   </DrawerDescription>
                 </DrawerHeader>
                 <div className="p-4 pb-0">
                   {/* 설정 내용 표시 - 쿠키 설정 스타일로 */}
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {/* Strictly Necessary */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
@@ -204,14 +204,19 @@ const SettingsToggle = ({ children }) => {
                     </div>
 
                     {/* 최소매수금액 입력 필드 */}
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium">
-                        최소매수금액 (원)
-                      </label>
-                      <div className="flex gap-2 w-full items-center bg-neutral-100 p-2 rounded-lg">
+                    <div className="flex gap-2 items-center justify-between">
+                      <div>
+                        <label className="text-sm font-medium">
+                          최소매수금액 (원)
+                        </label>
+                        <p className="text-xs text-neutral-500">
+                          최소 매수 금액을 설정합니다.
+                        </p>
+                      </div>
+                      <div className="flex gap-2 w-fit items-center bg-neutral-100 p-2 rounded-lg">
                         <input
                           type="number"
-                          className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
+                          className="w-20 flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
                           value={settings.minBuyAmount}
                           onChange={handleChange("minBuyAmount")}
                           placeholder="최소매수금액을 입력해주세요"
@@ -219,20 +224,22 @@ const SettingsToggle = ({ children }) => {
                         />
                         <span className="text-neutral-500">원</span>
                       </div>
-                      <p className="text-xs text-neutral-500">
-                        최소 매수 금액을 설정합니다. (최소 1,000원)
-                      </p>
                     </div>
 
                     {/* 매도기준 입력 필드 */}
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium">
-                        매도기준 (%)
-                      </label>
-                      <div className="flex gap-2 w-full items-center bg-neutral-100 p-2 rounded-lg">
+                    <div className="flex gap-2 justify-between items-center">
+                      <div>
+                        <label className="text-sm font-medium">
+                          매도기준 (%)
+                        </label>
+                        <p className="text-xs text-neutral-500">
+                          예: 2은 2% 수익 시 매도
+                        </p>
+                      </div>
+                      <div className="flex gap-2 w-fit items-center bg-neutral-100 p-2 rounded-lg">
                         <input
                           type="number"
-                          className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
+                          className="w-20 flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
                           value={settings.sellRate}
                           onChange={handleChange("sellRate")}
                           placeholder="매도기준을 입력해주세요"
@@ -241,20 +248,22 @@ const SettingsToggle = ({ children }) => {
                         />
                         <span className="text-neutral-500">%</span>
                       </div>
-                      <p className="text-xs text-neutral-500">
-                        양수 값을 입력해주세요. 예: 2.0은 2% 수익 시 매도
-                      </p>
                     </div>
 
                     {/* 매수기준 입력 필드 */}
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium">
-                        매수기준 (%)
-                      </label>
-                      <div className="flex gap-2 w-full items-center bg-neutral-100 p-2 rounded-lg">
+                    <div className="flex gap-2 items-center justify-between">
+                      <div>
+                        <label className="text-sm font-medium">
+                          매수기준 (%)
+                        </label>
+                        <p className="text-xs text-neutral-500">
+                          예: -10은 10% 하락 시 매수
+                        </p>
+                      </div>
+                      <div className="flex gap-2 w-fit items-center bg-neutral-100 p-2 rounded-lg">
                         <input
                           type="number"
-                          className="flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
+                          className="w-20 flex-1 border-0 shadow-none focus:outline-none focus:ring-0 bg-neutral-100"
                           value={settings.buyRate}
                           onChange={handleChange("buyRate")}
                           placeholder="매수기준을 입력해주세요"
@@ -263,9 +272,6 @@ const SettingsToggle = ({ children }) => {
                         />
                         <span className="text-neutral-500">%</span>
                       </div>
-                      <p className="text-xs text-neutral-500">
-                        음수 값을 입력해주세요. 예: -10은 10% 하락 시 매수
-                      </p>
                     </div>
                   </div>
                 </div>
