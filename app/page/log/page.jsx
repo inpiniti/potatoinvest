@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Tabs, TabsList } from '@/components/ui/tabs';
 import useStockData from './hooks/useStockData';
 import useStockNav from './hooks/useStockNav';
@@ -12,10 +12,6 @@ import useStockSell from './hooks/useStockSell'; // 매도 훅 추가
 import Header from './components/Header';
 
 import { toast } from 'sonner';
-
-import AnalysisTab from './components/tabPanel/AnalysisTab';
-import OrderTab from './components/tabPanel/OrderTab';
-import PortfolioTab from './components/tabPanel/PortfolioTab';
 
 import StockNavigation from './components/header/navigation/StockNavigation';
 import AutoPlayToggle from './components/header/navigation/AutoPlayToggle';
