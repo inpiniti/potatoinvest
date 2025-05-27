@@ -5,6 +5,7 @@ const useToggle = () => {
   const [autoBuy, setAutoBuy] = useState(false); // 자동 매수 활성화 여부
   const [autoSell, setAutoSell] = useState(false); // 자동 매도 활성화 여부 추가
   const [autoPlay, setAutoPlay] = useState(false);
+  const [showMarket, setShowMarket] = useState(true); // 시장 지표 표시 여부 추가
 
   // 자동 순환 토글 함수
   const toggleAutoPlay = useCallback(() => {
@@ -38,14 +39,21 @@ const useToggle = () => {
     );
   };
 
+  // 시장 지표 표시 토글 함수 추가
+  const toggleMarket = () => {
+    setShowMarket((prev) => !prev);
+  };
+
   return {
     autoBuy,
     autoSell,
     autoPlay,
+    showMarket,
 
     toggleAutoPlay,
     toggleAutoBuy,
     toggleAutoSell,
+    toggleMarket, // 시장 지표 표시 토글 함수 반환
   };
 };
 

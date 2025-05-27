@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 
+import PageWrap from "./components/PageWrap";
 import Header from "./components/Header";
 import { EmptyMessage, Loading } from "./components/TabPanel";
 import StockIcon, { IconWrap } from "./components/StockIcon";
@@ -16,8 +15,13 @@ import SellToggle from "./components/header/navigation/SellToggle";
 import SettingsButton from "./components/header/buttons/SettingsButton";
 import LeftButton from "./components/header/buttons/LeftButton";
 import RightButton from "./components/header/buttons/RightButton";
+import MarketToggleButton from "./components/header/buttons/MarketToggleButton";
 import StockDisplay from "./components/header/navigation/StockDisplay";
 import Tab from "./components/header/tab/Tab";
+import {
+  MarketIndicatorCard,
+  MarketIndicatorItem,
+} from "./components/MarketIndicator";
 
 import useStockData from "./hooks/useStockData";
 import useStockNav from "./hooks/useStockNav";
@@ -26,6 +30,7 @@ import useStockBuy from "./hooks/useStockBuy";
 import useStockSell from "./hooks/useStockSell";
 import useTab from "./hooks/useTab";
 import useToggle from "./hooks/useToggle";
+import useMarketIndicators from "./hooks/useMarketIndicators";
 
 const Log = () => {
   const { activeTab, activeTabRef, handleTabChange } = useTab();
@@ -33,10 +38,15 @@ const Log = () => {
     autoBuy,
     autoSell,
     autoPlay,
+    showMarket,
     toggleAutoPlay,
     toggleAutoBuy,
     toggleAutoSell,
+    toggleMarket,
   } = useToggle();
+
+  // 시장 지표 데이터 가져오기
+  const { indicators } = useMarketIndicators();
 
   // 데이터 관련 훅 사용
   const { 체결데이터, 구매데이터, 필터링된분석데이터, isLoading } =
@@ -61,7 +71,7 @@ const Log = () => {
     });
 
   return (
-    <div className="space-y-2">
+    <PageWrap>
       <Header>
         <StockNavigation>
           <LeftButton onClick={moveToPrevStock} />
@@ -71,12 +81,29 @@ const Log = () => {
           />
           <RightButton onClick={moveToNextStock} />
         </StockNavigation>
+        <MarketToggleButton
+          showMarket={showMarket}
+          toggleMarket={toggleMarket}
+        />
         <SettingsButton>
           <AutoPlayToggle autoPlay={autoPlay} toggleAutoPlay={toggleAutoPlay} />
           <BuyToggle autoBuy={autoBuy} onToggleAutoBuy={toggleAutoBuy} />
           <SellToggle autoSell={autoSell} onToggleAutoSell={toggleAutoSell} />
         </SettingsButton>
       </Header>
+
+      {/* 시장 지표 카드 추가 */}
+      <MarketIndicatorCard isShow={showMarket}>
+        {indicators.map((indicator, index) => (
+          <MarketIndicatorItem
+            key={index}
+            region={indicator.region}
+            type={indicator.type}
+            value={indicator.value}
+            change={indicator.change}
+          />
+        ))}
+      </MarketIndicatorCard>
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
@@ -157,7 +184,7 @@ const Log = () => {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageWrap>
   );
 };
 
