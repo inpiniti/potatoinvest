@@ -19,6 +19,7 @@ const useStockNav = ({
   autoPlay,
   autoBuy,
   autoSell,
+  fetch분석데이터,
 }) => {
   // selectedStock을 객체로 관리
   const [selectedStock, setSelectedStock] = useState(null);
@@ -145,27 +146,39 @@ const useStockNav = ({
 
   // 분석 데이터 새로고침 후 첫 번째 아이콘 선택 함수 (수정 필요 없음)
   const loadAnalysisAndSelectFirst = useCallback(async () => {
-    setActiveTab("분석");
-
-    if (refreshAnalysisData) {
-      await refreshAnalysisData();
+    if (autoPlayTimerRef.current) {
+      clearTimeout(autoPlayTimerRef.current);
+      autoPlayTimerRef.current = null;
     }
 
-    if (필터링된분석데이터 && 필터링된분석데이터.length > 0) {
-      const firstStock = 필터링된분석데이터[0];
-      if (firstStock) {
-        handleSelectStock(firstStock);
-      }
-    } else {
-      // 분석 데이터가 없는 경우 다음 탭으로 이동
-      const nextTab = getNextTab("분석");
-      setActiveTab(nextTab);
+    try {
+      setActiveTab("분석");
 
-      const nextTabData = getDataForTab(nextTab);
-      if (nextTabData && nextTabData.length > 0) {
-        handleSelectStock(nextTabData[0]); // 다음 탭의 첫 번째 종목 선택
+      await fetch분석데이터();
+
+      if (필터링된분석데이터 && 필터링된분석데이터.length > 0) {
+        const firstStock = 필터링된분석데이터[0];
+        if (firstStock) {
+          handleSelectStock(firstStock);
+        }
       } else {
-        console.warn("다음 탭에도 데이터가 없습니다.");
+        // 분석 데이터가 없는 경우 다음 탭으로 이동
+        const nextTab = getNextTab("분석");
+        setActiveTab(nextTab);
+
+        const nextTabData = getDataForTab(nextTab);
+        if (nextTabData && nextTabData.length > 0) {
+          handleSelectStock(nextTabData[0]); // 다음 탭의 첫 번째 종목 선택
+        } else {
+          console.warn("다음 탭에도 데이터가 없습니다.");
+        }
+      }
+    } finally {
+      // 새로고침 후 자동 순환 재시작
+      if (autoPlay) {
+        autoPlayTimerRef.current = setTimeout(() => {
+          moveToNextStock();
+        }, interval);
       }
     }
   }, [
@@ -228,6 +241,10 @@ const useStockNav = ({
 
       return itemCode === selectedCode;
     });
+
+    if (currentIndex === -1) {
+      return;
+    }
 
     // 현재 종목을 찾지 못했거나 마지막 종목인 경우 다음 탭으로 이동
     if (currentIndex === -1 || currentIndex === currentData.length - 1) {
@@ -317,6 +334,10 @@ const useStockNav = ({
       return itemCode === selectedCode;
     });
 
+    if (currentIndex === -1) {
+      return;
+    }
+
     // 현재 종목을 찾지 못했거나 첫 번째 종목인 경우 이전 탭으로 이동
     if (currentIndex === -1 || currentIndex === 0) {
       const prevTab = getPrevTab(activeTab);
@@ -366,6 +387,7 @@ const useStockNav = ({
     return () => {
       if (autoPlayTimerRef.current) {
         clearTimeout(autoPlayTimerRef.current);
+        autoPlayTimerRef.current = null;
       }
     };
   }, [autoPlay, hasData, moveToNextStock]);

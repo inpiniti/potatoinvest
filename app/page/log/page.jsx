@@ -49,8 +49,13 @@ const Log = () => {
   const { indicators } = useMarketIndicators();
 
   // 데이터 관련 훅 사용
-  const { 체결데이터, 구매데이터, 필터링된분석데이터, isLoading } =
-    useStockData();
+  const {
+    체결데이터,
+    구매데이터,
+    필터링된분석데이터,
+    isLoading,
+    fetch분석데이터,
+  } = useStockData();
 
   const { detailing } = useStockDetail();
   const { buying } = useStockBuy();
@@ -68,6 +73,7 @@ const Log = () => {
       autoPlay,
       autoBuy,
       autoSell,
+      fetch분석데이터,
     });
 
   return (
