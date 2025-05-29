@@ -33,7 +33,8 @@
     "app/page/buy/page.js",
     "app/page/log/page.jsx",
     "hooks/useAi.js",
-    "app/page/sell/page.jsx"
+    "app/page/sell/page.jsx",
+    "app/dashboard/page.jsx"
   ],
   "exclude": ["node_modules"]
 }

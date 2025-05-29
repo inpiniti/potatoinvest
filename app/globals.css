@@ -46,76 +46,96 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --radius: 1rem;
+  --radius: 0.5rem;
+  /* 배경색을 살짝 더 따뜻한 느낌으로 */
+  --background: oklch(0.98 0.003 80);
+  --foreground: oklch(0.141 0.004 285.823);
+  --card: oklch(0.98 0.003 80);
+  --card-foreground: oklch(0.141 0.004 285.823);
+  --popover: oklch(0.98 0.003 80);
+  --popover-foreground: oklch(0.141 0.004 285.823);
+
+  /* 채도 더 낮추기: 0.19 → 0.16 */
+  --primary: oklch(0.62 0.16 25.331);
+  --primary-foreground: oklch(0.97 0.01 17.38);
+
+  /* 회색조 더 자연스럽게 */
+  --secondary: oklch(0.94 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.005 285.885);
+  --muted: oklch(0.94 0.001 286.375);
+  --muted-foreground: oklch(0.552 0.012 285.938);
+  --accent: oklch(0.94 0.001 286.375);
+  --accent-foreground: oklch(0.21 0.005 285.885);
+
+  /* 채도 낮추기: 0.21 → 0.17 */
+  --destructive: oklch(0.57 0.17 27.325);
+
+  /* 테두리 색상 부드럽게 */
+  --border: oklch(0.9 0.003 286.32);
+  --input: oklch(0.9 0.003 286.32);
+
+  /* 링 색상 채도 낮추기 */
+  --ring: oklch(0.62 0.16 25.331);
+
+  /* 차트 색상 더 부드럽게 톤다운 */
+  --chart-1: oklch(0.646 0.14 41.116);
+  --chart-2: oklch(0.6 0.08 184.704);
+  --chart-3: oklch(0.398 0.05 227.392);
+  --chart-4: oklch(0.78 0.12 84.429);
+  --chart-5: oklch(0.769 0.12 70.08);
+
+  /* 사이드바 색상 더 부드럽게 */
+  --sidebar: oklch(0.97 0.003 80);
+  --sidebar-foreground: oklch(0.141 0.004 285.823);
+  --sidebar-primary: oklch(0.62 0.16 25.331);
+  --sidebar-primary-foreground: oklch(0.97 0.01 17.38);
+  --sidebar-accent: oklch(0.94 0.001 286.375);
+  --sidebar-accent-foreground: oklch(0.21 0.005 285.885);
+  --sidebar-border: oklch(0.9 0.003 286.32);
+  --sidebar-ring: oklch(0.62 0.16 25.331);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
-  --radius: 1rem;
+  /* 다크 모드 배경도 조금 더 부드럽게 */
+  --background: oklch(0.16 0.002 285.823);
+  --foreground: oklch(0.94 0 0);
+  --card: oklch(0.22 0.003 285.885);
+  --card-foreground: oklch(0.94 0 0);
+  --popover: oklch(0.22 0.003 285.885);
+  --popover-foreground: oklch(0.94 0 0);
+
+  /* 채도 낮추기: 0.19 → 0.16 */
+  --primary: oklch(0.62 0.16 25.331);
+  --primary-foreground: oklch(0.97 0.01 17.38);
+  --secondary: oklch(0.28 0.003 286.033);
+  --secondary-foreground: oklch(0.94 0 0);
+  --muted: oklch(0.28 0.003 286.033);
+  --muted-foreground: oklch(0.705 0.01 286.067);
+  --accent: oklch(0.28 0.003 286.033);
+  --accent-foreground: oklch(0.94 0 0);
+
+  /* 채도 낮추기: 0.17 → 0.14 */
+  --destructive: oklch(0.7 0.14 22.216);
+  --border: oklch(1 0 0 / 6%); /* 투명도 낮춤 */
+  --input: oklch(1 0 0 / 9%); /* 투명도 낮춤 */
+  --ring: oklch(0.62 0.16 25.331);
+
+  /* 차트 색상 더 부드럽게 */
+  --chart-1: oklch(0.48 0.15 264.376);
+  --chart-2: oklch(0.68 0.11 162.48);
+  --chart-3: oklch(0.75 0.12 70.08);
+  --chart-4: oklch(0.62 0.15 303.9);
+  --chart-5: oklch(0.64 0.15 16.439);
+
+  /* 사이드바 색상도 톤다운 */
+  --sidebar: oklch(0.22 0.003 285.885);
+  --sidebar-foreground: oklch(0.94 0 0);
+  --sidebar-primary: oklch(0.62 0.16 25.331);
+  --sidebar-primary-foreground: oklch(0.97 0.01 17.38);
+  --sidebar-accent: oklch(0.28 0.003 286.033);
+  --sidebar-accent-foreground: oklch(0.94 0 0);
+  --sidebar-border: oklch(1 0 0 / 6%);
+  --sidebar-ring: oklch(0.62 0.16 25.331);
 }
 
 @layer base {
@@ -125,4 +145,30 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* 커스텀 스크롤바 숨김 유틸리티 추가 */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+
+  .scrollbar-default {
+    -ms-overflow-style: auto; /* IE and Edge */
+    scrollbar-width: auto; /* Firefox */
+  }
+
+  .scrollbar-default::-webkit-scrollbar {
+    display: block; /* Chrome, Safari and Opera */
+  }
+}
+
+/* globals.css */
+* {
+  box-sizing: border-box;
 }
