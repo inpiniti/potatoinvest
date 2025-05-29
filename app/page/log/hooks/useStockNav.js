@@ -28,6 +28,7 @@ const useStockNav = ({
   const autoPlayTimerRef = useRef(null);
 
   const { fetchStockDetail } = useStockDetail();
+  const { refreshIndicators } = useMarketIndicators();
   const { buyStock } = useStockBuy();
   const { sellStock } = useStockSell();
 
@@ -52,6 +53,7 @@ const useStockNav = ({
       }
 
       fetchStockDetail(stockCode, options);
+      refreshIndicators();
     },
     [
       activeTabRef,

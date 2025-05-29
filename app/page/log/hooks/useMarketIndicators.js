@@ -142,14 +142,6 @@ const useMarketIndicators = () => {
   useEffect(() => {
     // 초기 로드
     refreshAllIndicators();
-
-    // 30초마다 갱신
-    const intervalId = setInterval(() => {
-      refreshAllIndicators();
-    }, 30000);
-
-    // 컴포넌트 언마운트 시 인터벌 정리
-    return () => clearInterval(intervalId);
   }, [CANO, ACNT_PRDT_CD]);
 
   return {
