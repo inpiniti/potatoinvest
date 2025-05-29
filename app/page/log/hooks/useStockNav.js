@@ -3,6 +3,7 @@ import { getSelectedStockCode } from "../utils/logoUtils";
 import useStockDetail from "./useStockDetail";
 import useStockBuy from "./useStockBuy";
 import useStockSell from "./useStockSell";
+import useMarketIndicators from "./useMarketIndicators";
 
 // 탭 순서 정의
 const tabOrder = ["분석", "구매"];
