@@ -4,9 +4,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 
 export default function RoulettePage() {
-  // 38개 칸 클릭 여부 추적
-  const [everClicked, setEverClicked] = useState(Array(38).fill(false));
-  // 클릭 히스토리만 보존
+  // 클릭 히스토리를 무제한으로 기록
   const [clickHistory, setClickHistory] = useState([]);
   // 카운터 추가
   const [counter, setCounter] = useState(0);
@@ -22,6 +20,23 @@ export default function RoulettePage() {
     // 네 번째 행
     [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34],
   ];
+
+  // 클릭 히스토리에서 각 숫자의 클릭 여부 계산
+  const clickCounts = useMemo(() => {
+    const counts = Array(38).fill(0);
+    clickHistory.forEach((num) => {
+      const index = num === "00" ? 37 : parseInt(num);
+      counts[index]++;
+    });
+    return counts;
+  }, [clickHistory]);
+
+  // 클릭되지 않은 칸들 계산
+  const unclickedNumbers = useMemo(() => {
+    return Array.from({ length: 38 }, (_, i) => i)
+      .filter((num) => clickCounts[num] === 0)
+      .map((num) => (num === 37 ? "00" : num.toString()));
+  }, [clickCounts]);
 
   // 숫자 색상 결정 함수 (실제 룰렛 색상 배치)
   const getNumberColor = (num, wasClicked) => {
@@ -50,14 +65,16 @@ export default function RoulettePage() {
     return num.toString();
   };
 
-  // 버튼 클릭 핸들러 - 카운터 로직 추가
+  // 버튼 클릭 핸들러 - 카운터 로직 및 히스토리 관리
   const handleNumberClick = (num) => {
-    // 클릭 이력 업데이트 (최대 10개까지만 저장)
+    // 표시할 숫자
     const displayNum = num === 37 ? "00" : num.toString();
-    const newHistory = [displayNum, ...clickHistory.slice(0, 9)];
 
-    // 카운터 업데이트 - 클릭 여부에 따라 다르게 처리
-    if (everClicked[num]) {
+    // 1. 히스토리에 추가
+    const newHistory = [displayNum, ...clickHistory];
+
+    // 2. 카운터 업데이트
+    if (clickCounts[num] > 0) {
       // 이미 클릭한 칸이면 카운터 증가
       setCounter((prev) => prev + 1);
     } else {
@@ -65,20 +82,35 @@ export default function RoulettePage() {
       setCounter(0);
     }
 
-    // 클릭된 칸 기록 업데이트
-    const newEverClicked = [...everClicked];
-    newEverClicked[num] = true;
+    // 3. 히스토리 업데이트 (클릭하지 않은 칸이 11개가 되도록 히스토리 관리)
+    let adjustedHistory = [...newHistory];
+    let simulatedUnclicked = getSimulatedUnclicked(adjustedHistory);
+
+    // 클릭하지 않은 칸이 11개보다 적으면 가장 오래된 기록부터 삭제
+    while (simulatedUnclicked.length < 11 && adjustedHistory.length > 0) {
+      adjustedHistory = adjustedHistory.slice(0, -1);
+      simulatedUnclicked = getSimulatedUnclicked(adjustedHistory);
+    }
 
     // 상태 업데이트
-    setClickHistory(newHistory);
-    setEverClicked(newEverClicked);
+    setClickHistory(adjustedHistory);
   };
 
-  // 클릭된 칸 수 계산
-  const clickedCount = useMemo(
-    () => everClicked.filter((clicked) => clicked).length,
-    [everClicked]
-  );
+  // 주어진 히스토리에서 클릭하지 않은 숫자 계산 (시뮬레이션용)
+  const getSimulatedUnclicked = (history) => {
+    const counts = Array(38).fill(0);
+    history.forEach((num) => {
+      const index = num === "00" ? 37 : parseInt(num);
+      counts[index]++;
+    });
+
+    return Array.from({ length: 38 }, (_, i) => i)
+      .filter((num) => counts[num] === 0)
+      .map((num) => (num === 37 ? "00" : num.toString()));
+  };
+
+  // 클릭한 칸 수 계산
+  const clickedCount = 38 - unclickedNumbers.length;
 
   return (
     <div className="container mx-auto p-4">
@@ -90,17 +122,18 @@ export default function RoulettePage() {
         <p className="text-sm text-gray-600">
           * 한 번이라도 클릭한 칸은 흐리게, 클릭되지 않은 칸은 선명하게
           표시됩니다.
+          <br />* 항상 11개의 추천 숫자가 유지됩니다.
         </p>
       </div>
 
       {/* 최근 클릭 이력 표시 */}
       <div className="mb-4">
-        <h2 className="font-bold mb-2">최근 클릭 이력:</h2>
+        <h2 className="font-bold mb-2">최근 클릭 이력 (10개):</h2>
         <div className="flex flex-wrap gap-2">
           {clickHistory.length === 0 ? (
             <p className="text-gray-500">아직 클릭 이력이 없습니다.</p>
           ) : (
-            clickHistory.map((num, index) => (
+            clickHistory.slice(0, 10).map((num, index) => (
               <div
                 key={index}
                 className={`w-10 h-10 flex items-center justify-center rounded-full ${
@@ -114,6 +147,34 @@ export default function RoulettePage() {
             ))
           )}
         </div>
+      </div>
+
+      {/* 추천 숫자 표시 (클릭하지 않은 숫자) */}
+      <div className="mb-4 bg-green-50 p-4 rounded border border-green-200">
+        <h2 className="font-bold mb-2 text-green-800">
+          추천 숫자 (클릭하지 않은 숫자):
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {unclickedNumbers.length === 0 ? (
+            <p className="text-gray-500">모든 숫자가 이미 클릭되었습니다.</p>
+          ) : (
+            unclickedNumbers.map((num, index) => (
+              <div
+                key={index}
+                className={`w-10 h-10 flex items-center justify-center rounded-full ${
+                  num === "0" || num === "00"
+                    ? "bg-green-700 text-white"
+                    : getNumberColor(parseInt(num), false)
+                } ring-2 ring-green-400`}
+              >
+                {num}
+              </div>
+            ))
+          )}
+        </div>
+        <p className="mt-2 text-sm text-green-700">
+          총 {unclickedNumbers.length}개의 추천 숫자가 있습니다.
+        </p>
       </div>
 
       {/* 카운터 표시 - 새로 추가 */}
@@ -140,10 +201,14 @@ export default function RoulettePage() {
                 onClick={() => handleNumberClick(num)}
                 className={`w-20 h-20 flex items-center justify-center ${getNumberColor(
                   num,
-                  everClicked[num]
+                  clickCounts[num] > 0
                 )} rounded-none ${
                   clickHistory[0] === getDisplayNumber(num)
                     ? "ring-2 ring-yellow-400"
+                    : ""
+                } ${
+                  unclickedNumbers.includes(getDisplayNumber(num))
+                    ? "ring-2 ring-green-400"
                     : ""
                 }`}
               >
@@ -164,10 +229,14 @@ export default function RoulettePage() {
                   onClick={() => handleNumberClick(num)}
                   className={`w-20 h-20 flex items-center justify-center ${getNumberColor(
                     num,
-                    everClicked[num]
+                    clickCounts[num] > 0
                   )} rounded-none ${
                     clickHistory[0] === num.toString()
                       ? "ring-2 ring-yellow-400"
+                      : ""
+                  } ${
+                    unclickedNumbers.includes(num.toString())
+                      ? "ring-2 ring-green-400"
                       : ""
                   }`}
                 >
@@ -191,7 +260,8 @@ export default function RoulettePage() {
             표시됩니다.
           </li>
           <li>가장 최근에 클릭한 숫자는 노란색 테두리로 강조됩니다.</li>
-          <li>클릭 이력은 최대 10개까지 표시됩니다.</li>
+          <li>클릭하지 않은 숫자(추천 숫자)는 녹색 테두리로 표시됩니다.</li>
+          <li>항상 11개의 추천 숫자가 유지됩니다.</li>
           <li className="font-bold mt-2">
             점수 시스템:
             <ul className="font-normal mt-1">
@@ -217,16 +287,26 @@ export default function RoulettePage() {
               <div
                 key={i}
                 className={`border p-2 rounded-md ${
-                  !everClicked[i] ? "opacity-50" : ""
-                } text-sm`}
+                  clickCounts[i] === 0 ? "" : "opacity-50"
+                } text-sm ${
+                  unclickedNumbers.includes(displayNum)
+                    ? "bg-green-50 border-green-300"
+                    : ""
+                }`}
               >
                 <p className="font-bold">{displayNum}</p>
-                <p>클릭 여부: {everClicked[i] ? "✓" : "✗"}</p>
+                <p>클릭 여부: {clickCounts[i] > 0 ? "✓" : "✗"}</p>
+                <p>클릭 횟수: {clickCounts[i]}</p>
               </div>
             );
           })}
         </div>
       </details>
+
+      {/* 총 히스토리 개수 표시 */}
+      <div className="mt-4 text-sm text-gray-600">
+        총 기록된 히스토리 수: {clickHistory.length}개
+      </div>
     </div>
   );
 }
