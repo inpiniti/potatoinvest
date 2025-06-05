@@ -2,14 +2,12 @@
 
 import { Separator } from "@/components/ui/separator";
 import {
-  Sprout,
   Wallet, // 잔고에 적합한 지갑 아이콘
   CheckSquare, // 체결에 적합한 체크 아이콘
   Clock, // 미체결에 적합한 시계 아이콘
   LineChart, // 기간손익에 적합한 차트 아이콘
   BarChart3, // 분석에 적합한 분석 차트 아이콘
 } from "lucide-react";
-import { Sidebar, SidebarProvider } from "@/components/ui/sidebar";
 import { useState } from "react";
 
 import {
