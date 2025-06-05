@@ -2,12 +2,15 @@
 
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function RoulettePage() {
   // 클릭 히스토리를 무제한으로 기록
   const [clickHistory, setClickHistory] = useState([]);
   // 카운터 추가
   const [counter, setCounter] = useState(0);
+  // 추천 숫자 개수 설정 (기본값 17)
+  const [recommendCount, setRecommendCount] = useState(17);
 
   // 룰렛 레이아웃 - 0과 00 포함
   const rouletteLayout = [
@@ -82,12 +85,15 @@ export default function RoulettePage() {
       setCounter(0);
     }
 
-    // 3. 히스토리 업데이트 (클릭하지 않은 칸이 11개가 되도록 히스토리 관리)
+    // 3. 히스토리 업데이트 (클릭하지 않은 칸이 recommendCount개가 되도록 히스토리 관리)
     let adjustedHistory = [...newHistory];
     let simulatedUnclicked = getSimulatedUnclicked(adjustedHistory);
 
-    // 클릭하지 않은 칸이 11개보다 적으면 가장 오래된 기록부터 삭제
-    while (simulatedUnclicked.length < 11 && adjustedHistory.length > 0) {
+    // 클릭하지 않은 칸이 recommendCount개보다 적으면 가장 오래된 기록부터 삭제
+    while (
+      simulatedUnclicked.length < recommendCount &&
+      adjustedHistory.length > 0
+    ) {
       adjustedHistory = adjustedHistory.slice(0, -1);
       simulatedUnclicked = getSimulatedUnclicked(adjustedHistory);
     }
@@ -109,6 +115,33 @@ export default function RoulettePage() {
       .map((num) => (num === 37 ? "00" : num.toString()));
   };
 
+  // 추천 숫자 개수 변경 핸들러
+  const handleRecommendCountChange = (e) => {
+    const value = parseInt(e.target.value);
+
+    // 범위 검증 (1-38 사이의 값)
+    if (isNaN(value)) return;
+
+    const validValue = Math.max(1, Math.min(38, value));
+    setRecommendCount(validValue);
+
+    // 새 추천 개수에 맞춰 히스토리 조정
+    let adjustedHistory = [...clickHistory];
+    let simulatedUnclicked = getSimulatedUnclicked(adjustedHistory);
+
+    // 클릭하지 않은 칸이 새 recommendCount개보다 적으면 가장 오래된 기록부터 삭제
+    while (
+      simulatedUnclicked.length < validValue &&
+      adjustedHistory.length > 0
+    ) {
+      adjustedHistory = adjustedHistory.slice(0, -1);
+      simulatedUnclicked = getSimulatedUnclicked(adjustedHistory);
+    }
+
+    // 히스토리 업데이트
+    setClickHistory(adjustedHistory);
+  };
+
   // 클릭한 칸 수 계산
   const clickedCount = 38 - unclickedNumbers.length;
 
@@ -116,13 +149,58 @@ export default function RoulettePage() {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">룰렛 게임 (클릭 히스토리)</h1>
 
+      {/* 추천 숫자 개수 설정 UI - 새로 추가 */}
+      <div className="mb-4 bg-yellow-50 p-4 rounded border border-yellow-200">
+        <h2 className="font-bold mb-2">추천 숫자 개수 설정:</h2>
+        <div className="flex items-center gap-4">
+          <Input
+            type="number"
+            min="1"
+            max="38"
+            value={recommendCount}
+            onChange={handleRecommendCountChange}
+            className="w-24"
+            aria-label="추천 숫자 개수"
+          />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                handleRecommendCountChange({
+                  target: { value: Math.max(1, recommendCount - 1) },
+                })
+              }
+              disabled={recommendCount <= 1}
+            >
+              -
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                handleRecommendCountChange({
+                  target: { value: Math.min(38, recommendCount + 1) },
+                })
+              }
+              disabled={recommendCount >= 38}
+            >
+              +
+            </Button>
+          </div>
+          <span className="text-sm text-gray-600">
+            (1-38 사이 값 설정 가능)
+          </span>
+        </div>
+      </div>
+
       {/* 클릭 상태 정보 */}
       <div className="mb-4 bg-blue-50 p-2 rounded border border-blue-200">
         <p className="font-bold">클릭된 칸: {clickedCount}/38</p>
         <p className="text-sm text-gray-600">
           * 한 번이라도 클릭한 칸은 흐리게, 클릭되지 않은 칸은 선명하게
           표시됩니다.
-          <br />* 항상 11개의 추천 숫자가 유지됩니다.
+          <br />* 항상 {recommendCount}개의 추천 숫자가 유지됩니다.
         </p>
       </div>
 
@@ -174,10 +252,15 @@ export default function RoulettePage() {
         </div>
         <p className="mt-2 text-sm text-green-700">
           총 {unclickedNumbers.length}개의 추천 숫자가 있습니다.
+          {unclickedNumbers.length !== recommendCount && (
+            <span className="text-yellow-600 font-bold ml-2">
+              (목표: {recommendCount}개)
+            </span>
+          )}
         </p>
       </div>
 
-      {/* 카운터 표시 - 새로 추가 */}
+      {/* 카운터 표시 */}
       <div className="mb-6 bg-yellow-100 p-4 rounded-md border border-yellow-300 flex items-center justify-between">
         <div>
           <h2 className="font-bold text-lg">연속 점수:</h2>
@@ -261,7 +344,7 @@ export default function RoulettePage() {
           </li>
           <li>가장 최근에 클릭한 숫자는 노란색 테두리로 강조됩니다.</li>
           <li>클릭하지 않은 숫자(추천 숫자)는 녹색 테두리로 표시됩니다.</li>
-          <li>항상 11개의 추천 숫자가 유지됩니다.</li>
+          <li>추천 숫자 개수는 상단에서 조절할 수 있습니다 (1-38).</li>
           <li className="font-bold mt-2">
             점수 시스템:
             <ul className="font-normal mt-1">
