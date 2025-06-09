@@ -3,12 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useHoldingStore } from "@/store/useHoldingStore";
 import useApi from "@/hooks/useApi";
 import useAccount from "@/hooks/useAccount";
+import { keyStore } from "@/store/keyStore";
 
 /**
  * 보유 종목 데이터를 관리하는 훅
  * @param {number} refetchInterval - 데이터 갱신 주기 (밀리초)
  */
 const useHolding = (refetchInterval = 1000 * 60) => {
+  const { key } = keyStore();
+  const { appKey, secretKey } = key;
+
   // 기본값 1분
   const { holdingData, setHoldingData } = useHoldingStore();
   const [error, setError] = useState(null);
@@ -81,6 +85,7 @@ const useHolding = (refetchInterval = 1000 * 60) => {
     refetchInterval,
     refetchIntervalInBackground: false,
     staleTime: refetchInterval - 10000,
+    enabled: !!appKey && !!secretKey, // appKey와 secretKey가 존재할 때만 실행
     onError: (error) => {
       console.error("보유 종목 데이터 쿼리 오류:", error);
       setError(error.message);

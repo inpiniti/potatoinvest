@@ -3,12 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useUntradedStore } from "@/store/useUntradedStore";
 import useApi from "@/hooks/useApi";
 import useAccount from "@/hooks/useAccount";
+import { keyStore } from "@/store/keyStore";
 
 /**
  * 미체결 주문 데이터를 관리하는 훅
  * @param {number} refetchInterval - 데이터 갱신 주기 (밀리초)
  */
 const useUntraded = (refetchInterval = 1000 * 60) => {
+  const { key } = keyStore();
+  const { appKey, secretKey } = key;
+
   // 기본값 1분
   const { untradedData, setUntradedData } = useUntradedStore();
   const [error, setError] = useState(null);
@@ -26,6 +30,10 @@ const useUntraded = (refetchInterval = 1000 * 60) => {
       const response = await api.trading.inquireNccs({
         CANO,
         ACNT_PRDT_CD,
+        CTX_AREA_NK200: "", // 연속조회키200
+        CTX_AREA_FK200: "", // 연속조회검색조건200
+        OVRS_EXCG_CD: "NASD",
+        SORT_SQN: "DS", // 정렬순서 ('DS' : 정순, 'AS': 역순)
         // 필요한 추가 파라미터 설정
       });
 
@@ -74,6 +82,7 @@ const useUntraded = (refetchInterval = 1000 * 60) => {
     refetchInterval,
     refetchIntervalInBackground: false,
     staleTime: refetchInterval - 10000,
+    enabled: !!appKey && !!secretKey, // appKey와 secretKey가 존재할 때만 실행
     onError: (error) => {
       console.error("미체결 데이터 쿼리 오류:", error);
       setError(error.message);

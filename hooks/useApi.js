@@ -104,8 +104,41 @@ const useApi = () => {
             CTX_AREA_NK200,
           },
         }), // 해외주식 잔고
-      inquireCcnl: (payload) =>
-        _fetch({ url: "/api/koreainvestment/trading/inquireCcnl", payload }), // 해외주식 주문체결내역
+      inquireCcnl: ({
+        CANO,
+        ACNT_PRDT_CD,
+        OVRS_EXCG_CD,
+        PDNO,
+        ORD_STRT_DT,
+        ORD_END_DT,
+        SLL_BUY_DVSN,
+        CCLD_NCCS_DVSN,
+        SORT_SQN,
+        ORD_DT,
+        ORD_GNO_BRNO,
+        ODNO,
+        CTX_AREA_NK200,
+        CTX_AREA_FK200,
+      }) =>
+        _fetch({
+          url: "/api/koreainvestment/trading/inquireCcnl",
+          payload: {
+            CANO,
+            ACNT_PRDT_CD,
+            OVRS_EXCG_CD,
+            PDNO,
+            ORD_STRT_DT,
+            ORD_END_DT,
+            SLL_BUY_DVSN,
+            CCLD_NCCS_DVSN,
+            SORT_SQN,
+            ORD_DT,
+            ORD_GNO_BRNO,
+            ODNO,
+            CTX_AREA_NK200,
+            CTX_AREA_FK200,
+          },
+        }), // 해외주식 주문체결내역
       inquirePresentBalance: (payload) =>
         _fetch({
           url: "/api/koreainvestment/trading/inquirePresentBalance",

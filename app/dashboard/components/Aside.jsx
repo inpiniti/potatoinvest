@@ -18,7 +18,7 @@ const Aside = ({ activeItem, list, current, setCurrent }) => {
       <SidebarContent>
         <SidebarGroup className="p-0 pb-0.5">
           <SidebarGroupContent>
-            {list.map((analysis) => (
+            {list?.map((analysis) => (
               <a
                 href="#"
                 key={analysis?.name}
@@ -29,12 +29,20 @@ const Aside = ({ activeItem, list, current, setCurrent }) => {
                 onClick={() => setCurrent(analysis)}
               >
                 <div className="flex w-full items-center gap-2">
-                  <span>{analysis?.name}</span>{" "}
-                  <span className="ml-auto text-xs">{analysis?.close}</span>
+                  <span className="whitespace-pre-wrap">
+                    {analysis?.name || analysis?.prdt_name}
+                  </span>{" "}
+                  <span className="ml-auto text-xs">
+                    {analysis?.close || analysis?.sll_buy_dvsn_cd_name}{" "}
+                    {analysis?.prcs_stat_name}
+                  </span>
                 </div>
-                <span className="font-medium">{analysis?.change}</span>
+                <span className="font-medium">
+                  {analysis?.change || analysis?.pdno}
+                </span>
                 <span className="line-clamp-2 w-[260px] whitespace-break-spaces text-xs">
-                  {analysis?.["Perf.W"]}
+                  {analysis?.["Perf.W"] || analysis?.ft_ord_unpr3} (
+                  {analysis?.ft_ord_qty})
                 </span>
               </a>
             ))}

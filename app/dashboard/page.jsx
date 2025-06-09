@@ -8,7 +8,7 @@ import {
   LineChart, // 기간손익에 적합한 차트 아이콘
   BarChart3, // 분석에 적합한 분석 차트 아이콘
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   Card,
@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import useAnalysis from "./hooks/useAnalysis"; // 분석 데이터 훅
 import useUntraded from "./hooks/useUntraded"; // 미체결 데이터 훅
 import useHolding from "./hooks/useHolding"; // 보유 종목 데이터 훅
+import useCnnl from "./hooks/useCnnl"; // 체결 데이터 훅
 
 import SettingsButton from "../page/log/components/header/buttons/SettingsButton";
 import AutoPlayToggle from "../page/log/components/header/navigation/AutoPlayToggle";
@@ -41,42 +42,6 @@ import SectionHeader from "./components/SectionHeader";
 import SectionTitle from "./components/SectionTitle";
 import SectionTitleItem from "./components/SectionTitleItem";
 import LoginButton from "./components/LoginButton";
-
-type Analysis = {
-  name: string; // 종목명
-  description: string; // 종목 설명,
-  logoid: string; // 로고 아이콘 URL
-  operating_margin_ttm: string; // 운영 마진 (TTM)
-  relative_volume_10d_calc: string; // 10일 상대 거래량 계산
-  enterprise_value_to_revenue_ttm: string; // 기업 가치 대비 매출 (TTM)
-  "Volatility.W": string; // 주간 변동성
-  "Volatility.M": string; // 월간 변동성
-  dividends_yield_current: string; // 현재 배당 수익률
-  gap: string; // 갭
-  volume_change: string; // 거래량 변화
-  pre_tax_margin_ttm: string; // 세전 마진 (TTM)
-  "Perf.1Y.MarketCap": string; // 1년 성과 (시가총액)
-  "Perf.W": string; // 주간 성과
-  "Perf.1M": string; // 1개월 성과
-  "Perf.3M": string; // 3개월 성과
-  "Perf.6M": string; // 6개월 성과
-  "Perf.YTD": string; // 연초부터 현재까지의 성과
-  "Perf.Y": string; // 1년 성과
-  "Perf.5Y": string; // 5년 성과
-  "Perf.10Y": string; // 10년 성과
-  "Perf.All": string; // 전체 성과
-  "Recommend.All": string; // 모든 추천
-  "Recommend.MA": string; // 이동 평균 추천
-  "Recommend.Other": string; // 기타 추천
-  RSI: string; // 상대 강도 지수
-  Mom: string; // 모멘텀
-  CCI20: string; // 상품 채널 지수 20
-  "Stoch.K": string; // 스토캐스틱 K
-  "Stoch.D": string; // 스토캐스틱 D
-  close: string; // 종가
-  change: string; // 변화
-  market: string; // 시장
-};
 
 const data = {
   navMain: [
@@ -115,31 +80,58 @@ const data = {
 
 export default function DashBoardPage() {
   const [activeItem, setActiveItem] = useState(data.navMain[0]);
-  const [current, setCurrent] = useState<Analysis | undefined>();
+  const [current, setCurrent] = useState();
 
   //const [mails, setMails] = useState(data.mails);
 
   // 분석 데이터
-  const { analysisData } = useAnalysis(120000); // 2분마다 갱신
-  const { untradedData } = useUntraded(120000); // 2분
-  const { holdingData } = useHolding(120000); // 2분
+  const { analysisData } = useAnalysis(120000); // 분석
+  const { untradedData } = useUntraded(120000); // 미체결
+  const { holdingData } = useHolding(120000); // 잔고
+  const { data: cnnlData } = useCnnl(120000); // 체결 데이터
 
   const [autoPlay, toggleAutoPlay] = useState(false);
   const [autoBuy, toggleAutoBuy] = useState(false);
   const [autoSell, toggleAutoSell] = useState(false);
 
-  const [list, setList] = useState<Analysis[]>(analysisData);
+  const [list, setList] = useState(analysisData);
+
+  const handleMenuChange = (newActive) => {
+    setActiveItem(newActive);
+    switch (newActive?.title) {
+      case "잔고":
+        setList(holdingData);
+        break;
+      case "미체결":
+        setList(untradedData);
+        break;
+      case "분석":
+        setList(analysisData);
+        break;
+      case "체결":
+        setList(cnnlData);
+        break;
+      default:
+        setList([]);
+    }
+  };
+
+  const dataInitialized = useRef(false);
+
+  useEffect(() => {
+    // Only set the list once when holdingData is first available
+    if (holdingData && holdingData.length > 0 && !dataInitialized.current) {
+      setList(holdingData);
+      dataInitialized.current = true;
+    }
+  }, [holdingData]);
 
   return (
     <PageWrap>
       <Header
         data={data}
         activeItem={activeItem}
-        setActiveItem={setActiveItem}
-        setList={setList}
-        holdingData={holdingData}
-        untradedData={untradedData}
-        analysisData={analysisData}
+        onChange={(item) => handleMenuChange(item)}
       />
       <Aside
         activeItem={activeItem}
@@ -167,7 +159,7 @@ export default function DashBoardPage() {
           setCurrent={setCurrent}
           analysisData={analysisData}
         >
-          {list.map((analysis: Analysis, index: number) => (
+          {list?.map((analysis, index) => (
             <SectionTitleItem
               key={index}
               current={current}

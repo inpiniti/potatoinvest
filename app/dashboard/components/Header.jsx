@@ -10,15 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Sprout } from "lucide-react";
 
-const Header = ({
-  data,
-  activeItem,
-  setActiveItem,
-  setList,
-  holdingData,
-  untradedData,
-  analysisData,
-}) => {
+const Header = ({ data, activeItem, onChange }) => {
   return (
     <Sidebar
       collapsible="none"
@@ -52,22 +44,7 @@ const Header = ({
                       children: item.title,
                       hidden: false,
                     }}
-                    onClick={() => {
-                      setActiveItem(item);
-                      switch (item?.title) {
-                        case "잔고":
-                          setList(holdingData);
-                          break;
-                        case "미체결":
-                          setList(untradedData);
-                          break;
-                        case "분석":
-                          setList(analysisData);
-                          break;
-                        default:
-                          setList([]);
-                      }
-                    }}
+                    onClick={() => onChange(item)}
                     isActive={activeItem?.title === item.title}
                     className="px-2.5 md:px-2"
                   >
