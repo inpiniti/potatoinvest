@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { Separator } from "@/components/ui/separator";
+import { Separator } from '@/components/ui/separator';
 import {
   Wallet, // 잔고에 적합한 지갑 아이콘
   CheckSquare, // 체결에 적합한 체크 아이콘
   Clock, // 미체결에 적합한 시계 아이콘
   LineChart, // 기간손익에 적합한 차트 아이콘
   BarChart3, // 분석에 적합한 분석 차트 아이콘
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   Card,
@@ -17,61 +17,62 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
-import useAnalysis from "./hooks/useAnalysis"; // 분석 데이터 훅
-import useUntraded from "./hooks/useUntraded"; // 미체결 데이터 훅
-import useHolding from "./hooks/useHolding"; // 보유 종목 데이터 훅
-import useCnnl from "./hooks/useCnnl"; // 체결 데이터 훅
+import useAnalysis from './hooks/useAnalysis'; // 분석 데이터 훅
+import useUntraded from './hooks/useUntraded'; // 미체결 데이터 훅
+import useHolding from './hooks/useHolding'; // 보유 종목 데이터 훅
+import useCnnl from './hooks/useCnnl'; // 체결 데이터 훅
+import useProfit from './hooks/useProfit'; // 기간 손익 데이터 훅
 
-import SettingsButton from "../page/log/components/header/buttons/SettingsButton";
-import AutoPlayToggle from "../page/log/components/header/navigation/AutoPlayToggle";
-import BuyToggle from "../page/log/components/header/navigation/BuyToggle";
-import SellToggle from "../page/log/components/header/navigation/SellToggle";
+import SettingsButton from '../page/log/components/header/buttons/SettingsButton';
+import AutoPlayToggle from '../page/log/components/header/navigation/AutoPlayToggle';
+import BuyToggle from '../page/log/components/header/navigation/BuyToggle';
+import SellToggle from '../page/log/components/header/navigation/SellToggle';
 
-import PageWrap from "./components/PageWrap";
-import Header from "./components/Header";
-import Aside from "./components/Aside";
-import Main from "./components/Main";
-import SectionHeader from "./components/SectionHeader";
-import SectionTitle from "./components/SectionTitle";
-import SectionTitleItem from "./components/SectionTitleItem";
-import LoginButton from "./components/LoginButton";
+import PageWrap from './components/PageWrap';
+import Header from './components/Header';
+import Aside from './components/Aside';
+import Main from './components/Main';
+import SectionHeader from './components/SectionHeader';
+import SectionTitle from './components/SectionTitle';
+import SectionTitleItem from './components/SectionTitleItem';
+import LoginButton from './components/LoginButton';
 
 const data = {
   navMain: [
     {
-      title: "잔고",
-      url: "#",
+      title: '잔고',
+      url: '#',
       icon: Wallet,
       isActive: true,
     },
     {
-      title: "체결",
-      url: "#",
+      title: '체결',
+      url: '#',
       icon: CheckSquare,
       isActive: false,
     },
     {
-      title: "미체결",
-      url: "#",
+      title: '미체결',
+      url: '#',
       icon: Clock,
       isActive: false,
     },
     {
-      title: "기간손익",
-      url: "#",
+      title: '기간손익',
+      url: '#',
       icon: LineChart,
       isActive: false,
     },
     {
-      title: "분석",
-      url: "#",
+      title: '분석',
+      url: '#',
       icon: BarChart3,
       isActive: false,
     },
@@ -89,6 +90,7 @@ export default function DashBoardPage() {
   const { untradedData } = useUntraded(120000); // 미체결
   const { holdingData } = useHolding(120000); // 잔고
   const { data: cnnlData } = useCnnl(120000); // 체결 데이터
+  const { profitData, fetchProfitData } = useProfit(); // 기간 손익
 
   const [autoPlay, toggleAutoPlay] = useState(false);
   const [autoBuy, toggleAutoBuy] = useState(false);
@@ -99,17 +101,20 @@ export default function DashBoardPage() {
   const handleMenuChange = (newActive) => {
     setActiveItem(newActive);
     switch (newActive?.title) {
-      case "잔고":
+      case '잔고':
         setList(holdingData);
         break;
-      case "미체결":
+      case '미체결':
         setList(untradedData);
         break;
-      case "분석":
+      case '분석':
         setList(analysisData);
         break;
-      case "체결":
+      case '체결':
         setList(cnnlData);
+        break;
+      case '기간손익':
+        setList(profitData);
         break;
       default:
         setList([]);
@@ -121,6 +126,7 @@ export default function DashBoardPage() {
   useEffect(() => {
     // Only set the list once when holdingData is first available
     if (holdingData && holdingData.length > 0 && !dataInitialized.current) {
+      fetchProfitData();
       setList(holdingData);
       dataInitialized.current = true;
     }
