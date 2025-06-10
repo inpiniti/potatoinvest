@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { Separator } from '@/components/ui/separator';
+import { Separator } from "@/components/ui/separator";
 import {
   Wallet, // 잔고에 적합한 지갑 아이콘
   CheckSquare, // 체결에 적합한 체크 아이콘
   Clock, // 미체결에 적합한 시계 아이콘
   LineChart, // 기간손익에 적합한 차트 아이콘
   BarChart3, // 분석에 적합한 분석 차트 아이콘
-} from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   Card,
@@ -17,62 +17,63 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-import useAnalysis from './hooks/useAnalysis'; // 분석 데이터 훅
-import useUntraded from './hooks/useUntraded'; // 미체결 데이터 훅
-import useHolding from './hooks/useHolding'; // 보유 종목 데이터 훅
-import useCnnl from './hooks/useCnnl'; // 체결 데이터 훅
-import useProfit from './hooks/useProfit'; // 기간 손익 데이터 훅
+import useAnalysis from "./hooks/useAnalysis"; // 분석 데이터 훅
+import useHolding from "./hooks/useHolding"; // 보유 종목 데이터 훅
+import useCnnl from "./hooks/useCnnl"; // 체결 데이터 훅
+import useProfit from "./hooks/useProfit"; // 기간 손익 데이터 훅
 
-import SettingsButton from '../page/log/components/header/buttons/SettingsButton';
-import AutoPlayToggle from '../page/log/components/header/navigation/AutoPlayToggle';
-import BuyToggle from '../page/log/components/header/navigation/BuyToggle';
-import SellToggle from '../page/log/components/header/navigation/SellToggle';
+import SettingsButton from "../page/log/components/header/buttons/SettingsButton";
+import AutoPlayToggle from "../page/log/components/header/navigation/AutoPlayToggle";
+import BuyToggle from "../page/log/components/header/navigation/BuyToggle";
+import SellToggle from "../page/log/components/header/navigation/SellToggle";
 
-import PageWrap from './components/PageWrap';
-import Header from './components/Header';
-import Aside from './components/Aside';
-import Main from './components/Main';
-import SectionHeader from './components/SectionHeader';
-import SectionTitle from './components/SectionTitle';
-import SectionTitleItem from './components/SectionTitleItem';
-import LoginButton from './components/LoginButton';
+import PageWrap from "./components/PageWrap";
+import Header from "./components/Header";
+import Aside from "./components/Aside";
+import AsideItem from "./components/AsideItem";
+import Main from "./components/Main";
+import SectionHeader from "./components/SectionHeader";
+import SectionTitle from "./components/SectionTitle";
+import SectionTitleItem from "./components/SectionTitleItem";
+import LoginButton from "./components/LoginButton";
+import dayjs from "dayjs";
 
 const data = {
   navMain: [
     {
-      title: '잔고',
-      url: '#',
+      title: "잔고",
+      url: "#",
       icon: Wallet,
       isActive: true,
     },
     {
-      title: '체결',
-      url: '#',
+      title: "체결",
+      url: "#",
       icon: CheckSquare,
       isActive: false,
     },
     {
-      title: '미체결',
-      url: '#',
+      title: "미체결",
+      url: "#",
       icon: Clock,
       isActive: false,
     },
     {
-      title: '기간손익',
-      url: '#',
+      title: "기간손익",
+      url: "#",
       icon: LineChart,
       isActive: false,
     },
     {
-      title: '분석',
-      url: '#',
+      title: "분석",
+      url: "#",
       icon: BarChart3,
       isActive: false,
     },
@@ -87,7 +88,6 @@ export default function DashBoardPage() {
 
   // 분석 데이터
   const { analysisData } = useAnalysis(120000); // 분석
-  const { untradedData } = useUntraded(120000); // 미체결
   const { holdingData } = useHolding(120000); // 잔고
   const { data: cnnlData } = useCnnl(120000); // 체결 데이터
   const { profitData, fetchProfitData } = useProfit(); // 기간 손익
@@ -101,19 +101,19 @@ export default function DashBoardPage() {
   const handleMenuChange = (newActive) => {
     setActiveItem(newActive);
     switch (newActive?.title) {
-      case '잔고':
+      case "잔고":
         setList(holdingData);
         break;
-      case '미체결':
-        setList(untradedData);
+      case "미체결":
+        setList(cnnlData.filter((item) => item.prcs_stat_name !== "완료"));
         break;
-      case '분석':
+      case "분석":
         setList(analysisData);
         break;
-      case '체결':
-        setList(cnnlData);
+      case "체결":
+        setList(cnnlData.filter((item) => item.prcs_stat_name === "완료"));
         break;
-      case '기간손익':
+      case "기간손익":
         setList(profitData);
         break;
       default:
@@ -144,7 +144,99 @@ export default function DashBoardPage() {
         list={list}
         current={current}
         setCurrent={setCurrent}
-      />
+      >
+        {list?.map((item, index) => {
+          if (activeItem?.title === "잔고") {
+            return (
+              <AsideItem
+                key={item?.ovrs_pdno}
+                title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
+                date={`${item?.evlu_pfls_rt}%`}
+                info={`${Number(item?.frcr_pchs_amt1).toFixed(2)} > ${Number(
+                  item?.ovrs_stck_evlu_amt
+                ).toFixed(2)} (${Number(
+                  (Number(item?.frcr_evlu_pfls_amt) * 1500).toFixed(0)
+                ).toLocaleString("ko-KR")}원)`}
+                description={`${Number(item?.pchs_avg_pric).toFixed(
+                  2
+                )} > ${Number(item?.now_pric2).toFixed(2)} (${Number(
+                  item?.ovrs_cblc_qty
+                ).toLocaleString("ko-KR")})`}
+                onClick={() => setCurrent(item)}
+                active={current?.name === item?.name}
+              />
+            );
+          } else if (activeItem?.title === "미체결") {
+            return (
+              <AsideItem
+                key={index}
+                title={`${item?.prdt_name} (${item?.pdno})`}
+                date={`${item?.sll_buy_dvsn_cd_name}`}
+                info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
+                  item?.ft_ccld_qty
+                } / ${item?.ft_ord_qty}) (${(
+                  Number(item?.ft_ord_unpr3) *
+                  Number(item?.ft_ord_qty) *
+                  1500
+                ).toLocaleString("ko-KR")}원)`}
+                description={`${item?.prcs_stat_name}`}
+                onClick={() => setCurrent(item)}
+                active={current?.name === item?.name}
+              />
+            );
+          } else if (activeItem?.title === "체결") {
+            return (
+              <AsideItem
+                key={index}
+                title={`${item?.prdt_name} (${item?.pdno})`}
+                date={`${item?.sll_buy_dvsn_cd_name}`}
+                info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
+                  item?.ft_ccld_qty
+                } / ${item?.ft_ord_qty}) (${(
+                  Number(item?.ft_ord_unpr3) *
+                  Number(item?.ft_ord_qty) *
+                  1500
+                ).toLocaleString("ko-KR")}원)`}
+                description={`${item?.prcs_stat_name}`}
+                onClick={() => setCurrent(item)}
+                active={current?.name === item?.name}
+              />
+            );
+          } else if (activeItem?.title === "기간손익") {
+            return (
+              <AsideItem
+                key={index}
+                title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
+                date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
+                info={`${Number(item?.ovrs_rlzt_pfls_amt).toFixed(2)} (${Number(
+                  item?.pftrt
+                ).toFixed(2)})`}
+                description={`${Number(item?.pchs_avg_pric).toFixed(
+                  2
+                )} > ${Number(item?.avg_sll_unpr).toFixed(2)}`}
+                onClick={() => setCurrent(item)}
+                active={current?.name === item?.name}
+              />
+            );
+          } else if (activeItem?.title === "분석") {
+            return (
+              <AsideItem
+                key={item?.name}
+                title={`${item?.description} (${item?.name})`}
+                date={`${Number(item?.perf_1_m).toFixed(2)}%`}
+                info={`${item?.close} (${Number(item?.change).toFixed(2)}%)`}
+                description={`${Number(item?.perf_6_m).toFixed(2)}% > ${Number(
+                  item?.perf_3_m
+                ).toFixed(2)}% > ${Number(item?.perf_1_m).toFixed(
+                  2
+                )}% > ${Number(item?.perf_w).toFixed(2)}%`}
+                onClick={() => setCurrent(item)}
+                active={current?.name === item?.name}
+              />
+            );
+          }
+        })}
+      </Aside>
       <Main>
         <SectionHeader>
           {/* 로그인 버튼 */}
