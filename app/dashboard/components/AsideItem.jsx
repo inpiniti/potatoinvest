@@ -1,12 +1,4 @@
-const AsideItem = ({
-  key,
-  title,
-  date,
-  info,
-  description,
-  onClick,
-  active,
-}) => {
+const AsideItem = ({ title, date, info, description, onClick, active }) => {
   // 카드에 필요한 값
   // key
   // title
@@ -17,7 +9,6 @@ const AsideItem = ({
   return (
     <a
       href="#"
-      key={key}
       className={`box-border ${
         active && "bg-primary-foreground border border-primary"
       } flex flex-col items-start gap-2 whitespace-nowrap border-b p-4 text-sm leading-tight hover:bg-primary-foreground hover:text-sidebar-accent-foreground`}

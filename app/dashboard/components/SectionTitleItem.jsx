@@ -1,9 +1,9 @@
 import { CarouselItem } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 
-const SectionTitleItem = ({ key, current, analysis, setCurrent }) => {
+const SectionTitleItem = ({ current, analysis, setCurrent }) => {
   return (
-    <CarouselItem key={key} className="my-4">
+    <CarouselItem className="my-4">
       <Card
         className={`${
           current?.name === analysis.name &&
