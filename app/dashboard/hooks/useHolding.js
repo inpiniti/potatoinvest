@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useHoldingStore } from "@/store/useHoldingStore";
 import useApi from "@/hooks/useApi";
 import useAccount from "@/hooks/useAccount";
 import { keyStore } from "@/store/keyStore";
@@ -14,7 +13,7 @@ const useHolding = (refetchInterval = 1000 * 60) => {
   const { appKey, secretKey } = key;
 
   // 기본값 1분
-  const { holdingData, setHoldingData } = useHoldingStore();
+  //const { holdingData, setHoldingData } = useHoldingStore();
   const [error, setError] = useState(null);
   const api = useApi();
   const [CANO, ACNT_PRDT_CD] = useAccount();
@@ -68,7 +67,7 @@ const useHolding = (refetchInterval = 1000 * 60) => {
       });
 
       // 스토어에 데이터 저장
-      setHoldingData(processedData);
+      //setHoldingData(processedData);
       return processedData;
     } catch (error) {
       console.error("보유 종목 데이터 로드 실패:", error);
@@ -121,7 +120,7 @@ const useHolding = (refetchInterval = 1000 * 60) => {
   };
 
   return {
-    holdingData: query.data || holdingData,
+    holdingData: query.data,
     isLoading: query.isLoading,
     isError: query.isError || !!error,
     error: query.error?.message || error,

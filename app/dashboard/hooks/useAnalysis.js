@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { useAnalysisStore } from "@/store/useAnalysisStore";
 import aiModels from "@/json/ai_models.json";
 import { useQuery } from "@tanstack/react-query";
 
 // 웹 워커를 사용하는 분석 기능 훅
 const useAnalysis = (refetchInterval = 1000 * 60 * 2) => {
-  const { analysisData, setAnalysisData } = useAnalysisStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
   const [workerReady, setWorkerReady] = useState(false);
@@ -16,20 +14,14 @@ const useAnalysis = (refetchInterval = 1000 * 60 * 2) => {
 
   // Worker 초기화
   useEffect(() => {
-    // 서버 사이드 렌더링인 경우 실행하지 않음
-    if (typeof window === "undefined") return;
-
-    // 이미 Worker가 생성되어 있다면 생성하지 않음
-    if (workerRef.current) return;
+    if (typeof window === "undefined") return; // 서버 사이드 렌더링 방지
+    if (workerRef.current) return; // 이미 Worker가 생성된 경우 방지
 
     try {
-      // 네이티브 브라우저 Worker 사용 (동적 임포트 대신)
       if (typeof window.Worker === "function") {
-        // Worker 생성
         const worker = new window.Worker("/workers/analysis.worker.js");
         workerRef.current = worker;
 
-        // 메시지 핸들러 함수 정의
         const handleMessage = (e) => {
           const { type, payload } = e.data;
 
@@ -41,7 +33,6 @@ const useAnalysis = (refetchInterval = 1000 * 60 * 2) => {
 
             case "PROCESS_COMPLETE":
               console.log(`분석 처리 완료: ${payload.length}개 항목`);
-              setAnalysisData(payload);
               setIsProcessing(false);
               break;
 
@@ -56,18 +47,12 @@ const useAnalysis = (refetchInterval = 1000 * 60 * 2) => {
           }
         };
 
-        // 메시지 핸들러 참조 저장 (clean-up에서 사용)
         messageHandlerRef.current = handleMessage;
-
-        // 표준 Worker API 이벤트 리스너 등록
         worker.addEventListener("message", handleMessage);
 
-        // clean-up 함수 반환
         return () => {
           if (workerRef.current) {
-            // 이벤트 리스너 제거
             worker.removeEventListener("message", handleMessage);
-            // 워커 종료
             worker.terminate();
             workerRef.current = null;
           }
@@ -79,7 +64,7 @@ const useAnalysis = (refetchInterval = 1000 * 60 * 2) => {
       console.error("웹 워커 초기화 오류:", error);
       setError(`웹 워커를 초기화할 수 없습니다: ${error.message}`);
     }
-  }, [setAnalysisData]);
+  }, []);
 
   // 메인 데이터 가져오기 함수
   const fetchData = async () => {
@@ -105,47 +90,40 @@ const useAnalysis = (refetchInterval = 1000 * 60 * 2) => {
       setError(
         "웹 워커가 아직 준비되지 않았습니다. 잠시 후 다시 시도해 주세요."
       );
-      return analysisData;
+      return [];
     }
 
     try {
       setIsProcessing(true);
       setError(null);
 
-      // 데이터 가져오기
       const rawData = await fetchData();
 
       if (!rawData || !Array.isArray(rawData)) {
         throw new Error("유효한 데이터를 가져오지 못했습니다.");
       }
 
-      // 메시지 처리를 위한 Promise 생성
       return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
           reject(new Error("데이터 처리 시간이 초과되었습니다."));
         }, 30000);
 
-        // 일회용 메시지 핸들러
         const responseHandler = (e) => {
           const { type, payload } = e.data;
 
           if (type === "PROCESS_COMPLETE") {
             clearTimeout(timeoutId);
-            // 이벤트 리스너 제거
             workerRef.current.removeEventListener("message", responseHandler);
             resolve(payload);
           } else if (type === "ERROR") {
             clearTimeout(timeoutId);
-            // 이벤트 리스너 제거
             workerRef.current.removeEventListener("message", responseHandler);
             reject(new Error(payload));
           }
         };
 
-        // 일회용 메시지 핸들러 등록
         workerRef.current.addEventListener("message", responseHandler);
 
-        // 요청 전송
         workerRef.current.postMessage({
           type: "PROCESS_DATA",
           payload: {
@@ -158,7 +136,7 @@ const useAnalysis = (refetchInterval = 1000 * 60 * 2) => {
       setIsProcessing(false);
       setError(`분석 처리 중 오류: ${error.message}`);
       console.error("분석 오류:", error);
-      return analysisData;
+      return [];
     }
   };
 
@@ -185,7 +163,7 @@ const useAnalysis = (refetchInterval = 1000 * 60 * 2) => {
   };
 
   return {
-    analysisData: query.data || analysisData,
+    analysisData: query.data || [],
     isLoading: query.isLoading || isProcessing,
     isError: query.isError || !!error,
     error: query.error?.message || error,
