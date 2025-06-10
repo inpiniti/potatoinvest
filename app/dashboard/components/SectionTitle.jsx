@@ -16,7 +16,7 @@ const SectionTitle = ({ children, current, setCurrent, analysisData }) => {
     const selectHandler = () => {
       const selectedIndex = api.selectedScrollSnap();
       setCurrentIndex(selectedIndex);
-      setCurrent(analysisData[selectedIndex]);
+      setCurrent(selectedIndex);
     };
 
     // 참조에 핸들러 저장 (두 번째 effect에서 사용)
@@ -37,31 +37,29 @@ const SectionTitle = ({ children, current, setCurrent, analysisData }) => {
 
   // 두 번째 effect: currentMail이 변경될 때 캐러셀 위치 업데이트
   useEffect(() => {
-    if (!api || !current) return;
+    if (!api || current === undefined || current === null) return;
 
-    const mailIndex = analysisData.findIndex(
-      (analysis) => analysis.name === current.name
-    );
+    // const mailIndex = analysisData.findIndex(
+    //   (analysis) => analysis.name === current.name
+    // );
 
-    if (mailIndex >= 0 && mailIndex !== currentIndex) {
-      // 저장한 핸들러 참조 사용
-      const handler = selectHandlerRef.current;
+    // 저장한 핸들러 참조 사용
+    const handler = selectHandlerRef.current;
 
-      // 핸들러가 있으면 임시로 제거
-      if (handler) {
-        api.off("select", handler);
-      }
+    // 핸들러가 있으면 임시로 제거
+    if (handler) {
+      api.off("select", handler);
+    }
 
-      // 캐러셀 위치 업데이트
-      api.scrollTo(mailIndex);
-      setCurrentIndex(mailIndex);
+    // 캐러셀 위치 업데이트
+    api.scrollTo(current);
+    setCurrentIndex(current);
 
-      // 핸들러 다시 등록
-      if (handler) {
-        setTimeout(() => {
-          api.on("select", handler);
-        }, 0);
-      }
+    // 핸들러 다시 등록
+    if (handler) {
+      setTimeout(() => {
+        api.on("select", handler);
+      }, 0);
     }
   }, [current, analysisData, api, currentIndex]);
 

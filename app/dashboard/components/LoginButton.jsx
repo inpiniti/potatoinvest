@@ -173,14 +173,9 @@ const LoginButton = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <SidebarMenuButton
-          tooltip={{
-            children: status === "success" ? "로그인 완료" : "로그인",
-            hidden: false,
-          }}
-        >
+        <Button variant="ghost" size="icon" className="size-7">
           <KeyRound className={status === "success" ? "text-green-500" : ""} />
-        </SidebarMenuButton>
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

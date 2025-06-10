@@ -148,7 +148,7 @@ const SettingsToggle = ({ children }) => {
           <TooltipTrigger asChild>
             <Drawer>
               <DrawerTrigger asChild>
-                <Button variant="secondary" size="icon">
+                <Button variant="ghost" size="icon" className="size-7">
                   <Settings size={16} />
                 </Button>
               </DrawerTrigger>

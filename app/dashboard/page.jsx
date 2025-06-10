@@ -7,6 +7,8 @@ import {
   Clock, // 미체결에 적합한 시계 아이콘
   LineChart, // 기간손익에 적합한 차트 아이콘
   BarChart3, // 분석에 적합한 분석 차트 아이콘
+  ArrowLeft, // "<"
+  ArrowRight, // ">"
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -162,8 +164,8 @@ export default function DashBoardPage() {
                 )} > ${Number(item?.now_pric2).toFixed(2)} (${Number(
                   item?.ovrs_cblc_qty
                 ).toLocaleString("ko-KR")})`}
-                onClick={() => setCurrent(item)}
-                active={current?.name === item?.name}
+                onClick={() => setCurrent(index)}
+                active={current === index}
               />
             );
           } else if (activeItem?.title === "미체결") {
@@ -180,8 +182,8 @@ export default function DashBoardPage() {
                   1500
                 ).toLocaleString("ko-KR")}원)`}
                 description={`${item?.prcs_stat_name}`}
-                onClick={() => setCurrent(item)}
-                active={current?.name === item?.name}
+                onClick={() => setCurrent(index)}
+                active={current === index}
               />
             );
           } else if (activeItem?.title === "체결") {
@@ -198,8 +200,8 @@ export default function DashBoardPage() {
                   1500
                 ).toLocaleString("ko-KR")}원)`}
                 description={`${item?.prcs_stat_name}`}
-                onClick={() => setCurrent(item)}
-                active={current?.name === item?.name}
+                onClick={() => setCurrent(index)}
+                active={current === index}
               />
             );
           } else if (activeItem?.title === "기간손익") {
@@ -214,8 +216,8 @@ export default function DashBoardPage() {
                 description={`${Number(item?.pchs_avg_pric).toFixed(
                   2
                 )} > ${Number(item?.avg_sll_unpr).toFixed(2)}`}
-                onClick={() => setCurrent(item)}
-                active={current?.name === item?.name}
+                onClick={() => setCurrent(index)}
+                active={current === index}
               />
             );
           } else if (activeItem?.title === "분석") {
@@ -230,8 +232,8 @@ export default function DashBoardPage() {
                 ).toFixed(2)}% > ${Number(item?.perf_1_m).toFixed(
                   2
                 )}% > ${Number(item?.perf_w).toFixed(2)}%`}
-                onClick={() => setCurrent(item)}
-                active={current?.name === item?.name}
+                onClick={() => setCurrent(index)}
+                active={current === index}
               />
             );
           }
@@ -250,21 +252,117 @@ export default function DashBoardPage() {
             <BuyToggle autoBuy={autoBuy} onToggleAutoBuy={toggleAutoBuy} />
             <SellToggle autoSell={autoSell} onToggleAutoSell={toggleAutoSell} />
           </SettingsButton>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7"
+            onClick={() => setCurrent((prev) => Math.max(prev - 1, 0))}
+          >
+            <ArrowLeft />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7"
+            onClick={() =>
+              setCurrent((prev) => Math.min(prev + 1, list.length - 1))
+            }
+          >
+            <ArrowRight />
+          </Button>
         </SectionHeader>
 
         <SectionTitle
           current={current}
           setCurrent={setCurrent}
-          analysisData={analysisData}
+          analysisData={list}
         >
-          {list?.map((analysis, index) => (
-            <SectionTitleItem
-              key={index}
-              current={current}
-              analysis={analysis}
-              setCurrent={setCurrent}
-            />
-          ))}
+          {list?.map((item, index) => {
+            if (activeItem?.title === "잔고") {
+              return (
+                <SectionTitleItem
+                  key={item?.ovrs_pdno}
+                  title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
+                  date={`${item?.evlu_pfls_rt}%`}
+                  info={`${Number(item?.frcr_pchs_amt1).toFixed(2)} > ${Number(
+                    item?.ovrs_stck_evlu_amt
+                  ).toFixed(2)} (${Number(
+                    (Number(item?.frcr_evlu_pfls_amt) * 1500).toFixed(0)
+                  ).toLocaleString("ko-KR")}원)`}
+                  description={`${Number(item?.pchs_avg_pric).toFixed(
+                    2
+                  )} > ${Number(item?.now_pric2).toFixed(2)} (${Number(
+                    item?.ovrs_cblc_qty
+                  ).toLocaleString("ko-KR")})`}
+                  active={current === index}
+                />
+              );
+            } else if (activeItem?.title === "미체결") {
+              return (
+                <SectionTitleItem
+                  key={index}
+                  title={`${item?.prdt_name} (${item?.pdno})`}
+                  date={`${item?.sll_buy_dvsn_cd_name}`}
+                  info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
+                    item?.ft_ccld_qty
+                  } / ${item?.ft_ord_qty}) (${(
+                    Number(item?.ft_ord_unpr3) *
+                    Number(item?.ft_ord_qty) *
+                    1500
+                  ).toLocaleString("ko-KR")}원)`}
+                  description={`${item?.prcs_stat_name}`}
+                  active={current === index}
+                />
+              );
+            } else if (activeItem?.title === "체결") {
+              return (
+                <SectionTitleItem
+                  key={index}
+                  title={`${item?.prdt_name} (${item?.pdno})`}
+                  date={`${item?.sll_buy_dvsn_cd_name}`}
+                  info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
+                    item?.ft_ccld_qty
+                  } / ${item?.ft_ord_qty}) (${(
+                    Number(item?.ft_ord_unpr3) *
+                    Number(item?.ft_ord_qty) *
+                    1500
+                  ).toLocaleString("ko-KR")}원)`}
+                  description={`${item?.prcs_stat_name}`}
+                  active={current === index}
+                />
+              );
+            } else if (activeItem?.title === "기간손익") {
+              return (
+                <SectionTitleItem
+                  key={index}
+                  title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
+                  date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
+                  info={`${Number(item?.ovrs_rlzt_pfls_amt).toFixed(
+                    2
+                  )} (${Number(item?.pftrt).toFixed(2)})`}
+                  description={`${Number(item?.pchs_avg_pric).toFixed(
+                    2
+                  )} > ${Number(item?.avg_sll_unpr).toFixed(2)}`}
+                  active={current === index}
+                />
+              );
+            } else if (activeItem?.title === "분석") {
+              return (
+                <SectionTitleItem
+                  key={item?.name}
+                  title={`${item?.description} (${item?.name})`}
+                  date={`${Number(item?.perf_1_m).toFixed(2)}%`}
+                  info={`${item?.close} (${Number(item?.change).toFixed(2)}%)`}
+                  description={`${Number(item?.perf_6_m).toFixed(
+                    2
+                  )}% > ${Number(item?.perf_3_m).toFixed(2)}% > ${Number(
+                    item?.perf_1_m
+                  ).toFixed(2)}% > ${Number(item?.perf_w).toFixed(2)}%`}
+                  active={current === index}
+                />
+              );
+            }
+          })}
         </SectionTitle>
         <Separator className="mr-2 h-4" />
         <div className="h-full overflow-y-scroll flex flex-col gap-4 p-4 scrollbar-hide">

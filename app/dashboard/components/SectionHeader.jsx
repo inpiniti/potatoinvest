@@ -3,7 +3,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const SectionHeader = ({ children }) => {
   return (
-    <header className="sticky top-0 flex items-center border-b bg-background px-4 py-1 justify-between">
+    <header className="sticky top-0 flex items-center border-b bg-background px-4 py-2 justify-between">
       <div className="flex items-center">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
