@@ -711,7 +711,7 @@ export default function DashBoardPage() {
                             {newsItem.title}
                           </CardTitle>
                           <CardDescription className="text-sm text-muted-foreground">
-                            {newsItem.summary}
+                            {newsItem.contentText}
                           </CardDescription>
                         </div>
                         <span className="text-xs text-muted-foreground shrink-0">
