@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Separator } from '@/components/ui/separator';
+import { Separator } from "@/components/ui/separator";
 import {
   Wallet, // 잔고에 적합한 지갑 아이콘
   CheckSquare, // 체결에 적합한 체크 아이콘
@@ -9,8 +9,8 @@ import {
   BarChart3, // 분석에 적합한 분석 차트 아이콘
   ArrowLeft, // "<"
   ArrowRight, // ">"
-} from 'lucide-react';
-import { use, useEffect, useRef, useState } from 'react';
+} from "lucide-react";
+import { use, useEffect, useRef, useState } from "react";
 
 import {
   Card,
@@ -19,68 +19,79 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-import useAnalysis from './hooks/useAnalysis'; // 분석 데이터 훅
-import useHolding from './hooks/useHolding'; // 보유 종목 데이터 훅
-import useCnnl from './hooks/useCnnl'; // 체결 데이터 훅
-import useProfit from './hooks/useProfit'; // 기간 손익 데이터 훅
-import useSearchInfo from './hooks/useSearchInfo'; // 현재가 상세 정보 훅
+import useAnalysis from "./hooks/useAnalysis"; // 분석 데이터 훅
+import useHolding from "./hooks/useHolding"; // 보유 종목 데이터 훅
+import useCnnl from "./hooks/useCnnl"; // 체결 데이터 훅
+import useProfit from "./hooks/useProfit"; // 기간 손익 데이터 훅
+import useSearchInfo from "./hooks/useSearchInfo"; // 현재가 상세 정보 훅
+import useDailyprice from "./hooks/useDailyprice"; // 기간별 시세 훅
 
-import SettingsButton from '../page/log/components/header/buttons/SettingsButton';
-import AutoPlayToggle from '../page/log/components/header/navigation/AutoPlayToggle';
-import BuyToggle from '../page/log/components/header/navigation/BuyToggle';
-import SellToggle from '../page/log/components/header/navigation/SellToggle';
+import SettingsButton from "../page/log/components/header/buttons/SettingsButton";
+import AutoPlayToggle from "../page/log/components/header/navigation/AutoPlayToggle";
+import BuyToggle from "../page/log/components/header/navigation/BuyToggle";
+import SellToggle from "../page/log/components/header/navigation/SellToggle";
 
-import PageWrap from './components/PageWrap';
-import Header from './components/Header';
-import Aside from './components/Aside';
-import AsideItem from './components/AsideItem';
-import Main from './components/Main';
-import SectionHeader from './components/SectionHeader';
-import SectionTitle from './components/SectionTitle';
-import SectionTitleItem from './components/SectionTitleItem';
-import LoginButton from './components/LoginButton';
-import dayjs from 'dayjs';
+import PageWrap from "./components/PageWrap";
+import Header from "./components/Header";
+import Aside from "./components/Aside";
+import AsideItem from "./components/AsideItem";
+import Main from "./components/Main";
+import SectionHeader from "./components/SectionHeader";
+import SectionTitle from "./components/SectionTitle";
+import SectionTitleItem from "./components/SectionTitleItem";
+import LoginButton from "./components/LoginButton";
+import { ChartAreaDefault } from "./components/ChartAreaDefault";
+
+import dayjs from "dayjs";
 
 const data = {
   navMain: [
     {
-      title: '잔고',
-      url: '#',
+      title: "잔고",
+      url: "#",
       icon: Wallet,
       isActive: true,
     },
     {
-      title: '체결',
-      url: '#',
+      title: "체결",
+      url: "#",
       icon: CheckSquare,
       isActive: false,
     },
     {
-      title: '미체결',
-      url: '#',
+      title: "미체결",
+      url: "#",
       icon: Clock,
       isActive: false,
     },
     {
-      title: '기간손익',
-      url: '#',
+      title: "기간손익",
+      url: "#",
       icon: LineChart,
       isActive: false,
     },
     {
-      title: '분석',
-      url: '#',
+      title: "분석",
+      url: "#",
       icon: BarChart3,
       isActive: false,
     },
   ],
+};
+
+const KEY_MAP = {
+  잔고: "ovrs_pdno",
+  체결: "pdno",
+  미체결: "pdno",
+  기간손익: "ovrs_pdno",
+  분석: "name",
 };
 
 export default function DashBoardPage() {
@@ -95,7 +106,8 @@ export default function DashBoardPage() {
   const { data: cnnlData } = useCnnl(120000); // 체결 데이터
   const { profitData, fetchProfitData } = useProfit(); // 기간 손익
 
-  const { data: searchData, mutate } = useSearchInfo(); // 현재가 상세
+  const { data: searchData, mutate: fetchSearchInfo } = useSearchInfo(); // 현재가 상세
+  const { data: dailyPriceData, mutate: fetchDailyPrice } = useDailyprice(); // 기간별시세
 
   const [autoPlay, toggleAutoPlay] = useState(false);
   const [autoBuy, toggleAutoBuy] = useState(false);
@@ -106,19 +118,19 @@ export default function DashBoardPage() {
   const handleMenuChange = (newActive) => {
     setActiveItem(newActive);
     switch (newActive?.title) {
-      case '잔고':
+      case "잔고":
         setList(holdingData);
         break;
-      case '미체결':
-        setList(cnnlData.filter((item) => item.prcs_stat_name !== '완료'));
+      case "미체결":
+        setList(cnnlData.filter((item) => item.prcs_stat_name !== "완료"));
         break;
-      case '분석':
+      case "분석":
         setList(analysisData);
         break;
-      case '체결':
-        setList(cnnlData.filter((item) => item.prcs_stat_name === '완료'));
+      case "체결":
+        setList(cnnlData.filter((item) => item.prcs_stat_name === "완료"));
         break;
-      case '기간손익':
+      case "기간손익":
         setList(profitData);
         break;
       default:
@@ -139,34 +151,21 @@ export default function DashBoardPage() {
 
   useEffect(() => {
     const newItem = list[current];
-    switch (activeItem?.title) {
-      case '잔고':
-        mutate({
-          PDNO: newItem?.ovrs_pdno,
-        });
-        break;
-      case '미체결':
-        mutate({
-          PDNO: newItem?.pdno,
-        });
-        break;
-      case '분석':
-        mutate({
-          PDNO: newItem?.name,
-        });
-        break;
-      case '체결':
-        mutate({
-          PDNO: newItem?.pdno,
-        });
-        break;
-      case '기간손익':
-        mutate({
-          PDNO: newItem?.ovrs_pdno,
-        });
-        break;
-    }
+    fetchSearchInfo({
+      PDNO: newItem?.[KEY_MAP[activeItem?.title]],
+    });
+    fetchDailyPrice({
+      SYMB: newItem?.[KEY_MAP[activeItem?.title]],
+    });
   }, [current]);
+
+  const handleChartChange = (GUBN) => {
+    const newItem = list[current];
+    fetchDailyPrice({
+      SYMB: newItem?.[KEY_MAP[activeItem?.title]],
+      GUBN,
+    });
+  };
 
   return (
     <PageWrap>
@@ -182,7 +181,7 @@ export default function DashBoardPage() {
         setCurrent={setCurrent}
       >
         {list?.map((item, index) => {
-          if (activeItem?.title === '잔고') {
+          if (activeItem?.title === "잔고") {
             return (
               <AsideItem
                 key={item?.ovrs_pdno}
@@ -192,17 +191,17 @@ export default function DashBoardPage() {
                   item?.ovrs_stck_evlu_amt
                 ).toFixed(2)} (${Number(
                   (Number(item?.frcr_evlu_pfls_amt) * 1500).toFixed(0)
-                ).toLocaleString('ko-KR')}원)`}
+                ).toLocaleString("ko-KR")}원)`}
                 description={`${Number(item?.pchs_avg_pric).toFixed(
                   2
                 )} > ${Number(item?.now_pric2).toFixed(2)} (${Number(
                   item?.ovrs_cblc_qty
-                ).toLocaleString('ko-KR')})`}
+                ).toLocaleString("ko-KR")})`}
                 onClick={() => setCurrent(index)}
                 active={current === index}
               />
             );
-          } else if (activeItem?.title === '미체결') {
+          } else if (activeItem?.title === "미체결") {
             return (
               <AsideItem
                 key={index}
@@ -214,13 +213,13 @@ export default function DashBoardPage() {
                   Number(item?.ft_ord_unpr3) *
                   Number(item?.ft_ord_qty) *
                   1500
-                ).toLocaleString('ko-KR')}원)`}
+                ).toLocaleString("ko-KR")}원)`}
                 description={`${item?.prcs_stat_name}`}
                 onClick={() => setCurrent(index)}
                 active={current === index}
               />
             );
-          } else if (activeItem?.title === '체결') {
+          } else if (activeItem?.title === "체결") {
             return (
               <AsideItem
                 key={index}
@@ -232,18 +231,18 @@ export default function DashBoardPage() {
                   Number(item?.ft_ord_unpr3) *
                   Number(item?.ft_ord_qty) *
                   1500
-                ).toLocaleString('ko-KR')}원)`}
+                ).toLocaleString("ko-KR")}원)`}
                 description={`${item?.prcs_stat_name}`}
                 onClick={() => setCurrent(index)}
                 active={current === index}
               />
             );
-          } else if (activeItem?.title === '기간손익') {
+          } else if (activeItem?.title === "기간손익") {
             return (
               <AsideItem
                 key={index}
                 title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
-                date={`${dayjs(item?.trad_day).format('YYYY-MM-DD')}`}
+                date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
                 info={`${Number(item?.ovrs_rlzt_pfls_amt).toFixed(2)} (${Number(
                   item?.pftrt
                 ).toFixed(2)})`}
@@ -254,7 +253,7 @@ export default function DashBoardPage() {
                 active={current === index}
               />
             );
-          } else if (activeItem?.title === '분석') {
+          } else if (activeItem?.title === "분석") {
             return (
               <AsideItem
                 key={item?.name}
@@ -312,7 +311,7 @@ export default function DashBoardPage() {
           analysisData={list}
         >
           {list?.map((item, index) => {
-            if (activeItem?.title === '잔고') {
+            if (activeItem?.title === "잔고") {
               return (
                 <SectionTitleItem
                   key={item?.ovrs_pdno}
@@ -322,16 +321,16 @@ export default function DashBoardPage() {
                     item?.ovrs_stck_evlu_amt
                   ).toFixed(2)} (${Number(
                     (Number(item?.frcr_evlu_pfls_amt) * 1500).toFixed(0)
-                  ).toLocaleString('ko-KR')}원)`}
+                  ).toLocaleString("ko-KR")}원)`}
                   description={`${Number(item?.pchs_avg_pric).toFixed(
                     2
                   )} > ${Number(item?.now_pric2).toFixed(2)} (${Number(
                     item?.ovrs_cblc_qty
-                  ).toLocaleString('ko-KR')})`}
+                  ).toLocaleString("ko-KR")})`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === '미체결') {
+            } else if (activeItem?.title === "미체결") {
               return (
                 <SectionTitleItem
                   key={index}
@@ -343,12 +342,12 @@ export default function DashBoardPage() {
                     Number(item?.ft_ord_unpr3) *
                     Number(item?.ft_ord_qty) *
                     1500
-                  ).toLocaleString('ko-KR')}원)`}
+                  ).toLocaleString("ko-KR")}원)`}
                   description={`${item?.prcs_stat_name}`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === '체결') {
+            } else if (activeItem?.title === "체결") {
               return (
                 <SectionTitleItem
                   key={index}
@@ -360,17 +359,17 @@ export default function DashBoardPage() {
                     Number(item?.ft_ord_unpr3) *
                     Number(item?.ft_ord_qty) *
                     1500
-                  ).toLocaleString('ko-KR')}원)`}
+                  ).toLocaleString("ko-KR")}원)`}
                   description={`${item?.prcs_stat_name}`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === '기간손익') {
+            } else if (activeItem?.title === "기간손익") {
               return (
                 <SectionTitleItem
                   key={index}
                   title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
-                  date={`${dayjs(item?.trad_day).format('YYYY-MM-DD')}`}
+                  date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
                   info={`${Number(item?.ovrs_rlzt_pfls_amt).toFixed(
                     2
                   )} (${Number(item?.pftrt).toFixed(2)})`}
@@ -380,7 +379,7 @@ export default function DashBoardPage() {
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === '분석') {
+            } else if (activeItem?.title === "분석") {
               return (
                 <SectionTitleItem
                   key={item?.name}
@@ -410,23 +409,14 @@ export default function DashBoardPage() {
             <TabsContent value="chart">
               <div className="py-2">
                 <CardTitle>차트</CardTitle>
-                <CardDescription>가려워 죽겠다. 벌레가 있나?</CardDescription>
+                <CardDescription className="pt-1">
+                  한국투자증권의 해외주식 기간별시세 기반의 데이터 입니다.
+                </CardDescription>
                 <Separator className="my-4" />
-                <Card className="bg-white">
-                  <CardContent className="space-y-2">
-                    <div className="space-y-1">
-                      <Label htmlFor="name">Name</Label>
-                      <Input id="name" defaultValue="Pedro Duarte" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label htmlFor="username">Username</Label>
-                      <Input id="username" defaultValue="@peduarte" />
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button>Save changes</Button>
-                  </CardFooter>
-                </Card>
+                <ChartAreaDefault
+                  dailyPriceData={dailyPriceData}
+                  onChange={handleChartChange}
+                />
               </div>
             </TabsContent>
             <TabsContent value="stock">
@@ -449,38 +439,38 @@ export default function DashBoardPage() {
                     <CardContent className="grid grid-cols-2 gap-4">
                       <div className="flex flex-col gap-2">
                         <Label>표준상품번호</Label>
-                        <Input value={searchData?.std_pdno || ''} readOnly />
+                        <Input value={searchData?.std_pdno || ""} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상품영문명</Label>
                         <Input
-                          value={searchData?.prdt_eng_name || ''}
+                          value={searchData?.prdt_eng_name || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상품명</Label>
-                        <Input value={searchData?.prdt_name || ''} readOnly />
+                        <Input value={searchData?.prdt_name || ""} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>국가명</Label>
-                        <Input value={searchData?.natn_name || ''} readOnly />
+                        <Input value={searchData?.natn_name || ""} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>국가코드</Label>
-                        <Input value={searchData?.natn_cd || ''} readOnly />
+                        <Input value={searchData?.natn_cd || ""} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상품분류명</Label>
                         <Input
-                          value={searchData?.prdt_clsf_name || ''}
+                          value={searchData?.prdt_clsf_name || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상품분류코드</Label>
                         <Input
-                          value={searchData?.prdt_clsf_cd || ''}
+                          value={searchData?.prdt_clsf_cd || ""}
                           readOnly
                         />
                       </div>
@@ -500,57 +490,57 @@ export default function DashBoardPage() {
                       <div className="flex flex-col gap-2">
                         <Label>거래시장명</Label>
                         <Input
-                          value={searchData?.tr_mket_name || ''}
+                          value={searchData?.tr_mket_name || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>거래시장코드</Label>
-                        <Input value={searchData?.tr_mket_cd || ''} readOnly />
+                        <Input value={searchData?.tr_mket_cd || ""} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외거래소명</Label>
                         <Input
-                          value={searchData?.ovrs_excg_name || ''}
+                          value={searchData?.ovrs_excg_name || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외거래소코드</Label>
                         <Input
-                          value={searchData?.ovrs_excg_cd || ''}
+                          value={searchData?.ovrs_excg_cd || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>거래통화코드</Label>
-                        <Input value={searchData?.tr_crcy_cd || ''} readOnly />
+                        <Input value={searchData?.tr_crcy_cd || ""} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>통화명</Label>
-                        <Input value={searchData?.crcy_name || ''} readOnly />
+                        <Input value={searchData?.crcy_name || ""} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외액면가</Label>
-                        <Input value={searchData?.ovrs_papr || ''} readOnly />
+                        <Input value={searchData?.ovrs_papr || ""} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>매수단위수량</Label>
                         <Input
-                          value={searchData?.buy_unit_qty || ''}
+                          value={searchData?.buy_unit_qty || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>매도단위수량</Label>
                         <Input
-                          value={searchData?.sll_unit_qty || ''}
+                          value={searchData?.sll_unit_qty || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>거래단위금액</Label>
-                        <Input value={searchData?.tr_unit_amt || ''} readOnly />
+                        <Input value={searchData?.tr_unit_amt || ""} readOnly />
                       </div>
                     </CardContent>
                   </Card>
@@ -568,57 +558,57 @@ export default function DashBoardPage() {
                       <div className="flex flex-col gap-2">
                         <Label>상장주식수</Label>
                         <Input
-                          value={searchData?.lstg_stck_num || ''}
+                          value={searchData?.lstg_stck_num || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상장일자</Label>
-                        <Input value={searchData?.lstg_dt || ''} readOnly />
+                        <Input value={searchData?.lstg_dt || ""} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상장여부</Label>
-                        <Input value={searchData?.lstg_yn || ''} readOnly />
+                        <Input value={searchData?.lstg_yn || ""} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상장폐지종목여부</Label>
                         <Input
-                          value={searchData?.lstg_abol_item_yn || ''}
+                          value={searchData?.lstg_abol_item_yn || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상장폐지일자</Label>
                         <Input
-                          value={searchData?.lstg_abol_dt || ''}
+                          value={searchData?.lstg_abol_dt || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외주식거래정지구분코드</Label>
                         <Input
-                          value={searchData?.ovrs_stck_tr_stop_dvsn_cd || ''}
+                          value={searchData?.ovrs_stck_tr_stop_dvsn_cd || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외주식상품그룹번호</Label>
                         <Input
-                          value={searchData?.ovrs_stck_prdt_grp_no || ''}
+                          value={searchData?.ovrs_stck_prdt_grp_no || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외주식등록사유코드</Label>
                         <Input
-                          value={searchData?.ovrs_stck_erlm_rosn_cd || ''}
+                          value={searchData?.ovrs_stck_erlm_rosn_cd || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외주식이력권리구분코드</Label>
                         <Input
-                          value={searchData?.ovrs_stck_hist_rght_dvsn_cd || ''}
+                          value={searchData?.ovrs_stck_hist_rght_dvsn_cd || ""}
                           readOnly
                         />
                       </div>
@@ -638,38 +628,38 @@ export default function DashBoardPage() {
                       <div className="flex flex-col gap-2">
                         <Label>현재가</Label>
                         <Input
-                          value={searchData?.ovrs_now_pric1 || ''}
+                          value={searchData?.ovrs_now_pric1 || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>최종수신일시</Label>
                         <Input
-                          value={searchData?.last_rcvg_dtime || ''}
+                          value={searchData?.last_rcvg_dtime || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>SEDOL번호</Label>
-                        <Input value={searchData?.sedol_no || ''} readOnly />
+                        <Input value={searchData?.sedol_no || ""} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>블룸버그티커</Label>
                         <Input
-                          value={searchData?.blbg_tckr_text || ''}
+                          value={searchData?.blbg_tckr_text || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>기관용도ISIN코드</Label>
                         <Input
-                          value={searchData?.istt_usge_isin_cd || ''}
+                          value={searchData?.istt_usge_isin_cd || ""}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>메모</Label>
-                        <Input value={searchData?.memo_text1 || ''} readOnly />
+                        <Input value={searchData?.memo_text1 || ""} readOnly />
                       </div>
                       {/* 필요시 추가 필드 계속 추가 */}
                     </CardContent>
@@ -677,8 +667,24 @@ export default function DashBoardPage() {
                 </CardContent>
               </div>
             </TabsContent>
-            <TabsContent value="news">news</TabsContent>
-            <TabsContent value="community">community</TabsContent>
+            <TabsContent value="news">
+              <div className="py-2">
+                <CardTitle>뉴스</CardTitle>
+                <CardDescription className="pt-1">
+                  한국투자증권의 해외주식 상품기본정보 기반의 데이터 입니다.
+                </CardDescription>
+                <Separator className="my-4" />
+              </div>
+            </TabsContent>
+            <TabsContent value="community">
+              <div className="py-2">
+                <CardTitle>커뮤니티</CardTitle>
+                <CardDescription className="pt-1">
+                  한국투자증권의 해외주식 상품기본정보 기반의 데이터 입니다.
+                </CardDescription>
+                <Separator className="my-4" />
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       </Main>
