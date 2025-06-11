@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Separator } from "@/components/ui/separator";
+import { Separator } from '@/components/ui/separator';
 import {
   Wallet, // 잔고에 적합한 지갑 아이콘
   CheckSquare, // 체결에 적합한 체크 아이콘
@@ -9,8 +9,8 @@ import {
   BarChart3, // 분석에 적합한 분석 차트 아이콘
   ArrowLeft, // "<"
   ArrowRight, // ">"
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+} from 'lucide-react';
+import { use, useEffect, useRef, useState } from 'react';
 
 import {
   Card,
@@ -19,63 +19,64 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
-import useAnalysis from "./hooks/useAnalysis"; // 분석 데이터 훅
-import useHolding from "./hooks/useHolding"; // 보유 종목 데이터 훅
-import useCnnl from "./hooks/useCnnl"; // 체결 데이터 훅
-import useProfit from "./hooks/useProfit"; // 기간 손익 데이터 훅
+import useAnalysis from './hooks/useAnalysis'; // 분석 데이터 훅
+import useHolding from './hooks/useHolding'; // 보유 종목 데이터 훅
+import useCnnl from './hooks/useCnnl'; // 체결 데이터 훅
+import useProfit from './hooks/useProfit'; // 기간 손익 데이터 훅
+import useSearchInfo from './hooks/useSearchInfo'; // 현재가 상세 정보 훅
 
-import SettingsButton from "../page/log/components/header/buttons/SettingsButton";
-import AutoPlayToggle from "../page/log/components/header/navigation/AutoPlayToggle";
-import BuyToggle from "../page/log/components/header/navigation/BuyToggle";
-import SellToggle from "../page/log/components/header/navigation/SellToggle";
+import SettingsButton from '../page/log/components/header/buttons/SettingsButton';
+import AutoPlayToggle from '../page/log/components/header/navigation/AutoPlayToggle';
+import BuyToggle from '../page/log/components/header/navigation/BuyToggle';
+import SellToggle from '../page/log/components/header/navigation/SellToggle';
 
-import PageWrap from "./components/PageWrap";
-import Header from "./components/Header";
-import Aside from "./components/Aside";
-import AsideItem from "./components/AsideItem";
-import Main from "./components/Main";
-import SectionHeader from "./components/SectionHeader";
-import SectionTitle from "./components/SectionTitle";
-import SectionTitleItem from "./components/SectionTitleItem";
-import LoginButton from "./components/LoginButton";
-import dayjs from "dayjs";
+import PageWrap from './components/PageWrap';
+import Header from './components/Header';
+import Aside from './components/Aside';
+import AsideItem from './components/AsideItem';
+import Main from './components/Main';
+import SectionHeader from './components/SectionHeader';
+import SectionTitle from './components/SectionTitle';
+import SectionTitleItem from './components/SectionTitleItem';
+import LoginButton from './components/LoginButton';
+import dayjs from 'dayjs';
 
 const data = {
   navMain: [
     {
-      title: "잔고",
-      url: "#",
+      title: '잔고',
+      url: '#',
       icon: Wallet,
       isActive: true,
     },
     {
-      title: "체결",
-      url: "#",
+      title: '체결',
+      url: '#',
       icon: CheckSquare,
       isActive: false,
     },
     {
-      title: "미체결",
-      url: "#",
+      title: '미체결',
+      url: '#',
       icon: Clock,
       isActive: false,
     },
     {
-      title: "기간손익",
-      url: "#",
+      title: '기간손익',
+      url: '#',
       icon: LineChart,
       isActive: false,
     },
     {
-      title: "분석",
-      url: "#",
+      title: '분석',
+      url: '#',
       icon: BarChart3,
       isActive: false,
     },
@@ -94,6 +95,8 @@ export default function DashBoardPage() {
   const { data: cnnlData } = useCnnl(120000); // 체결 데이터
   const { profitData, fetchProfitData } = useProfit(); // 기간 손익
 
+  const { data: searchData, mutate } = useSearchInfo(); // 현재가 상세
+
   const [autoPlay, toggleAutoPlay] = useState(false);
   const [autoBuy, toggleAutoBuy] = useState(false);
   const [autoSell, toggleAutoSell] = useState(false);
@@ -103,19 +106,19 @@ export default function DashBoardPage() {
   const handleMenuChange = (newActive) => {
     setActiveItem(newActive);
     switch (newActive?.title) {
-      case "잔고":
+      case '잔고':
         setList(holdingData);
         break;
-      case "미체결":
-        setList(cnnlData.filter((item) => item.prcs_stat_name !== "완료"));
+      case '미체결':
+        setList(cnnlData.filter((item) => item.prcs_stat_name !== '완료'));
         break;
-      case "분석":
+      case '분석':
         setList(analysisData);
         break;
-      case "체결":
-        setList(cnnlData.filter((item) => item.prcs_stat_name === "완료"));
+      case '체결':
+        setList(cnnlData.filter((item) => item.prcs_stat_name === '완료'));
         break;
-      case "기간손익":
+      case '기간손익':
         setList(profitData);
         break;
       default:
@@ -134,6 +137,37 @@ export default function DashBoardPage() {
     }
   }, [holdingData]);
 
+  useEffect(() => {
+    const newItem = list[current];
+    switch (activeItem?.title) {
+      case '잔고':
+        mutate({
+          PDNO: newItem?.ovrs_pdno,
+        });
+        break;
+      case '미체결':
+        mutate({
+          PDNO: newItem?.pdno,
+        });
+        break;
+      case '분석':
+        mutate({
+          PDNO: newItem?.name,
+        });
+        break;
+      case '체결':
+        mutate({
+          PDNO: newItem?.pdno,
+        });
+        break;
+      case '기간손익':
+        mutate({
+          PDNO: newItem?.ovrs_pdno,
+        });
+        break;
+    }
+  }, [current]);
+
   return (
     <PageWrap>
       <Header
@@ -148,7 +182,7 @@ export default function DashBoardPage() {
         setCurrent={setCurrent}
       >
         {list?.map((item, index) => {
-          if (activeItem?.title === "잔고") {
+          if (activeItem?.title === '잔고') {
             return (
               <AsideItem
                 key={item?.ovrs_pdno}
@@ -158,17 +192,17 @@ export default function DashBoardPage() {
                   item?.ovrs_stck_evlu_amt
                 ).toFixed(2)} (${Number(
                   (Number(item?.frcr_evlu_pfls_amt) * 1500).toFixed(0)
-                ).toLocaleString("ko-KR")}원)`}
+                ).toLocaleString('ko-KR')}원)`}
                 description={`${Number(item?.pchs_avg_pric).toFixed(
                   2
                 )} > ${Number(item?.now_pric2).toFixed(2)} (${Number(
                   item?.ovrs_cblc_qty
-                ).toLocaleString("ko-KR")})`}
+                ).toLocaleString('ko-KR')})`}
                 onClick={() => setCurrent(index)}
                 active={current === index}
               />
             );
-          } else if (activeItem?.title === "미체결") {
+          } else if (activeItem?.title === '미체결') {
             return (
               <AsideItem
                 key={index}
@@ -180,13 +214,13 @@ export default function DashBoardPage() {
                   Number(item?.ft_ord_unpr3) *
                   Number(item?.ft_ord_qty) *
                   1500
-                ).toLocaleString("ko-KR")}원)`}
+                ).toLocaleString('ko-KR')}원)`}
                 description={`${item?.prcs_stat_name}`}
                 onClick={() => setCurrent(index)}
                 active={current === index}
               />
             );
-          } else if (activeItem?.title === "체결") {
+          } else if (activeItem?.title === '체결') {
             return (
               <AsideItem
                 key={index}
@@ -198,18 +232,18 @@ export default function DashBoardPage() {
                   Number(item?.ft_ord_unpr3) *
                   Number(item?.ft_ord_qty) *
                   1500
-                ).toLocaleString("ko-KR")}원)`}
+                ).toLocaleString('ko-KR')}원)`}
                 description={`${item?.prcs_stat_name}`}
                 onClick={() => setCurrent(index)}
                 active={current === index}
               />
             );
-          } else if (activeItem?.title === "기간손익") {
+          } else if (activeItem?.title === '기간손익') {
             return (
               <AsideItem
                 key={index}
                 title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
-                date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
+                date={`${dayjs(item?.trad_day).format('YYYY-MM-DD')}`}
                 info={`${Number(item?.ovrs_rlzt_pfls_amt).toFixed(2)} (${Number(
                   item?.pftrt
                 ).toFixed(2)})`}
@@ -220,7 +254,7 @@ export default function DashBoardPage() {
                 active={current === index}
               />
             );
-          } else if (activeItem?.title === "분석") {
+          } else if (activeItem?.title === '분석') {
             return (
               <AsideItem
                 key={item?.name}
@@ -278,7 +312,7 @@ export default function DashBoardPage() {
           analysisData={list}
         >
           {list?.map((item, index) => {
-            if (activeItem?.title === "잔고") {
+            if (activeItem?.title === '잔고') {
               return (
                 <SectionTitleItem
                   key={item?.ovrs_pdno}
@@ -288,16 +322,16 @@ export default function DashBoardPage() {
                     item?.ovrs_stck_evlu_amt
                   ).toFixed(2)} (${Number(
                     (Number(item?.frcr_evlu_pfls_amt) * 1500).toFixed(0)
-                  ).toLocaleString("ko-KR")}원)`}
+                  ).toLocaleString('ko-KR')}원)`}
                   description={`${Number(item?.pchs_avg_pric).toFixed(
                     2
                   )} > ${Number(item?.now_pric2).toFixed(2)} (${Number(
                     item?.ovrs_cblc_qty
-                  ).toLocaleString("ko-KR")})`}
+                  ).toLocaleString('ko-KR')})`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === "미체결") {
+            } else if (activeItem?.title === '미체결') {
               return (
                 <SectionTitleItem
                   key={index}
@@ -309,12 +343,12 @@ export default function DashBoardPage() {
                     Number(item?.ft_ord_unpr3) *
                     Number(item?.ft_ord_qty) *
                     1500
-                  ).toLocaleString("ko-KR")}원)`}
+                  ).toLocaleString('ko-KR')}원)`}
                   description={`${item?.prcs_stat_name}`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === "체결") {
+            } else if (activeItem?.title === '체결') {
               return (
                 <SectionTitleItem
                   key={index}
@@ -326,17 +360,17 @@ export default function DashBoardPage() {
                     Number(item?.ft_ord_unpr3) *
                     Number(item?.ft_ord_qty) *
                     1500
-                  ).toLocaleString("ko-KR")}원)`}
+                  ).toLocaleString('ko-KR')}원)`}
                   description={`${item?.prcs_stat_name}`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === "기간손익") {
+            } else if (activeItem?.title === '기간손익') {
               return (
                 <SectionTitleItem
                   key={index}
                   title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
-                  date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
+                  date={`${dayjs(item?.trad_day).format('YYYY-MM-DD')}`}
                   info={`${Number(item?.ovrs_rlzt_pfls_amt).toFixed(
                     2
                   )} (${Number(item?.pftrt).toFixed(2)})`}
@@ -346,7 +380,7 @@ export default function DashBoardPage() {
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === "분석") {
+            } else if (activeItem?.title === '분석') {
               return (
                 <SectionTitleItem
                   key={item?.name}
@@ -396,27 +430,252 @@ export default function DashBoardPage() {
               </div>
             </TabsContent>
             <TabsContent value="stock">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Password</CardTitle>
-                  <CardDescription>
-                    Change your password here. After saving, ll be logged out.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="space-y-1">
-                    <Label htmlFor="current">Current password</Label>
-                    <Input id="current" type="password" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="new">New password</Label>
-                    <Input id="new" type="password" />
-                  </div>
+              <div className="py-2">
+                <CardTitle>종목정보</CardTitle>
+                <CardDescription className="pt-1">
+                  한국투자증권의 해외주식 상품기본정보 기반의 데이터 입니다.
+                </CardDescription>
+                <Separator className="my-4" />
+                <CardContent className="grid grid-cols-2 gap-4 px-0">
+                  {/* 기본 정보 */}
+                  <Card className="bg-white">
+                    <CardHeader>
+                      <CardTitle>기본 정보</CardTitle>
+                      <CardDescription>
+                        종목의 표준상품번호, 영문명, 국가, 상품분류 등 기본적인
+                        식별 정보를 제공합니다.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-2">
+                        <Label>표준상품번호</Label>
+                        <Input value={searchData?.std_pdno || ''} readOnly />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>상품영문명</Label>
+                        <Input
+                          value={searchData?.prdt_eng_name || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>상품명</Label>
+                        <Input value={searchData?.prdt_name || ''} readOnly />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>국가명</Label>
+                        <Input value={searchData?.natn_name || ''} readOnly />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>국가코드</Label>
+                        <Input value={searchData?.natn_cd || ''} readOnly />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>상품분류명</Label>
+                        <Input
+                          value={searchData?.prdt_clsf_name || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>상품분류코드</Label>
+                        <Input
+                          value={searchData?.prdt_clsf_cd || ''}
+                          readOnly
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* 거래 정보 */}
+                  <Card className="bg-white">
+                    <CardHeader>
+                      <CardTitle>거래 정보</CardTitle>
+                      <CardDescription>
+                        거래시장, 거래소, 통화, 단위 등 실제 매매와 관련된 거래
+                        조건 정보를 확인할 수 있습니다.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-2">
+                        <Label>거래시장명</Label>
+                        <Input
+                          value={searchData?.tr_mket_name || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>거래시장코드</Label>
+                        <Input value={searchData?.tr_mket_cd || ''} readOnly />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>해외거래소명</Label>
+                        <Input
+                          value={searchData?.ovrs_excg_name || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>해외거래소코드</Label>
+                        <Input
+                          value={searchData?.ovrs_excg_cd || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>거래통화코드</Label>
+                        <Input value={searchData?.tr_crcy_cd || ''} readOnly />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>통화명</Label>
+                        <Input value={searchData?.crcy_name || ''} readOnly />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>해외액면가</Label>
+                        <Input value={searchData?.ovrs_papr || ''} readOnly />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>매수단위수량</Label>
+                        <Input
+                          value={searchData?.buy_unit_qty || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>매도단위수량</Label>
+                        <Input
+                          value={searchData?.sll_unit_qty || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>거래단위금액</Label>
+                        <Input value={searchData?.tr_unit_amt || ''} readOnly />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* 상장/상태 정보 */}
+                  <Card className="bg-white">
+                    <CardHeader>
+                      <CardTitle>상장/상태 정보</CardTitle>
+                      <CardDescription>
+                        상장주식수, 상장일자, 상장여부, 폐지여부 등 종목의 상장
+                        및 상태 관련 정보를 보여줍니다.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-2">
+                        <Label>상장주식수</Label>
+                        <Input
+                          value={searchData?.lstg_stck_num || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>상장일자</Label>
+                        <Input value={searchData?.lstg_dt || ''} readOnly />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>상장여부</Label>
+                        <Input value={searchData?.lstg_yn || ''} readOnly />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>상장폐지종목여부</Label>
+                        <Input
+                          value={searchData?.lstg_abol_item_yn || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>상장폐지일자</Label>
+                        <Input
+                          value={searchData?.lstg_abol_dt || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>해외주식거래정지구분코드</Label>
+                        <Input
+                          value={searchData?.ovrs_stck_tr_stop_dvsn_cd || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>해외주식상품그룹번호</Label>
+                        <Input
+                          value={searchData?.ovrs_stck_prdt_grp_no || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>해외주식등록사유코드</Label>
+                        <Input
+                          value={searchData?.ovrs_stck_erlm_rosn_cd || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>해외주식이력권리구분코드</Label>
+                        <Input
+                          value={searchData?.ovrs_stck_hist_rght_dvsn_cd || ''}
+                          readOnly
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* 기타 정보 */}
+                  <Card className="bg-white">
+                    <CardHeader>
+                      <CardTitle>기타 정보</CardTitle>
+                      <CardDescription>
+                        현재가, SEDOL, 블룸버그티커, 메모 등 기타 참고용 부가
+                        정보를 제공합니다.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-2">
+                        <Label>현재가</Label>
+                        <Input
+                          value={searchData?.ovrs_now_pric1 || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>최종수신일시</Label>
+                        <Input
+                          value={searchData?.last_rcvg_dtime || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>SEDOL번호</Label>
+                        <Input value={searchData?.sedol_no || ''} readOnly />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>블룸버그티커</Label>
+                        <Input
+                          value={searchData?.blbg_tckr_text || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>기관용도ISIN코드</Label>
+                        <Input
+                          value={searchData?.istt_usge_isin_cd || ''}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>메모</Label>
+                        <Input value={searchData?.memo_text1 || ''} readOnly />
+                      </div>
+                      {/* 필요시 추가 필드 계속 추가 */}
+                    </CardContent>
+                  </Card>
                 </CardContent>
-                <CardFooter>
-                  <Button>Save password</Button>
-                </CardFooter>
-              </Card>
+              </div>
             </TabsContent>
             <TabsContent value="news">news</TabsContent>
             <TabsContent value="community">community</TabsContent>
