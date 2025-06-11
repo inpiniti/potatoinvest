@@ -755,12 +755,8 @@ export default function DashBoardPage() {
                             {comment.author.nickname}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(comment.updatedAt).toLocaleTimeString(
-                              "ko-KR",
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
+                            {dayjs(comment.createdAt).format(
+                              "YYYY-MM-DD HH:mm"
                             )}
                           </span>
                         </div>
