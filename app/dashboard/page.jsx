@@ -97,7 +97,7 @@ const KEY_MAP = {
 
 export default function DashBoardPage() {
   const [activeItem, setActiveItem] = useState(data.navMain[0]);
-  const [current, setCurrent] = useState();
+  const [current, setCurrent] = useState(0);
 
   //const [mails, setMails] = useState(data.mails);
 
@@ -302,9 +302,20 @@ export default function DashBoardPage() {
             variant="ghost"
             size="icon"
             className="size-7"
-            onClick={() =>
-              setCurrent((prev) => Math.min(prev + 1, list.length - 1))
-            }
+            onClick={() => {
+              if (current === list.length - 1) {
+                setCurrent(0); // current를 0으로 초기화
+                const nextIndex =
+                  data.navMain.findIndex(
+                    (item) => item.title === activeItem.title
+                  ) + 1;
+                const nextItem = data.navMain[nextIndex % data.navMain.length];
+                setActiveItem(nextItem); // 다음 activeItem으로 이동
+                handleMenuChange(nextItem);
+              } else {
+                setCurrent((prev) => Math.min(prev + 1, list.length - 1)); // 일반적인 증가
+              }
+            }}
           >
             <ArrowRight />
           </Button>
