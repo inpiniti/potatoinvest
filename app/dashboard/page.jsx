@@ -32,6 +32,7 @@ import useCnnl from "./hooks/useCnnl"; // 체결 데이터 훅
 import useProfit from "./hooks/useProfit"; // 기간 손익 데이터 훅
 import useSearchInfo from "./hooks/useSearchInfo"; // 현재가 상세 정보 훅
 import useDailyprice from "./hooks/useDailyprice"; // 기간별 시세 훅
+import useNewsCommunity from "./hooks/useNewsCommunity"; // 뉴스 및 커뮤니티 훅
 
 import SettingsButton from "../page/log/components/header/buttons/SettingsButton";
 import AutoPlayToggle from "../page/log/components/header/navigation/AutoPlayToggle";
@@ -105,6 +106,7 @@ export default function DashBoardPage() {
   const { holdingData } = useHolding(120000); // 잔고
   const { data: cnnlData } = useCnnl(120000); // 체결 데이터
   const { profitData, fetchProfitData } = useProfit(); // 기간 손익
+  const { data: newsData, mutate: fetchNews } = useNewsCommunity(); // 뉴스 및 커뮤니티
 
   const { data: searchData, mutate: fetchSearchInfo } = useSearchInfo(); // 현재가 상세
   const { data: dailyPriceData, mutate: fetchDailyPrice } = useDailyprice(); // 기간별시세
@@ -156,6 +158,9 @@ export default function DashBoardPage() {
     });
     fetchDailyPrice({
       SYMB: newItem?.[KEY_MAP[activeItem?.title]],
+    });
+    fetchNews({
+      code: newItem?.[KEY_MAP[activeItem?.title]],
     });
   }, [current]);
 
@@ -671,18 +676,86 @@ export default function DashBoardPage() {
               <div className="py-2">
                 <CardTitle>뉴스</CardTitle>
                 <CardDescription className="pt-1">
-                  한국투자증권의 해외주식 상품기본정보 기반의 데이터 입니다.
+                  최신 뉴스 목록입니다.
                 </CardDescription>
                 <Separator className="my-4" />
+                <div className="grid gap-4">
+                  {newsData?.news.map((newsItem) => (
+                    <Card key={newsItem.id} className="flex flex-col">
+                      <CardHeader className="flex gap-4">
+                        <img
+                          src={newsItem.imageUrls[0]}
+                          alt={newsItem.title}
+                          className="w-16 h-16 rounded-md object-cover shrink-0"
+                        />
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <img
+                              src={newsItem.source.faviconUrl}
+                              alt={newsItem.source.name}
+                              className="w-5 h-5"
+                            />
+                            {newsItem.title}
+                          </CardTitle>
+                          <CardDescription className="text-sm text-muted-foreground">
+                            {newsItem.summary}
+                          </CardDescription>
+                        </div>
+                        <span className="text-xs text-muted-foreground shrink-0">
+                          {new Date(newsItem.createdAt).toLocaleDateString(
+                            "ko-KR",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )}
+                        </span>
+                      </CardHeader>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </TabsContent>
+
             <TabsContent value="community">
               <div className="py-2">
                 <CardTitle>커뮤니티</CardTitle>
                 <CardDescription className="pt-1">
-                  한국투자증권의 해외주식 상품기본정보 기반의 데이터 입니다.
+                  최신 커뮤니티 글입니다.
                 </CardDescription>
                 <Separator className="my-4" />
+                <div className="flex flex-col gap-4">
+                  {newsData?.comments.map((comment) => (
+                    <Card
+                      key={comment.id}
+                      className="flex flex-row items-start px-4 gap-4"
+                    >
+                      <img
+                        src={comment.author.profilePictureUrl}
+                        alt={comment.author.nickname}
+                        className="w-10 h-10 rounded-full"
+                      />
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">
+                            {comment.author.nickname}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(comment.updatedAt).toLocaleTimeString(
+                              "ko-KR",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </span>
+                        </div>
+                        <p className="text-sm">{comment.message}</p>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </TabsContent>
           </Tabs>
