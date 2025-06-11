@@ -153,14 +153,16 @@ export default function DashBoardPage() {
 
   useEffect(() => {
     const newItem = list[current];
+    const code = newItem?.[KEY_MAP[activeItem?.title]];
+    if (!code) return; // 코드가 없으면 아무 작업도 하지 않음
     fetchSearchInfo({
-      PDNO: newItem?.[KEY_MAP[activeItem?.title]],
+      PDNO: code,
     });
     fetchDailyPrice({
-      SYMB: newItem?.[KEY_MAP[activeItem?.title]],
+      SYMB: code,
     });
     fetchNews({
-      code: newItem?.[KEY_MAP[activeItem?.title]],
+      code: code,
     });
   }, [current]);
 
