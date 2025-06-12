@@ -3,9 +3,14 @@ import useAccount from '@/hooks/useAccount';
 
 import { useProfitStore } from '@/store/useProfitStore';
 import dayjs from 'dayjs';
+import { useEffect, useMemo, useState } from 'react';
 
 const useProfit = () => {
   const { profitData, setProfitData } = useProfitStore();
+  // 일별인지 월별인지 개별인지
+  const [profitType, setProfitType] = useState('individual'); // 'daily', 'monthly', 'individual'
+  const [dailyProfitData, setDailyProfitData] = useState([]); // 일별
+  const [monthlyProfitData, setMonthlyProfitData] = useState([]); // 월별
 
   const api = useApi();
   const [CANO, ACNT_PRDT_CD] = useAccount();
@@ -117,8 +122,69 @@ const useProfit = () => {
     return merged;
   };
 
+  // profitData가 변할 때마다 일별/월별 데이터 가공
+  useEffect(() => {
+    // 일별 그룹화
+    const groupedDailyData = profitData?.reduce((acc, item) => {
+      const existingGroup = acc.find(
+        (group) => group.trad_day === item.trad_day
+      );
+      if (existingGroup) {
+        existingGroup.totalProfit += Number(item.ovrs_rlzt_pfls_amt);
+        existingGroup.totalInvestment += Number(item.frcr_pchs_amt1);
+      } else {
+        acc.push({
+          trad_day: item.trad_day,
+          totalProfit: Number(item.ovrs_rlzt_pfls_amt),
+          totalInvestment: Number(item.frcr_pchs_amt1),
+        });
+      }
+      return acc;
+    }, []);
+    setDailyProfitData(groupedDailyData);
+
+    // 월별 그룹화
+    const groupedMonthlyData = profitData?.reduce((acc, item) => {
+      const yearMonth = item.trad_day ? item.trad_day.substring(0, 6) : null;
+      if (!yearMonth) return acc;
+      const existingGroup = acc.find((group) => group.yearMonth === yearMonth);
+      if (existingGroup) {
+        existingGroup.totalProfit += Number(item.ovrs_rlzt_pfls_amt);
+        existingGroup.totalInvestment += Number(item.frcr_pchs_amt1);
+        if (!existingGroup.tradingDays.includes(item.trad_day)) {
+          existingGroup.tradingDays.push(item.trad_day);
+        }
+      } else {
+        acc.push({
+          yearMonth,
+          totalProfit: Number(item.ovrs_rlzt_pfls_amt),
+          totalInvestment: Number(item.frcr_pchs_amt1),
+          tradingDays: [item.trad_day],
+        });
+      }
+      return acc;
+    }, []);
+    setMonthlyProfitData(groupedMonthlyData);
+  }, [profitData]);
+
+  const data = useMemo(() => {
+    console.log('profitType:', profitType);
+    if (profitType === 'individual') {
+      return profitData;
+    } else if (profitType === 'daily') {
+      return dailyProfitData;
+    } else if (profitType === 'monthly') {
+      return monthlyProfitData;
+    }
+    return [];
+  }, [profitType, profitData, dailyProfitData, monthlyProfitData]);
+
   return {
-    profitData,
+    profitData: data,
+    dailyProfitData,
+    monthlyProfitData,
+    profitType,
+    setProfitType,
     fetchProfitData,
   };
 };
