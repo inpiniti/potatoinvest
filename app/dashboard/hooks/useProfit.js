@@ -99,12 +99,19 @@ const useProfit = () => {
     }
 
     // 기존 데이터와 합치고 중복 제거
-    const merged = [...profitData, ...allData].filter(
-      (item, idx, arr) =>
-        arr.findIndex(
-          (v) => v.trad_day === item.trad_day && v.ovrs_pdno === item.ovrs_pdno
-        ) === idx
-    );
+    const merged = [...profitData, ...allData]
+      .filter(
+        (item, idx, arr) =>
+          arr.findIndex(
+            (v) =>
+              v.trad_day === item.trad_day && v.ovrs_pdno === item.ovrs_pdno
+          ) === idx
+      )
+      .sort(
+        (a, b) =>
+          b.trad_day.localeCompare(a.trad_day) ||
+          a.ovrs_pdno.localeCompare(b.ovrs_pdno)
+      );
 
     setProfitData(merged);
     return merged;
