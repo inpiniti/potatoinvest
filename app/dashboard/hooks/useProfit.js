@@ -1,22 +1,25 @@
-import useApi from '@/hooks/useApi';
-import useAccount from '@/hooks/useAccount';
+import useApi from "@/hooks/useApi";
+import useAccount from "@/hooks/useAccount";
 
-import { useProfitStore } from '@/store/useProfitStore';
-import dayjs from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
+import { useProfitStore } from "@/store/useProfitStore";
+import dayjs from "dayjs";
+import { useEffect, useMemo, useState } from "react";
 
 const useProfit = () => {
   const { profitData, setProfitData } = useProfitStore();
   // 일별인지 월별인지 개별인지
-  const [profitType, setProfitType] = useState('individual'); // 'daily', 'monthly', 'individual'
+  const [profitType, setProfitType] = useState("individual"); // 'daily', 'monthly', 'individual'
   const [dailyProfitData, setDailyProfitData] = useState([]); // 일별
   const [monthlyProfitData, setMonthlyProfitData] = useState([]); // 월별
+
+  // 총 매매손익
+  const [totalProfit, setTotalProfit] = useState(0);
 
   const api = useApi();
   const [CANO, ACNT_PRDT_CD] = useAccount();
 
   // 조회 시작일자
-  const INQR_STRT_DT = '20250301';
+  const INQR_STRT_DT = "20250301";
 
   // trad_day : 거래일자임
 
@@ -32,11 +35,11 @@ const useProfit = () => {
   const fetchProfitData = async () => {
     let allData = [];
     let hasMore = true;
-    let ctxAreaNk200 = '';
-    let ctxAreaFk200 = '';
+    let ctxAreaNk200 = "";
+    let ctxAreaFk200 = "";
     // 기존 내역이 있다면 마지막 거래일 다음날부터 조회
     let startDate = lastDay;
-    const endDate = dayjs().format('YYYYMMDD');
+    const endDate = dayjs().format("YYYYMMDD");
 
     // 중복 제거를 위한 Set (trad_day + ovrs_pdno 조합으로 유니크)
     const uniqueSet = new Set(
@@ -47,13 +50,13 @@ const useProfit = () => {
       const payload = {
         CANO,
         ACNT_PRDT_CD,
-        OVRS_EXCG_CD: 'NASD',
-        NATN_CD: '', // 국가코드 : 공란
-        CRCY_CD: '', // 통화코드 : 공란
-        PDNO: '', // 상품번호 : 공란
+        OVRS_EXCG_CD: "NASD",
+        NATN_CD: "", // 국가코드 : 공란
+        CRCY_CD: "", // 통화코드 : 공란
+        PDNO: "", // 상품번호 : 공란
         INQR_STRT_DT: startDate,
         INQR_END_DT: endDate,
-        WCRC_FRCR_DVSN_CD: '02', // 원화외화구분코드 : 01: 외화, 02: 원화
+        WCRC_FRCR_DVSN_CD: "02", // 원화외화구분코드 : 01: 외화, 02: 원화
         CTX_AREA_FK200: ctxAreaFk200,
         CTX_AREA_NK200: ctxAreaNk200,
       };
@@ -69,7 +72,7 @@ const useProfit = () => {
         } catch {
           data = {};
         }
-        if (data && data.message === 'fetch failed') {
+        if (data && data.message === "fetch failed") {
           retryCount++;
           await new Promise((res) => setTimeout(res, 1000 * retryCount)); // 점점 대기시간 증가
           continue;
@@ -92,7 +95,7 @@ const useProfit = () => {
         allData = [...allData, ...newItems];
 
         // 연속 조회 키가 있으면 다음 페이지로
-        if (data.ctx_area_nk200 && data.ctx_area_nk200.trim() !== '') {
+        if (data.ctx_area_nk200 && data.ctx_area_nk200.trim() !== "") {
           ctxAreaNk200 = data.ctx_area_nk200;
           ctxAreaFk200 = data.ctx_area_fk200;
         } else {
@@ -165,15 +168,26 @@ const useProfit = () => {
       return acc;
     }, []);
     setMonthlyProfitData(groupedMonthlyData);
+
+    // 총 매매손익 계산
+    const totalProfitData = profitData?.reduce(
+      (acc, item) => {
+        acc.totalProfit += Number(item.ovrs_rlzt_pfls_amt);
+        acc.totalInvestment += Number(item.frcr_pchs_amt1);
+        return acc;
+      },
+      { totalProfit: 0, totalInvestment: 0 }
+    );
+    setTotalProfit(totalProfitData);
   }, [profitData]);
 
   const data = useMemo(() => {
-    console.log('profitType:', profitType);
-    if (profitType === 'individual') {
+    console.log("profitType:", profitType);
+    if (profitType === "individual") {
       return profitData;
-    } else if (profitType === 'daily') {
+    } else if (profitType === "daily") {
       return dailyProfitData;
-    } else if (profitType === 'monthly') {
+    } else if (profitType === "monthly") {
       return monthlyProfitData;
     }
     return [];
@@ -183,6 +197,7 @@ const useProfit = () => {
     profitData: data,
     dailyProfitData,
     monthlyProfitData,
+    totalProfit,
     profitType,
     setProfitType,
     fetchProfitData,

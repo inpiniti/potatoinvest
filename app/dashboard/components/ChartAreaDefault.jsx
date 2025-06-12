@@ -42,7 +42,7 @@ export function ChartAreaDefault({ dailyPriceData, onChange }) {
         clos: item.clos,
       };
     })
-    .reverse();
+    ?.reverse();
 
   const handleTabChange = (value) => {
     setSelectedTab(value);

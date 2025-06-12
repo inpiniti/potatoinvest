@@ -68,12 +68,18 @@ const useHolding = (refetchInterval = 1000 * 60) => {
 
       // 스토어에 데이터 저장
       //setHoldingData(processedData);
-      return processedData;
+      return {
+        holdingData: processedData,
+        output2: data.output2 || {},
+      };
     } catch (error) {
       console.error("보유 종목 데이터 로드 실패:", error);
       setError(error.message);
       // 기존 데이터 반환 (오류 시 이전 데이터 유지)
-      return holdingData;
+      return {
+        holdingData: [],
+        output2: {},
+      };
     }
   };
 
@@ -120,7 +126,7 @@ const useHolding = (refetchInterval = 1000 * 60) => {
   };
 
   return {
-    holdingData: query.data,
+    balanceData: query.data,
     isLoading: query.isLoading,
     isError: query.isError || !!error,
     error: query.error?.message || error,
