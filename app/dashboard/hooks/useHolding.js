@@ -128,6 +128,7 @@ const useHolding = (refetchInterval = 1000 * 60) => {
   return {
     balanceData: query.data,
     isLoading: query.isLoading,
+    isPending: query.isPending,
     isError: query.isError || !!error,
     error: query.error?.message || error,
     refetch: refreshData,

@@ -165,6 +165,7 @@ const useAnalysis = (refetchInterval = 1000 * 60 * 2) => {
   return {
     analysisData: query.data || [],
     isLoading: query.isLoading || isProcessing,
+    isPending: query.isPending,
     isError: query.isError || !!error,
     error: query.error?.message || error,
     refetch: refreshData,

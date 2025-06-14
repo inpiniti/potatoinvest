@@ -9,6 +9,7 @@ import {
   BarChart3, // 분석에 적합한 분석 차트 아이콘
   ArrowLeft, // "<"
   ArrowRight, // ">"
+  ShieldAlert,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -24,6 +25,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
+import useToken from "@/hooks/useToken"; // 토큰 유효성 검사 훅
 
 import useAnalysis from "./hooks/useAnalysis"; // 분석 데이터 훅
 import useHolding from "./hooks/useHolding"; // 보유 종목 데이터 훅
@@ -100,23 +103,35 @@ export default function DashBoardPage() {
   const [current, setCurrent] = useState(0);
 
   // 분석 데이터
-  const { analysisData } = useAnalysis(120000); // 분석
-  const { balanceData } = useHolding(120000); // 잔고
+  const { analysisData, isPending: analysisPending } = useAnalysis(120000); // 분석
+  const { balanceData, isPending: balancePending } = useHolding(120000); // 잔고
   const holdingData = balanceData?.holdingData || [];
   const holdingData2 = balanceData?.output2 || {};
-  const { data: cnnlData } = useCnnl(120000); // 체결 데이터
+  const { data: cnnlData, isPending: cnnlPending } = useCnnl(120000); // 체결 데이터
   const {
     profitData,
     totalProfit,
     profitType,
     setProfitType,
     fetchProfitData,
+    isPending: profitPending,
   } = useProfit(); // 기간 손익
   const { data: newsData, mutate: fetchNews } = useNewsCommunity(); // 뉴스 및 커뮤니티
   const { data: searchData, mutate: fetchSearchInfo } = useSearchInfo(); // 현재가 상세
   const { data: dailyPriceData, mutate: fetchDailyPrice } = useDailyprice(); // 기간별시세
   const { data: exchangeRateData, mutate: fetchExchangeRate } =
     useExchangeRate(); // 환율
+
+  // 토큰이 유효한지 확인
+  const { isTokenValid } = useToken();
+
+  const PENDING_MAP = {
+    잔고: balancePending,
+    체결: cnnlPending,
+    미체결: cnnlPending,
+    기간손익: profitPending,
+    분석: analysisPending,
+  };
 
   const krw = useMemo(
     () => Number(exchangeRateData?.usdToKrw),
@@ -157,12 +172,14 @@ export default function DashBoardPage() {
   useEffect(() => {
     // 환율은 한 번만 가져오도록 설정
     fetchExchangeRate();
+
+    // 기간손익도 한 번만 가져오도록 설정
+    fetchProfitData();
   }, []);
 
   useEffect(() => {
     // Only set the list once when holdingData is first available
     if (holdingData && holdingData.length > 0 && !dataInitialized.current) {
-      fetchProfitData();
       setList(holdingData);
       dataInitialized.current = true;
     }
@@ -278,159 +295,174 @@ export default function DashBoardPage() {
             </div>
           </div>
         )}
-        <>
-          {list?.map((item, index) => {
-            if (activeItem?.title === "잔고") {
-              return (
-                <AsideItem
-                  key={item?.ovrs_pdno}
-                  title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
-                  date={`${item?.evlu_pfls_rt}%`}
-                  info={`${Number(item?.frcr_pchs_amt1).toFixed(2)} > ${Number(
-                    item?.ovrs_stck_evlu_amt
-                  ).toFixed(2)} (${Number(
-                    (Number(item?.frcr_evlu_pfls_amt) * krw).toFixed(0)
-                  ).toLocaleString("ko-KR")}원)`}
-                  description={`${Number(item?.pchs_avg_pric).toFixed(
-                    2
-                  )} > ${Number(item?.now_pric2).toFixed(2)} (${Number(
-                    item?.ovrs_cblc_qty
-                  ).toLocaleString("ko-KR")})`}
-                  onClick={() => setCurrent(index)}
-                  active={current === index}
-                />
-              );
-            } else if (activeItem?.title === "미체결") {
-              return (
-                <AsideItem
-                  key={index}
-                  title={`${item?.prdt_name} (${item?.pdno})`}
-                  date={`${item?.sll_buy_dvsn_cd_name}`}
-                  info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
-                    item?.ft_ccld_qty
-                  } / ${item?.ft_ord_qty}) (${Number(
-                    (
-                      Number(item?.ft_ord_unpr3) *
-                      Number(item?.ft_ord_qty) *
-                      krw
-                    ).toFixed(0)
-                  ).toLocaleString("ko-KR")}원)`}
-                  description={`${item?.prcs_stat_name}`}
-                  onClick={() => setCurrent(index)}
-                  active={current === index}
-                />
-              );
-            } else if (activeItem?.title === "체결") {
-              return (
-                <AsideItem
-                  key={index}
-                  title={`${item?.prdt_name} (${item?.pdno})`}
-                  date={`${item?.sll_buy_dvsn_cd_name}`}
-                  info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
-                    item?.ft_ccld_qty
-                  } / ${item?.ft_ord_qty}) (${Number(
-                    (
-                      Number(item?.ft_ord_unpr3) *
-                      Number(item?.ft_ord_qty) *
-                      krw
-                    ).toFixed(0)
-                  ).toLocaleString("ko-KR")}원)`}
-                  description={`${item?.prcs_stat_name}`}
-                  onClick={() => setCurrent(index)}
-                  active={current === index}
-                />
-              );
-            } else if (activeItem?.title === "기간손익") {
-              if (profitType === "individual") {
+        {PENDING_MAP[activeItem?.title] ? (
+          isTokenValid ? (
+            "로딩중"
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full gap-4 pt-16 text-neutral-500">
+              <ShieldAlert size={28} />
+              <p>로그인을 해야 사용이 가능합니다.</p>
+            </div>
+          )
+        ) : (
+          <>
+            {list?.map((item, index) => {
+              if (activeItem?.title === "잔고") {
                 return (
                   <AsideItem
-                    key={index}
+                    key={item?.ovrs_pdno}
                     title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
-                    date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
-                    info={`${Number(item?.ovrs_rlzt_pfls_amt).toFixed(
+                    date={`${item?.evlu_pfls_rt}%`}
+                    info={`${Number(item?.frcr_pchs_amt1).toFixed(
                       2
-                    )} (${Number(item?.pftrt).toFixed(2)})`}
+                    )} > ${Number(item?.ovrs_stck_evlu_amt).toFixed(
+                      2
+                    )} (${Number(
+                      (Number(item?.frcr_evlu_pfls_amt) * krw).toFixed(0)
+                    ).toLocaleString("ko-KR")}원)`}
                     description={`${Number(item?.pchs_avg_pric).toFixed(
                       2
-                    )} > ${Number(item?.avg_sll_unpr).toFixed(2)}`}
+                    )} > ${Number(item?.now_pric2).toFixed(2)} (${Number(
+                      item?.ovrs_cblc_qty
+                    ).toLocaleString("ko-KR")})`}
                     onClick={() => setCurrent(index)}
                     active={current === index}
                   />
                 );
-              } else if (profitType === "daily") {
+              } else if (activeItem?.title === "미체결") {
                 return (
                   <AsideItem
                     key={index}
-                    title={dayjs(item?.trad_day).format("YYYY-MM-DD")}
-                    date=""
-                    info={
-                      "손익 : " +
-                      Number(
-                        Number(item?.totalProfit).toFixed(0)
-                      ).toLocaleString("ko-KR") +
-                      "원 " +
-                      `(${(
-                        (Number(item?.totalProfit) /
-                          Number(item?.totalInvestment)) *
-                        100
-                      ).toFixed(2)}%)`
-                    }
-                    description={
-                      "판매대금 : " +
-                      Number(
-                        Number(item.totalInvestment).toFixed(0)
-                      ).toLocaleString("ko-KR") +
-                      "원"
-                    }
+                    title={`${item?.prdt_name} (${item?.pdno})`}
+                    date={`${item?.sll_buy_dvsn_cd_name}`}
+                    info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
+                      item?.ft_ccld_qty
+                    } / ${item?.ft_ord_qty}) (${Number(
+                      (
+                        Number(item?.ft_ord_unpr3) *
+                        Number(item?.ft_ord_qty) *
+                        krw
+                      ).toFixed(0)
+                    ).toLocaleString("ko-KR")}원)`}
+                    description={`${item?.prcs_stat_name}`}
+                    onClick={() => setCurrent(index)}
+                    active={current === index}
                   />
                 );
-              } else if (profitType === "monthly") {
+              } else if (activeItem?.title === "체결") {
                 return (
                   <AsideItem
                     key={index}
-                    title={dayjs(item?.yearMonth).format("YYYY년 MM월")}
-                    date={`${item?.tradingDays?.length}일간`}
-                    info={
-                      "손익 : " +
-                      Number(
-                        Number(item?.totalProfit).toFixed(0)
-                      ).toLocaleString("ko-KR") +
-                      "원 " +
-                      `(${(
-                        (Number(item?.totalProfit) /
-                          Number(item?.totalInvestment)) *
-                        100
-                      ).toFixed(2)}%)`
-                    }
-                    description={
-                      "판매대금 : " +
-                      Number(
-                        Number(item.totalInvestment).toFixed(0)
-                      ).toLocaleString("ko-KR") +
-                      "원"
-                    }
+                    title={`${item?.prdt_name} (${item?.pdno})`}
+                    date={`${item?.sll_buy_dvsn_cd_name}`}
+                    info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
+                      item?.ft_ccld_qty
+                    } / ${item?.ft_ord_qty}) (${Number(
+                      (
+                        Number(item?.ft_ord_unpr3) *
+                        Number(item?.ft_ord_qty) *
+                        krw
+                      ).toFixed(0)
+                    ).toLocaleString("ko-KR")}원)`}
+                    description={`${item?.prcs_stat_name}`}
+                    onClick={() => setCurrent(index)}
+                    active={current === index}
+                  />
+                );
+              } else if (activeItem?.title === "기간손익") {
+                if (profitType === "individual") {
+                  return (
+                    <AsideItem
+                      key={index}
+                      title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
+                      date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
+                      info={`${Number(item?.ovrs_rlzt_pfls_amt).toFixed(
+                        2
+                      )} (${Number(item?.pftrt).toFixed(2)})`}
+                      description={`${Number(item?.pchs_avg_pric).toFixed(
+                        2
+                      )} > ${Number(item?.avg_sll_unpr).toFixed(2)}`}
+                      onClick={() => setCurrent(index)}
+                      active={current === index}
+                    />
+                  );
+                } else if (profitType === "daily") {
+                  return (
+                    <AsideItem
+                      key={index}
+                      title={dayjs(item?.trad_day).format("YYYY-MM-DD")}
+                      date=""
+                      info={
+                        "손익 : " +
+                        Number(
+                          Number(item?.totalProfit).toFixed(0)
+                        ).toLocaleString("ko-KR") +
+                        "원 " +
+                        `(${(
+                          (Number(item?.totalProfit) /
+                            Number(item?.totalInvestment)) *
+                          100
+                        ).toFixed(2)}%)`
+                      }
+                      description={
+                        "판매대금 : " +
+                        Number(
+                          Number(item.totalInvestment).toFixed(0)
+                        ).toLocaleString("ko-KR") +
+                        "원"
+                      }
+                    />
+                  );
+                } else if (profitType === "monthly") {
+                  return (
+                    <AsideItem
+                      key={index}
+                      title={dayjs(item?.yearMonth).format("YYYY년 MM월")}
+                      date={`${item?.tradingDays?.length}일간`}
+                      info={
+                        "손익 : " +
+                        Number(
+                          Number(item?.totalProfit).toFixed(0)
+                        ).toLocaleString("ko-KR") +
+                        "원 " +
+                        `(${(
+                          (Number(item?.totalProfit) /
+                            Number(item?.totalInvestment)) *
+                          100
+                        ).toFixed(2)}%)`
+                      }
+                      description={
+                        "판매대금 : " +
+                        Number(
+                          Number(item.totalInvestment).toFixed(0)
+                        ).toLocaleString("ko-KR") +
+                        "원"
+                      }
+                    />
+                  );
+                }
+              } else if (activeItem?.title === "분석") {
+                return (
+                  <AsideItem
+                    key={item?.name}
+                    title={`${item?.description} (${item?.name})`}
+                    date={`${Number(item?.perf_1_m).toFixed(2)}%`}
+                    info={`${item?.close} (${Number(item?.change).toFixed(
+                      2
+                    )}%)`}
+                    description={`${Number(item?.perf_6_m).toFixed(
+                      2
+                    )}% > ${Number(item?.perf_3_m).toFixed(2)}% > ${Number(
+                      item?.perf_1_m
+                    ).toFixed(2)}% > ${Number(item?.perf_w).toFixed(2)}%`}
+                    onClick={() => setCurrent(index)}
+                    active={current === index}
                   />
                 );
               }
-            } else if (activeItem?.title === "분석") {
-              return (
-                <AsideItem
-                  key={item?.name}
-                  title={`${item?.description} (${item?.name})`}
-                  date={`${Number(item?.perf_1_m).toFixed(2)}%`}
-                  info={`${item?.close} (${Number(item?.change).toFixed(2)}%)`}
-                  description={`${Number(item?.perf_6_m).toFixed(
-                    2
-                  )}% > ${Number(item?.perf_3_m).toFixed(2)}% > ${Number(
-                    item?.perf_1_m
-                  ).toFixed(2)}% > ${Number(item?.perf_w).toFixed(2)}%`}
-                  onClick={() => setCurrent(index)}
-                  active={current === index}
-                />
-              );
-            }
-          })}
-        </>
+            })}
+          </>
+        )}
       </Aside>
       <Main>
         <SectionHeader>
