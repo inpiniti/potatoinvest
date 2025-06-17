@@ -229,23 +229,6 @@ const useProfit = () => {
     return [];
   }, [profitType, profitData, dailyProfitData, monthlyProfitData]);
 
-  // 수동으로 데이터를 가져오는 함수
-  const refreshProfitData = () => {
-    if (!appKey || !secretKey || !CANO || !ACNT_PRDT_CD) {
-      console.log({
-        appKey,
-        secretKey,
-        CANO,
-        ACNT_PRDT_CD,
-      });
-      console.error(
-        'API 키 또는 계좌 정보가 없습니다. 계정 설정을 확인해주세요.'
-      );
-      return;
-    }
-    return query.refetch();
-  };
-
   return {
     profitData: data,
     isLoading: query.isLoading,
