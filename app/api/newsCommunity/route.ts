@@ -101,17 +101,32 @@ export async function GET(request: Request) {
     const news = newsData?.result?.body || [];
 
     // Combine results and return
-    return NextResponse.json({
-      productCode,
-      companyCode,
-      news,
-      comments,
-    });
+    return NextResponse.json(
+      {
+        productCode,
+        companyCode,
+        news,
+        comments,
+      },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=60",
+          "CDN-Cache-Control": "public, s-maxage=86400",
+          "Vercel-CDN-Cache-Control": "public, s-maxage=86400",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching data:", error);
     return NextResponse.json(
       { error: "An error occurred while processing the request" },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
     );
   }
 }

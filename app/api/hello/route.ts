@@ -1,8 +1,28 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function GET() {
-  const res = await crawling('us');
-  return NextResponse.json(res);
+  try {
+    const res = await crawling("us");
+    return NextResponse.json(res, {
+      status: 200,
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=60",
+        "CDN-Cache-Control": "public, s-maxage=60",
+        "Vercel-CDN-Cache-Control": "public, s-maxage=60",
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return NextResponse.json(
+      { error: "An error occurred while fetching data" },
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
+    );
+  }
 }
 
 type CodeList = {
@@ -15,74 +35,74 @@ type CodeList = {
 };
 
 const codeList: CodeList = {
-  il: { name: 'israel', kr: '이스라엘' },
+  il: { name: "israel", kr: "이스라엘" },
   br: {
-    name: 'brazil',
-    kr: '브라질',
+    name: "brazil",
+    kr: "브라질",
     countryId: 32,
     pageSize: 1406,
   },
-  fr: { name: 'france', kr: '프랑스' },
-  hk: { name: 'hong', kr: '홍콩' },
-  be: { name: 'belgium', kr: '벨기에' },
-  fi: { name: 'finland', kr: '핀란드' },
-  it: { name: 'italy', kr: '이탈리아' },
-  se: { name: 'sweden', kr: '스웨덴' },
-  sg: { name: 'singapore', kr: '싱가포르' },
-  nl: { name: 'netherlands', kr: '네덜란드', countryId: 21, pageSize: 200 },
-  ch: { name: 'switzerland', kr: '스위스' },
-  cl: { name: 'chile', kr: '칠레', countryId: 27, pageSize: 200 },
-  ca: { name: 'canada', kr: '캐나다', countryId: 6, pageSize: 5000 },
-  de: { name: 'germany', kr: '독일', countryId: 17, pageSize: 6000 },
-  ie: { name: 'ireland', kr: '아일랜드' },
-  no: { name: 'norway', kr: '노르웨이', countryId: 60, pageSize: 400 },
-  dk: { name: 'denmark', kr: '덴마크', countryId: 24, pageSize: 200 },
-  pt: { name: 'portugal', kr: '포르투갈' },
-  es: { name: 'spain', kr: '스페인' },
-  uk: { name: 'united', kr: '영국' },
-  co: { name: 'colombia', kr: '콜롬비아', countryId: 122, pageSize: 100 },
-  cz: { name: 'czech', kr: '체코' },
-  gr: { name: 'greece', kr: '그리스', countryId: 51, pageSize: 200 },
-  eg: { name: 'egypt', kr: '이집트' },
-  hu: { name: 'hungary', kr: '헝가리' },
-  in: { name: 'india', kr: '인도' },
-  id: { name: 'indonesia', kr: '인도네시아' },
-  kr: { name: 'korea', kr: '한국', countryId: 11, pageSize: 3000 },
-  my: { name: 'malaysia', kr: '말레이시아' },
-  mx: { name: 'mexico', kr: '멕시코', countryId: 7, pageSize: 800 },
-  pe: { name: 'peru', kr: '페루', countryId: 125, pageSize: 300 },
-  ph: { name: 'philippines', kr: '필리핀' },
-  pl: { name: 'poland', kr: '폴란드' },
-  th: { name: 'thailand', kr: '태국' },
-  tr: { name: 'turkey', kr: '터키' },
+  fr: { name: "france", kr: "프랑스" },
+  hk: { name: "hong", kr: "홍콩" },
+  be: { name: "belgium", kr: "벨기에" },
+  fi: { name: "finland", kr: "핀란드" },
+  it: { name: "italy", kr: "이탈리아" },
+  se: { name: "sweden", kr: "스웨덴" },
+  sg: { name: "singapore", kr: "싱가포르" },
+  nl: { name: "netherlands", kr: "네덜란드", countryId: 21, pageSize: 200 },
+  ch: { name: "switzerland", kr: "스위스" },
+  cl: { name: "chile", kr: "칠레", countryId: 27, pageSize: 200 },
+  ca: { name: "canada", kr: "캐나다", countryId: 6, pageSize: 5000 },
+  de: { name: "germany", kr: "독일", countryId: 17, pageSize: 6000 },
+  ie: { name: "ireland", kr: "아일랜드" },
+  no: { name: "norway", kr: "노르웨이", countryId: 60, pageSize: 400 },
+  dk: { name: "denmark", kr: "덴마크", countryId: 24, pageSize: 200 },
+  pt: { name: "portugal", kr: "포르투갈" },
+  es: { name: "spain", kr: "스페인" },
+  uk: { name: "united", kr: "영국" },
+  co: { name: "colombia", kr: "콜롬비아", countryId: 122, pageSize: 100 },
+  cz: { name: "czech", kr: "체코" },
+  gr: { name: "greece", kr: "그리스", countryId: 51, pageSize: 200 },
+  eg: { name: "egypt", kr: "이집트" },
+  hu: { name: "hungary", kr: "헝가리" },
+  in: { name: "india", kr: "인도" },
+  id: { name: "indonesia", kr: "인도네시아" },
+  kr: { name: "korea", kr: "한국", countryId: 11, pageSize: 3000 },
+  my: { name: "malaysia", kr: "말레이시아" },
+  mx: { name: "mexico", kr: "멕시코", countryId: 7, pageSize: 800 },
+  pe: { name: "peru", kr: "페루", countryId: 125, pageSize: 300 },
+  ph: { name: "philippines", kr: "필리핀" },
+  pl: { name: "poland", kr: "폴란드" },
+  th: { name: "thailand", kr: "태국" },
+  tr: { name: "turkey", kr: "터키" },
   ar: {
-    name: 'argentina',
-    kr: '아르헨티나',
+    name: "argentina",
+    kr: "아르헨티나",
     countryId: 29,
     pageSize: 400,
   },
-  jo: { name: 'jordan', kr: '요르단' },
-  ma: { name: 'morocco', kr: '모로코' },
-  om: { name: 'oman', kr: '오만' },
-  pk: { name: 'pakistan', kr: '파키스탄' },
-  qa: { name: 'qatar', kr: '카타르' },
-  lk: { name: 'sri', kr: '스리랑카' },
-  au: { name: 'australia', kr: '호주' },
-  cn: { name: 'china', kr: '중국', countryId: 37, pageSize: 6000 },
-  jp: { name: 'japan', kr: '일본', countryId: 35, pageSize: 5000 },
-  us: { name: 'america', kr: '미국', countryId: 5, pageSize: 0 },
-  at: { name: 'austria', kr: '오스트리아' },
-  cy: { name: 'cyprus', kr: '키프로스' },
-  tw: { name: 'taiwan', kr: '대만' },
-  jm: { name: 'jamaica', kr: '자메이카', countryId: 119, pageSize: 100 },
-  ve: { name: 'venezuela', kr: '베네수엘라', countryId: 138, pageSize: 100 },
-  cr: { name: 'costarica', kr: '코스타리카', countryId: 15, pageSize: 100 },
-  lv: { name: 'latvia', kr: '라트비아', countryId: 97, pageSize: 100 },
-  ru: { name: 'russia', kr: '러시아', countryId: 56, pageSize: 300 },
-  ro: { name: 'romania', kr: '루마니아', countryId: 100, pageSize: 300 },
-  lu: { name: 'luxembourg', kr: '룩셈부르크', countryId: 103, pageSize: 100 },
-  lt: { name: 'lithuania', kr: '리투아니아', countryId: 96, pageSize: 100 },
-  me: { name: 'moNTENEGRO', kr: '몬테네그로', countryId: 247, pageSize: 100 },
+  jo: { name: "jordan", kr: "요르단" },
+  ma: { name: "morocco", kr: "모로코" },
+  om: { name: "oman", kr: "오만" },
+  pk: { name: "pakistan", kr: "파키스탄" },
+  qa: { name: "qatar", kr: "카타르" },
+  lk: { name: "sri", kr: "스리랑카" },
+  au: { name: "australia", kr: "호주" },
+  cn: { name: "china", kr: "중국", countryId: 37, pageSize: 6000 },
+  jp: { name: "japan", kr: "일본", countryId: 35, pageSize: 5000 },
+  us: { name: "america", kr: "미국", countryId: 5, pageSize: 0 },
+  at: { name: "austria", kr: "오스트리아" },
+  cy: { name: "cyprus", kr: "키프로스" },
+  tw: { name: "taiwan", kr: "대만" },
+  jm: { name: "jamaica", kr: "자메이카", countryId: 119, pageSize: 100 },
+  ve: { name: "venezuela", kr: "베네수엘라", countryId: 138, pageSize: 100 },
+  cr: { name: "costarica", kr: "코스타리카", countryId: 15, pageSize: 100 },
+  lv: { name: "latvia", kr: "라트비아", countryId: 97, pageSize: 100 },
+  ru: { name: "russia", kr: "러시아", countryId: 56, pageSize: 300 },
+  ro: { name: "romania", kr: "루마니아", countryId: 100, pageSize: 300 },
+  lu: { name: "luxembourg", kr: "룩셈부르크", countryId: 103, pageSize: 100 },
+  lt: { name: "lithuania", kr: "리투아니아", countryId: 96, pageSize: 100 },
+  me: { name: "moNTENEGRO", kr: "몬테네그로", countryId: 247, pageSize: 100 },
 };
 
 // us, kr
@@ -92,18 +112,18 @@ const crawling = async (countryCode: string) => {
     // 메서드 POST
 
     const 분석용 = [
-      'name',
-      'description',
-      'logoid',
-      'operating_margin_ttm',
-      'relative_volume_10d_calc',
-      'enterprise_value_to_revenue_ttm',
-      'Volatility.W', //"volatility_w",
-      'Volatility.M', //"volatility_m",
-      'dividends_yield_current',
-      'gap',
-      'volume_change',
-      'pre_tax_margin_ttm',
+      "name",
+      "description",
+      "logoid",
+      "operating_margin_ttm",
+      "relative_volume_10d_calc",
+      "enterprise_value_to_revenue_ttm",
+      "Volatility.W", //"volatility_w",
+      "Volatility.M", //"volatility_m",
+      "dividends_yield_current",
+      "gap",
+      "volume_change",
+      "pre_tax_margin_ttm",
       // "perf_1_y_market_cap",
       // "perf_w",
       // "perf_1_m",
@@ -113,39 +133,39 @@ const crawling = async (countryCode: string) => {
       // "perf_y",
       // "perf_5_y",
       // "perf_10_y",
-      'Perf.1Y.MarketCap',
-      'Perf.W', // 주간 성과
-      'Perf.1M', // 1개월 성과
-      'Perf.3M', // 3개월 성과
-      'Perf.6M', // 6개월 성과
-      'Perf.YTD', // 연초부터 현재까지의 성과
-      'Perf.Y', // 1년 성과
-      'Perf.5Y', // 5년 성과
-      'Perf.10Y', // 10년 성과
-      'Perf.All', // 전체 성과
+      "Perf.1Y.MarketCap",
+      "Perf.W", // 주간 성과
+      "Perf.1M", // 1개월 성과
+      "Perf.3M", // 3개월 성과
+      "Perf.6M", // 6개월 성과
+      "Perf.YTD", // 연초부터 현재까지의 성과
+      "Perf.Y", // 1년 성과
+      "Perf.5Y", // 5년 성과
+      "Perf.10Y", // 10년 성과
+      "Perf.All", // 전체 성과
 
       // "recommend_all",
       // "recommend_m_a",
       // "recommend_other",
-      'Recommend.All', // 모든 추천
-      'Recommend.MA', // 이동 평균 추천
-      'Recommend.Other', // 기타 추천
+      "Recommend.All", // 모든 추천
+      "Recommend.MA", // 이동 평균 추천
+      "Recommend.Other", // 기타 추천
 
       // "r_s_i",
       // "mom",
-      'RSI', // 상대 강도 지수
-      'Mom', // 모멘텀
+      "RSI", // 상대 강도 지수
+      "Mom", // 모멘텀
 
       // "c_c_i20",
       // "stoch_k",
       // "stoch_d",
-      'CCI20', // 상품 채널 지수 20
-      'Stoch.K', // 스토캐스틱 K
-      'Stoch.D', // 스토캐스틱 D
+      "CCI20", // 상품 채널 지수 20
+      "Stoch.K", // 스토캐스틱 K
+      "Stoch.D", // 스토캐스틱 D
 
-      'close', // 종가
-      'change', // 변화
-      'market',
+      "close", // 종가
+      "change", // 변화
+      "market",
     ];
 
     // const 오버뷰 = [
@@ -369,48 +389,48 @@ const crawling = async (countryCode: string) => {
     const response = await fetch(
       `https://scanner.tradingview.com/${codeList[countryCode].name}/scan`,
       {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           columns: columns,
           ignore_unknown_fields: false,
-          options: { lang: 'ko' },
+          options: { lang: "ko" },
           range: [0, 99999],
-          sort: { sortBy: 'market_cap_basic', sortOrder: 'desc' },
+          sort: { sortBy: "market_cap_basic", sortOrder: "desc" },
           symbols: {},
-          markets: ['america'],
+          markets: ["america"],
           filter: [
             {
-              left: 'exchange',
-              operation: 'in_range',
-              right: ['NASDAQ'],
+              left: "exchange",
+              operation: "in_range",
+              right: ["NASDAQ"],
             },
           ],
           filter2: {
-            operator: 'and',
+            operator: "and",
             operands: [
               {
                 operation: {
-                  operator: 'or',
+                  operator: "or",
                   operands: [
                     {
                       operation: {
-                        operator: 'and',
+                        operator: "and",
                         operands: [
                           {
                             expression: {
-                              left: 'type',
-                              operation: 'equal',
-                              right: 'stock',
+                              left: "type",
+                              operation: "equal",
+                              right: "stock",
                             },
                           },
                           {
                             expression: {
-                              left: 'typespecs',
-                              operation: 'has',
-                              right: ['common'],
+                              left: "typespecs",
+                              operation: "has",
+                              right: ["common"],
                             },
                           },
                         ],
@@ -418,20 +438,20 @@ const crawling = async (countryCode: string) => {
                     },
                     {
                       operation: {
-                        operator: 'and',
+                        operator: "and",
                         operands: [
                           {
                             expression: {
-                              left: 'type',
-                              operation: 'equal',
-                              right: 'stock',
+                              left: "type",
+                              operation: "equal",
+                              right: "stock",
                             },
                           },
                           {
                             expression: {
-                              left: 'typespecs',
-                              operation: 'has',
-                              right: ['preferred'],
+                              left: "typespecs",
+                              operation: "has",
+                              right: ["preferred"],
                             },
                           },
                         ],
@@ -439,13 +459,13 @@ const crawling = async (countryCode: string) => {
                     },
                     {
                       operation: {
-                        operator: 'and',
+                        operator: "and",
                         operands: [
                           {
                             expression: {
-                              left: 'type',
-                              operation: 'equal',
-                              right: 'dr',
+                              left: "type",
+                              operation: "equal",
+                              right: "dr",
                             },
                           },
                         ],
@@ -453,20 +473,20 @@ const crawling = async (countryCode: string) => {
                     },
                     {
                       operation: {
-                        operator: 'and',
+                        operator: "and",
                         operands: [
                           {
                             expression: {
-                              left: 'type',
-                              operation: 'equal',
-                              right: 'fund',
+                              left: "type",
+                              operation: "equal",
+                              right: "fund",
                             },
                           },
                           {
                             expression: {
-                              left: 'typespecs',
-                              operation: 'has_none_of',
-                              right: ['etf'],
+                              left: "typespecs",
+                              operation: "has_none_of",
+                              right: ["etf"],
                             },
                           },
                         ],
@@ -497,7 +517,7 @@ const crawling = async (countryCode: string) => {
 
     return data.map((item: Record<string, unknown>) => toSnakeCase(item));
   } catch (error) {
-    console.error('error014', error);
+    console.error("error014", error);
     throw error;
   }
 };
@@ -506,13 +526,13 @@ function toSnakeCase(obj: Record<string, unknown>): Record<string, unknown> {
   const newObj: Record<string, unknown> = {};
   Object.keys(obj).forEach((key) => {
     let snakeCaseKey = key
-      .replace(/\.+/g, '_') // Replace dots with underscores
-      .replace(/([A-Z])/g, '_$1') // Prefix uppercase letters with an underscore
+      .replace(/\.+/g, "_") // Replace dots with underscores
+      .replace(/([A-Z])/g, "_$1") // Prefix uppercase letters with an underscore
       .toLowerCase() // Convert to lowercase
-      .replace(/__+/g, '_'); // Replace double underscores with a single underscore
+      .replace(/__+/g, "_"); // Replace double underscores with a single underscore
 
     // Remove leading underscore if it's the first character
-    snakeCaseKey = snakeCaseKey.startsWith('_')
+    snakeCaseKey = snakeCaseKey.startsWith("_")
       ? snakeCaseKey.substring(1)
       : snakeCaseKey;
 
