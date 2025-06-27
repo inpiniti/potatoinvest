@@ -69,6 +69,7 @@ import { ChartAreaDefault } from './components/ChartAreaDefault';
 
 import dayjs from 'dayjs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getLogoUrlByCode, getLogoUrlById } from '../page/log/utils/logoUtils';
 
 const data = {
   navMain: [
@@ -388,15 +389,12 @@ export default function DashBoardPage() {
                 return (
                   <AsideItem
                     key={item?.ovrs_pdno}
-                    title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
+                    logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
+                    title={`${item?.ovrs_pdno} ${item?.ovrs_item_name}`}
                     date={`${item?.evlu_pfls_rt}%`}
-                    info={`${Number(item?.frcr_pchs_amt1).toFixed(
-                      2
-                    )} > ${Number(item?.ovrs_stck_evlu_amt).toFixed(
-                      2
-                    )} (${Number(
+                    info={`${Number(
                       (Number(item?.frcr_evlu_pfls_amt) * krw).toFixed(0)
-                    ).toLocaleString('ko-KR')}원)`}
+                    ).toLocaleString('ko-KR')}원`}
                     description={`${Number(item?.pchs_avg_pric).toFixed(
                       2
                     )} > ${Number(item?.now_pric2).toFixed(2)} (${Number(
@@ -410,6 +408,7 @@ export default function DashBoardPage() {
                 return (
                   <AsideItem
                     key={index}
+                    logoUrl={getLogoUrlByCode(item?.pdno)}
                     title={`${item?.prdt_name} (${item?.pdno})`}
                     date={`${item?.sll_buy_dvsn_cd_name}`}
                     info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
@@ -430,6 +429,7 @@ export default function DashBoardPage() {
                 return (
                   <AsideItem
                     key={index}
+                    logoUrl={getLogoUrlByCode(item?.pdno)}
                     title={`${item?.prdt_name} (${item?.pdno})`}
                     date={`${item?.sll_buy_dvsn_cd_name}`}
                     info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
@@ -451,11 +451,14 @@ export default function DashBoardPage() {
                   return (
                     <AsideItem
                       key={index}
+                      logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
                       title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
                       date={`${dayjs(item?.trad_day).format('YYYY-MM-DD')}`}
-                      info={`${Number(item?.ovrs_rlzt_pfls_amt).toFixed(
-                        2
-                      )} (${Number(item?.pftrt).toFixed(2)})`}
+                      info={`${Number(
+                        Number(item?.ovrs_rlzt_pfls_amt).toFixed(0)
+                      ).toLocaleString('ko-KR')}원 (${Number(
+                        item?.pftrt
+                      ).toFixed(2)})`}
                       description={`${Number(item?.pchs_avg_pric).toFixed(
                         2
                       )} > ${Number(item?.avg_sll_unpr).toFixed(2)}`}
@@ -522,6 +525,7 @@ export default function DashBoardPage() {
                 return (
                   <AsideItem
                     key={item?.name}
+                    logoUrl={getLogoUrlById(item?.logoid)}
                     title={`${item?.description} (${item?.name})`}
                     date={`${Number(item?.perf_1_m).toFixed(2)}%`}
                     info={`${item?.close} (${Number(item?.change).toFixed(
@@ -664,6 +668,7 @@ export default function DashBoardPage() {
               return (
                 <SectionTitleItem
                   key={item?.ovrs_pdno}
+                  logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
                   title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
                   date={`${item?.evlu_pfls_rt}%`}
                   info={`${Number(item?.frcr_pchs_amt1).toFixed(2)} > ${Number(
@@ -683,6 +688,7 @@ export default function DashBoardPage() {
               return (
                 <SectionTitleItem
                   key={index}
+                  logoUrl={getLogoUrlByCode(item?.pdno)}
                   title={`${item?.prdt_name} (${item?.pdno})`}
                   date={`${item?.sll_buy_dvsn_cd_name}`}
                   info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
@@ -700,6 +706,7 @@ export default function DashBoardPage() {
               return (
                 <SectionTitleItem
                   key={index}
+                  logoUrl={getLogoUrlByCode(item?.pdno)}
                   title={`${item?.prdt_name} (${item?.pdno})`}
                   date={`${item?.sll_buy_dvsn_cd_name}`}
                   info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
@@ -717,11 +724,12 @@ export default function DashBoardPage() {
               return (
                 <SectionTitleItem
                   key={index}
+                  logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
                   title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
                   date={`${dayjs(item?.trad_day).format('YYYY-MM-DD')}`}
                   info={`${Number(item?.ovrs_rlzt_pfls_amt).toFixed(
-                    2
-                  )} (${Number(item?.pftrt).toFixed(2)})`}
+                    0
+                  )}원 (${Number(item?.pftrt).toFixed(2)})`}
                   description={`${Number(item?.pchs_avg_pric).toFixed(
                     2
                   )} > ${Number(item?.avg_sll_unpr).toFixed(2)}`}
@@ -732,6 +740,7 @@ export default function DashBoardPage() {
               return (
                 <SectionTitleItem
                   key={item?.name}
+                  logoUrl={getLogoUrlById(item?.logoid)}
                   title={`${item?.description} (${item?.name})`}
                   date={`${Number(item?.perf_1_m).toFixed(2)}%`}
                   info={`${item?.close} (${Number(item?.change).toFixed(2)}%)`}

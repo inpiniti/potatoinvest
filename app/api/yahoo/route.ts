@@ -56,12 +56,24 @@ export async function GET() {
     // 디버그를 위한 콘솔 로그 추가
     console.log("처리된 지표 데이터:", indicators);
 
-    return NextResponse.json(indicators);
+    return NextResponse.json(indicators, {
+      status: 200,
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=60",
+        "CDN-Cache-Control": "public, s-maxage=3600",
+        "Vercel-CDN-Cache-Control": "public, s-maxage=3600",
+      },
+    });
   } catch (error) {
     console.error("시장 지표 가져오기 실패:", error);
     return NextResponse.json(
       { error: "Failed to fetch market indices" },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
     );
   }
 }

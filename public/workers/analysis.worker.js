@@ -187,6 +187,8 @@ const filterAnalysisData = (data) => {
     change: item.change,
     volume_change: item.volume_change || 0,
     perf_1_m: item.perf_1_m || 0,
+    perf_3_m: item.perf_3_m || 0,
+    perf_6_m: item.perf_6_m || 0,
     perf_w: item.perf_w || 0,
     perf_1_y: item.perf_1_y || 0,
     예측결과: item.예측결과,

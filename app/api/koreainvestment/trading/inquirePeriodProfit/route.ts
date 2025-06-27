@@ -1,5 +1,5 @@
-import { NextResponse, NextRequest } from 'next/server';
-import { decrypt } from '@/utils/crypto';
+import { NextResponse, NextRequest } from "next/server";
+import { decrypt } from "@/utils/crypto";
 
 export async function POST(request: NextRequest) {
   const {
@@ -22,21 +22,21 @@ export async function POST(request: NextRequest) {
     CTX_AREA_NK200, // 연속조회키200 : 공란
   } = await request.json();
 
-  const port = isVts ? '29443' : '9443';
-  const domain = isVts ? 'openapivts' : 'openapi';
-  const endpoint = 'uapi/overseas-stock/v1/trading/inquire-period-profit';
+  const port = isVts ? "29443" : "9443";
+  const domain = isVts ? "openapivts" : "openapi";
+  const endpoint = "uapi/overseas-stock/v1/trading/inquire-period-profit";
   const url = `https://${domain}.koreainvestment.com:${port}/${endpoint}`;
 
   // 연속 조회 여부 판단하여 tr_cont 헤더 설정
   const isContinuousQuery = !!(CTX_AREA_FK200 || CTX_AREA_NK200);
 
   const headers = {
-    'Content-Type': 'application/json; charset=UTF-8',
+    "Content-Type": "application/json; charset=UTF-8",
     Authorization: `Bearer ${token}`,
     appkey: decrypt(solt, appkey),
     appsecret: decrypt(solt, appsecret),
-    tr_id: 'TTTS3039R', // 거래ID
-    tr_cont: isContinuousQuery ? 'N' : '', // 연속 조회 시 'N', 최초 조회 시 빈 문자열
+    tr_id: "TTTS3039R", // 거래ID
+    tr_cont: isContinuousQuery ? "N" : "", // 연속 조회 시 'N', 최초 조회 시 빈 문자열
   };
 
   const payload = {
@@ -59,20 +59,32 @@ export async function POST(request: NextRequest) {
   try {
     const queryParams = new URLSearchParams(payload);
     const response = await fetch(`${url}?${queryParams.toString()}`, {
-      method: 'GET',
+      method: "GET",
       headers,
     });
     const data = await response.json();
 
     console.log(data);
 
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      status: 200,
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=60",
+        "CDN-Cache-Control": "public, s-maxage=3600",
+        "Vercel-CDN-Cache-Control": "public, s-maxage=3600",
+      },
+    });
   } catch (error: unknown) {
     return NextResponse.json(
       {
         message: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
     );
   }
 }

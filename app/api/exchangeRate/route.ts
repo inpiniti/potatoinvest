@@ -12,16 +12,36 @@ export async function GET() {
     if (!exchangeRate) {
       return NextResponse.json(
         { error: "Failed to fetch exchange rate" },
-        { status: 500 }
+        {
+          status: 500,
+          headers: {
+            "Cache-Control": "no-store",
+          },
+        }
       );
     }
 
-    return NextResponse.json({ usdToKrw: parseFloat(exchangeRate) });
+    return NextResponse.json(
+      { usdToKrw: parseFloat(exchangeRate) },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=60",
+          "CDN-Cache-Control": "public, s-maxage=86400",
+          "Vercel-CDN-Cache-Control": "public, s-maxage=86400",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching exchange rate:", error);
     return NextResponse.json(
       { error: "An error occurred while fetching exchange rate" },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
     );
   }
 }

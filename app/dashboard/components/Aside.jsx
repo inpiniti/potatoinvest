@@ -1,17 +1,20 @@
-import { Badge } from '@/components/ui/badge';
+import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
-} from '@/components/ui/sidebar';
-import React from 'react';
+} from "@/components/ui/sidebar";
+import React from "react";
 
 const Aside = ({ activeItem, length, children, subItems }) => {
   const childrenArray = React.Children.toArray(children);
   return (
-    <Sidebar collapsible="none" className="hidden flex-1 md:flex">
+    <Sidebar
+      collapsible="none"
+      className="hidden flex-1 md:flex overflow-hidden"
+    >
       <SidebarHeader className="gap-3.5 border-b px-4 h-15 flex flex-row justify-between items-center">
         <div className="text-base font-medium text-foreground flex gap-2">
           <activeItem.icon />

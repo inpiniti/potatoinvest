@@ -44,13 +44,25 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
 
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      status: 200,
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=60",
+        "CDN-Cache-Control": "public, s-maxage=60",
+        "Vercel-CDN-Cache-Control": "public, s-maxage=60",
+      },
+    });
   } catch (error: unknown) {
     return NextResponse.json(
       {
         message: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
     );
   }
 }
