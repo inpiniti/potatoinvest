@@ -11,6 +11,8 @@ import {
   ArrowRight, // ">"
   ShieldAlert,
   NotepadTextDashed,
+  // 설정
+  Settings,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -26,6 +28,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 import useToken from '@/hooks/useToken'; // 토큰 유효성 검사 훅
 
@@ -570,6 +583,75 @@ export default function DashBoardPage() {
           >
             <ArrowRight />
           </Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              {/* <Button variant="outline">Open</Button> */}
+              <Button variant="ghost" size="icon" className="size-7">
+                <Settings />
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Edit profile</SheetTitle>
+                <SheetDescription>
+                  Make changes to your profile here. Click save when you&apos;re
+                  done.
+                </SheetDescription>
+              </SheetHeader>
+              <Tabs defaultValue="account">
+                <TabsList>
+                  <TabsTrigger value="account">Account</TabsTrigger>
+                  <TabsTrigger value="password">Password</TabsTrigger>
+                </TabsList>
+                <TabsContent value="account">
+                  <CardHeader>
+                    <CardTitle>Account</CardTitle>
+                    <CardDescription>
+                      Make changes to your account here. Click save when
+                      you&apos;re done.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    <div className="grid gap-3">
+                      <Label htmlFor="tabs-demo-name">Name</Label>
+                      <Input id="tabs-demo-name" defaultValue="Pedro Duarte" />
+                    </div>
+                    <div className="grid gap-3">
+                      <Label htmlFor="tabs-demo-username">Username</Label>
+                      <Input id="tabs-demo-username" defaultValue="@peduarte" />
+                    </div>
+                  </CardContent>
+                </TabsContent>
+                <TabsContent value="password">
+                  <CardHeader>
+                    <CardTitle>Password</CardTitle>
+                    <CardDescription>
+                      Change your password here. After saving, you&apos;ll be
+                      logged out.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    <div className="grid gap-3">
+                      <Label htmlFor="tabs-demo-current">
+                        Current password
+                      </Label>
+                      <Input id="tabs-demo-current" type="password" />
+                    </div>
+                    <div className="grid gap-3">
+                      <Label htmlFor="tabs-demo-new">New password</Label>
+                      <Input id="tabs-demo-new" type="password" />
+                    </div>
+                  </CardContent>
+                </TabsContent>
+              </Tabs>
+              <SheetFooter>
+                <Button type="submit">Save changes</Button>
+                <SheetClose asChild>
+                  <Button variant="outline">Close</Button>
+                </SheetClose>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
         </SectionHeader>
 
         <SectionTitle
