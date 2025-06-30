@@ -29,6 +29,10 @@ const useStockDetail = () => {
   // 자동 매수 조건 확인 함수 (useCallback으로 래핑)
   const shouldAutoBuy = useCallback(
     (activeTab, detail, buyCondition, 체결데이터, stockObject) => {
+      console.log("detail:", detail);
+      console.log("buyCondition:", buyCondition);
+      console.log("체결데이터:", 체결데이터);
+      console.log("stockObject:", stockObject);
       // 상세 정보가 없으면 매수하지 않음
       if (!detail || !detail.last) return false;
 
@@ -80,6 +84,126 @@ const useStockDetail = () => {
             console.log(
               `매수 조건 충족: ${profitRate <= detailSettings.buyRate}%`
             );
+
+            console.log(
+              `${profitRate} < -5 && ${stockObject.예측결과} > 0.7 : ${
+                profitRate < -5 && stockObject.예측결과 > 0.7
+              }`
+            );
+            console.log(
+              `${profitRate} < -10 && ${stockObject.예측결과} > 0.67 : ${
+                profitRate < -10 && stockObject.예측결과 > 0.67
+              }`
+            );
+            console.log(
+              `${profitRate} < -15 && ${stockObject.예측결과} > 0.64 : ${
+                profitRate < -15 && stockObject.예측결과 > 0.64
+              }`
+            );
+            console.log(
+              `${profitRate} < -20 && ${stockObject.예측결과} > 0.61 : ${
+                profitRate < -20 && stockObject.예측결과 > 0.61
+              }`
+            );
+            console.log(
+              `${profitRate} < -25 && ${stockObject.예측결과} > 0.58 : ${
+                profitRate < -25 && stockObject.예측결과 > 0.58
+              }`
+            );
+            console.log(
+              `${profitRate} < -30 && ${stockObject.예측결과} > 0.55 : ${
+                profitRate < -30 && stockObject.예측결과 > 0.55
+              }`
+            );
+            console.log(
+              `${profitRate} < -35 && ${stockObject.예측결과} > 0.53 : ${
+                profitRate < -35 && stockObject.예측결과 > 0.53
+              }`
+            );
+            console.log(
+              `${profitRate} < -40 && ${stockObject.예측결과} > 0.5 : ${
+                profitRate < -40 && stockObject.예측결과 > 0.5
+              }`
+            );
+            console.log(
+              `${profitRate} < -45 && ${stockObject.예측결과} > 0.47 : ${
+                profitRate < -45 && stockObject.예측결과 > 0.47
+              }`
+            );
+            console.log(
+              `${profitRate} < -50 && ${stockObject.예측결과} > 0.44 : ${
+                profitRate < -50 && stockObject.예측결과 > 0.44
+              }`
+            );
+            console.log(
+              `${profitRate} < -55 && ${stockObject.예측결과} > 0.41 : ${
+                profitRate < -55 && stockObject.예측결과 > 0.41
+              }`
+            );
+            console.log(
+              `${profitRate} < -60 && ${stockObject.예측결과} > 0.38 : ${
+                profitRate < -60 && stockObject.예측결과 > 0.38
+              }`
+            );
+            console.log(
+              `${profitRate} < -65 && ${stockObject.예측결과} > 0.35 : ${
+                profitRate < -65 && stockObject.예측결과 > 0.35
+              }`
+            );
+            console.log(
+              `${profitRate} < -70 && ${stockObject.예측결과} > 0.32 : ${
+                profitRate < -70 && stockObject.예측결과 > 0.32
+              }`
+            );
+            console.log(
+              `${profitRate} < -75 && ${stockObject.예측결과} > 0.29 : ${
+                profitRate < -75 && stockObject.예측결과 > 0.29
+              }`
+            );
+            console.log(
+              `${profitRate} < -80 && ${stockObject.예측결과} > 0.26 : ${
+                profitRate < -80 && stockObject.예측결과 > 0.26
+              }`
+            );
+            console.log(
+              `${profitRate} < -85 && ${stockObject.예측결과} > 0.23 : ${
+                profitRate < -85 && stockObject.예측결과 > 0.23
+              }`
+            );
+            console.log(
+              `${profitRate} < -90 && ${stockObject.예측결과} > 0.2 : ${
+                profitRate < -90 && stockObject.예측결과 > 0.2
+              }`
+            );
+            console.log(
+              `${profitRate} < -95 && ${stockObject.예측결과} > 0.17 : ${
+                profitRate < -95 && stockObject.예측결과 > 0.17
+              }`
+            );
+
+            // 위 조건으로 변경
+            return (
+              (profitRate < -5 && stockObject.예측결과 > 0.7) ||
+              (profitRate < -10 && stockObject.예측결과 > 0.67) ||
+              (profitRate < -15 && stockObject.예측결과 > 0.64) ||
+              (profitRate < -20 && stockObject.예측결과 > 0.61) ||
+              (profitRate < -25 && stockObject.예측결과 > 0.58) ||
+              (profitRate < -30 && stockObject.예측결과 > 0.55) ||
+              (profitRate < -35 && stockObject.예측결과 > 0.53) ||
+              (profitRate < -40 && stockObject.예측결과 > 0.5) ||
+              (profitRate < -45 && stockObject.예측결과 > 0.47) ||
+              (profitRate < -50 && stockObject.예측결과 > 0.44) ||
+              (profitRate < -55 && stockObject.예측결과 > 0.41) ||
+              (profitRate < -60 && stockObject.예측결과 > 0.38) ||
+              (profitRate < -65 && stockObject.예측결과 > 0.35) ||
+              (profitRate < -70 && stockObject.예측결과 > 0.32) ||
+              (profitRate < -75 && stockObject.예측결과 > 0.29) ||
+              (profitRate < -80 && stockObject.예측결과 > 0.26) ||
+              (profitRate < -85 && stockObject.예측결과 > 0.23) ||
+              (profitRate < -90 && stockObject.예측결과 > 0.2) ||
+              (profitRate < -95 && stockObject.예측결과 > 0.17)
+            );
+
             // 수정: 하드코딩된 -10 대신 설정값 사용
             return profitRate <= detailSettings.buyRate; // 설정값 이하 손실 중인 종목만 매수
           }

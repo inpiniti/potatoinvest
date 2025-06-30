@@ -18,10 +18,10 @@ import RightButton from "./components/header/buttons/RightButton";
 import MarketToggleButton from "./components/header/buttons/MarketToggleButton";
 import StockDisplay from "./components/header/navigation/StockDisplay";
 import Tab from "./components/header/tab/Tab";
-import {
-  MarketIndicatorCard,
-  MarketIndicatorItem,
-} from "./components/MarketIndicator";
+// import {
+//   MarketIndicatorCard,
+//   MarketIndicatorItem,
+// } from "./components/MarketIndicator";
 
 import useStockData from "./hooks/useStockData";
 import useStockNav from "./hooks/useStockNav";
@@ -30,7 +30,7 @@ import useStockBuy from "./hooks/useStockBuy";
 import useStockSell from "./hooks/useStockSell";
 import useTab from "./hooks/useTab";
 import useToggle from "./hooks/useToggle";
-import useMarketIndicators from "./hooks/useMarketIndicators";
+// import useMarketIndicators from "./hooks/useMarketIndicators";
 
 const Log = () => {
   const { activeTab, activeTabRef, handleTabChange } = useTab();
@@ -46,7 +46,7 @@ const Log = () => {
   } = useToggle();
 
   // 시장 지표 데이터 가져오기
-  const { indicators } = useMarketIndicators();
+  // const { indicators } = useMarketIndicators();
 
   // 데이터 관련 훅 사용
   const {
@@ -99,7 +99,7 @@ const Log = () => {
       </Header>
 
       {/* 시장 지표 카드 추가 */}
-      <MarketIndicatorCard isShow={showMarket}>
+      {/* <MarketIndicatorCard isShow={showMarket}>
         {indicators.map((indicator, index) => (
           <MarketIndicatorItem
             key={index}
@@ -109,7 +109,7 @@ const Log = () => {
             change={indicator.change}
           />
         ))}
-      </MarketIndicatorCard>
+      </MarketIndicatorCard> */}
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
