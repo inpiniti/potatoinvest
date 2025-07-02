@@ -32,12 +32,12 @@ export const getLogoUrlByCode = (code) => {
   }
 
   // 로고가 없으면 빈 문자열 반환
-  return "";
+  return null;
 };
 
 // 로고 아이디로 로고 URL 가져오기
 export const getLogoUrlById = (logoid) => {
-  if (!logoid) return "";
+  if (!logoid) return null;
 
   // 로고 URL 생성
   return `https://s3-symbol-logo.tradingview.com/${logoid}--big.svg`;

@@ -241,6 +241,28 @@ export default function DashBoardPage() {
     });
   };
 
+  const next = () => {
+    if (current === list.length - 1) {
+      setCurrent(0); // current를 0으로 초기화
+
+      // 기간손익을 제외한 메뉴만 필터링
+      const availableMenus = data.navMain.filter(
+        (item) => item.title !== "기간손익"
+      );
+
+      const currentIndex = availableMenus.findIndex(
+        (item) => item.title === activeItem.title
+      );
+      const nextIndex = (currentIndex + 1) % availableMenus.length;
+      const nextItem = availableMenus[nextIndex];
+
+      setActiveItem(nextItem); // 다음 activeItem으로 이동
+      handleMenuChange(nextItem);
+    } else {
+      setCurrent((prev) => Math.min(prev + 1, list.length - 1)); // 일반적인 증가
+    }
+  };
+
   return (
     <PageWrap>
       <Header
@@ -401,7 +423,7 @@ export default function DashBoardPage() {
               if (activeItem?.title === "잔고") {
                 return (
                   <AsideItem
-                    key={item?.ovrs_pdno}
+                    key={index}
                     logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
                     title={`${item?.ovrs_pdno} ${item?.ovrs_item_name}`}
                     date={`${item?.evlu_pfls_rt}%`}
@@ -537,7 +559,7 @@ export default function DashBoardPage() {
               } else if (activeItem?.title === "분석") {
                 return (
                   <AsideItem
-                    key={item?.name}
+                    key={index}
                     logoUrl={getLogoUrlById(item?.logoid)}
                     title={`${item?.description} (${item?.name})`}
                     date={`${Number(item?.perf_1_m).toFixed(2)}%`}
@@ -579,25 +601,7 @@ export default function DashBoardPage() {
           >
             <ArrowLeft />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7"
-            onClick={() => {
-              if (current === list.length - 1) {
-                setCurrent(0); // current를 0으로 초기화
-                const nextIndex =
-                  data.navMain.findIndex(
-                    (item) => item.title === activeItem.title
-                  ) + 1;
-                const nextItem = data.navMain[nextIndex % data.navMain.length];
-                setActiveItem(nextItem); // 다음 activeItem으로 이동
-                handleMenuChange(nextItem);
-              } else {
-                setCurrent((prev) => Math.min(prev + 1, list.length - 1)); // 일반적인 증가
-              }
-            }}
-          >
+          <Button variant="ghost" size="icon" className="size-7" onClick={next}>
             <ArrowRight />
           </Button>
           <Sheet>
@@ -680,7 +684,7 @@ export default function DashBoardPage() {
             if (activeItem?.title === "잔고") {
               return (
                 <SectionTitleItem
-                  key={item?.ovrs_pdno}
+                  key={index}
                   logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
                   title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
                   date={`${item?.evlu_pfls_rt}%`}
@@ -752,7 +756,7 @@ export default function DashBoardPage() {
             } else if (activeItem?.title === "분석") {
               return (
                 <SectionTitleItem
-                  key={item?.name}
+                  key={index}
                   logoUrl={getLogoUrlById(item?.logoid)}
                   title={`${item?.description} (${item?.name})`}
                   date={`${Number(item?.perf_1_m).toFixed(2)}%`}
