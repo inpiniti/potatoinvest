@@ -231,7 +231,7 @@ export default function DashBoardPage() {
 
   // 현제가 상세 (priceDetailData) 가 바뀌면 next 실행
   useEffect(() => {
-    if (autoPlay) next();
+    if (autoPlay) setTimeout(next, 1000);
   }, [priceDetailData, autoPlay]);
 
   useEffect(() => {
