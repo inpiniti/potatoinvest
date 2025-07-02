@@ -196,16 +196,23 @@ export default function DashBoardPage() {
     //fetchProfitData();
   }, []);
 
+  // 처음에 기본값? 셋팅
   useEffect(() => {
     // Only set the list once when holdingData is first available
     if (holdingData && holdingData.length > 0 && !dataInitialized.current) {
       setList(holdingData);
+      getDetailData(0);
       dataInitialized.current = true;
     }
   }, [holdingData]);
 
   useEffect(() => {
-    const newItem = list[current];
+    getDetailData(current);
+  }, [current]);
+
+  // 디테일 데이터 가져오기
+  const getDetailData = (index) => {
+    const newItem = list[index];
     const code = newItem?.[KEY_MAP[activeItem?.title]];
     if (!code) return; // 코드가 없으면 아무 작업도 하지 않음
     fetchSearchInfo({
@@ -220,7 +227,7 @@ export default function DashBoardPage() {
     fetchNews({
       code: code,
     });
-  }, [current]);
+  };
 
   useEffect(() => {
     setList(profitData);
