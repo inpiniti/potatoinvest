@@ -231,7 +231,18 @@ export default function DashBoardPage() {
 
   // 현제가 상세 (priceDetailData) 가 바뀌면 next 실행
   useEffect(() => {
-    if (autoPlay) setTimeout(next, 1000);
+    let timeoutId;
+
+    if (autoPlay) {
+      timeoutId = setTimeout(next, 1000);
+    }
+
+    // 클린업 함수로 이전 타이머 취소
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [priceDetailData, autoPlay]);
 
   useEffect(() => {
