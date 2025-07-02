@@ -201,20 +201,25 @@ export default function DashBoardPage() {
     // Only set the list once when holdingData is first available
     if (holdingData && holdingData.length > 0 && !dataInitialized.current) {
       setList(holdingData);
-      getDetailData(0);
+      //getDetailData(0);
       dataInitialized.current = true;
     }
   }, [holdingData]);
 
   useEffect(() => {
     getDetailData(current);
-  }, [current]);
+  }, [current, list]);
 
   // 디테일 데이터 가져오기
   const getDetailData = (index) => {
     const newItem = list[index];
     const code = newItem?.[KEY_MAP[activeItem?.title]];
-    if (!code) return; // 코드가 없으면 아무 작업도 하지 않음
+    if (!code) {
+      if (autoPlay) {
+        next();
+      }
+      return; // 코드가 없으면 아무 작업도 하지 않음
+    }
     fetchSearchInfo({
       PDNO: code,
     });
@@ -234,7 +239,7 @@ export default function DashBoardPage() {
     let timeoutId;
 
     if (autoPlay) {
-      timeoutId = setTimeout(next, 1000);
+      timeoutId = setTimeout(next, 2000);
     }
 
     // 클린업 함수로 이전 타이머 취소
