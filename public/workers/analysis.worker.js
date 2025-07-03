@@ -195,20 +195,22 @@ const filterAnalysisData = (data) => {
   }));
 
   // 2. 기준에 맞는 항목만 필터링
-  return essentialFields
-    .filter((item) => item.예측결과 >= 0.6) // 예측 점수 0.6 이상
-    .filter((item) => item.close !== undefined && item.close >= 2) // 종가 2 이상
-    .filter((item) => {
-      // 한달 변동률이 -10% 이하인 종목만 선택
-      const monthlyPerf = item.perf_1_m !== undefined ? item.perf_1_m : 0;
-      return monthlyPerf <= -10;
-    })
-    .sort((a, b) => {
-      // perf_1_m이 없는 경우 기본값 0으로 처리
-      const aPerf = a.perf_1_m !== undefined ? a.perf_1_m : 0;
-      const bPerf = b.perf_1_m !== undefined ? b.perf_1_m : 0;
-      return aPerf - bPerf; // 오름차순 정렬 (가장 하락폭이 큰 순)
-    });
+  return (
+    essentialFields
+      // .filter((item) => item.예측결과 >= 0.6) // 예측 점수 0.6 이상
+      // .filter((item) => item.close !== undefined && item.close >= 2) // 종가 2 이상
+      // .filter((item) => {
+      //   // 한달 변동률이 -10% 이하인 종목만 선택
+      //   const monthlyPerf = item.perf_1_m !== undefined ? item.perf_1_m : 0;
+      //   return monthlyPerf <= -10;
+      // })
+      .sort((a, b) => {
+        // perf_1_m이 없는 경우 기본값 0으로 처리
+        const aPerf = a.perf_1_m !== undefined ? a.perf_1_m : 0;
+        const bPerf = b.perf_1_m !== undefined ? b.perf_1_m : 0;
+        return aPerf - bPerf; // 오름차순 정렬 (가장 하락폭이 큰 순)
+      })
+  );
 };
 
 // 워커 메시지 이벤트 핸들러

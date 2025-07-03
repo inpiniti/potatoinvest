@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 const AsideItem = ({
   title,
@@ -8,6 +9,7 @@ const AsideItem = ({
   onClick,
   active,
   logoUrl,
+  badge,
   ...props
 }) => {
   // 카드에 필요한 값
@@ -41,6 +43,8 @@ const AsideItem = ({
         </div>
         <span className="font-medium">{info}</span>
         <span className="line-clamp-2 w-[260px] whitespace-break-spaces text-xs">
+          <Badge className={!badge?.[0] && "hidden"}>보유</Badge>
+          <Badge className={!badge?.[1] && "hidden"}>체결</Badge>
           {description}
         </span>
       </div>

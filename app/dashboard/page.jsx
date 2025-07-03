@@ -173,7 +173,22 @@ export default function DashBoardPage() {
         setList(cnnlData.filter((item) => item.prcs_stat_name !== "완료"));
         break;
       case "분석":
-        setList(analysisData);
+        setList(
+          analysisData
+            .filter((item) => item.예측결과 >= 0.6)
+            .filter((item) => item.close !== undefined && item.close >= 2)
+            .map((item) => {
+              return {
+                ...item,
+                isHolding: holdingData.some(
+                  (holdingItem) => holdingItem.ovrs_pdno === item.name
+                ),
+                isCnnl: cnnlData.some(
+                  (cnnlItem) => cnnlItem.pdno === item.name
+                ),
+              };
+            })
+        );
         break;
       case "체결":
         setList(cnnlData.filter((item) => item.prcs_stat_name === "완료"));
@@ -616,13 +631,14 @@ export default function DashBoardPage() {
                     info={`${item?.close} (${Number(item?.change).toFixed(
                       2
                     )}%)`}
-                    description={`${Number(item?.perf_6_m).toFixed(
-                      2
-                    )}% > ${Number(item?.perf_3_m).toFixed(2)}% > ${Number(
-                      item?.perf_1_m
-                    ).toFixed(2)}% > ${Number(item?.perf_w).toFixed(2)}%`}
+                    // description={`${Number(item?.perf_6_m).toFixed(
+                    //   2
+                    // )}% > ${Number(item?.perf_3_m).toFixed(2)}% > ${Number(
+                    //   item?.perf_1_m
+                    // ).toFixed(2)}% > ${Number(item?.perf_w).toFixed(2)}%`}
                     onClick={() => setCurrent(index)}
                     active={current === index}
+                    badge={[item.isHolding, item.isCnnl]}
                   />
                 );
               }
@@ -817,6 +833,7 @@ export default function DashBoardPage() {
                     item?.perf_1_m
                   ).toFixed(2)}% > ${Number(item?.perf_w).toFixed(2)}%`}
                   active={current === index}
+                  badge={[item.isHolding, item.isCnnl]}
                 />
               );
             }

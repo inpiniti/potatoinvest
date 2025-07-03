@@ -1,6 +1,7 @@
 import { CarouselItem } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 const SectionTitleItem = ({
   title,
@@ -9,6 +10,7 @@ const SectionTitleItem = ({
   description,
   active,
   logoUrl,
+  badge,
 }) => {
   return (
     <CarouselItem className="my-4">
@@ -35,6 +37,8 @@ const SectionTitleItem = ({
             </div>
             <span className="font-medium text-sm mb-1">{info}</span>
             <p className="text-xs text-muted-foreground line-clamp-2">
+              <Badge className={!badge?.[0] && "hidden"}>보유</Badge>
+              <Badge className={!badge?.[1] && "hidden"}>체결</Badge>
               {description}
             </p>
           </div>
