@@ -12,11 +12,8 @@ import { Sprout } from "lucide-react";
 
 const Header = ({ data, activeItem, onChange }) => {
   return (
-    <Sidebar
-      collapsible="none"
-      className="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r"
-    >
-      <SidebarHeader>
+    <Sidebar collapsible="none" className="!w-[calc(3rem_+_1px)] border-r">
+      <SidebarHeader className="p-0 md:p-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
@@ -35,7 +32,7 @@ const Header = ({ data, activeItem, onChange }) => {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupContent className="px-1.5 md:px-0">
+          <SidebarGroupContent className="px-0">
             <SidebarMenu>
               {data.navMain.map((item) => (
                 <SidebarMenuItem key={item.title}>

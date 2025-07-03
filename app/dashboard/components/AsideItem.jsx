@@ -8,6 +8,7 @@ const AsideItem = ({
   onClick,
   active,
   logoUrl,
+  ...props
 }) => {
   // 카드에 필요한 값
   // key
@@ -18,6 +19,7 @@ const AsideItem = ({
 
   return (
     <a
+      {...props}
       href="#"
       className={`box-border ${
         active && "bg-white border border-primary"

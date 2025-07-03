@@ -187,6 +187,27 @@ export default function DashBoardPage() {
   };
 
   const dataInitialized = useRef(false);
+  const asideScrollContainerRef = useRef(null); // 스크롤 컨테이너 Ref 추가
+
+  // current 값이 변경될 때 스크롤 이동
+  useEffect(() => {
+    console.log("useEffect current");
+    if (asideScrollContainerRef.current) {
+      console.log("useEffect current asideScrollContainerRef.current");
+      const activeItemElement = asideScrollContainerRef.current.querySelector(
+        `[data-index="${current}"]`
+      );
+      console.log("useEffect current activeItemElement");
+      if (activeItemElement) {
+        console.log("useEffect current activeItemElement 2");
+        activeItemElement.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        console.log("activeItemElement.scrollIntoView");
+      }
+    }
+  }, [current]);
 
   useEffect(() => {
     // 환율은 한 번만 가져오도록 설정
@@ -292,6 +313,7 @@ export default function DashBoardPage() {
         onChange={(item) => handleMenuChange(item)}
       />
       <Aside
+        ref={asideScrollContainerRef}
         activeItem={activeItem}
         length={list?.length || 0}
         subItems={
@@ -445,6 +467,7 @@ export default function DashBoardPage() {
                 return (
                   <AsideItem
                     key={index}
+                    data-index={index}
                     logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
                     title={`${item?.ovrs_pdno} ${item?.ovrs_item_name}`}
                     date={`${item?.evlu_pfls_rt}%`}
@@ -464,6 +487,7 @@ export default function DashBoardPage() {
                 return (
                   <AsideItem
                     key={index}
+                    data-index={index}
                     logoUrl={getLogoUrlByCode(item?.pdno)}
                     title={`${item?.prdt_name} (${item?.pdno})`}
                     date={`${item?.sll_buy_dvsn_cd_name}`}
@@ -485,6 +509,7 @@ export default function DashBoardPage() {
                 return (
                   <AsideItem
                     key={index}
+                    data-index={index}
                     logoUrl={getLogoUrlByCode(item?.pdno)}
                     title={`${item?.prdt_name} (${item?.pdno})`}
                     date={`${item?.sll_buy_dvsn_cd_name}`}
@@ -507,6 +532,7 @@ export default function DashBoardPage() {
                   return (
                     <AsideItem
                       key={index}
+                      data-index={index}
                       logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
                       title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
                       date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
@@ -526,6 +552,7 @@ export default function DashBoardPage() {
                   return (
                     <AsideItem
                       key={index}
+                      data-index={index}
                       title={dayjs(item?.trad_day).format("YYYY-MM-DD")}
                       date=""
                       info={
@@ -553,6 +580,7 @@ export default function DashBoardPage() {
                   return (
                     <AsideItem
                       key={index}
+                      data-index={index}
                       title={dayjs(item?.yearMonth).format("YYYY년 MM월")}
                       date={`${item?.tradingDays?.length}일간`}
                       info={
@@ -581,6 +609,7 @@ export default function DashBoardPage() {
                 return (
                   <AsideItem
                     key={index}
+                    data-index={index}
                     logoUrl={getLogoUrlById(item?.logoid)}
                     title={`${item?.description} (${item?.name})`}
                     date={`${Number(item?.perf_1_m).toFixed(2)}%`}
