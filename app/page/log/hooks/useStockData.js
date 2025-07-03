@@ -105,7 +105,7 @@ const useStockData = () => {
       .filter((item) => {
         // 한달 변동률이 -10% 이하인 종목만 선택
         const monthlyPerf = item.perf_1_m !== undefined ? item.perf_1_m : 0;
-        return monthlyPerf <= -30;
+        return monthlyPerf <= 0;
       })
       .filter((item) => {
         // 미체결 종목과 보유 중인 종목 제거

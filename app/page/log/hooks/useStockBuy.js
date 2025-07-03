@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from 'react';
-import useTrading from '@/hooks/useTrading';
-import { toast } from 'sonner';
-import { settingStore } from '@/store/settingStore';
+import { useState, useCallback, useEffect } from "react";
+import useTrading from "@/hooks/useTrading";
+import { toast } from "sonner";
+import { settingStore } from "@/store/settingStore";
 
 const useStockBuy = () => {
   const [buying, setBuying] = useState(false);
@@ -28,7 +28,7 @@ const useStockBuy = () => {
   const buyStock = useCallback(
     async (stockCode, stockDetail) => {
       if (!stockCode || !stockDetail || !stockDetail.last) {
-        toast.error('매수에 필요한 정보가 부족합니다');
+        toast.error("매수에 필요한 정보가 부족합니다");
         return null;
       }
 
@@ -38,7 +38,7 @@ const useStockBuy = () => {
       // 현재가 추출 및 검증
       const currentPrice = parseFloat(stockDetail.last);
       if (isNaN(currentPrice) || currentPrice <= 0) {
-        toast.error('유효하지 않은 종목 가격입니다');
+        toast.error("유효하지 않은 종목 가격입니다");
         return null;
       }
 
@@ -55,12 +55,27 @@ const useStockBuy = () => {
           ? parseFloat(stockDetail.t_rate)
           : 1500;
 
+        // 분석인 경우는 minBuyAmout 대신
+        // 예측결과에 따라서 달라짐
+        let dollarAmount = 0;
+        if (stockDetail.is분석) {
+          dollarAmount = (stockDetail.perf_1_m * -10000) / exchangeRate;
+          console.log({
+            perf_1_m: stockDetail.perf_1_m,
+            exchangeRate,
+            a: stockDetail.perf_1_m * -10000,
+            dollarAmount,
+          });
+        } else {
+          dollarAmount = buySettings.minBuyAmount / exchangeRate;
+        }
+
         // 수정: 하드코딩된 300000 대신 설정값 사용
-        const dollarAmount = buySettings.minBuyAmount / exchangeRate;
+        //const dollarAmount = buySettings.minBuyAmount / exchangeRate;
         let quantity = Math.floor(dollarAmount / orderPrice);
 
         // 최소 1주 구매
-        if (quantity < 1) quantity = 1;
+        //if (quantity < 1) quantity = 1;
 
         // 간소화된 매수 요청
         const response = await 매수({
@@ -70,17 +85,17 @@ const useStockBuy = () => {
         });
 
         if (response) {
-          if (response.rt_cd === '0') {
+          if (response.rt_cd === "0") {
             toast.success(`${cleanStockCode} ${quantity}주 매수 주문 완료`);
           } else {
-            toast.error(response.msg1 || '매수 주문 실패');
+            toast.error(response.msg1 || "매수 주문 실패");
           }
         }
 
         return response;
       } catch (error) {
-        console.error('매수 오류:', error);
-        toast.error(`매수 실패: ${error.message || '알 수 없는 오류'}`);
+        console.error("매수 오류:", error);
+        toast.error(`매수 실패: ${error.message || "알 수 없는 오류"}`);
         return null;
       } finally {
         setBuying(false);

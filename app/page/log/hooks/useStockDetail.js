@@ -261,7 +261,16 @@ const useStockDetail = () => {
             )
           ) {
             if (options.onBuy) {
-              options.onBuy(cleanStockCode, detail);
+              const evluPflsRt = options.buyCondition?.evluPflsRt;
+              options.onBuy(cleanStockCode, {
+                ...detail,
+                is분석: options.activeTab === "분석",
+                perf_1_m: options.stockObject.perf_1_m,
+                evluPflsRt:
+                  typeof evluPflsRt === "string"
+                    ? parseFloat(evluPflsRt.replace("%", ""))
+                    : Number(evluPflsRt),
+              });
             }
           }
 
