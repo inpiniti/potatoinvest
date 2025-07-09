@@ -54,6 +54,11 @@ export async function POST(request: NextRequest) {
     CTX_AREA_FK200,
   };
 
+  console.log(payload);
+
+  // 연속 조회 여부 판단하여 tr_cont 헤더 설정
+  const isContinuousQuery = !!(CTX_AREA_FK200 || CTX_AREA_NK200);
+
   try {
     const queryParams = new URLSearchParams(payload);
 
@@ -65,6 +70,7 @@ export async function POST(request: NextRequest) {
         appkey: decrypt(solt, appkey),
         appsecret: decrypt(solt, appsecret),
         tr_id: trId, // 거래ID
+        tr_cont: isContinuousQuery ? "N" : "", // 연속 조회 시 'N', 최초 조회 시 빈 문자열
       },
     });
 

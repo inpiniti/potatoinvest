@@ -15,13 +15,14 @@ const useBuy = () => {
     // 현재가(priceDetailData.last) 비교
 
     // 2% 이상 차이가 나면 현재가에 매도가능
+    // 매도가능수량(currentItem.ord_psbl_qty)
     // 보유수량(currentItem.ovrs_cblc_qty)
     // 종목코드(currentItem.ovrs_pdno)
     if (menu === "잔고") {
-      // 현재가가 매입평균단가보다 2% 이상 높아야 매수 가능
+      // 현재가가 매입평균단가보다 2% 이상 높아야 매도 가능
       const purchasePrice = parseFloat(currentItem.pchs_avg_pric);
       const currentPrice = parseFloat(priceDetailData.last);
-      const qty = currentItem.ovrs_cblc_qty;
+      const qty = currentItem.ord_psbl_qty;
       const code = currentItem.ovrs_pdno;
 
       // 2% 이상 차이가 나야 매도 가능
@@ -33,7 +34,9 @@ const useBuy = () => {
         //   })`
         // );
 
-        toast.success(`${code} ${qty}주 $${now_pric2}에 매도 주문중`);
+        toast.success(
+          `${code} ${qty}주 $${currentPrice.toFixed(2)}에 매도 주문중`
+        );
 
         const response = await 매도({
           ovrs_pdno: code, // 종목코드
@@ -42,12 +45,14 @@ const useBuy = () => {
         });
 
         if (response?.rt_cd === "0") {
-          toast.success(`${code} ${qty}주 $${now_pric2}에 매도 주문 완료`);
+          toast.success(
+            `${code} ${qty}주 $${currentPrice.toFixed(2)}에 매도 주문 완료`
+          );
         } else {
           toast.error(response.msg1 || "매도 주문 실패");
         }
       } else {
-        //toast("매수가능");
+        toast("2% 이상 차이가 나지 않음");
       }
     }
   };

@@ -53,9 +53,6 @@ export async function GET() {
       }
     });
 
-    // 디버그를 위한 콘솔 로그 추가
-    console.log("처리된 지표 데이터:", indicators);
-
     return NextResponse.json(indicators, {
       status: 200,
       headers: {

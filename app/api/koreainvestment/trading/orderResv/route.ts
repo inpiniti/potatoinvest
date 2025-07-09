@@ -53,15 +53,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const queryParams = new URLSearchParams(payload);
-    console.log({
-      appkey: decrypt(solt, appkey),
-      appsecret,
-      solt,
-      token,
-      url,
-      trId,
-      queryParams,
-    });
 
     const response = await fetch(`${url}?${queryParams.toString()}`, {
       method: "GET",

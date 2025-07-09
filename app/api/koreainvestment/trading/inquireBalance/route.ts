@@ -17,20 +17,6 @@ export async function POST(request: NextRequest) {
     CTX_AREA_NK200, // 연속조회키200 ex) ''
   } = await request.json();
 
-  console.log({
-    appkey,
-    appsecret,
-    solt,
-    token,
-    isVts,
-    CANO,
-    ACNT_PRDT_CD,
-    OVRS_EXCG_CD,
-    TR_CRCY_CD,
-    CTX_AREA_FK200,
-    CTX_AREA_NK200,
-  });
-
   const port = isVts ? "29443" : "9443";
   const domain = isVts ? "openapivts" : "openapi";
   const endpoint = "uapi/overseas-stock/v1/trading/inquire-balance";

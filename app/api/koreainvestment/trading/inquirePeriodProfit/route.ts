@@ -53,9 +53,6 @@ export async function POST(request: NextRequest) {
     CTX_AREA_NK200, // 연속조회키200 : 공란
   };
 
-  console.log(headers);
-  console.log(payload);
-
   try {
     const queryParams = new URLSearchParams(payload);
     const response = await fetch(`${url}?${queryParams.toString()}`, {
@@ -63,8 +60,6 @@ export async function POST(request: NextRequest) {
       headers,
     });
     const data = await response.json();
-
-    console.log(data);
 
     return NextResponse.json(data, {
       status: 200,
