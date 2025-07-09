@@ -3,13 +3,11 @@ import { toast } from "sonner";
 
 const useBuy = () => {
   const { 매도 } = useTrading();
-  const validate = () => {
-    // 구매한 가격 보다 현재가격이 2% 큰지 체크
-  };
+
   const mutation = async ({
     currentItem, // 현재 데이터
     priceDetailData, // 현재가 상세
-    analysisItem, // 분석 데이터
+    //analysisItem, // 분석 데이터
     menu, // 현재 메뉴
   }) => {
     // 1. 메뉴가 잔고라면
