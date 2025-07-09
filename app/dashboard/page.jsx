@@ -40,6 +40,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { Toaster } from "sonner";
+
 import useToken from "@/hooks/useToken"; // 토큰 유효성 검사 훅
 
 import useAnalysis from "./hooks/useAnalysis"; // 분석 데이터 훅
@@ -51,6 +53,8 @@ import useDailyprice from "./hooks/useDailyprice"; // 기간별 시세 훅
 import usePriceDetail from "./hooks/usePriceDetail"; // 현제가 상세 훅
 import useNewsCommunity from "./hooks/useNewsCommunity"; // 뉴스 및 커뮤니티 훅
 import useExchangeRate from "./hooks/useExchangeRate"; // 환율 훅
+
+import useBuy from "./hooks/useBuy"; // 매수 훅
 
 import SettingsButton from "../page/log/components/header/buttons/SettingsButton";
 import AutoPlayToggle from "../page/log/components/header/navigation/AutoPlayToggle";
@@ -119,6 +123,9 @@ const KEY_MAP = {
 export default function DashBoardPage() {
   const [activeItem, setActiveItem] = useState(data.navMain[0]);
   const [current, setCurrent] = useState(0);
+
+  // 매매
+  const { mutation } = useBuy();
 
   // 분석 데이터
   const { analysisData, isPending: analysisPending } = useAnalysis(120000); // 분석
@@ -273,6 +280,18 @@ export default function DashBoardPage() {
   // 현제가 상세 (priceDetailData) 가 바뀌면 next 실행
   useEffect(() => {
     let timeoutId;
+
+    const currentItem = list[current];
+    const code = currentItem?.[KEY_MAP[activeItem?.title]];
+    // 분석데이터
+    const analysisItem = analysisData.find((item) => item.name === code);
+
+    mutation({
+      currentItem, // 현재 데이터
+      priceDetailData, // 현재가 상세
+      analysisItem, // 분석 데이터
+      menu: activeItem.title, // 현재 메뉴
+    });
 
     if (autoPlay) {
       timeoutId = setTimeout(next, 2000);
@@ -647,6 +666,7 @@ export default function DashBoardPage() {
         )}
       </Aside>
       <Main>
+        <Toaster />
         <SectionHeader>
           {/* 로그인 버튼 */}
           <LoginButton />
