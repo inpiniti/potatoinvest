@@ -193,7 +193,8 @@ export default function DashBoardPage() {
         setList(
           analysisData
             .filter((item) => item?.예측결과 >= 0.6)
-            .filter((item) => item?.close !== undefined && item?.close >= 2)
+            .filter((item) => item?.close !== undefined && item?.close >= 3)
+            .filter((item) => Number(item?.perf_1_m) >= 0)
             .map((item) => {
               return {
                 ...item,
