@@ -45,6 +45,7 @@ const AsideItem = ({
         <span className="line-clamp-2 w-[260px] whitespace-break-spaces text-xs">
           <Badge className={!badge?.[0] && "hidden"}>보유</Badge>
           <Badge className={!badge?.[1] && "hidden"}>체결</Badge>
+          <Badge className={!badge?.[2] && "hidden"}>미체결</Badge>
           {description}
         </span>
       </div>

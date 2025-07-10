@@ -20,11 +20,6 @@ const useBuy = () => {
     // 보유수량(currentItem.ovrs_cblc_qty)
     // 종목코드(currentItem.ovrs_pdno)
     if (menu === "잔고") {
-      if (currentItem.isCnnl) {
-        toast.error("체결된 종목은 매도 또는 매수 없습니다.");
-        return;
-      }
-
       // 현재가가 매입평균단가보다 2% 이상 높아야 매도 가능
       const purchasePrice = parseFloat(currentItem?.pchs_avg_pric);
       const currentPrice = parseFloat(priceDetailData?.last);
@@ -34,6 +29,11 @@ const useBuy = () => {
 
       // 2% 이상 올라야 매도 가능
       if (currentPrice > purchasePrice * 1.02) {
+        if (currentItem.isNotCnnl) {
+          toast.error("미체결된 종목은 매도 할 수 없습니다.");
+          return;
+        }
+
         toast.success(
           `${code} ${qty}주 $${currentPrice.toFixed(2)}에 매도 주문중`
         );
@@ -52,6 +52,10 @@ const useBuy = () => {
           toast.error(response.msg1 || "매도 주문 실패");
         }
       } else {
+        if (currentItem.isCnnl) {
+          toast.error("체결된 종목은 추가매수 할 수 없습니다.");
+          return;
+        }
         // 매입평균단가(currentItem.pchs_avg_pric)와
         // 현재가(priceDetailData.last) 비교하여
         // 이익률(profitRate)을 계산하는데,

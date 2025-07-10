@@ -180,6 +180,9 @@ export default function DashBoardPage() {
             isCnnl: cnnlData?.some(
               (cnnlItem) => cnnlItem?.pdno === item.ovrs_pdno
             ),
+            isNotCnnl: cnnlData
+              ?.filter((item) => item?.prcs_stat_name !== "완료")
+              .some((cnnlItem) => cnnlItem?.pdno === item.ovrs_pdno),
           }))
         );
         break;
@@ -526,7 +529,7 @@ export default function DashBoardPage() {
                     // ).toLocaleString("ko-KR")})`}
                     onClick={() => setCurrent(index)}
                     active={current === index}
-                    badge={[false, item?.isCnnl]}
+                    badge={[false, item?.isCnnl, item?.isNotCnnl]}
                   />
                 );
               } else if (activeItem?.title === "미체결") {
