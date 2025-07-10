@@ -13,6 +13,8 @@ import {
   NotepadTextDashed,
   // 설정
   Settings,
+  Play,
+  RotateCw,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -706,6 +708,16 @@ export default function DashBoardPage() {
           <Button variant="ghost" size="icon" className="size-7" onClick={next}>
             <ArrowRight />
           </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7"
+            onClick={() => toggleAutoPlay(!autoPlay)}
+          >
+            {autoPlay ? <RotateCw className="animate-spin" /> : <Play />}
+          </Button>
+
           <Sheet>
             <SheetTrigger asChild>
               {/* <Button variant="outline">Open</Button> */}
