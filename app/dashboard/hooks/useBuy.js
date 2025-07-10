@@ -1,5 +1,5 @@
-import useTrading from "@/hooks/useTrading";
-import { toast } from "sonner";
+import useTrading from '@/hooks/useTrading';
+import { toast } from 'sonner';
 
 const useBuy = () => {
   const { 매도 } = useTrading();
@@ -18,12 +18,12 @@ const useBuy = () => {
     // 매도가능수량(currentItem.ord_psbl_qty)
     // 보유수량(currentItem.ovrs_cblc_qty)
     // 종목코드(currentItem.ovrs_pdno)
-    if (menu === "잔고") {
+    if (menu === '잔고') {
       // 현재가가 매입평균단가보다 2% 이상 높아야 매도 가능
-      const purchasePrice = parseFloat(currentItem.pchs_avg_pric);
-      const currentPrice = parseFloat(priceDetailData.last);
-      const qty = currentItem.ord_psbl_qty;
-      const code = currentItem.ovrs_pdno;
+      const purchasePrice = parseFloat(currentItem?.pchs_avg_pric);
+      const currentPrice = parseFloat(priceDetailData?.last);
+      const qty = currentItem?.ord_psbl_qty;
+      const code = currentItem?.ovrs_pdno;
 
       // 2% 이상 차이가 나야 매도 가능
       if (currentPrice > purchasePrice * 1.02) {
@@ -44,15 +44,15 @@ const useBuy = () => {
           now_pric2: currentPrice.toFixed(2), // 매도가
         });
 
-        if (response?.rt_cd === "0") {
+        if (response?.rt_cd === '0') {
           toast.success(
             `${code} ${qty}주 $${currentPrice.toFixed(2)}에 매도 주문 완료`
           );
         } else {
-          toast.error(response.msg1 || "매도 주문 실패");
+          toast.error(response.msg1 || '매도 주문 실패');
         }
       } else {
-        toast("2% 이상 차이가 나지 않음");
+        toast('2% 이상 차이가 나지 않음');
       }
     }
   };
