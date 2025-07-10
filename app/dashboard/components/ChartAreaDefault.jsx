@@ -35,7 +35,7 @@ const chartConfig = {
 export function ChartAreaDefault({ dailyPriceData, onChange }) {
   const [selectedTab, setSelectedTab] = React.useState("0"); // Default to "일"
 
-  const filteredData = dailyPriceData
+  const filteredData = (Array.isArray(dailyPriceData) ? dailyPriceData : [])
     ?.map((item) => {
       return {
         xymd: dayjs(item.xymd).format("YYYY-MM-DD"),
