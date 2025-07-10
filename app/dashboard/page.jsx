@@ -255,7 +255,7 @@ export default function DashBoardPage() {
 
   // 디테일 데이터 가져오기
   const getDetailData = (index) => {
-    const newItem = list[index];
+    const newItem = list?.[index];
     const code = newItem?.[KEY_MAP[activeItem?.title]];
     if (!code) {
       if (autoPlay) {
