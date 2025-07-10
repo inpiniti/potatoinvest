@@ -340,7 +340,7 @@ export default function DashBoardPage() {
 
       // 기간손익을 제외한 메뉴만 필터링
       const availableMenus = data.navMain.filter(
-        (item) => !["기간손익", "체결", "미체결"].includes(item.title)
+        (item) => !["기간손익", "미체결"].includes(item.title)
       );
 
       const currentIndex = availableMenus.findIndex(
