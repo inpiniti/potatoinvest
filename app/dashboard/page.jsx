@@ -50,6 +50,8 @@ import useAnalysis from "./hooks/useAnalysis"; // 분석 데이터 훅
 import useHolding from "./hooks/useHolding"; // 보유 종목 데이터 훅
 import useCnnl from "./hooks/useCnnl"; // 체결 데이터 훅
 import useProfit from "./hooks/useProfit"; // 기간 손익 데이터 훅
+
+import useGemini from "./hooks/useGemini"; // 제미니 관련 훅 (사용하지 않음, 필요시 추가)
 import useSearchInfo from "./hooks/useSearchInfo"; // 현재가 상세 정보 훅
 import useDailyprice from "./hooks/useDailyprice"; // 기간별 시세 훅
 import usePriceDetail from "./hooks/usePriceDetail"; // 현제가 상세 훅
@@ -143,6 +145,11 @@ export default function DashBoardPage() {
     fetchProfitData,
     isPending: profitPending,
   } = useProfit(); // 기간 손익
+  const {
+    data: geminiData,
+    mutate: fetchGeminiData,
+    isPending: geminiPending,
+  } = useGemini(); // 제미니 관련 훅
   const { data: newsData, mutate: fetchNews } = useNewsCommunity(); // 뉴스 및 커뮤니티
   const { data: searchData, mutate: fetchSearchInfo } = useSearchInfo(); // 상품기본정보
   const { data: dailyPriceData, mutate: fetchDailyPrice } = useDailyprice(); // 기간별시세
@@ -288,6 +295,9 @@ export default function DashBoardPage() {
     fetchNews({
       code: code,
     });
+    fetchGeminiData({
+      code: code,
+    });
   };
 
   // 현제가 상세 (priceDetailData) 가 바뀌면 next 실행
@@ -354,6 +364,55 @@ export default function DashBoardPage() {
     } else {
       setCurrent((prev) => Math.min(prev + 1, list.length - 1)); // 일반적인 증가
     }
+  };
+
+  // 제미니 로딩 관련 상태 추가
+  const [geminiProgress, setGeminiProgress] = useState(0);
+  const [geminiStartTime, setGeminiStartTime] = useState(null);
+  const [geminiElapsedTime, setGeminiElapsedTime] = useState(0);
+
+  // 제미니 진행률 및 경과 시간 관리
+  useEffect(() => {
+    if (geminiPending && !geminiStartTime) {
+      // 로딩 시작
+      setGeminiStartTime(Date.now());
+      setGeminiProgress(0);
+      setGeminiElapsedTime(0);
+    } else if (!geminiPending && geminiStartTime) {
+      // 로딩 완료
+      setGeminiStartTime(null);
+      setGeminiProgress(0);
+      setGeminiElapsedTime(0);
+    }
+  }, [geminiPending, geminiStartTime]);
+
+  // 진행률 바 애니메이션 및 경과 시간 업데이트
+  useEffect(() => {
+    let interval;
+
+    if (geminiPending && geminiStartTime) {
+      interval = setInterval(() => {
+        const elapsed = (Date.now() - geminiStartTime) / 1000; // 초 단위
+        setGeminiElapsedTime(elapsed);
+
+        // 60초를 기준으로 진행률 계산 (최대 95%까지만)
+        const progress = Math.min((elapsed / 60) * 95, 95);
+        setGeminiProgress(progress);
+      }, 100); // 100ms마다 업데이트
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [geminiPending, geminiStartTime]);
+
+  // 경과 시간을 분:초 형식으로 포맷
+  const formatElapsedTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -891,12 +950,363 @@ export default function DashBoardPage() {
         <div className="h-full overflow-y-scroll flex flex-col gap-4 p-4 scrollbar-hide">
           <Tabs defaultValue="chart">
             <TabsList>
+              <TabsTrigger value="gemini">제미니</TabsTrigger>
               <TabsTrigger value="chart">차트</TabsTrigger>
               <TabsTrigger value="stock">종목정보</TabsTrigger>
               <TabsTrigger value="news">뉴스</TabsTrigger>
               <TabsTrigger value="community">커뮤니티</TabsTrigger>
               <TabsTrigger value="order">주문</TabsTrigger>
             </TabsList>
+            <TabsContent value="gemini">
+              <div className="py-2">
+                <CardTitle>제미니</CardTitle>
+                <CardDescription className="pt-1">
+                  제미니 AI 기반의 종목 분석 데이터 입니다.
+                </CardDescription>
+                <Separator className="my-4" />
+                {geminiPending ? (
+                  <div className="space-y-6">
+                    {/* 진행 상황 표시 */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <RotateCw
+                            className="animate-spin text-blue-500"
+                            size={20}
+                          />
+                          AI 분석 진행 중...
+                        </CardTitle>
+                        <CardDescription>
+                          9개 주요 금융 사이트를 실시간으로 분석하고 있습니다
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {/* 진행률 바 */}
+                          <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div
+                              className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300 ease-out"
+                              style={{
+                                width: `${geminiProgress}%`,
+                              }}
+                            ></div>
+                          </div>
+
+                          {/* 진행률 및 시간 정보 */}
+                          <div className="flex justify-between items-center text-sm text-muted-foreground">
+                            <span>{Math.round(geminiProgress)}% 완료</span>
+                            <span>
+                              경과 시간: {formatElapsedTime(geminiElapsedTime)}
+                            </span>
+                          </div>
+
+                          <p className="text-sm text-muted-foreground text-center">
+                            예상 소요 시간: 약 1분
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* 분석 사이트 목록 */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>분석 중인 사이트</CardTitle>
+                        <CardDescription>
+                          다음 사이트들의 데이터를 수집하고 분석합니다
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-3 gap-3">
+                          {[
+                            { name: "MarketBeat", status: "analyzing" },
+                            { name: "Barchart", status: "analyzing" },
+                            { name: "TipRanks", status: "analyzing" },
+                            { name: "Zacks", status: "analyzing" },
+                            { name: "Yahoo Finance", status: "analyzing" },
+                            { name: "Seeking Alpha", status: "analyzing" },
+                            { name: "Simply Wall St", status: "analyzing" },
+                            { name: "MarketWatch", status: "analyzing" },
+                            { name: "TradingView", status: "analyzing" },
+                          ].map((site, index) => (
+                            <div
+                              key={site.name}
+                              className="flex items-center gap-2 p-2 border rounded"
+                            >
+                              <div
+                                className={`w-2 h-2 rounded-full ${
+                                  site.status === "analyzing"
+                                    ? "bg-yellow-500 animate-pulse"
+                                    : "bg-green-500"
+                                }`}
+                              ></div>
+                              <span className="text-sm">{site.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* 분석 과정 설명 */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>분석 과정</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            {
+                              step: "1",
+                              title: "데이터 수집",
+                              desc: "각 사이트에서 최신 분석 데이터 수집",
+                              status: "progress",
+                            },
+                            {
+                              step: "2",
+                              title: "AI 분석",
+                              desc: "제미니 AI가 수집된 데이터를 종합 분석",
+                              status: "progress",
+                            },
+                            {
+                              step: "3",
+                              title: "점수 산정",
+                              desc: "1-10점 척도로 투자 의견 점수화",
+                              status: "waiting",
+                            },
+                            {
+                              step: "4",
+                              title: "결과 생성",
+                              desc: "한국어 분석 리포트 생성",
+                              status: "waiting",
+                            },
+                          ].map((process) => (
+                            <div
+                              key={process.step}
+                              className="flex items-start gap-3"
+                            >
+                              <div
+                                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                  process.status === "progress"
+                                    ? "bg-blue-500 text-white animate-pulse"
+                                    : process.status === "complete"
+                                    ? "bg-green-500 text-white"
+                                    : "bg-gray-200 text-gray-500"
+                                }`}
+                              >
+                                {process.step}
+                              </div>
+                              <div>
+                                <h4 className="font-medium text-sm">
+                                  {process.title}
+                                </h4>
+                                <p className="text-xs text-muted-foreground">
+                                  {process.desc}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* 재미있는 팁 */}
+                    <Card className="bg-gradient-to-r from-blue-50 to-purple-50">
+                      <CardHeader>
+                        <CardTitle className="text-blue-700">
+                          💡 분석 중 알아두면 좋은 팁
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm">
+                          <p>
+                            • <strong>MarketBeat</strong>: 애널리스트 컨센서스
+                            중심의 분석
+                          </p>
+                          <p>
+                            • <strong>TradingView</strong>: 기술적 분석 및 차트
+                            패턴
+                          </p>
+                          <p>
+                            • <strong>Zacks Rank</strong>: 실적 추정치 변화 기반
+                            평가
+                          </p>
+                          <p>
+                            • <strong>Simply Wall St</strong>: 장기 펀더멘털
+                            가치 평가
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ) : geminiData ? (
+                  <div className="space-y-6">
+                    {/* 종목 기본 정보 */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          <span>
+                            {geminiData.companyName} ({geminiData.ticker})
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {geminiData.requestDate}
+                          </span>
+                        </CardTitle>
+                      </CardHeader>
+                    </Card>
+
+                    {/* 종합 평가 */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>종합 평가</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {/* 평균 점수 */}
+                          <div className="flex items-center gap-4">
+                            <div className="text-2xl font-bold">
+                              {geminiData.summary.averageScore}/10
+                            </div>
+                            <div className="flex-1">
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full"
+                                  style={{
+                                    width: `${
+                                      (geminiData.summary.averageScore / 10) *
+                                      100
+                                    }%`,
+                                  }}
+                                ></div>
+                              </div>
+                            </div>
+                            <div className="text-sm font-medium">
+                              {geminiData.summary.averageScore >= 9
+                                ? "강력 매수"
+                                : geminiData.summary.averageScore >= 7
+                                ? "매수"
+                                : geminiData.summary.averageScore >= 5
+                                ? "중립"
+                                : geminiData.summary.averageScore >= 3
+                                ? "매도"
+                                : "강력 매도"}
+                            </div>
+                          </div>
+
+                          {/* 점수 의미 */}
+                          <div className="grid grid-cols-5 gap-2 text-xs">
+                            {Object.entries(
+                              geminiData.summary.scoreMeaning
+                            ).map(([range, meaning]) => (
+                              <div
+                                key={range}
+                                className="text-center p-2 bg-gray-50 rounded"
+                              >
+                                <div className="font-medium">{range}점</div>
+                                <div className="text-muted-foreground">
+                                  {meaning}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* 결론 */}
+                          <div className="p-4 bg-blue-50 rounded-lg">
+                            <h4 className="font-medium mb-2">분석 결론</h4>
+                            <p className="text-sm text-gray-700 leading-relaxed">
+                              {geminiData.summary.conclusion_kr}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* 사이트별 분석 */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>사이트별 분석</CardTitle>
+                        <CardDescription>
+                          주요 금융 정보 사이트별 투자 의견 및 점수
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {geminiData.analysisBySource.map(
+                            (analysis, index) => (
+                              <div
+                                key={index}
+                                className="border rounded-lg p-4"
+                              >
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-3">
+                                    <h4 className="font-medium">
+                                      {analysis.source}
+                                    </h4>
+                                    <span
+                                      className={`px-2 py-1 rounded text-xs font-medium ${
+                                        analysis.score >= 8
+                                          ? "bg-green-100 text-green-800"
+                                          : analysis.score >= 6
+                                          ? "bg-blue-100 text-blue-800"
+                                          : analysis.score >= 4
+                                          ? "bg-yellow-100 text-yellow-800"
+                                          : "bg-red-100 text-red-800"
+                                      }`}
+                                    >
+                                      {analysis.ratingText}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-lg font-bold">
+                                      {analysis.score}/10
+                                    </span>
+                                    <div className="w-16 bg-gray-200 rounded-full h-2">
+                                      <div
+                                        className={`h-2 rounded-full ${
+                                          analysis.score >= 8
+                                            ? "bg-green-500"
+                                            : analysis.score >= 6
+                                            ? "bg-blue-500"
+                                            : analysis.score >= 4
+                                            ? "bg-yellow-500"
+                                            : "bg-red-500"
+                                        }`}
+                                        style={{
+                                          width: `${
+                                            (analysis.score / 10) * 100
+                                          }%`,
+                                        }}
+                                      ></div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <p className="text-sm text-gray-600 mb-3">
+                                  {analysis.summary_kr}
+                                </p>
+
+                                <a
+                                  href={analysis.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 text-xs underline"
+                                >
+                                  원문 보기 →
+                                </a>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
+                    <div className="text-sm">
+                      제미니 분석을 시작하려면 종목을 선택하세요.
+                    </div>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
             <TabsContent value="chart">
               <div className="py-2">
                 <CardTitle>차트</CardTitle>
