@@ -295,9 +295,11 @@ export default function DashBoardPage() {
     fetchNews({
       code: code,
     });
-    fetchGeminiData({
-      code: code,
-    });
+    if (!autoPlay) {
+      fetchGeminiData({
+        code: code,
+      });
+    }
   };
 
   // 현제가 상세 (priceDetailData) 가 바뀌면 next 실행
