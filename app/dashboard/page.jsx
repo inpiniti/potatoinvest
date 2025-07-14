@@ -417,17 +417,17 @@ export default function DashBoardPage() {
         {activeItem?.title === "잔고" && (
           <div className="flex">
             <div className="flex flex-col text-xs flex-1">
-              <div className="text-neutral-500">매입금액</div>
+              <div className="text-neutral-500">평가금액</div>
               <div className="flex items-center gap-1">
                 <div className="font-bold text-lg">
                   {Number(
-                    Number(holdingData2?.frcr_pchs_amt1 * krw).toFixed(0)
+                    Number(holdingData2?.tot_evlu_pfls_amt * krw).toFixed(0)
                   ).toLocaleString("ko-KR")}
                 </div>
               </div>
             </div>
             <div className="flex flex-col text-xs flex-1">
-              <div className="text-neutral-500">실현수익</div>
+              <div className="text-neutral-500">평가손익</div>
               <div className="flex items-center gap-1">
                 <div className="font-bold text-lg">
                   {Number(
