@@ -6,22 +6,22 @@ const ai = new GoogleGenAI({
 });
 
 // JSON 추출 함수 추가
-function extractJsonFromMarkdown(text: string) {
-  try {
-    // ```json ... ``` 형태에서 JSON 추출
-    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[1]);
-    }
+// function extractJsonFromMarkdown(text: string) {
+//   try {
+//     // ```json ... ``` 형태에서 JSON 추출
+//     const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+//     if (jsonMatch) {
+//       return JSON.parse(jsonMatch[1]);
+//     }
 
-    // 마크다운 코드 블록이 없다면 전체 텍스트를 JSON으로 파싱 시도
-    return JSON.parse(text);
-  } catch (error) {
-    console.error('JSON 파싱 오류:', error);
-    // 파싱 실패시 원본 텍스트 반환
-    return { error: 'JSON 파싱 실패', rawResponse: text };
-  }
-}
+//     // 마크다운 코드 블록이 없다면 전체 텍스트를 JSON으로 파싱 시도
+//     return JSON.parse(text);
+//   } catch (error) {
+//     console.error('JSON 파싱 오류:', error);
+//     // 파싱 실패시 원본 텍스트 반환
+//     return { error: 'JSON 파싱 실패', rawResponse: text };
+//   }
+// }
 
 export async function GET(request: NextRequest) {
   try {
