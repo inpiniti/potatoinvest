@@ -52,8 +52,7 @@ export async function GET(request: NextRequest) {
         `,
       ],
       config: {
-        tools: [{ urlContext: {} }],
-        temperature: 0.2,
+        tools: [{ urlContext: {} }, { googleSearch: {} }],
       },
     });
 
