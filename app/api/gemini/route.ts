@@ -49,6 +49,8 @@ export async function GET(request: NextRequest) {
         https://valueinvesting.io
         https://www.stockinvest.us
         https://www.morningstar.com
+
+        답변을 json 형태로 정형화 해서 작성해줘
         `,
       ],
       config: {
