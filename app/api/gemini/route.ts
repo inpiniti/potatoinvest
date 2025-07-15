@@ -38,14 +38,18 @@ export async function GET(request: NextRequest) {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: [
-        `다음 사이트들에서 나스닥 종목코드 ${qry}의 정보를 분석해서, 목표주가, 애널리스트의 수, 가치편차 분석, 컨센서스 등을 알려줘
+        `다음 사이트들에서 나스닥 종목코드 ${qry}의 정보를 분석해서, 목표주가, 애널리스트의 수, 가치편차 분석, 컨센서스 등을 알려주고, 원문링크도 같이 표기해줘
         
-        https://www.marketbeat.com/stocks/NASDAQ/${qry}/forecast/
-        https://www.barchart.com/stocks/quotes/${qry}
-        https://www.tipranks.com/stocks/${qry}/forecast
-        https://www.zacks.com/stock/quote/${qry}
-        https://finance.yahoo.com/quote/${qry}/
-        https://www.marketwatch.com/investing/stock/${qry}`,
+        https://www.marketbeat.com
+        https://www.barchart.com
+        https://www.tipranks.com
+        https://www.zacks.com
+        https://finance.yahoo.com
+        https://www.marketwatch.com
+        https://valueinvesting.io
+        https://www.stockinvest.us
+        https://www.morningstar.com
+        `,
       ],
       config: {
         tools: [{ urlContext: {} }],
