@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(extractJsonFromMarkdown(response.text || ''), {
+    return NextResponse.json(response.text, {
       status: 200,
       headers: {
         'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=1800',
