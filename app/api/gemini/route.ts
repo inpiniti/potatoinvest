@@ -58,24 +58,24 @@ export async function GET(request: NextRequest) {
           "ticker": "${qry}",
           "requestDate": "2025-01-15",
           "summary": {
-            "averageScore": 7.2,
-            "totalAnalysts": 5,
+            "averageScore": 3.2,
+            "totalAnalysts": 3,
             "scoreMeaning": {
-              "9-10": "강력매수",
-              "7-8": "매수", 
-              "5-6": "중립",
-              "3-4": "매도",
-              "1-2": "강력매도"
+              "5": "강력매수",
+              "4": "매수", 
+              "3": "중립",
+              "2": "매도",
+              "1": "강력매도"
             },
             "conclusion_kr": "종합 분석 결론"
           },
           "analysisBySource": [
             {
               "source": "MarketBeat",
-              "score": 8,
+              "score": 4,
               "ratingText": "매수",
               "targetPrice": "$50.00",
-              "analystCount": 3,
+              "analystCount": 4,
               "summary_kr": "분석 요약",
               "url": "실제 URL"
             }
