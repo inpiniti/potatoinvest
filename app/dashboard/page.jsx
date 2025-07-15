@@ -397,8 +397,8 @@ export default function DashBoardPage() {
         const elapsed = (Date.now() - geminiStartTime) / 1000; // 초 단위
         setGeminiElapsedTime(elapsed);
 
-        // 21초를 기준으로 진행률 계산 (최대 95%까지만)
-        const progress = Math.min((elapsed / 21) * 99, 99);
+        // 35초를 기준으로 진행률 계산 (최대 99%까지만)
+        const progress = Math.min((elapsed / 35) * 99, 99);
         setGeminiProgress(progress);
       }, 100); // 100ms마다 업데이트
     }
@@ -412,8 +412,8 @@ export default function DashBoardPage() {
 
   // 경과 시간을 분:초 형식으로 포맷
   const formatElapsedTime = (seconds) => {
-    const mins = Math.floor(seconds / 21);
-    const secs = Math.floor(seconds % 21);
+    const mins = Math.floor(seconds / 35);
+    const secs = Math.floor(seconds % 35);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
@@ -1003,7 +1003,7 @@ export default function DashBoardPage() {
                           </div>
 
                           <p className="text-sm text-muted-foreground text-center">
-                            예상 소요 시간: 약 21초
+                            예상 최대 소요 시간: 약 35초
                           </p>
                         </div>
                       </CardContent>

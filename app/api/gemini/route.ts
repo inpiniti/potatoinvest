@@ -71,13 +71,13 @@ export async function GET(request: NextRequest) {
           },
           "analysisBySource": [
             {
-              "source": "MarketBeat",
-              "score": 4,
-              "ratingText": "매수",
-              "targetPrice": "$50.00",
-              "analystCount": 4,
-              "summary_kr": "분석 요약",
-              "url": "실제 URL"
+              "source": "MarketBeat", // 출처 이름
+              "score": 4, // 점수 (1-5)
+              "ratingText": "매수", // 평점 텍스트
+              "targetPrice": "$50.00", // 목표 주가
+              "analystCount": 4, // 분석가 수
+              "summary_kr": "분석 요약", // 요약 내용
+              "url": "실제 URL" // 해당 출처의 URL
             }
           ]
         }`,
