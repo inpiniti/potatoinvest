@@ -1193,6 +1193,34 @@ export default function DashBoardPage() {
                             </div>
                           </div>
 
+                          {/* 목표주가 및 전문가 수 정보 추가 */}
+                          <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                            <div className="text-center">
+                              <div className="text-sm text-muted-foreground">
+                                분석한 전문가 수
+                              </div>
+                              <div className="text-lg font-bold text-blue-600">
+                                {geminiData.summary.totalAnalysts}명
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-sm text-muted-foreground">
+                                평균 목표주가
+                              </div>
+                              <div className="text-lg font-bold text-green-600">
+                                {geminiData.summary.averageTargetPrice || 'N/A'}
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-sm text-muted-foreground">
+                                현재가 대비
+                              </div>
+                              <div className="text-lg font-bold text-purple-600">
+                                {geminiData.summary.targetPriceUpside || 'N/A'}
+                              </div>
+                            </div>
+                          </div>
+
                           {/* 점수 의미 */}
                           <div className="grid grid-cols-5 gap-2 text-xs">
                             {Object.entries(
@@ -1278,6 +1306,26 @@ export default function DashBoardPage() {
                                         }}
                                       ></div>
                                     </div>
+                                  </div>
+                                </div>
+
+                                {/* 목표주가 및 전문가 수 추가 */}
+                                <div className="grid grid-cols-2 gap-4 mb-3 p-3 bg-gray-50 rounded">
+                                  <div className="flex justify-between">
+                                    <span className="text-sm text-muted-foreground">
+                                      목표주가:
+                                    </span>
+                                    <span className="text-sm font-medium text-green-600">
+                                      {analysis.targetPrice || 'N/A'}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-sm text-muted-foreground">
+                                      분석가 수:
+                                    </span>
+                                    <span className="text-sm font-medium text-blue-600">
+                                      {analysis.analystCount || 0}명
+                                    </span>
                                   </div>
                                 </div>
 
