@@ -6,22 +6,22 @@ const ai = new GoogleGenAI({
 });
 
 // JSON 추출 함수 추가
-// function extractJsonFromMarkdown(text: string) {
-//   try {
-//     // ```json ... ``` 형태에서 JSON 추출
-//     const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-//     if (jsonMatch) {
-//       return JSON.parse(jsonMatch[1]);
-//     }
+function extractJsonFromMarkdown(text: string) {
+  try {
+    // ```json ... ``` 형태에서 JSON 추출
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[1]);
+    }
 
-//     // 마크다운 코드 블록이 없다면 전체 텍스트를 JSON으로 파싱 시도
-//     return JSON.parse(text);
-//   } catch (error) {
-//     console.error('JSON 파싱 오류:', error);
-//     // 파싱 실패시 원본 텍스트 반환
-//     return { error: 'JSON 파싱 실패', rawResponse: text };
-//   }
-// }
+    // 마크다운 코드 블록이 없다면 전체 텍스트를 JSON으로 파싱 시도
+    return JSON.parse(text);
+  } catch (error) {
+    console.error('JSON 파싱 오류:', error);
+    // 파싱 실패시 원본 텍스트 반환
+    return { error: 'JSON 파싱 실패', rawResponse: text };
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,27 +38,56 @@ export async function GET(request: NextRequest) {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: [
-        `다음 사이트들에서 나스닥 종목코드 ${qry}의 정보를 분석해서, 목표주가, 애널리스트의 수, 가치편차 분석, 컨센서스 등을 알려주고, 원문링크도 같이 표기해줘
-        
-        https://www.marketbeat.com
-        https://www.barchart.com
-        https://www.tipranks.com
-        https://www.zacks.com
-        https://finance.yahoo.com
-        https://www.marketwatch.com
-        https://valueinvesting.io
-        https://www.stockinvest.us
-        https://www.morningstar.com
+        `당신은 전문 금융 분석가 AI입니다. 주식 티커를 받아 실시간 데이터를 분석하고 요청된 JSON 형식으로만 응답하세요. 인사말이나 설명 없이 JSON만 제공하세요.
 
-        답변을 json 형태로 정형화 해서 작성해줘
-        `,
+        나스닥 종목코드 ${qry}에 대해 다음 사이트들을 분석해서 JSON 형태로만 응답해주세요:
+
+        https://www.marketbeat.com/stocks/NASDAQ/${qry}/
+        https://www.barchart.com/stocks/quotes/${qry}
+        https://www.tipranks.com/stocks/${qry}/forecast
+        https://www.zacks.com/stock/quote/${qry}
+        https://finance.yahoo.com/quote/${qry}/
+        https://www.marketwatch.com/investing/stock/${qry}
+        https://valueinvesting.io/stocks/${qry}
+        https://www.stockinvest.us/stock/${qry}
+        https://www.morningstar.com/stocks/xnas/${qry}
+
+        다음 JSON 구조로만 응답하세요:
+        {
+          "companyName": "회사명",
+          "ticker": "${qry}",
+          "requestDate": "2025-01-15",
+          "summary": {
+            "averageScore": 7.2,
+            "totalAnalysts": 5,
+            "scoreMeaning": {
+              "9-10": "강력매수",
+              "7-8": "매수", 
+              "5-6": "중립",
+              "3-4": "매도",
+              "1-2": "강력매도"
+            },
+            "conclusion_kr": "종합 분석 결론"
+          },
+          "analysisBySource": [
+            {
+              "source": "MarketBeat",
+              "score": 8,
+              "ratingText": "매수",
+              "targetPrice": "$50.00",
+              "analystCount": 3,
+              "summary_kr": "분석 요약",
+              "url": "실제 URL"
+            }
+          ]
+        }`,
       ],
       config: {
         tools: [{ urlContext: {} }, { googleSearch: {} }],
       },
     });
 
-    return NextResponse.json(response.text, {
+    return NextResponse.json(extractJsonFromMarkdown(response.text || ''), {
       status: 200,
       headers: {
         'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=1800',
