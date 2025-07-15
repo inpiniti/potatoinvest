@@ -1003,7 +1003,7 @@ export default function DashBoardPage() {
                           </div>
 
                           <p className="text-sm text-muted-foreground text-center">
-                            예상 최대 소요 시간: 약 35초
+                            평균 소요 시간: 약 35초
                           </p>
                         </div>
                       </CardContent>
@@ -1173,7 +1173,7 @@ export default function DashBoardPage() {
                                   className="bg-blue-600 h-2 rounded-full"
                                   style={{
                                     width: `${
-                                      (geminiData.summary.averageScore / 10) *
+                                      (geminiData.summary.averageScore / 5) *
                                       100
                                     }%`,
                                   }}
@@ -1244,11 +1244,11 @@ export default function DashBoardPage() {
                                     </h4>
                                     <span
                                       className={`px-2 py-1 rounded text-xs font-medium ${
-                                        analysis.score >= 8
+                                        analysis.score >= 4
                                           ? 'bg-green-100 text-green-800'
-                                          : analysis.score >= 6
+                                          : analysis.score >= 3
                                           ? 'bg-blue-100 text-blue-800'
-                                          : analysis.score >= 4
+                                          : analysis.score >= 2
                                           ? 'bg-yellow-100 text-yellow-800'
                                           : 'bg-red-100 text-red-800'
                                       }`}
@@ -1258,22 +1258,22 @@ export default function DashBoardPage() {
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <span className="text-lg font-bold">
-                                      {analysis.score}/10
+                                      {analysis.score}/5
                                     </span>
                                     <div className="w-16 bg-gray-200 rounded-full h-2">
                                       <div
                                         className={`h-2 rounded-full ${
-                                          analysis.score >= 8
+                                          analysis.score >= 4
                                             ? 'bg-green-500'
-                                            : analysis.score >= 6
+                                            : analysis.score >= 3
                                             ? 'bg-blue-500'
-                                            : analysis.score >= 4
+                                            : analysis.score >= 2
                                             ? 'bg-yellow-500'
                                             : 'bg-red-500'
                                         }`}
                                         style={{
                                           width: `${
-                                            (analysis.score / 10) * 100
+                                            (analysis.score / 5) * 100
                                           }%`,
                                         }}
                                       ></div>
