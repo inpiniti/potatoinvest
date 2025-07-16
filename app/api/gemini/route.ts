@@ -19,7 +19,7 @@ function extractJsonFromMarkdown(text: string) {
   } catch (error) {
     console.error("JSON 파싱 오류:", error, text);
     // 파싱 실패시 원본 텍스트 반환
-    return { error: "JSON 파싱 실패", rawResponse: error };
+    return { error: "JSON 파싱 실패", rawResponse: error, originalText: text };
   }
 }
 

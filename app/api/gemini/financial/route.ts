@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
         error: "재무제표 분석 중 오류가 발생했습니다.",
         rawError: String(error),
       },
-      { status: 500 }
+      { status: 200 }
     );
   }
 }
