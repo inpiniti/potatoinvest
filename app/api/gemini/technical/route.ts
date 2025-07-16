@@ -162,7 +162,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(extractJsonFromMarkdown(response.text || ""), {
       status: 200,
       headers: {
-        "Cache-Control": "public, s-maxage=900, stale-while-revalidate=900",
+        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
+        "CDN-Cache-Control": "public, s-maxage=86400",
+        "Vercel-CDN-Cache-Control": "public, s-maxage=86400",
       },
     });
   } catch (error: unknown) {
