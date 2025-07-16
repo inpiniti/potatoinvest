@@ -1,5 +1,5 @@
-import { NextResponse, NextRequest } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { NextResponse, NextRequest } from "next/server";
+import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
@@ -13,25 +13,25 @@ function extractJsonFromMarkdown(text: string) {
     }
     return JSON.parse(text);
   } catch (error) {
-    console.error('JSON 파싱 오류:', error);
-    return { error: 'JSON 파싱 실패', rawResponse: text };
+    console.error("JSON 파싱 오류:", error);
+    return { error: "JSON 파싱 실패", rawResponse: text };
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const qry = searchParams.get('qry');
+    const qry = searchParams.get("qry");
 
     if (!qry) {
       return NextResponse.json(
-        { error: '종목코드(qry) 파라미터가 필요합니다.' },
+        { error: "종목코드(qry) 파라미터가 필요합니다." },
         { status: 400 }
       );
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: "gemini-2.5-flash",
       contents: [
         `당신은 전문 재무분석가 AI입니다. 종목코드 ${qry}의 재무제표 정보를 다음 사이트들에서 분석하고 JSON 형식으로만 응답하세요.
 
@@ -123,16 +123,16 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(extractJsonFromMarkdown(response.text || ''), {
+    return NextResponse.json(extractJsonFromMarkdown(response.text || ""), {
       status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=3600',
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=3600",
       },
     });
   } catch (error: unknown) {
-    console.error('재무제표 분석 API 오류:', error);
+    console.error("재무제표 분석 API 오류:", error);
     return NextResponse.json(
-      { error: '재무제표 분석 중 오류가 발생했습니다.' },
+      { error: "재무제표 분석 중 오류가 발생했습니다." },
       { status: 500 }
     );
   }

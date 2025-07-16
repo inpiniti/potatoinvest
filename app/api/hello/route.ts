@@ -155,6 +155,7 @@ const crawling = async (countryCode: string) => {
       // "mom",
       "RSI", // 상대 강도 지수
       "Mom", // 모멘텀
+      "AO", // 놀라운 오실레이터
 
       // "c_c_i20",
       // "stoch_k",
@@ -162,6 +163,8 @@ const crawling = async (countryCode: string) => {
       "CCI20", // 상품 채널 지수 20
       "Stoch.K", // 스토캐스틱 K
       "Stoch.D", // 스토캐스틱 D
+
+      "pricescale", // 가격 척도
 
       "close", // 종가
       "change", // 변화

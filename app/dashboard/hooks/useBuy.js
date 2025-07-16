@@ -10,6 +10,10 @@ const useBuy = () => {
     priceDetailData, // 현재가 상세
     analysisItem, // 분석 데이터
     menu, // 현재 메뉴
+    newsScore, // 뉴스분석 점수 (1-5)
+    expertScore, // 전문가 분석 점수 (1-5)
+    technicalScore, // 기술적 분석 점수 (1-5)
+    financialScore, // 재무 분석 점수 (1-5로 변환)
   }) => {
     // 1. 메뉴가 잔고라면
     // 매입평균단가(currentItem.pchs_avg_pric)와
@@ -89,7 +93,14 @@ const useBuy = () => {
           (profitRate < -85 && predictionResult > 0.23) ||
           (profitRate < -90 && predictionResult > 0.2) ||
           (profitRate < -95 && predictionResult > 0.17);
-        if (shouldNotify) {
+
+        if (
+          shouldNotify &&
+          newsScore > 3 &&
+          expertScore > 3 &&
+          technicalScore > 3 &&
+          financialScore > 3
+        ) {
           const response = await 매수({
             ovrs_pdno: code,
             now_pric2: currentPrice.toFixed(2),
@@ -119,7 +130,11 @@ const useBuy = () => {
       if (
         !currentItem.isHolding &&
         !currentItem.isCnnl &&
-        analysisItem?.perf_1_m
+        analysisItem?.perf_1_m &&
+        newsScore > 3 &&
+        expertScore > 3 &&
+        technicalScore > 3 &&
+        financialScore > 3
       ) {
         const currentPrice = parseFloat(priceDetailData?.last);
         const exchangeRate = 1500; // 환율 기본값
