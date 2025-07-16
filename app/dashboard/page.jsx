@@ -322,32 +322,32 @@ export default function DashBoardPage() {
     fetchNews({
       code: code,
     });
-    if (!autoPlay) {
-      fetchGeminiData({
-        code: code,
-      });
-      fetchGeminiNewsData({
-        code: code,
-      });
-      fetchGeminiTechnicalData({
-        ticker: code,
-        technicalData: {
-          "Recommend.All": currentAnalysisData?.recommend_all,
-          "Recommend.MA": currentAnalysisData?.recommend_m_a,
-          "Recommend.Other": currentAnalysisData?.recommend_other,
-          RSI: currentAnalysisData?.r_s_i,
-          Mom: currentAnalysisData?.mom,
-          AO: currentAnalysisData?.a_o,
-          CCI20: currentAnalysisData?.c_c_i20,
-          "Stoch.K": currentAnalysisData?.stoch_k,
-          "Stoch.D": currentAnalysisData?.stoch_d,
-          pricescale: currentAnalysisData?.pricescale,
-        },
-      });
-      fetchGeminiFinancialData({
-        code: code,
-      });
-    }
+    //if (!autoPlay) {
+    fetchGeminiData({
+      code: code,
+    });
+    fetchGeminiNewsData({
+      code: code,
+    });
+    fetchGeminiTechnicalData({
+      ticker: code,
+      technicalData: {
+        "Recommend.All": currentAnalysisData?.recommend_all,
+        "Recommend.MA": currentAnalysisData?.recommend_m_a,
+        "Recommend.Other": currentAnalysisData?.recommend_other,
+        RSI: currentAnalysisData?.r_s_i,
+        Mom: currentAnalysisData?.mom,
+        AO: currentAnalysisData?.a_o,
+        CCI20: currentAnalysisData?.c_c_i20,
+        "Stoch.K": currentAnalysisData?.stoch_k,
+        "Stoch.D": currentAnalysisData?.stoch_d,
+        pricescale: currentAnalysisData?.pricescale,
+      },
+    });
+    fetchGeminiFinancialData({
+      code: code,
+    });
+    //}
   };
 
   // 4개 분석이 모두 완료되었는지 확인하는 함수
