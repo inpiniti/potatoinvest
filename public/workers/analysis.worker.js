@@ -168,50 +168,50 @@ const processData = async (rawData, aiModels) => {
       processedAt: new Date().toISOString(),
     }));
 
-    return filterAnalysisData(analysisData);
+    return analysisData;
   } catch (error) {
     throw new Error(`데이터 처리 오류: ${error.message}`);
   }
 };
 
 // 분석 데이터 필터링 함수
-const filterAnalysisData = (data) => {
-  if (!data || !Array.isArray(data)) return [];
+// const filterAnalysisData = (data) => {
+//   if (!data || !Array.isArray(data)) return [];
 
-  // 1. 중요 필드만 선택 (데이터 크기 줄이기)
-  const essentialFields = data.map((item) => ({
-    name: item.name || "",
-    description: item.description || "",
-    logoid: item.logoid || "",
-    close: item.close,
-    change: item.change,
-    volume_change: item.volume_change || 0,
-    perf_1_m: item.perf_1_m || 0,
-    perf_3_m: item.perf_3_m || 0,
-    perf_6_m: item.perf_6_m || 0,
-    perf_w: item.perf_w || 0,
-    perf_1_y: item.perf_1_y || 0,
-    예측결과: item.예측결과,
-  }));
+//   // 1. 중요 필드만 선택 (데이터 크기 줄이기)
+//   const essentialFields = data.map((item) => ({
+//     name: item.name || "",
+//     description: item.description || "",
+//     logoid: item.logoid || "",
+//     close: item.close,
+//     change: item.change,
+//     volume_change: item.volume_change || 0,
+//     perf_1_m: item.perf_1_m || 0,
+//     perf_3_m: item.perf_3_m || 0,
+//     perf_6_m: item.perf_6_m || 0,
+//     perf_w: item.perf_w || 0,
+//     perf_1_y: item.perf_1_y || 0,
+//     예측결과: item.예측결과,
+//   }));
 
-  // 2. 기준에 맞는 항목만 필터링
-  return (
-    essentialFields
-      // .filter((item) => item.예측결과 >= 0.6) // 예측 점수 0.6 이상
-      // .filter((item) => item.close !== undefined && item.close >= 2) // 종가 2 이상
-      // .filter((item) => {
-      //   // 한달 변동률이 -10% 이하인 종목만 선택
-      //   const monthlyPerf = item.perf_1_m !== undefined ? item.perf_1_m : 0;
-      //   return monthlyPerf <= -10;
-      // })
-      .sort((a, b) => {
-        // perf_1_m이 없는 경우 기본값 0으로 처리
-        const aPerf = a.perf_1_m !== undefined ? a.perf_1_m : 0;
-        const bPerf = b.perf_1_m !== undefined ? b.perf_1_m : 0;
-        return aPerf - bPerf; // 오름차순 정렬 (가장 하락폭이 큰 순)
-      })
-  );
-};
+//   // 2. 기준에 맞는 항목만 필터링
+//   return (
+//     essentialFields
+//       // .filter((item) => item.예측결과 >= 0.6) // 예측 점수 0.6 이상
+//       // .filter((item) => item.close !== undefined && item.close >= 2) // 종가 2 이상
+//       // .filter((item) => {
+//       //   // 한달 변동률이 -10% 이하인 종목만 선택
+//       //   const monthlyPerf = item.perf_1_m !== undefined ? item.perf_1_m : 0;
+//       //   return monthlyPerf <= -10;
+//       // })
+//       .sort((a, b) => {
+//         // perf_1_m이 없는 경우 기본값 0으로 처리
+//         const aPerf = a.perf_1_m !== undefined ? a.perf_1_m : 0;
+//         const bPerf = b.perf_1_m !== undefined ? b.perf_1_m : 0;
+//         return aPerf - bPerf; // 오름차순 정렬 (가장 하락폭이 큰 순)
+//       })
+//   );
+// };
 
 // 워커 메시지 이벤트 핸들러
 self.addEventListener("message", async (e) => {

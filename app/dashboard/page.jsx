@@ -333,6 +333,7 @@ export default function DashBoardPage() {
     fetchGeminiNewsData({
       code: code,
     });
+    console.log("currentAnalysisData", currentAnalysisData);
     fetchGeminiTechnicalData({
       ticker: code,
       technicalData: {
@@ -422,10 +423,6 @@ export default function DashBoardPage() {
     geminiNewsPending,
     geminiTechnicalPending,
     geminiFinancialPending,
-    autoPlay,
-    current,
-    list,
-    activeItem,
   ]);
 
   useEffect(() => {
@@ -1593,10 +1590,10 @@ export default function DashBoardPage() {
                           </div>
 
                           {/* 감정 점수 의미 */}
-                          <div className="grid grid-cols-5 gap-2 text-xs">
+                          {/* <div className="grid grid-cols-5 gap-2 text-xs">
                             {Object.entries(
                               geminiNewsData?.overallSentiment?.scoreMeaning
-                            ).map(([score, meaning]) => (
+                            )?.map(([score, meaning]) => (
                               <div
                                 key={score}
                                 className="text-center p-2 bg-gray-50 rounded"
@@ -1607,7 +1604,7 @@ export default function DashBoardPage() {
                                 </div>
                               </div>
                             ))}
-                          </div>
+                          </div> */}
 
                           {/* 주요 요인 */}
                           <div className="p-4 bg-blue-50 rounded-lg">

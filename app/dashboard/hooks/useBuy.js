@@ -15,6 +15,11 @@ const useBuy = () => {
     technicalScore, // 기술적 분석 점수 (1-5)
     financialScore, // 재무 분석 점수 (1-5로 변환)
   }) => {
+    console.log("newsScore > 3", newsScore > 3);
+    console.log("expertScore > 3", expertScore > 3);
+    console.log("technicalScore > 3", technicalScore > 3);
+    console.log("financialScore > 3", financialScore > 3);
+
     // 1. 메뉴가 잔고라면
     // 매입평균단가(currentItem.pchs_avg_pric)와
     // 현재가(priceDetailData.last) 비교
@@ -30,6 +35,13 @@ const useBuy = () => {
       const qty = currentItem?.ord_psbl_qty;
       const holdingQty = currentItem?.ovrs_cblc_qty;
       const code = currentItem?.ovrs_pdno;
+
+      console.log("현재가격", currentPrice);
+      console.log("매입평균단가", purchasePrice);
+      console.log(
+        "currentPrice > purchasePrice * 1.02",
+        currentPrice > purchasePrice * 1.02
+      );
 
       // 2% 이상 올라야 매도 가능
       if (currentPrice > purchasePrice * 1.02) {

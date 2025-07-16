@@ -13,7 +13,7 @@ function extractJsonFromMarkdown(text: string) {
     }
     return JSON.parse(text);
   } catch (error) {
-    console.error("JSON 파싱 오류:", error);
+    console.error("JSON 파싱 오류:", error, text);
     return { error: "JSON 파싱 실패", rawResponse: text };
   }
 }
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     }
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-lite-preview-06-17",
+      model: "gemini-2.5-flash",
       contents: [
         `당신은 전문 재무분석가 AI입니다. 종목코드 ${qry}의 재무제표 정보를 다음 사이트들에서 분석하고 JSON 형식으로만 응답하세요.
 
@@ -132,7 +132,10 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     console.error("재무제표 분석 API 오류:", error);
     return NextResponse.json(
-      { error: "재무제표 분석 중 오류가 발생했습니다." },
+      {
+        error: "재무제표 분석 중 오류가 발생했습니다.",
+        rawError: String(error),
+      },
       { status: 500 }
     );
   }

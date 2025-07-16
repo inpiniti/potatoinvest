@@ -13,7 +13,7 @@ function extractJsonFromMarkdown(text: string) {
     }
     return JSON.parse(text);
   } catch (error) {
-    console.error("JSON 파싱 오류:", error);
+    console.error("JSON 파싱 오류:", error, text);
     return { error: "JSON 파싱 실패", rawResponse: text };
   }
 }
