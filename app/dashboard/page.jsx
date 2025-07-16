@@ -1230,7 +1230,7 @@ export default function DashBoardPage() {
                       </CardContent>
                     </Card>
                   </div>
-                ) : geminiData ? (
+                ) : geminiData && !geminiData.error ? (
                   <div className="space-y-6">
                     {/* 종목 기본 정보 */}
                     <Card>
@@ -1439,6 +1439,21 @@ export default function DashBoardPage() {
                       </CardContent>
                     </Card>
                   </div>
+                ) : geminiData && geminiData.error ? (
+                  <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+                    <div className="p-6 bg-red-50 rounded-lg border border-red-200 text-center max-w-md">
+                      <div className="text-red-600 font-medium mb-2">
+                        전문가 분석 오류
+                      </div>
+                      <div className="text-sm text-red-500 mb-4">
+                        {geminiData.message ||
+                          "전문가 분석 중 오류가 발생했습니다."}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        잠시 후 다시 시도해주세요.
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
                     <div className="text-sm">
@@ -1482,7 +1497,7 @@ export default function DashBoardPage() {
                       </CardContent>
                     </Card>
                   </div>
-                ) : geminiNewsData ? (
+                ) : geminiNewsData && !geminiNewsData.error ? (
                   <div className="space-y-6">
                     {/* 종목 기본 정보 */}
                     <Card>
@@ -1664,6 +1679,21 @@ export default function DashBoardPage() {
                       </CardContent>
                     </Card>
                   </div>
+                ) : geminiNewsData && geminiNewsData.error ? (
+                  <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+                    <div className="p-6 bg-red-50 rounded-lg border border-red-200 text-center max-w-md">
+                      <div className="text-red-600 font-medium mb-2">
+                        뉴스 분석 오류
+                      </div>
+                      <div className="text-sm text-red-500 mb-4">
+                        {geminiNewsData.message ||
+                          "뉴스 분석 중 오류가 발생했습니다."}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        잠시 후 다시 시도해주세요.
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
                     <div className="text-sm">
@@ -1708,7 +1738,7 @@ export default function DashBoardPage() {
                       </CardContent>
                     </Card>
                   </div>
-                ) : geminiTechnicalData ? (
+                ) : geminiTechnicalData && !geminiTechnicalData.error ? (
                   <div className="space-y-6">
                     {/* 종목 기본 정보 */}
                     <Card>
@@ -2062,6 +2092,21 @@ export default function DashBoardPage() {
                       </CardContent>
                     </Card>
                   </div>
+                ) : geminiTechnicalData && geminiTechnicalData.error ? (
+                  <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+                    <div className="p-6 bg-red-50 rounded-lg border border-red-200 text-center max-w-md">
+                      <div className="text-red-600 font-medium mb-2">
+                        기술 분석 오류
+                      </div>
+                      <div className="text-sm text-red-500 mb-4">
+                        {geminiTechnicalData.message ||
+                          "기술 분석 중 오류가 발생했습니다."}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        잠시 후 다시 시도해주세요.
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
                     <div className="text-sm">
@@ -2107,7 +2152,7 @@ export default function DashBoardPage() {
                       </CardContent>
                     </Card>
                   </div>
-                ) : geminiFinancialData ? (
+                ) : geminiFinancialData && !geminiFinancialData.error ? (
                   <div className="space-y-6">
                     {/* 종목 기본 정보 */}
                     <Card>
@@ -2439,6 +2484,21 @@ export default function DashBoardPage() {
                         </div>
                       </CardContent>
                     </Card>
+                  </div>
+                ) : geminiFinancialData && geminiFinancialData.error ? (
+                  <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+                    <div className="p-6 bg-red-50 rounded-lg border border-red-200 text-center max-w-md">
+                      <div className="text-red-600 font-medium mb-2">
+                        재무 분석 오류
+                      </div>
+                      <div className="text-sm text-red-500 mb-4">
+                        {geminiFinancialData.message ||
+                          "재무 분석 중 오류가 발생했습니다."}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        잠시 후 다시 시도해주세요.
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
