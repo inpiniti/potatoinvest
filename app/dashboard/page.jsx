@@ -173,7 +173,11 @@ export default function DashBoardPage() {
   const { data: newsData, mutate: fetchNews } = useNewsCommunity(); // 뉴스 및 커뮤니티
   const { data: searchData, mutate: fetchSearchInfo } = useSearchInfo(); // 상품기본정보
   const { data: dailyPriceData, mutate: fetchDailyPrice } = useDailyprice(); // 기간별시세
-  const { data: priceDetailData, mutate: fetchPriceDetail } = usePriceDetail(); // 현제가 상세
+  const {
+    data: priceDetailData,
+    mutate: fetchPriceDetail,
+    isError,
+  } = usePriceDetail(); // 현제가 상세
   const { data: exchangeRateData, mutate: fetchExchangeRate } =
     useExchangeRate(); // 환율
 
@@ -386,16 +390,18 @@ export default function DashBoardPage() {
       ? (geminiFinancialData.financialHealth.overallScore / 10) * 5
       : 0; // 10점 척도를 5점 척도로 변환
 
-    mutation({
-      currentItem, // 현재 데이터
-      priceDetailData, // 현재가 상세
-      analysisItem, // 분석 데이터
-      menu: activeItem.title, // 현재 메뉴
-      newsScore, // 뉴스분석 점수 (1-5)
-      expertScore, // 전문가 분석 점수 (1-5)
-      technicalScore, // 기술적 분석 점수 (1-5)
-      financialScore, // 재무 분석 점수 (1-5로 변환)
-    });
+    // 현재가 상세의 isError 를 보고 정상 조회가 되었을때만 mutation 실행
+    if (!isError)
+      mutation({
+        currentItem, // 현재 데이터
+        priceDetailData, // 현재가 상세
+        analysisItem, // 분석 데이터
+        menu: activeItem.title, // 현재 메뉴
+        newsScore, // 뉴스분석 점수 (1-5)
+        expertScore, // 전문가 분석 점수 (1-5)
+        technicalScore, // 기술적 분석 점수 (1-5)
+        financialScore, // 재무 분석 점수 (1-5로 변환)
+      });
 
     if (autoPlay) {
       timeoutId = setTimeout(next, 2000);
