@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     }
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite-preview-06-17",
       contents: [
         `당신은 전문 재무분석가 AI입니다. 종목코드 ${qry}의 재무제표 정보를 다음 사이트들에서 분석하고 JSON 형식으로만 응답하세요.
 

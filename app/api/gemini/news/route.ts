@@ -1,5 +1,5 @@
-import { NextResponse, NextRequest } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { NextResponse, NextRequest } from "next/server";
+import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
@@ -13,30 +13,30 @@ function extractJsonFromMarkdown(text: string) {
     }
     return JSON.parse(text);
   } catch (error) {
-    console.error('JSON 파싱 오류:', error);
-    return { error: 'JSON 파싱 실패', rawResponse: text };
+    console.error("JSON 파싱 오류:", error);
+    return { error: "JSON 파싱 실패", rawResponse: text };
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const qry = searchParams.get('qry');
+    const qry = searchParams.get("qry");
 
     if (!qry) {
       return NextResponse.json(
-        { error: '종목코드(qry) 파라미터가 필요합니다.' },
+        { error: "종목코드(qry) 파라미터가 필요합니다." },
         { status: 400 }
       );
     }
 
     const today = new Date();
     const threeDaysAgo = new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000);
-    const todayStr = today.toISOString().split('T')[0];
-    const threeDaysAgoStr = threeDaysAgo.toISOString().split('T')[0];
+    const todayStr = today.toISOString().split("T")[0];
+    const threeDaysAgoStr = threeDaysAgo.toISOString().split("T")[0];
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: "gemini-2.5-flash-lite-preview-06-17",
       contents: [
         `당신은 전문 금융 뉴스 분석가 AI입니다. 종목코드 ${qry}의 최근 2-3일간 뉴스를 분석하여 호재/악재를 판단하고 JSON 형식으로만 응답하세요.
   
@@ -111,19 +111,19 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const result = extractJsonFromMarkdown(response.text || '');
+    const result = extractJsonFromMarkdown(response.text || "");
 
     // 추가 검증: 뉴스가 없는 경우 명확히 처리
     if (result && !result.hasRecentNews) {
       return NextResponse.json(
         {
           ...result,
-          message: '최근 뉴스 데이터가 없어 분석을 수행할 수 없습니다.',
+          message: "최근 뉴스 데이터가 없어 분석을 수행할 수 없습니다.",
         },
         {
           status: 200,
           headers: {
-            'Cache-Control': 'public, s-maxage=900, stale-while-revalidate=900', // 더 짧은 캐시
+            "Cache-Control": "public, s-maxage=900, stale-while-revalidate=900", // 더 짧은 캐시
           },
         }
       );
@@ -132,13 +132,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result, {
       status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=1800',
+        "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=1800",
       },
     });
   } catch (error: unknown) {
-    console.error('뉴스 분석 API 오류:', error);
+    console.error("뉴스 분석 API 오류:", error);
     return NextResponse.json(
-      { error: '뉴스 분석 중 오류가 발생했습니다.' },
+      { error: "뉴스 분석 중 오류가 발생했습니다." },
       { status: 500 }
     );
   }

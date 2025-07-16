@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const today = new Date().toISOString().split("T")[0];
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite-preview-06-17",
       contents: [
         `당신은 전문 테크니컬 분석가 AI입니다. 제공된 기술적 지표 데이터를 분석하여 종목의 기술적 분석 결과를 JSON 형식으로만 응답하세요.
 

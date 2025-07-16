@@ -1,5 +1,5 @@
-import { NextResponse, NextRequest } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { NextResponse, NextRequest } from "next/server";
+import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
@@ -17,26 +17,26 @@ function extractJsonFromMarkdown(text: string) {
     // 마크다운 코드 블록이 없다면 전체 텍스트를 JSON으로 파싱 시도
     return JSON.parse(text);
   } catch (error) {
-    console.error('JSON 파싱 오류:', error);
+    console.error("JSON 파싱 오류:", error);
     // 파싱 실패시 원본 텍스트 반환
-    return { error: 'JSON 파싱 실패', rawResponse: error };
+    return { error: "JSON 파싱 실패", rawResponse: error };
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const qry = searchParams.get('qry');
+    const qry = searchParams.get("qry");
 
     if (!qry) {
       return NextResponse.json(
-        { error: '질문(qry) 파라미터가 필요합니다.' },
+        { error: "질문(qry) 파라미터가 필요합니다." },
         { status: 400 }
       );
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: "gemini-2.5-flash-lite-preview-06-17",
       contents: [
         `당신은 전문 금융 분석가 AI입니다. 주식 티커를 받아 실시간 데이터를 분석하고 요청된 JSON 형식으로만 응답하세요. 인사말이나 설명 없이 JSON만 제공하세요.
 
@@ -87,16 +87,16 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(extractJsonFromMarkdown(response.text || ''), {
+    return NextResponse.json(extractJsonFromMarkdown(response.text || ""), {
       status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=1800',
+        "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=1800",
       },
     });
   } catch (error: unknown) {
-    console.error('Gemini API 오류:', error);
+    console.error("Gemini API 오류:", error);
     return NextResponse.json(
-      { error: 'AI 응답 생성 중 오류가 발생했습니다.' },
+      { error: "AI 응답 생성 중 오류가 발생했습니다." },
       { status: 500 }
     );
   }
