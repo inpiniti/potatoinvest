@@ -1058,7 +1058,6 @@ export default function DashBoardPage() {
               <TabsTrigger value="order">주문</TabsTrigger>
             </TabsList>
             <TabsContent value="dividendAnalysis">
-              {JSON.stringify(currentAnalysisData?.dividend)}
               <DividendAnalysis data={currentAnalysisData?.dividend} />
             </TabsContent>
             <TabsContent value="gemini">
