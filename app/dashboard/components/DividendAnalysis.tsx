@@ -167,10 +167,10 @@ export function DividendAnalysis({ data }: { data: DividendData }) {
   const formatValue = (value: number, key: string) => {
     if (key.includes("yield") || key.includes("ratio")) {
       return value < 1
-        ? `${(value * 100).toFixed(2)}%`
-        : `${value.toFixed(2)}%`;
+        ? `${(value * 100)?.toFixed(2)}%`
+        : `${value?.toFixed(2)}%`;
     }
-    return value.toFixed(2);
+    return value?.toFixed(2);
   };
 
   return (
@@ -226,7 +226,7 @@ export function DividendAnalysis({ data }: { data: DividendData }) {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900">
-                    {safeData.averageScore.toFixed(2)}
+                    {safeData.averageScore?.toFixed(2)}
                   </div>
                   <div className="text-sm text-gray-500">/ 5.00</div>
                 </div>
@@ -300,7 +300,7 @@ export function DividendAnalysis({ data }: { data: DividendData }) {
                       }}
                     />
                     <span className="text-xs text-gray-600">
-                      {config.shortName} ({(metric.score || 0).toFixed(2)})
+                      {config.shortName} ({(metric.score || 0)?.toFixed(2)})
                     </span>
                   </div>
                 );
@@ -355,7 +355,7 @@ export function DividendAnalysis({ data }: { data: DividendData }) {
                     }
                     className="text-xs"
                   >
-                    {(metric.score || 0).toFixed(2)}
+                    {(metric.score || 0)?.toFixed(2)}
                   </Badge>
                 </div>
               </CardHeader>

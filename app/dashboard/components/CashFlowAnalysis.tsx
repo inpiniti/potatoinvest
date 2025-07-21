@@ -145,13 +145,13 @@ export function CashFlowAnalysis({ data }: { data: CashFlowData }) {
   const formatValue = (value: number) => {
     const absValue = Math.abs(value);
     if (absValue >= 1000000000000) {
-      return `${(value / 1000000000000).toFixed(2)}T`;
+      return `${(value / 1000000000000)?.toFixed(2)}T`;
     } else if (absValue >= 1000000000) {
-      return `${(value / 1000000000).toFixed(2)}B`;
+      return `${(value / 1000000000)?.toFixed(2)}B`;
     } else if (absValue >= 1000000) {
-      return `${(value / 1000000).toFixed(2)}M`;
+      return `${(value / 1000000)?.toFixed(2)}M`;
     } else {
-      return `${value.toFixed(2)}`;
+      return `${value?.toFixed(2)}`;
     }
   };
 
@@ -212,7 +212,7 @@ export function CashFlowAnalysis({ data }: { data: CashFlowData }) {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900">
-                    {safeData.averageScore.toFixed(2)}
+                    {safeData.averageScore?.toFixed(2)}
                   </div>
                   <div className="text-sm text-gray-500">/ 5.00</div>
                 </div>
@@ -286,7 +286,7 @@ export function CashFlowAnalysis({ data }: { data: CashFlowData }) {
                       }}
                     />
                     <span className="text-xs text-gray-600">
-                      {config.shortName} ({(metric.score || 0).toFixed(2)})
+                      {config.shortName} ({(metric.score || 0)?.toFixed(2)})
                     </span>
                   </div>
                 );
@@ -349,7 +349,7 @@ export function CashFlowAnalysis({ data }: { data: CashFlowData }) {
                     }
                     className="text-xs"
                   >
-                    {(metric.score || 0).toFixed(2)}
+                    {(metric.score || 0)?.toFixed(2)}
                   </Badge>
                 </div>
               </CardHeader>
