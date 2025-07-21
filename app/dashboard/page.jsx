@@ -85,6 +85,7 @@ import dayjs from "dayjs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getLogoUrlByCode, getLogoUrlById } from "../page/log/utils/logoUtils";
 import { DividendAnalysis } from "./components/DividendAnalysis";
+import { CashFlowAnalysis } from "./components/CashFlowAnalysis";
 
 const data = {
   navMain: [
@@ -1047,6 +1048,8 @@ export default function DashBoardPage() {
           <Tabs defaultValue="chart">
             <TabsList>
               <TabsTrigger value="dividendAnalysis">배당 분석</TabsTrigger>
+              {/* 현금흐름 분석 */}
+              <TabsTrigger value="cashFlowAnalysis">현금흐름 분석</TabsTrigger>
               <TabsTrigger value="gemini">전문가 분석</TabsTrigger>
               <TabsTrigger value="geminiNews">뉴스 분석</TabsTrigger>
               <TabsTrigger value="geminiTech">기술 분석</TabsTrigger>
@@ -1059,6 +1062,9 @@ export default function DashBoardPage() {
             </TabsList>
             <TabsContent value="dividendAnalysis">
               <DividendAnalysis data={currentAnalysisData?.dividend} />
+            </TabsContent>
+            <TabsContent value="cashFlowAnalysis">
+              <CashFlowAnalysis data={currentAnalysisData?.cashFlow} />
             </TabsContent>
             <TabsContent value="gemini">
               <div className="py-2">

@@ -337,20 +337,20 @@ const crawling = async (countryCode: string) => {
     //   "cash_n_short_term_invest_to_total_debt_fq", // 현금 및 단기 투자 대 총 부채 비율(분기별)
     //   "exchange", // 거래소
     // ];
-    // const 현금흐름 = [
-    //   "name", // 이름
-    //   "description", // 설명
-    //   "logoid", // 로고 ID
-    //   "update_mode", // 업데이트 모드
-    //   "type", // 유형
-    //   "cash_f_operating_activities_ttm", // 운영 활동으로 인한 현금 흐름(TTM)
-    //   "fundamental_currency_code", // 기본 통화 코드
-    //   "cash_f_investing_activities_ttm", // 투자 활동으로 인한 현금 흐름(TTM)
-    //   "cash_f_financing_activities_ttm", // 재무 활동으로 인한 현금 흐름(TTM)
-    //   "free_cash_flow_ttm", // 자유 현금 흐름(TTM)
-    //   "capital_expenditures_ttm", // 자본 지출(TTM)
-    //   "exchange", // 거래소
-    // ];
+    const 현금흐름 = [
+      //   "name", // 이름
+      //   "description", // 설명
+      //   "logoid", // 로고 ID
+      //   "update_mode", // 업데이트 모드
+      //   "type", // 유형
+      "cash_f_operating_activities_ttm", // 운영 활동으로 인한 현금 흐름(TTM)
+      //   "fundamental_currency_code", // 기본 통화 코드
+      "cash_f_investing_activities_ttm", // 투자 활동으로 인한 현금 흐름(TTM)
+      "cash_f_financing_activities_ttm", // 재무 활동으로 인한 현금 흐름(TTM)
+      "free_cash_flow_ttm", // 자유 현금 흐름(TTM)
+      "capital_expenditures_ttm", // 자본 지출(TTM)
+      //   "exchange", // 거래소
+    ];
     // const 테크니컬즈 = [
     //   "name", // 이름
     //   "description", // 설명
@@ -382,7 +382,7 @@ const crawling = async (countryCode: string) => {
         ...배당,
         // ...손익계산,
         // ...대차대조표,
-        // ...현금흐름,
+        ...현금흐름,
         // ...테크니컬즈,
         // ...수익성,
         ...분석용,

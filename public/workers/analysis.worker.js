@@ -183,12 +183,35 @@ const processData = async (rawData, aiModels) => {
         dividends_yield_current: row.dividends_yield_current || 0,
       };
 
+      // 현금흐름 분석을 위한 데이터 구조 생성
+      //       "cash_f_operating_activities_ttm", // 운영 활동으로 인한 현금 흐름(TTM)
+      // "cash_f_investing_activities_ttm", // 투자 활동으로 인한 현금 흐름(TTM)
+      // "cash_f_financing_activities_ttm", // 재무 활동으로 인한 현금 흐름(TTM)
+      // "free_cash_flow_ttm", // 자유 현금 흐름(TTM)
+      // "capital_expenditures_ttm", // 자본 지출(TTM)
+      const cashFlowData = {
+        cash_f_operating_activities_ttm:
+          row.cash_f_operating_activities_ttm || 0,
+        cash_f_investing_activities_ttm:
+          row.cash_f_investing_activities_ttm || 0,
+        cash_f_financing_activities_ttm:
+          row.cash_f_financing_activities_ttm || 0,
+        free_cash_flow_ttm: row.free_cash_flow_ttm || 0,
+        capital_expenditures_ttm: row.capital_expenditures_ttm || 0,
+      };
+
       // stock-analyzer를 사용하여 배당 분석 수행
       let dividendAnalysis = null;
+      let cashFlowAnalysis = null;
       try {
         if (typeof analyzeStock === "function") {
-          const stockAnalysis = analyzeStock({ dividend: dividendData });
+          const stockAnalysis = analyzeStock({
+            dividend: dividendData,
+            cashFlow: cashFlowData,
+          });
           dividendAnalysis = stockAnalysis.dividend;
+          // 현금흐름 분석
+          cashFlowAnalysis = stockAnalysis.cashFlow;
         }
       } catch (error) {
         console.warn("배당 분석 중 오류:", error.message);
@@ -198,6 +221,7 @@ const processData = async (rawData, aiModels) => {
       return {
         ...stockWithPrediction,
         dividend: dividendAnalysis,
+        cashFlow: cashFlowAnalysis,
       };
     });
 

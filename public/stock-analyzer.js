@@ -18,16 +18,22 @@ const INDICATOR_RANGES = {
   },
 
   cashFlow: {
-    // 현금흐름 분석
-    capex: { min: -133.09, max: 0, optimal: "moderate_negative" },
-    fcf: { min: -12.83, max: 98.44, optimal: "higher" },
-    financingCashFlow: { min: -129.34, max: 51.17, optimal: "higher" },
-    investmentCashFlow: {
-      min: -106.2,
-      max: 144.03,
-      optimal: "context_dependent",
-    },
-    operatingCashFlow: { min: -10.33, max: 132.6, optimal: "higher" },
+    // 현금흐름 분석 - 핵심 3대 지표 (절댓값 단위)
+    cash_f_operating_activities_ttm: {
+      min: -10330000000,
+      max: 132600000000,
+      optimal: "higher",
+    }, // 영업활동 현금흐름 (영업계정흐름)
+    cash_f_financing_activities_ttm: {
+      min: -129340000000,
+      max: 51170000000,
+      optimal: "higher",
+    }, // 재무활동 현금흐름 (재무현금흐름)
+    free_cash_flow_ttm: {
+      min: -12830000000,
+      max: 98440000000,
+      optimal: "higher",
+    }, // 자유현금흐름 (FCF)
   },
 
   profitability: {
@@ -226,7 +232,123 @@ function analyzeStock(stockData) {
     })(avgScore);
   }
 
-  // 전체 평균 점수 계산
+  // 현금흐름 지표 분석
+  if (stockData.cashFlow) {
+    const cashFlow = stockData.cashFlow;
+    analysis.cashFlow = {
+      cash_f_operating_activities_ttm: {
+        value: cashFlow.cash_f_operating_activities_ttm,
+        score:
+          Math.round(
+            calculateIndicatorScore(
+              cashFlow.cash_f_operating_activities_ttm,
+              INDICATOR_RANGES.cashFlow.cash_f_operating_activities_ttm
+            ) * 100
+          ) / 100,
+        analysis:
+          cashFlow.cash_f_operating_activities_ttm >= 50000000000
+            ? `와! 영업활동으로 ${(
+                cashFlow.cash_f_operating_activities_ttm / 1000000000
+              ).toFixed(1)}B 현금을 벌어들였네요! 정말 탄탄한 사업구조예요 💪`
+            : cashFlow.cash_f_operating_activities_ttm >= 20000000000
+            ? `영업활동으로 ${(
+                cashFlow.cash_f_operating_activities_ttm / 1000000000
+              ).toFixed(1)}B 현금을 창출했어요. 괜찮은 수준이네요 👍`
+            : cashFlow.cash_f_operating_activities_ttm >= 0
+            ? `영업활동 현금흐름이 ${(
+                cashFlow.cash_f_operating_activities_ttm / 1000000000
+              ).toFixed(1)}B로 양수예요. 나쁘지 않네요 😊`
+            : `어? 영업활동에서 ${Math.abs(
+                cashFlow.cash_f_operating_activities_ttm / 1000000000
+              ).toFixed(1)}B 현금이 나갔네요. 좀 걱정되는 상황이에요 😰`,
+      },
+      cash_f_financing_activities_ttm: {
+        value: cashFlow.cash_f_financing_activities_ttm,
+        score:
+          Math.round(
+            calculateIndicatorScore(
+              cashFlow.cash_f_financing_activities_ttm,
+              INDICATOR_RANGES.cashFlow.cash_f_financing_activities_ttm
+            ) * 100
+          ) / 100,
+        analysis:
+          cashFlow.cash_f_financing_activities_ttm >= 20000000000
+            ? `재무활동으로 ${(
+                cashFlow.cash_f_financing_activities_ttm / 1000000000
+              ).toFixed(1)}B 자금을 조달했어요! 성장 자금 확보가 잘 됐네요 💪`
+            : cashFlow.cash_f_financing_activities_ttm >= 0
+            ? `재무활동에서 ${(
+                cashFlow.cash_f_financing_activities_ttm / 1000000000
+              ).toFixed(1)}B 현금이 유입됐어요. 적당한 자금조달이네요 👍`
+            : Math.abs(cashFlow.cash_f_financing_activities_ttm) <= 30000000000
+            ? `재무활동으로 ${Math.abs(
+                cashFlow.cash_f_financing_activities_ttm / 1000000000
+              ).toFixed(1)}B가 나갔어요. 배당이나 부채 상환일 수 있어요 😊`
+            : `재무활동에서 ${Math.abs(
+                cashFlow.cash_f_financing_activities_ttm / 1000000000
+              ).toFixed(
+                1
+              )}B 현금이 많이 나갔네요. 대규모 상환이 있었나 봐요 😮`,
+      },
+      free_cash_flow_ttm: {
+        value: cashFlow.free_cash_flow_ttm,
+        score:
+          Math.round(
+            calculateIndicatorScore(
+              cashFlow.free_cash_flow_ttm,
+              INDICATOR_RANGES.cashFlow.free_cash_flow_ttm
+            ) * 100
+          ) / 100,
+        analysis:
+          cashFlow.free_cash_flow_ttm >= 30000000000
+            ? `자유현금흐름이 ${(
+                cashFlow.free_cash_flow_ttm / 1000000000
+              ).toFixed(1)}B예요! 회사가 자유롭게 쓸 수 있는 돈이 넉넉하네요 🌟`
+            : cashFlow.free_cash_flow_ttm >= 10000000000
+            ? `자유현금흐름이 ${(
+                cashFlow.free_cash_flow_ttm / 1000000000
+              ).toFixed(1)}B로 양호해요. 배당이나 투자 여력이 있어요 💰`
+            : cashFlow.free_cash_flow_ttm >= 0
+            ? `자유현금흐름이 ${(
+                cashFlow.free_cash_flow_ttm / 1000000000
+              ).toFixed(1)}B로 플러스예요. 최소한은 확보했네요 😊`
+            : `자유현금흐름이 ${(
+                cashFlow.free_cash_flow_ttm / 1000000000
+              ).toFixed(1)}B로 마이너스네요. 현금 확보가 필요해 보여요 😰`,
+      },
+    };
+
+    // 현금흐름 부문 평균 점수
+    const cashFlowScores = Object.values(analysis.cashFlow).map(
+      (item) => item.score
+    );
+    const avgScore =
+      Math.round(
+        (cashFlowScores.reduce((a, b) => a + b, 0) / cashFlowScores.length) *
+          100
+      ) / 100;
+
+    analysis.cashFlow.averageScore = avgScore;
+
+    // 현금흐름 부문 종합 의견 추가
+    analysis.cashFlow.overallAnalysis = (function (score) {
+      if (score >= 4.5) {
+        return "🌟 현금흐름이 완벽해요! 영업으로 돈을 잘 벌고, 재무활동도 건전하고, 자유현금흐름도 넉넉해요. 재무적으로 매우 건전한 회사네요!";
+      } else if (score >= 4.0) {
+        return "💪 현금흐름이 아주 좋아요! 3대 핵심 지표가 모두 우수하고 현금 창출 능력이 탁월해요. 투자하기 좋은 회사예요!";
+      } else if (score >= 3.5) {
+        return "👍 현금흐름이 괜찮아요! 몇 가지 아쉬운 부분이 있지만 전반적으로 안정적인 현금 관리를 하고 있어요.";
+      } else if (score >= 3.0) {
+        return "😐 현금흐름이 보통 수준이에요. 영업, 재무, FCF 중 일부 개선이 필요할 수 있어요.";
+      } else if (score >= 2.0) {
+        return "⚠️ 현금흐름에 문제가 있어 보여요. 핵심 현금 지표들이 불안정하니 신중하게 검토하세요.";
+      } else if (score >= 1.0) {
+        return "🚨 현금흐름이 좋지 않아요. 영업활동이나 재무활동에서 현금 문제가 심각할 수 있어요.";
+      } else {
+        return "💸 현금흐름이 매우 위험해요! 3대 핵심 지표 모두 문제가 있어 투자를 피하는 게 좋겠어요.";
+      }
+    })(avgScore);
+  }
   const allScores = [];
   Object.values(analysis).forEach((category) => {
     if (category.averageScore) {
@@ -279,6 +401,11 @@ function exampleAnalysis() {
       dividendMarginRatio: 188,
       dividendYield: 7,
     },
+    cashFlow: {
+      operatingCashFlow: 50,
+      financingCashFlow: 10,
+      freeCashFlow: 30,
+    },
   };
 
   const result = analyzeStock(sampleStock);
@@ -300,6 +427,20 @@ function exampleAnalysis() {
     });
     console.log(`\n💰 배당 부문 평균: ${result.dividend.averageScore}/5점`);
     console.log(`📝 배당 부문 종합: ${result.dividend.overallAnalysis}`);
+  }
+
+  // 현금흐름 지표 출력
+  if (result.cashFlow) {
+    console.log("\n💵 현금흐름 지표 분석:");
+    Object.entries(result.cashFlow).forEach(([key, data]) => {
+      if (key !== "averageScore" && key !== "overallAnalysis") {
+        console.log(
+          `  ${key}: ${data.value} → ${data.score}/5점 (${data.analysis})`
+        );
+      }
+    });
+    console.log(`\n💸 현금흐름 부문 평균: ${result.cashFlow.averageScore}/5점`);
+    console.log(`📝 현금흐름 부문 종합: ${result.cashFlow.overallAnalysis}`);
   }
 
   // 종합 평가
