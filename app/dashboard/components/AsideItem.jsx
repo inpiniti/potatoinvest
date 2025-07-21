@@ -46,6 +46,9 @@ const AsideItem = ({
           <Badge className={!badge?.[0] && "hidden"}>보유</Badge>
           <Badge className={!badge?.[1] && "hidden"}>체결</Badge>
           <Badge className={!badge?.[2] && "hidden"}>미체결</Badge>
+          <Badge className={!badge?.[3] && "hidden"}>오를확률</Badge>
+          <Badge className={!badge?.[3] && "hidden"}>{badge?.[2]}</Badge>
+
           {description}
         </span>
       </div>

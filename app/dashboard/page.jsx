@@ -84,6 +84,7 @@ import Buy from "./components/Buy";
 import dayjs from "dayjs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getLogoUrlByCode, getLogoUrlById } from "../page/log/utils/logoUtils";
+import { DividendAnalysis } from "./components/DividendAnalysis";
 
 const data = {
   navMain: [
@@ -230,11 +231,13 @@ export default function DashBoardPage() {
         setList(cnnlData?.filter((item) => item?.prcs_stat_name !== "완료"));
         break;
       case "분석":
+        console.log("analysisData[0]", analysisData[0]);
+
         setList(
           analysisData
-            .filter((item) => item?.예측결과 >= 0.6)
-            .filter((item) => item?.close !== undefined && item?.close >= 3)
-            .filter((item) => Number(item?.perf_1_m) <= 0)
+            // .filter((item) => item?.예측결과 >= 0.6)
+            // .filter((item) => item?.close !== undefined && item?.close >= 3)
+            // .filter((item) => Number(item?.perf_1_m) <= 0)
             .map((item) => {
               return {
                 ...item,
@@ -327,53 +330,53 @@ export default function DashBoardPage() {
       code: code,
     });
     //if (!autoPlay) {
-    fetchGeminiData({
-      code: code,
-    });
-    fetchGeminiNewsData({
-      code: code,
-    });
-    console.log("currentAnalysisData", currentAnalysisData);
-    fetchGeminiTechnicalData({
-      ticker: code,
-      technicalData: {
-        "Recommend.All": currentAnalysisData?.recommend_all,
-        "Recommend.MA": currentAnalysisData?.recommend_m_a,
-        "Recommend.Other": currentAnalysisData?.recommend_other,
-        RSI: currentAnalysisData?.r_s_i,
-        Mom: currentAnalysisData?.mom,
-        AO: currentAnalysisData?.a_o,
-        CCI20: currentAnalysisData?.c_c_i20,
-        "Stoch.K": currentAnalysisData?.stoch_k,
-        "Stoch.D": currentAnalysisData?.stoch_d,
-        pricescale: currentAnalysisData?.pricescale,
-      },
-    });
-    fetchGeminiFinancialData({
-      code: code,
-    });
+    // fetchGeminiData({
+    //   code: code,
+    // });
+    // fetchGeminiNewsData({
+    //   code: code,
+    // });
+    // console.log("currentAnalysisData", currentAnalysisData);
+    // fetchGeminiTechnicalData({
+    //   ticker: code,
+    //   technicalData: {
+    //     "Recommend.All": currentAnalysisData?.recommend_all,
+    //     "Recommend.MA": currentAnalysisData?.recommend_m_a,
+    //     "Recommend.Other": currentAnalysisData?.recommend_other,
+    //     RSI: currentAnalysisData?.r_s_i,
+    //     Mom: currentAnalysisData?.mom,
+    //     AO: currentAnalysisData?.a_o,
+    //     CCI20: currentAnalysisData?.c_c_i20,
+    //     "Stoch.K": currentAnalysisData?.stoch_k,
+    //     "Stoch.D": currentAnalysisData?.stoch_d,
+    //     pricescale: currentAnalysisData?.pricescale,
+    //   },
+    // });
+    // fetchGeminiFinancialData({
+    //   code: code,
+    // });
     //}
   };
 
   // 4개 분석이 모두 완료되었는지 확인하는 함수
-  const isAllAnalysisCompleted = () => {
-    return (
-      geminiData &&
-      geminiNewsData &&
-      geminiTechnicalData &&
-      geminiFinancialData &&
-      !geminiPending &&
-      !geminiNewsPending &&
-      !geminiTechnicalPending &&
-      !geminiFinancialPending
-    );
-  };
+  // const isAllAnalysisCompleted = () => {
+  //   return (
+  //     geminiData &&
+  //     geminiNewsData &&
+  //     geminiTechnicalData &&
+  //     geminiFinancialData &&
+  //     !geminiPending &&
+  //     !geminiNewsPending &&
+  //     !geminiTechnicalPending &&
+  //     !geminiFinancialPending
+  //   );
+  // };
 
   // 4개 분석 완료 시 실행되는 useEffect
   useEffect(() => {
-    if (!isAllAnalysisCompleted()) {
-      return;
-    }
+    // if (!isAllAnalysisCompleted()) {
+    //   return;
+    // }
 
     let timeoutId;
 
@@ -827,7 +830,7 @@ export default function DashBoardPage() {
                     // ).toFixed(2)}% > ${Number(item?.perf_w).toFixed(2)}%`}
                     onClick={() => setCurrent(index)}
                     active={current === index}
-                    badge={[item.isHolding, item.isCnnl]}
+                    badge={[item.isHolding, item.isCnnl, null, item.예측결과]}
                   />
                 );
               }
@@ -1033,7 +1036,7 @@ export default function DashBoardPage() {
                     item?.perf_1_m
                   ).toFixed(2)}% > ${Number(item?.perf_w).toFixed(2)}%`}
                   active={current === index}
-                  badge={[item.isHolding, item.isCnnl]}
+                  badge={[item.isHolding, item.isCnnl, item.예측결과]}
                 />
               );
             }
@@ -1043,6 +1046,7 @@ export default function DashBoardPage() {
         <div className="h-full overflow-y-scroll flex flex-col gap-4 p-4 scrollbar-hide">
           <Tabs defaultValue="chart">
             <TabsList>
+              <TabsTrigger value="dividendAnalysis">배당 분석</TabsTrigger>
               <TabsTrigger value="gemini">전문가 분석</TabsTrigger>
               <TabsTrigger value="geminiNews">뉴스 분석</TabsTrigger>
               <TabsTrigger value="geminiTech">기술 분석</TabsTrigger>
@@ -1053,6 +1057,10 @@ export default function DashBoardPage() {
               <TabsTrigger value="community">커뮤니티</TabsTrigger>
               <TabsTrigger value="order">주문</TabsTrigger>
             </TabsList>
+            <TabsContent value="dividendAnalysis">
+              {JSON.stringify(currentAnalysisData?.dividend)}
+              <DividendAnalysis data={currentAnalysisData?.dividend} />
+            </TabsContent>
             <TabsContent value="gemini">
               <div className="py-2">
                 <CardTitle>전문가 분석</CardTitle>

@@ -265,22 +265,22 @@ const crawling = async (countryCode: string) => {
     //   "enterprise_value_ebitda_ttm", // EBITDA 대비 기업 가치(TTM)
     //   "exchange", // 거래소
     // ];
-    // const 배당 = [
-    //   "name", // 이름
-    //   "description", // 설명
-    //   "logoid", // 로고 ID
-    //   "update_mode", // 업데이트 모드
-    //   "type", // 유형
-    //   "dps_common_stock_prim_issue_fy", // 주식 기본 발행 DPS(연간)
-    //   "fundamental_currency_code", // 기본 통화 코드
-    //   "dividends_yield_current", // 현재 배당 수익률
-    //   "dividends_yield", // 배당 수익률
-    //   "dividend_payout_ratio_ttm", // 배당 지급 비율(TTM)
-    //   "dps_common_stock_prim_issue_yoy_growth_fy", // 주식 기본 발행 DPS 연간 성장률(FY)
-    //   "continuous_dividend_payout", // 연속 배당 지급
-    //   "continuous_dividend_growth", // 연속 배당 성장
-    //   "exchange", // 거래소
-    // ];
+    const 배당 = [
+      //   "name", // 이름
+      //   "description", // 설명
+      //   "logoid", // 로고 ID
+      //   "update_mode", // 업데이트 모드
+      //   "type", // 유형
+      //   "dps_common_stock_prim_issue_fy", // 주식 기본 발행 DPS(연간)
+      //   "fundamental_currency_code", // 기본 통화 코드
+      "dividends_yield_current", // 배당 수익률%
+      // "dividends_yield", // 배당 수익률%
+      "dividend_payout_ratio_ttm", // 배당 비율%(TTM)
+      "dps_common_stock_prim_issue_yoy_growth_fy", // 주식 기본 발행 DPS 연간 성장률(FY)
+      "continuous_dividend_payout", // 연속 배당 지급
+      "continuous_dividend_growth", // 연속 배당 성장
+      //   "exchange", // 거래소
+    ];
     // const 수익성 = [
     //   "name", // 이름
     //   "description", // 설명
@@ -379,7 +379,7 @@ const crawling = async (countryCode: string) => {
         // ...성과,
         // ...시간외,
         // ...평가,
-        // ...배당,
+        ...배당,
         // ...손익계산,
         // ...대차대조표,
         // ...현금흐름,
@@ -402,7 +402,9 @@ const crawling = async (countryCode: string) => {
           options: { lang: "ko" },
           range: [0, 99999],
           sort: { sortBy: "market_cap_basic", sortOrder: "desc" },
-          symbols: {},
+          symbols: {
+            symbolset: ["SYML:SP;SPX"],
+          },
           markets: ["america"],
           filter: [
             {

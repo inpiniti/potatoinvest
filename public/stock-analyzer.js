@@ -198,11 +198,32 @@ function analyzeStock(stockData) {
     const dividendScores = Object.values(analysis.dividend).map(
       (item) => item.score
     );
-    analysis.dividend.averageScore =
+    const avgScore =
       Math.round(
         (dividendScores.reduce((a, b) => a + b, 0) / dividendScores.length) *
           100
       ) / 100;
+
+    analysis.dividend.averageScore = avgScore;
+
+    // 배당 부문 종합 의견 추가
+    analysis.dividend.overallAnalysis = (function (score) {
+      if (score >= 4.5) {
+        return "🌟 와! 정말 훌륭한 배당주네요! 연속 배당, 성장성, 수익률 모든 면에서 완벽해요. 장기 투자하기 딱 좋은 회사예요!";
+      } else if (score >= 4.0) {
+        return "👍 아주 좋은 배당주예요! 대부분의 지표가 우수하고 안정적인 배당을 기대할 수 있어요. 포트폴리오에 추가하면 좋겠네요!";
+      } else if (score >= 3.5) {
+        return "😊 괜찮은 배당주네요! 몇 가지 아쉬운 부분이 있지만 전반적으로 나쁘지 않아요. 보수적인 투자자에게 적합할 것 같아요.";
+      } else if (score >= 3.0) {
+        return "😐 보통 수준의 배당주예요. 장점과 단점이 섞여있네요. 다른 투자 옵션과 비교해보시는 게 좋겠어요.";
+      } else if (score >= 2.0) {
+        return "⚠️ 배당 투자로는 좀 위험해 보여요. 배당 관련 지표들이 불안정하거나 낮은 편이에요. 신중하게 검토하세요.";
+      } else if (score >= 1.0) {
+        return "🚨 배당주로는 추천하기 어려워요. 대부분의 배당 지표가 좋지 않네요. 배당보다는 성장주를 고려해보세요.";
+      } else {
+        return "💸 배당 투자는 피하시는 게 좋겠어요. 배당 관련 데이터가 부족하거나 매우 불안정해요. 다른 종목을 찾아보세요!";
+      }
+    })(avgScore);
   }
 
   // 전체 평균 점수 계산
@@ -271,13 +292,14 @@ function exampleAnalysis() {
   if (result.dividend) {
     console.log("\n🏆 배당 지표 분석:");
     Object.entries(result.dividend).forEach(([key, data]) => {
-      if (key !== "averageScore") {
+      if (key !== "averageScore" && key !== "overallAnalysis") {
         console.log(
           `  ${key}: ${data.value} → ${data.score}/5점 (${data.analysis})`
         );
       }
     });
     console.log(`\n💰 배당 부문 평균: ${result.dividend.averageScore}/5점`);
+    console.log(`📝 배당 부문 종합: ${result.dividend.overallAnalysis}`);
   }
 
   // 종합 평가
@@ -287,6 +309,15 @@ function exampleAnalysis() {
   console.log(`  추천: ${result.overall.recommendation}`);
 
   return result;
+}
+
+// 웹 워커에서 사용 시 전역으로 노출
+if (typeof self !== "undefined" && typeof window === "undefined") {
+  // 웹 워커 환경
+  self.analyzeStock = analyzeStock;
+  self.calculateIndicatorScore = calculateIndicatorScore;
+  self.INDICATOR_RANGES = INDICATOR_RANGES;
+  self.exampleAnalysis = exampleAnalysis;
 }
 
 // 모듈 내보내기
@@ -310,6 +341,6 @@ if (typeof window !== "undefined") {
 }
 
 // 직접 실행 시 예시 출력
-if (require.main === module) {
+if (typeof require !== "undefined" && require.main === module) {
   exampleAnalysis();
 }

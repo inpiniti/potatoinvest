@@ -3,6 +3,9 @@
 // TensorFlow.js 라이브러리 불러오기 (웹 워커에서 사용 가능한 방식)
 importScripts("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js");
 
+// Stock Analyzer 불러오기 (public 폴더에서)
+importScripts("/stock-analyzer.js");
+
 // 데이터 가져오기 함수
 const fetchData = async (url) => {
   try {
@@ -161,12 +164,42 @@ const processData = async (rawData, aiModels) => {
     models.forEach((model) => model.dispose());
 
     // 6. 분석 데이터에 예측 결과 추가
-    const analysisData = rawData.map((row, index) => ({
-      ...row,
-      예측결과: predictionAverage[index],
-      type: "분석",
-      processedAt: new Date().toISOString(),
-    }));
+    const analysisData = rawData.map((row, index) => {
+      // 기본 데이터에 예측 결과 추가
+      const stockWithPrediction = {
+        ...row,
+        예측결과: predictionAverage[index],
+        type: "분석",
+        processedAt: new Date().toISOString(),
+      };
+
+      // 배당 분석을 위한 데이터 구조 생성
+      const dividendData = {
+        continuous_dividend_payout: row.continuous_dividend_payout || 0,
+        continuous_dividend_growth: row.continuous_dividend_growth || 0,
+        dps_common_stock_prim_issue_yoy_growth_fy:
+          row.dps_common_stock_prim_issue_yoy_growth_fy || 0,
+        dividend_payout_ratio_ttm: row.dividend_payout_ratio_ttm || 0,
+        dividends_yield_current: row.dividends_yield_current || 0,
+      };
+
+      // stock-analyzer를 사용하여 배당 분석 수행
+      let dividendAnalysis = null;
+      try {
+        if (typeof analyzeStock === "function") {
+          const stockAnalysis = analyzeStock({ dividend: dividendData });
+          dividendAnalysis = stockAnalysis.dividend;
+        }
+      } catch (error) {
+        console.warn("배당 분석 중 오류:", error.message);
+      }
+
+      // dividend 필드에 분석 결과 추가
+      return {
+        ...stockWithPrediction,
+        dividend: dividendAnalysis,
+      };
+    });
 
     return analysisData;
   } catch (error) {
