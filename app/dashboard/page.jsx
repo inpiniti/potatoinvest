@@ -1048,15 +1048,7 @@ export default function DashBoardPage() {
         <div className="h-full overflow-y-scroll flex flex-col gap-4 p-4 scrollbar-hide">
           <Tabs defaultValue="chart">
             <TabsList>
-              {/* 분석 */}
               <TabsTrigger value="analysis">분석</TabsTrigger>
-              <TabsTrigger value="dividendAnalysis">배당 분석</TabsTrigger>
-              {/* 현금흐름 분석 */}
-              <TabsTrigger value="cashFlowAnalysis">현금흐름 분석</TabsTrigger>
-              <TabsTrigger value="gemini">전문가 분석</TabsTrigger>
-              <TabsTrigger value="geminiNews">뉴스 분석</TabsTrigger>
-              <TabsTrigger value="geminiTech">기술 분석</TabsTrigger>
-              <TabsTrigger value="geminiFinance">재무 분석</TabsTrigger>
               <TabsTrigger value="chart">차트</TabsTrigger>
               <TabsTrigger value="stock">종목정보</TabsTrigger>
               <TabsTrigger value="news">뉴스</TabsTrigger>
