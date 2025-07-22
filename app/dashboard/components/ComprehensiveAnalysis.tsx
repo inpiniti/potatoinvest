@@ -41,6 +41,7 @@ interface CategoryData {
 }
 
 interface ComprehensiveData {
+  오버뷰평가: CategoryData;
   손익계산평가: CategoryData;
   수익성지표평가: CategoryData;
   배당지표평가: CategoryData;
@@ -56,6 +57,12 @@ interface ComprehensiveData {
 }
 
 const categoryConfig = {
+  오버뷰평가: {
+    label: "오버뷰",
+    icon: Star,
+    color: "#6366f1",
+    shortName: "오버뷰",
+  },
   손익계산평가: {
     label: "손익계산서",
     icon: TrendingUp,
@@ -148,10 +155,10 @@ export function ComprehensiveAnalysis({ data }: { data: ComprehensiveData }) {
     .map(([key, category]) => {
       const config = categoryConfig[key as keyof typeof categoryConfig];
       return {
-        category: config.shortName,
+        category: config?.shortName,
         score: category.평균점수,
-        fullName: config.label,
-        color: config.color,
+        fullName: config?.label,
+        color: config?.color,
       };
     });
 
@@ -276,7 +283,7 @@ export function ComprehensiveAnalysis({ data }: { data: ComprehensiveData }) {
           <CardHeader className="text-center">
             <CardTitle>카테고리별 분석</CardTitle>
             <p className="text-sm text-muted-foreground">
-              6개 영역별 종합 성과 현황
+              7개 영역별 종합 성과 현황
             </p>
           </CardHeader>
           <CardContent>
@@ -327,7 +334,7 @@ export function ComprehensiveAnalysis({ data }: { data: ComprehensiveData }) {
             if (key === "종합평가") return null;
 
             const config = categoryConfig[key as keyof typeof categoryConfig];
-            const IconComponent = config.icon;
+            const IconComponent = config?.icon;
             const categoryRadarData = getCategoryRadarData(category);
 
             return (
@@ -340,16 +347,16 @@ export function ComprehensiveAnalysis({ data }: { data: ComprehensiveData }) {
                     <div className="flex items-center gap-3">
                       <div
                         className="p-2 rounded-lg"
-                        style={{ backgroundColor: `${config.color}20` }}
+                        style={{ backgroundColor: `${config?.color}20` }}
                       >
                         <IconComponent
                           className="w-5 h-5"
-                          style={{ color: config.color }}
+                          style={{ color: config?.color }}
                         />
                       </div>
                       <div>
                         <CardTitle className="text-lg">
-                          {config.label}
+                          {config?.label}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground">
                           {category.데이터개수}개 지표
@@ -382,8 +389,8 @@ export function ComprehensiveAnalysis({ data }: { data: ComprehensiveData }) {
                           />
                           <Radar
                             dataKey="score"
-                            stroke={config.color}
-                            fill={config.color}
+                            stroke={config?.color}
+                            fill={config?.color}
                             fillOpacity={0.3}
                             strokeWidth={2}
                           />
@@ -432,14 +439,14 @@ export function ComprehensiveAnalysis({ data }: { data: ComprehensiveData }) {
             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
               <div
                 className="p-1.5 rounded-lg"
-                style={{ backgroundColor: `${config.color}20` }}
+                style={{ backgroundColor: `${config?.color}20` }}
               >
                 <config.icon
                   className="w-4 h-4"
-                  style={{ color: config.color }}
+                  style={{ color: config?.color }}
                 />
               </div>
-              {config.label} 세부 지표
+              {config?.label} 세부 지표
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               {Object.entries(category.지표들).map(([metricKey, metric]) => {

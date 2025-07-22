@@ -171,33 +171,34 @@ const crawling = async (countryCode: string) => {
       "market",
     ];
 
-    // const 오버뷰 = [
-    //   "name", // 이름
-    //   "description", // 설명
-    //   "logoid", // 로고 ID
-    //   "update_mode", // 업데이트 모드
-    //   "type", // 유형
-    //   "close", // 종가
-    //   "pricescale", // 가격 척도
-    //   "minmov", // 최소 이동
-    //   "fractional", // 분수
-    //   "minmove2", // 최소 이동 2
-    //   "currency", // 통화
-    //   "change", // 변화
-    //   "volume", // 거래량
-    //   "relative_volume_10d_calc", // 10일 상대 거래량 계산
-    //   "market_cap_basic", // 기본 시장 규모
-    //   "fundamental_currency_code", // 기본 통화 코드
-    //   "price_earnings_ttm", // 시가 총액 대비 이익(TTM)
-    //   "earnings_per_share_diluted_ttm", // 주당 순이익(TTM, 희석)
-    //   "earnings_per_share_diluted_yoy_growth_ttm", // 주당 순이익 연간 성장률(TTM, 희석)
-    //   "dividends_yield_current", // 현재 배당 수익률
-    //   "sector.tr", // TR 섹터
-    //   "market", // 시장
-    //   "sector", // 섹터
-    //   "recommendation_mark", // 추천 마크
-    //   "exchange", // 거래소
-    // ];
+    const 오버뷰 = [
+      //   "name", // 이름
+      //   "description", // 설명
+      //   "logoid", // 로고 ID
+      //   "update_mode", // 업데이트 모드
+      //   "type", // 유형
+      //   "close", // 종가
+      //   "pricescale", // 가격 척도
+      //   "minmov", // 최소 이동
+      //   "fractional", // 분수
+      //   "minmove2", // 최소 이동 2
+      //   "currency", // 통화
+      //   "change", // 변화
+      //   "volume", // 거래량
+      //   "relative_volume_10d_calc", // 10일 상대 거래량 계산
+      //   "market_cap_basic", // 기본 시장 규모
+      //   "fundamental_currency_code", // 기본 통화 코드
+      //   "price_earnings_ttm", // 시가 총액 대비 이익(TTM)
+      //   "earnings_per_share_diluted_ttm", // 주당 순이익(TTM, 희석)
+      //   "earnings_per_share_diluted_yoy_growth_ttm", // 주당 순이익 연간 성장률(TTM, 희석)
+      //   "dividends_yield_current", // 현재 배당 수익률
+      //   "sector.tr", // TR 섹터
+      //   "market", // 시장
+      //   "sector", // 섹터
+      "recommendation_mark", // 추천 마크
+      "price_target_1y_delta",
+      //   "exchange", // 거래소
+    ];
     // const 성과 = [
     //   "name", // 이름
     //   "description", // 설명
@@ -377,7 +378,7 @@ const crawling = async (countryCode: string) => {
 
     const columns: string[] = Array.from(
       new Set([
-        // ...오버뷰,
+        ...오버뷰,
         // ...성과,
         // ...시간외,
         ...평가,

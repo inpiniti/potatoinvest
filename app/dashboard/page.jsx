@@ -179,6 +179,7 @@ export default function DashBoardPage() {
   const {
     data: priceDetailData,
     mutate: fetchPriceDetail,
+    isPending: priceDetailPending,
     isError,
   } = usePriceDetail(); // 현제가 상세
   const { data: exchangeRateData, mutate: fetchExchangeRate } =
@@ -376,6 +377,15 @@ export default function DashBoardPage() {
 
   // 4개 분석 완료 시 실행되는 useEffect
   useEffect(() => {
+    // 리액트쿼리의 isPending 상태 가능한 값?
+    // 1. isPending: true - 데이터를 가져오는 중
+    // 2. isPending: false - 데이터가 로드되었거나 에러가 발생
+    // 3. isPending: undefined - 쿼리가 아직 실행되지 않음
+
+    if (priceDetailPending === true || priceDetailPending === undefined) {
+      return;
+    }
+
     // if (!isAllAnalysisCompleted()) {
     //   return;
     // }
@@ -387,15 +397,6 @@ export default function DashBoardPage() {
     // 분석데이터
     const analysisItem = analysisData.find((item) => item.name === code);
 
-    // 각 분석 데이터에서 점수 추출
-    const newsScore = geminiNewsData?.overallSentiment?.score || 0;
-    const expertScore = geminiData?.summary?.averageScore || 0;
-    const technicalScore =
-      geminiTechnicalData?.technicalScore?.overallScore || 0;
-    const financialScore = geminiFinancialData?.financialHealth?.overallScore
-      ? (geminiFinancialData.financialHealth.overallScore / 10) * 5
-      : 0; // 10점 척도를 5점 척도로 변환
-
     // 현재가 상세의 isError 를 보고 정상 조회가 되었을때만 mutation 실행
     if (!isError)
       mutation({
@@ -403,10 +404,10 @@ export default function DashBoardPage() {
         priceDetailData, // 현재가 상세
         analysisItem, // 분석 데이터
         menu: activeItem.title, // 현재 메뉴
-        newsScore, // 뉴스분석 점수 (1-5)
-        expertScore, // 전문가 분석 점수 (1-5)
-        technicalScore, // 기술적 분석 점수 (1-5)
-        financialScore, // 재무 분석 점수 (1-5로 변환)
+        //newsScore, // 뉴스분석 점수 (1-5)
+        //expertScore, // 전문가 분석 점수 (1-5)
+        //technicalScore, // 기술적 분석 점수 (1-5)
+        //financialScore, // 재무 분석 점수 (1-5로 변환)
       });
 
     if (autoPlay) {
@@ -419,16 +420,7 @@ export default function DashBoardPage() {
         clearTimeout(timeoutId);
       }
     };
-  }, [
-    geminiData,
-    geminiNewsData,
-    geminiTechnicalData,
-    geminiFinancialData,
-    geminiPending,
-    geminiNewsPending,
-    geminiTechnicalPending,
-    geminiFinancialPending,
-  ]);
+  }, [priceDetailPending]);
 
   useEffect(() => {
     setList(profitData);
@@ -462,55 +454,6 @@ export default function DashBoardPage() {
     } else {
       setCurrent((prev) => Math.min(prev + 1, list.length - 1)); // 일반적인 증가
     }
-  };
-
-  // 제미니 로딩 관련 상태 추가
-  const [geminiProgress, setGeminiProgress] = useState(0);
-  const [geminiStartTime, setGeminiStartTime] = useState(null);
-  const [geminiElapsedTime, setGeminiElapsedTime] = useState(0);
-
-  // 제미니 진행률 및 경과 시간 관리
-  useEffect(() => {
-    if (geminiPending && !geminiStartTime) {
-      // 로딩 시작
-      setGeminiStartTime(Date.now());
-      setGeminiProgress(0);
-      setGeminiElapsedTime(0);
-    } else if (!geminiPending && geminiStartTime) {
-      // 로딩 완료
-      setGeminiStartTime(null);
-      setGeminiProgress(0);
-      setGeminiElapsedTime(0);
-    }
-  }, [geminiPending, geminiStartTime]);
-
-  // 진행률 바 애니메이션 및 경과 시간 업데이트
-  useEffect(() => {
-    let interval;
-
-    if (geminiPending && geminiStartTime) {
-      interval = setInterval(() => {
-        const elapsed = (Date.now() - geminiStartTime) / 1000; // 초 단위
-        setGeminiElapsedTime(elapsed);
-
-        // 35초를 기준으로 진행률 계산 (최대 99%까지만)
-        const progress = Math.min((elapsed / 35) * 99, 99);
-        setGeminiProgress(progress);
-      }, 100); // 100ms마다 업데이트
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [geminiPending, geminiStartTime]);
-
-  // 경과 시간을 분:초 형식으로 포맷
-  const formatElapsedTime = (seconds) => {
-    const mins = Math.floor(seconds / 35);
-    const secs = Math.floor(seconds % 35);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
