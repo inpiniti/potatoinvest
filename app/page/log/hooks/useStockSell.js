@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from "react";
-import useTrading from "@/hooks/useTrading";
-import { toast } from "sonner";
-import { settingStore } from "@/store/settingStore";
+import { useState, useCallback, useEffect } from 'react';
+import useTrading from '@/hooks/useTrading';
+import { toast } from 'sonner';
+import { settingStore } from '@/store/settingStore';
 
 const useStockSell = () => {
   const [selling, setSelling] = useState(false);
@@ -27,7 +27,7 @@ const useStockSell = () => {
     // 현재가도 받음
     async (stockCode, stockDetail, quantity, avgPrice, currentPrice) => {
       if (!stockCode) {
-        toast.error("매도할 종목코드가 없습니다");
+        toast.error('매도할 종목코드가 없습니다');
         return null;
       }
 
@@ -37,7 +37,7 @@ const useStockSell = () => {
       // 매도 수량 검증
       const sellQuantity = parseInt(quantity);
       if (isNaN(sellQuantity) || sellQuantity <= 0) {
-        toast.error("유효하지 않은 매도 수량입니다");
+        toast.error('유효하지 않은 매도 수량입니다');
         return null;
       }
 
@@ -46,12 +46,12 @@ const useStockSell = () => {
 
       // 수정: 하드코딩된 1.02 대신 설정값 사용
       const sellRate = 1 + sellSettings.sellRate / 100;
-      const sellPrice = (purchasePrice * sellRate).toFixed(2);
+      const sellPrice = (purchasePrice * sellRate)?.toFixed(2);
 
       setSelling(true);
 
       try {
-        console.log("매도 정보:", {
+        console.log('매도 정보:', {
           종목코드: cleanStockCode,
           매도수량: sellQuantity,
           매도가격: sellPrice,
@@ -67,19 +67,19 @@ const useStockSell = () => {
         });
 
         if (response) {
-          if (response.rt_cd === "0") {
+          if (response.rt_cd === '0') {
             toast.success(
               `${cleanStockCode} ${sellQuantity}주 매도 주문 완료 ($${currentPrice})`
             );
           } else {
-            toast.error(response.msg1 || "매도 주문 실패");
+            toast.error(response.msg1 || '매도 주문 실패');
           }
         }
 
         return response;
       } catch (error) {
-        console.error("매도 오류:", error);
-        toast.error(`매도 실패: ${error.message || "알 수 없는 오류"}`);
+        console.error('매도 오류:', error);
+        toast.error(`매도 실패: ${error.message || '알 수 없는 오류'}`);
         return null;
       } finally {
         setSelling(false);

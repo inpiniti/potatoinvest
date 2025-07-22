@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { Card } from "@/components/ui/card";
+import { Card } from '@/components/ui/card';
 
-import { ArrowDown, ArrowUp, Loader2 } from "lucide-react"; // 추가: 로딩 아이콘
+import { ArrowDown, ArrowUp, Loader2 } from 'lucide-react'; // 추가: 로딩 아이콘
 
-import useApi from "@/hooks/useApi";
-import useAccount from "@/hooks/useAccount";
-import useAi from "@/hooks/useAi"; // AI 훅 추가
-import aiModels from "@/json/ai_models.json"; // AI 모델 데이터 추가
+import useApi from '@/hooks/useApi';
+import useAccount from '@/hooks/useAccount';
+import useAi from '@/hooks/useAi'; // AI 훅 추가
+import aiModels from '@/json/ai_models.json'; // AI 모델 데이터 추가
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import useTrading from "@/hooks/useTrading";
-import { Button } from "@/components/ui/button";
+import useTrading from '@/hooks/useTrading';
+import { Button } from '@/components/ui/button';
 
-import StockCard from "./StockCard"; // StockCard 컴포넌트 임포트
+import StockCard from './StockCard'; // StockCard 컴포넌트 임포트
 
 const Buy = () => {
   const api = useApi();
@@ -30,7 +30,7 @@ const Buy = () => {
   const [models, setModels] = useState([]); // AI 모델 상태
 
   // 정렬 상태 추가
-  const [sortOrder, setSortOrder] = useState("desc"); // 'asc' 또는 'desc'
+  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' 또는 'desc'
 
   // 환율 상태 추가
   const [exchangeRate, setExchangeRate] = useState(1350); // 기본값 설정 (1 USD = 1350 KRW)
@@ -82,7 +82,7 @@ const Buy = () => {
 
       setPredictions(최종분석데이터);
     } catch (error) {
-      console.error("예측 중 오류:", error);
+      console.error('예측 중 오류:', error);
     } finally {
       setPredictionsLoading(false);
     }
@@ -100,7 +100,7 @@ const Buy = () => {
       // 실제 API 호출 대신 임시로 설정
       setExchangeRate(1500); // 1 USD = 1350 KRW (예시)
     } catch (error) {
-      console.error("환율 정보 가져오기 실패:", error);
+      console.error('환율 정보 가져오기 실패:', error);
       // 오류 시 기본값 사용
       setExchangeRate(1500);
     }
@@ -117,10 +117,10 @@ const Buy = () => {
         const payload = {
           CANO: cano,
           ACNT_PRDT_CD: acntPrdtCd,
-          OVRS_EXCG_CD: "NASD",
-          TR_CRCY_CD: "USD",
-          CTX_AREA_FK200: "",
-          CTX_AREA_NK200: "",
+          OVRS_EXCG_CD: 'NASD',
+          TR_CRCY_CD: 'USD',
+          CTX_AREA_FK200: '',
+          CTX_AREA_NK200: '',
         };
 
         const response = await api.trading.inquireBalance(payload);
@@ -129,7 +129,7 @@ const Buy = () => {
         setList(data.output1 || []);
       }
     } catch (error) {
-      console.error("보유종목 조회 실패:", error);
+      console.error('보유종목 조회 실패:', error);
     } finally {
       setLoading(false); // 로딩 종료
     }
@@ -144,7 +144,7 @@ const Buy = () => {
       const data = await 미체결내역();
       set미체결리스트(data.output || []);
     } catch (error) {
-      console.error("미체결 내역 조회 실패:", error);
+      console.error('미체결 내역 조회 실패:', error);
     }
   };
 
@@ -180,7 +180,7 @@ const Buy = () => {
         const aValue = Number(a.evlu_pfls_rt);
         const bValue = Number(b.evlu_pfls_rt);
 
-        if (sortOrder === "asc") {
+        if (sortOrder === 'asc') {
           return aValue - bValue; // 오름차순: 손실 -> 수익
         } else {
           return bValue - aValue; // 내림차순: 수익 -> 손실
@@ -204,13 +204,13 @@ const Buy = () => {
 
   // 화폐 단위 변환 함수 추가
   const formatCurrency = useCallback(
-    (value, currency = "USD") => {
+    (value, currency = 'USD') => {
       const numValue = Number(value);
-      if (isNaN(numValue)) return "0.00";
+      if (isNaN(numValue)) return '0.00';
 
-      if (currency === "USD") {
-        return `$${numValue.toFixed(2)}`;
-      } else if (currency === "KRW") {
+      if (currency === 'USD') {
+        return `$${numValue?.toFixed(2)}`;
+      } else if (currency === 'KRW') {
         return `₩${Math.round(numValue * exchangeRate).toLocaleString()}`;
       }
     },
@@ -272,7 +272,7 @@ const Buy = () => {
               onClick={() => setShowKRW(!showKRW)}
               className="text-xs"
             >
-              {showKRW ? "원화 숨기기" : "원화 표시"}
+              {showKRW ? '원화 숨기기' : '원화 표시'}
             </Button>
             <Button
               variant="outline"
@@ -296,7 +296,7 @@ const Buy = () => {
                 {formatCurrency(portfolioSummary.totalInvestment)}
                 {showKRW && (
                   <div className="text-sm font-medium text-neutral-500 mt-1">
-                    {formatCurrency(portfolioSummary.totalInvestment, "KRW")}
+                    {formatCurrency(portfolioSummary.totalInvestment, 'KRW')}
                   </div>
                 )}
               </p>
@@ -308,14 +308,14 @@ const Buy = () => {
               <p
                 className={`text-xl font-bold ${
                   portfolioSummary.totalProfit > 0
-                    ? "text-red-500"
-                    : "text-blue-500"
+                    ? 'text-red-500'
+                    : 'text-blue-500'
                 }`}
               >
                 {formatCurrency(portfolioSummary.totalProfit)}
                 {showKRW && (
                   <div className="text-sm font-medium text-neutral-500 mt-1">
-                    {formatCurrency(portfolioSummary.totalProfit, "KRW")}
+                    {formatCurrency(portfolioSummary.totalProfit, 'KRW')}
                   </div>
                 )}
               </p>
@@ -327,11 +327,11 @@ const Buy = () => {
               <p
                 className={`text-xl font-bold ${
                   portfolioSummary.profitRate > 0
-                    ? "text-red-500"
-                    : "text-blue-500"
+                    ? 'text-red-500'
+                    : 'text-blue-500'
                 }`}
               >
-                {portfolioSummary.profitRate.toFixed(2)}%
+                {portfolioSummary.profitRate?.toFixed(2)}%
               </p>
             </div>
           </div>
@@ -345,12 +345,12 @@ const Buy = () => {
           size="sm"
           onClick={setSortOrder.bind(
             null,
-            sortOrder === "asc" ? "desc" : "asc"
+            sortOrder === 'asc' ? 'desc' : 'asc'
           )}
           className="flex items-center gap-2"
         >
           평가손익
-          {sortOrder === "asc" ? (
+          {sortOrder === 'asc' ? (
             <ArrowUp className="h-4 w-4" />
           ) : (
             <ArrowDown className="h-4 w-4" />

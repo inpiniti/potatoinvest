@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell } from 'recharts';
 
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
-import dayjs from "dayjs";
-import useQuotations from "@/hooks/useQuotations";
-import { useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/chart';
+import dayjs from 'dayjs';
+import useQuotations from '@/hooks/useQuotations';
+import { useEffect, useMemo, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // 종목 차트 컴포넌트
 const StockChart = ({ ticker }) => {
@@ -29,7 +29,7 @@ const StockChart = ({ ticker }) => {
   //       const price = lastPrice + change;
   //       data.push({
   //         date: `${i + 1}일`,
-  //         price: parseFloat(price.toFixed(2)),
+  //         price: parseFloat(price?.toFixed(2)),
   //         volume: Math.floor(Math.random() * 1000) + 500,
   //       });
   //     }
@@ -42,18 +42,18 @@ const StockChart = ({ ticker }) => {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const [구분, set구분] = useState("0"); // 0: 일봉, 1: 주봉, 2: 월봉
-  const [수정주가반영여부, set수정주가반영여부] = useState("0"); // 0: 수정주가 미반영, 1: 수정주가 반영
-  const [displayOption, setDisplayOption] = useState("clos"); // 표시할 데이터: clos(종가), rate(등락률), tvol(거래량)
+  const [구분, set구분] = useState('0'); // 0: 일봉, 1: 주봉, 2: 월봉
+  const [수정주가반영여부, set수정주가반영여부] = useState('0'); // 0: 수정주가 미반영, 1: 수정주가 반영
+  const [displayOption, setDisplayOption] = useState('clos'); // 표시할 데이터: clos(종가), rate(등락률), tvol(거래량)
 
   // 데이터 전처리 - 차트 데이터를 숫자로 변환
   const processedChartData = useMemo(() => {
     return (chartData || []).map((item) => ({
       ...item,
       clos: parseFloat(item.clos || 0),
-      rate: parseFloat((item.rate || "0").replace("+", "").replace("-", "-")),
+      rate: parseFloat((item.rate || '0').replace('+', '').replace('-', '-')),
       tvol: parseInt(item.tvol || 0, 10),
-      isPositive: item.sign === "2", // 상승인 경우 true
+      isPositive: item.sign === '2', // 상승인 경우 true
     }));
   }, [chartData]);
 
@@ -62,7 +62,7 @@ const StockChart = ({ ticker }) => {
     if (processedChartData.length === 0) return [0, 0];
 
     switch (displayOption) {
-      case "clos": {
+      case 'clos': {
         // 종가는 최소값과 최대값에 약간의 여백을 추가
         const values = processedChartData.map((d) => d.clos);
         const min = Math.min(...values);
@@ -70,7 +70,7 @@ const StockChart = ({ ticker }) => {
         const padding = (max - min) * 0.1; // 10% 여백
         return [Math.max(0, min - padding), max + padding];
       }
-      case "rate": {
+      case 'rate': {
         // 등락률은 양수/음수 범위를 고려
         const values = processedChartData.map((d) => d.rate);
         const min = Math.min(...values);
@@ -80,14 +80,14 @@ const StockChart = ({ ticker }) => {
         const padding = absMax * 0.1; // 10% 여백
         return [-absMax - padding, absMax + padding];
       }
-      case "tvol": {
+      case 'tvol': {
         // 거래량은 0부터 최대값까지 (하한은 항상 0)
         const values = processedChartData.map((d) => d.tvol);
         const max = Math.max(...values);
         return [0, max * 1.1]; // 10% 여백
       }
       default:
-        return ["auto", "auto"];
+        return ['auto', 'auto'];
     }
   }, [processedChartData, displayOption]);
 
@@ -105,7 +105,7 @@ const StockChart = ({ ticker }) => {
       });
       setChartData(조회데이터.slice(0, 15).reverse());
     } catch (error) {
-      console.error("차트 데이터 조회 오류:", error);
+      console.error('차트 데이터 조회 오류:', error);
     } finally {
       setLoading(false);
     }
@@ -128,46 +128,46 @@ const StockChart = ({ ticker }) => {
 
   const chartConfig = {
     clos: {
-      label: "종가",
-      color: "#a3a3a3",
+      label: '종가',
+      color: '#a3a3a3',
     },
     tvol: {
-      label: "거래량",
-      color: "#6366f1",
+      label: '거래량',
+      color: '#6366f1',
     },
     rate: {
-      label: "등락률",
-      color: "#a3a3a3",
+      label: '등락률',
+      color: '#a3a3a3',
     },
   };
 
   // 주기 선택 옵션
   const periodOptions = [
-    { value: "0", label: "일봉" },
-    { value: "1", label: "주봉" },
-    { value: "2", label: "월봉" },
+    { value: '0', label: '일봉' },
+    { value: '1', label: '주봉' },
+    { value: '2', label: '월봉' },
   ];
 
   // 표시 데이터 선택 옵션
   const displayOptions = [
-    { value: "clos", label: "종가" },
-    { value: "rate", label: "등락률" },
-    { value: "tvol", label: "거래량" },
+    { value: 'clos', label: '종가' },
+    { value: 'rate', label: '등락률' },
+    { value: 'tvol', label: '거래량' },
   ];
 
   // 표시 데이터에 따른 Y축 포맷
   const getYAxisTickFormatter = () => {
     switch (displayOption) {
-      case "clos":
-        return (value) => `$${value.toFixed(2)}`;
-      case "rate":
+      case 'clos':
+        return (value) => `$${value?.toFixed(2)}`;
+      case 'rate':
         return (value) => `${value}%`;
-      case "tvol":
+      case 'tvol':
         return (value) =>
           value >= 1000000
-            ? `${(value / 1000000).toFixed(1)}M`
+            ? `${(value / 1000000)?.toFixed(1)}M`
             : value >= 1000
-            ? `${(value / 1000).toFixed(0)}K`
+            ? `${(value / 1000)?.toFixed(0)}K`
             : value;
       default:
         return (value) => value;
@@ -177,11 +177,11 @@ const StockChart = ({ ticker }) => {
   // 데이터 항목에 따른 값 판단
   const isPositiveValue = (item) => {
     switch (displayOption) {
-      case "rate":
+      case 'rate':
         return parseFloat(item.rate) >= 0;
-      case "clos":
+      case 'clos':
         return parseFloat(item.rate) >= 0;
-      case "tvol":
+      case 'tvol':
         // 거래량은 항상 양수이므로 true 반환
         return true;
       default:
@@ -218,9 +218,9 @@ const StockChart = ({ ticker }) => {
           <div className="flex items-center gap-2">
             <Switch
               id="adjust-price"
-              checked={수정주가반영여부 === "1"}
+              checked={수정주가반영여부 === '1'}
               onCheckedChange={(checked) =>
-                set수정주가반영여부(checked ? "1" : "0")
+                set수정주가반영여부(checked ? '1' : '0')
               }
             />
             <Label htmlFor="adjust-price" className="text-xs">
@@ -256,7 +256,7 @@ const StockChart = ({ ticker }) => {
           disabled={loading}
           className="h-7 text-xs"
         >
-          {loading ? "로딩중..." : "새로고침"}
+          {loading ? '로딩중...' : '새로고침'}
         </Button>
       </div>
 
@@ -268,7 +268,7 @@ const StockChart = ({ ticker }) => {
             tickLine={false}
             tickMargin={10}
             axisLine={false}
-            tickFormatter={(value) => dayjs(value).format("MM/DD")}
+            tickFormatter={(value) => dayjs(value).format('MM/DD')}
           />
           <YAxis
             tickLine={false}
@@ -285,11 +285,11 @@ const StockChart = ({ ticker }) => {
                 key={`cell-${index}`}
                 fill={
                   // 표시 항목에 따라 다른 색상 로직 적용
-                  displayOption === "tvol"
-                    ? "#6366f1" // 거래량은 항상 같은 색상
+                  displayOption === 'tvol'
+                    ? '#6366f1' // 거래량은 항상 같은 색상
                     : isPositiveValue(item)
-                    ? "#ef4444" // 양수/상승이면 빨간색
-                    : "#3b82f6" // 음수/하락이면 파란색
+                    ? '#ef4444' // 양수/상승이면 빨간색
+                    : '#3b82f6' // 음수/하락이면 파란색
                 }
               />
             ))}

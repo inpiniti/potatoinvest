@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Separator } from "@/components/ui/separator";
+import { Separator } from '@/components/ui/separator';
 import {
   Wallet, // 잔고에 적합한 지갑 아이콘
   CheckSquare, // 체결에 적합한 체크 아이콘
@@ -15,8 +15,8 @@ import {
   Settings,
   Play,
   RotateCw,
-} from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+} from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   Card,
@@ -24,12 +24,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 import {
   Sheet,
@@ -40,82 +40,82 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
+} from '@/components/ui/sheet';
 
-import { Toaster } from "sonner";
+import { Toaster } from 'sonner';
 
-import useToken from "@/hooks/useToken"; // 토큰 유효성 검사 훅
+import useToken from '@/hooks/useToken'; // 토큰 유효성 검사 훅
 
-import useAnalysis from "./hooks/useAnalysis"; // 분석 데이터 훅
-import useHolding from "./hooks/useHolding"; // 보유 종목 데이터 훅
-import useCnnl from "./hooks/useCnnl"; // 체결 데이터 훅
-import useProfit from "./hooks/useProfit"; // 기간 손익 데이터 훅
+import useAnalysis from './hooks/useAnalysis'; // 분석 데이터 훅
+import useHolding from './hooks/useHolding'; // 보유 종목 데이터 훅
+import useCnnl from './hooks/useCnnl'; // 체결 데이터 훅
+import useProfit from './hooks/useProfit'; // 기간 손익 데이터 훅
 
-import useGemini from "./hooks/useGemini"; // 제미니 관련 훅
-import useGeminiNews from "./hooks/useGeminiNews"; // 제미니 뉴스 훅
-import useGeminiTechnical from "./hooks/useGeminiTechnical"; // 제미니 기술적 분석 훅
-import useGeminiFinancial from "./hooks/useGeminiFinancial"; // 제미니 재무 데이터 훅
+import useGemini from './hooks/useGemini'; // 제미니 관련 훅
+import useGeminiNews from './hooks/useGeminiNews'; // 제미니 뉴스 훅
+import useGeminiTechnical from './hooks/useGeminiTechnical'; // 제미니 기술적 분석 훅
+import useGeminiFinancial from './hooks/useGeminiFinancial'; // 제미니 재무 데이터 훅
 
-import useSearchInfo from "./hooks/useSearchInfo"; // 현재가 상세 정보 훅
-import useDailyprice from "./hooks/useDailyprice"; // 기간별 시세 훅
-import usePriceDetail from "./hooks/usePriceDetail"; // 현제가 상세 훅
-import useNewsCommunity from "./hooks/useNewsCommunity"; // 뉴스 및 커뮤니티 훅
-import useExchangeRate from "./hooks/useExchangeRate"; // 환율 훅
+import useSearchInfo from './hooks/useSearchInfo'; // 현재가 상세 정보 훅
+import useDailyprice from './hooks/useDailyprice'; // 기간별 시세 훅
+import usePriceDetail from './hooks/usePriceDetail'; // 현제가 상세 훅
+import useNewsCommunity from './hooks/useNewsCommunity'; // 뉴스 및 커뮤니티 훅
+import useExchangeRate from './hooks/useExchangeRate'; // 환율 훅
 
-import useBuy from "./hooks/useBuy"; // 매수 훅
+import useBuy from './hooks/useBuy'; // 매수 훅
 
-import SettingsButton from "../page/log/components/header/buttons/SettingsButton";
-import AutoPlayToggle from "../page/log/components/header/navigation/AutoPlayToggle";
-import BuyToggle from "../page/log/components/header/navigation/BuyToggle";
-import SellToggle from "../page/log/components/header/navigation/SellToggle";
+import SettingsButton from '../page/log/components/header/buttons/SettingsButton';
+import AutoPlayToggle from '../page/log/components/header/navigation/AutoPlayToggle';
+import BuyToggle from '../page/log/components/header/navigation/BuyToggle';
+import SellToggle from '../page/log/components/header/navigation/SellToggle';
 
-import PageWrap from "./components/PageWrap";
-import Header from "./components/Header";
-import Aside from "./components/Aside";
-import AsideItem from "./components/AsideItem";
-import Main from "./components/Main";
-import SectionHeader from "./components/SectionHeader";
-import SectionTitle from "./components/SectionTitle";
-import SectionTitleItem from "./components/SectionTitleItem";
-import LoginButton from "./components/LoginButton";
-import { ChartAreaDefault } from "./components/ChartAreaDefault";
-import Buy from "./components/Buy";
+import PageWrap from './components/PageWrap';
+import Header from './components/Header';
+import Aside from './components/Aside';
+import AsideItem from './components/AsideItem';
+import Main from './components/Main';
+import SectionHeader from './components/SectionHeader';
+import SectionTitle from './components/SectionTitle';
+import SectionTitleItem from './components/SectionTitleItem';
+import LoginButton from './components/LoginButton';
+import { ChartAreaDefault } from './components/ChartAreaDefault';
+import Buy from './components/Buy';
 
-import dayjs from "dayjs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getLogoUrlByCode, getLogoUrlById } from "../page/log/utils/logoUtils";
-import { DividendAnalysis } from "./components/DividendAnalysis";
-import { CashFlowAnalysis } from "./components/CashFlowAnalysis";
+import dayjs from 'dayjs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { getLogoUrlByCode, getLogoUrlById } from '../page/log/utils/logoUtils';
+import { DividendAnalysis } from './components/DividendAnalysis';
+import { CashFlowAnalysis } from './components/CashFlowAnalysis';
 
 const data = {
   navMain: [
     {
-      title: "잔고",
-      url: "#",
+      title: '잔고',
+      url: '#',
       icon: Wallet,
       isActive: true,
     },
     {
-      title: "체결",
-      url: "#",
+      title: '체결',
+      url: '#',
       icon: CheckSquare,
       isActive: false,
     },
     {
-      title: "미체결",
-      url: "#",
+      title: '미체결',
+      url: '#',
       icon: Clock,
       isActive: false,
     },
     {
-      title: "기간손익",
-      url: "#",
+      title: '기간손익',
+      url: '#',
       icon: LineChart,
       isActive: false,
     },
     {
-      title: "분석",
-      url: "#",
+      title: '분석',
+      url: '#',
       icon: BarChart3,
       isActive: false,
     },
@@ -123,11 +123,11 @@ const data = {
 };
 
 const KEY_MAP = {
-  잔고: "ovrs_pdno",
-  체결: "pdno",
-  미체결: "pdno",
-  기간손익: "ovrs_pdno",
-  분석: "name",
+  잔고: 'ovrs_pdno',
+  체결: 'pdno',
+  미체결: 'pdno',
+  기간손익: 'ovrs_pdno',
+  분석: 'name',
 };
 
 export default function DashBoardPage() {
@@ -215,7 +215,7 @@ export default function DashBoardPage() {
   const handleMenuChange = (newActive) => {
     setActiveItem(newActive);
     switch (newActive?.title) {
-      case "잔고":
+      case '잔고':
         setList(
           holdingData.map((item) => ({
             ...item,
@@ -223,16 +223,16 @@ export default function DashBoardPage() {
               (cnnlItem) => cnnlItem?.pdno === item.ovrs_pdno
             ),
             isNotCnnl: cnnlData
-              ?.filter((item) => item?.prcs_stat_name !== "완료")
+              ?.filter((item) => item?.prcs_stat_name !== '완료')
               .some((cnnlItem) => cnnlItem?.pdno === item.ovrs_pdno),
           }))
         );
         break;
-      case "미체결":
-        setList(cnnlData?.filter((item) => item?.prcs_stat_name !== "완료"));
+      case '미체결':
+        setList(cnnlData?.filter((item) => item?.prcs_stat_name !== '완료'));
         break;
-      case "분석":
-        console.log("analysisData[0]", analysisData[0]);
+      case '분석':
+        console.log('analysisData[0]', analysisData[0]);
 
         setList(
           analysisData
@@ -252,10 +252,10 @@ export default function DashBoardPage() {
             })
         );
         break;
-      case "체결":
-        setList(cnnlData?.filter((item) => item?.prcs_stat_name === "완료"));
+      case '체결':
+        setList(cnnlData?.filter((item) => item?.prcs_stat_name === '완료'));
         break;
-      case "기간손익":
+      case '기간손익':
         setList(profitData);
         break;
       default:
@@ -268,20 +268,20 @@ export default function DashBoardPage() {
 
   // current 값이 변경될 때 스크롤 이동
   useEffect(() => {
-    console.log("useEffect current");
+    console.log('useEffect current');
     if (asideScrollContainerRef.current) {
-      console.log("useEffect current asideScrollContainerRef.current");
+      console.log('useEffect current asideScrollContainerRef.current');
       const activeItemElement = asideScrollContainerRef.current.querySelector(
         `[data-index="${current}"]`
       );
-      console.log("useEffect current activeItemElement");
+      console.log('useEffect current activeItemElement');
       if (activeItemElement) {
-        console.log("useEffect current activeItemElement 2");
+        console.log('useEffect current activeItemElement 2');
         activeItemElement.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
+          behavior: 'smooth',
+          block: 'start',
         });
-        console.log("activeItemElement.scrollIntoView");
+        console.log('activeItemElement.scrollIntoView');
       }
     }
   }, [current]);
@@ -447,7 +447,7 @@ export default function DashBoardPage() {
 
       // 기간손익을 제외한 메뉴만 필터링
       const availableMenus = data.navMain.filter(
-        (item) => !["기간손익", "체결"].includes(item.title)
+        (item) => !['기간손익', '체결'].includes(item.title)
       );
 
       const currentIndex = availableMenus.findIndex(
@@ -509,7 +509,7 @@ export default function DashBoardPage() {
   const formatElapsedTime = (seconds) => {
     const mins = Math.floor(seconds / 35);
     const secs = Math.floor(seconds % 35);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -524,7 +524,7 @@ export default function DashBoardPage() {
         activeItem={activeItem}
         length={list?.length || 0}
         subItems={
-          activeItem?.title === "기간손익" && (
+          activeItem?.title === '기간손익' && (
             <Tabs
               value={profitType}
               onValueChange={setProfitType}
@@ -539,22 +539,22 @@ export default function DashBoardPage() {
           )
         }
       >
-        {activeItem?.title === "기간손익" && (
+        {activeItem?.title === '기간손익' && (
           <div className="flex">
             <div className="flex flex-col text-xs flex-1">
               <div className="text-neutral-500">총 매매손익</div>
               <div className="flex items-center gap-1">
                 <div className="font-bold text-lg">
                   {Number(
-                    Number(totalProfit?.totalProfit).toFixed(0)
-                  ).toLocaleString("ko-KR")}
+                    Number(totalProfit?.totalProfit)?.toFixed(0)
+                  ).toLocaleString('ko-KR')}
                 </div>
                 (
                 {(
                   (Number(totalProfit?.totalProfit) /
                     Number(totalProfit?.totalInvestment)) *
                   100
-                ).toFixed(1)}
+                )?.toFixed(1)}
                 %)
               </div>
             </div>
@@ -563,22 +563,22 @@ export default function DashBoardPage() {
               <div className="flex items-center gap-1">
                 <div className="font-bold text-lg">
                   {Number(
-                    Number(totalProfit?.totalInvestment).toFixed(0)
-                  ).toLocaleString("ko-KR")}
+                    Number(totalProfit?.totalInvestment)?.toFixed(0)
+                  ).toLocaleString('ko-KR')}
                 </div>
               </div>
             </div>
           </div>
         )}
-        {activeItem?.title === "잔고" && (
+        {activeItem?.title === '잔고' && (
           <div className="flex">
             <div className="flex flex-col text-xs flex-1">
               <div className="text-neutral-500">평가금액</div>
               <div className="flex items-center gap-1">
                 <div className="font-bold text-lg">
                   {Number(
-                    Number(holdingData2?.tot_evlu_pfls_amt * krw).toFixed(0)
-                  ).toLocaleString("ko-KR")}
+                    Number(holdingData2?.tot_evlu_pfls_amt * krw)?.toFixed(0)
+                  ).toLocaleString('ko-KR')}
                 </div>
               </div>
             </div>
@@ -587,10 +587,10 @@ export default function DashBoardPage() {
               <div className="flex items-center gap-1">
                 <div className="font-bold text-lg">
                   {Number(
-                    Number(holdingData2?.ovrs_tot_pfls * krw).toFixed(0)
-                  ).toLocaleString("ko-KR")}
+                    Number(holdingData2?.ovrs_tot_pfls * krw)?.toFixed(0)
+                  ).toLocaleString('ko-KR')}
                 </div>
-                ({Number(holdingData2?.tot_pftrt).toFixed(1)}
+                ({Number(holdingData2?.tot_pftrt)?.toFixed(1)}
                 %)
               </div>
             </div>
@@ -670,7 +670,7 @@ export default function DashBoardPage() {
         ) : (
           <>
             {list?.map((item, index) => {
-              if (activeItem?.title === "잔고") {
+              if (activeItem?.title === '잔고') {
                 return (
                   <AsideItem
                     key={index}
@@ -679,11 +679,11 @@ export default function DashBoardPage() {
                     title={`${item?.ovrs_pdno} ${item?.ovrs_item_name}`}
                     date={`${item?.evlu_pfls_rt}%`}
                     info={`${Number(
-                      (Number(item?.frcr_evlu_pfls_amt) * krw).toFixed(0)
-                    ).toLocaleString("ko-KR")}원`}
-                    // description={`${Number(item?.pchs_avg_pric).toFixed(
+                      (Number(item?.frcr_evlu_pfls_amt) * krw)?.toFixed(0)
+                    ).toLocaleString('ko-KR')}원`}
+                    // description={`${Number(item?.pchs_avg_pric)?.toFixed(
                     //   2
-                    // )} > ${Number(item?.now_pric2).toFixed(2)} (${Number(
+                    // )} > ${Number(item?.now_pric2)?.toFixed(2)} (${Number(
                     //   item?.ovrs_cblc_qty
                     // ).toLocaleString("ko-KR")})`}
                     onClick={() => setCurrent(index)}
@@ -691,7 +691,7 @@ export default function DashBoardPage() {
                     badge={[false, item?.isCnnl, item?.isNotCnnl]}
                   />
                 );
-              } else if (activeItem?.title === "미체결") {
+              } else if (activeItem?.title === '미체결') {
                 return (
                   <AsideItem
                     key={index}
@@ -699,21 +699,21 @@ export default function DashBoardPage() {
                     logoUrl={getLogoUrlByCode(item?.pdno)}
                     title={`${item?.prdt_name} (${item?.pdno})`}
                     date={`${item?.sll_buy_dvsn_cd_name}`}
-                    info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
+                    info={`${Number(item?.ft_ord_unpr3)?.toFixed(2)} (${
                       item?.ft_ccld_qty
                     } / ${item?.ft_ord_qty}) (${Number(
                       (
                         Number(item?.ft_ord_unpr3) *
                         Number(item?.ft_ord_qty) *
                         krw
-                      ).toFixed(0)
-                    ).toLocaleString("ko-KR")}원)`}
+                      )?.toFixed(0)
+                    ).toLocaleString('ko-KR')}원)`}
                     description={`${item?.prcs_stat_name}`}
                     onClick={() => setCurrent(index)}
                     active={current === index}
                   />
                 );
-              } else if (activeItem?.title === "체결") {
+              } else if (activeItem?.title === '체결') {
                 return (
                   <AsideItem
                     key={index}
@@ -721,114 +721,114 @@ export default function DashBoardPage() {
                     logoUrl={getLogoUrlByCode(item?.pdno)}
                     title={`${item?.prdt_name} (${item?.pdno})`}
                     date={`${item?.sll_buy_dvsn_cd_name}`}
-                    info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
+                    info={`${Number(item?.ft_ord_unpr3)?.toFixed(2)} (${
                       item?.ft_ccld_qty
                     } / ${item?.ft_ord_qty}) (${Number(
                       (
                         Number(item?.ft_ord_unpr3) *
                         Number(item?.ft_ord_qty) *
                         krw
-                      ).toFixed(0)
-                    ).toLocaleString("ko-KR")}원)`}
+                      )?.toFixed(0)
+                    ).toLocaleString('ko-KR')}원)`}
                     description={`${item?.prcs_stat_name}`}
                     onClick={() => setCurrent(index)}
                     active={current === index}
                   />
                 );
-              } else if (activeItem?.title === "기간손익") {
-                if (profitType === "individual") {
+              } else if (activeItem?.title === '기간손익') {
+                if (profitType === 'individual') {
                   return (
                     <AsideItem
                       key={index}
                       data-index={index}
                       logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
                       title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
-                      date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
+                      date={`${dayjs(item?.trad_day).format('YYYY-MM-DD')}`}
                       info={`${Number(
-                        Number(item?.ovrs_rlzt_pfls_amt).toFixed(0)
-                      ).toLocaleString("ko-KR")}원 (${Number(
+                        Number(item?.ovrs_rlzt_pfls_amt)?.toFixed(0)
+                      ).toLocaleString('ko-KR')}원 (${Number(
                         item?.pftrt
-                      ).toFixed(2)})`}
-                      description={`${Number(item?.pchs_avg_pric).toFixed(
+                      )?.toFixed(2)})`}
+                      description={`${Number(item?.pchs_avg_pric)?.toFixed(
                         2
-                      )} > ${Number(item?.avg_sll_unpr).toFixed(2)}`}
+                      )} > ${Number(item?.avg_sll_unpr)?.toFixed(2)}`}
                       onClick={() => setCurrent(index)}
                       active={current === index}
                     />
                   );
-                } else if (profitType === "daily") {
+                } else if (profitType === 'daily') {
                   return (
                     <AsideItem
                       key={index}
                       data-index={index}
-                      title={dayjs(item?.trad_day).format("YYYY-MM-DD")}
+                      title={dayjs(item?.trad_day).format('YYYY-MM-DD')}
                       date=""
                       info={
-                        "손익 : " +
+                        '손익 : ' +
                         Number(
-                          Number(item?.totalProfit).toFixed(0)
-                        ).toLocaleString("ko-KR") +
-                        "원 " +
+                          Number(item?.totalProfit)?.toFixed(0)
+                        ).toLocaleString('ko-KR') +
+                        '원 ' +
                         `(${(
                           (Number(item?.totalProfit) /
                             Number(item?.totalInvestment)) *
                           100
-                        ).toFixed(2)}%)`
+                        )?.toFixed(2)}%)`
                       }
                       description={
-                        "판매대금 : " +
+                        '판매대금 : ' +
                         Number(
-                          Number(item.totalInvestment).toFixed(0)
-                        ).toLocaleString("ko-KR") +
-                        "원"
+                          Number(item.totalInvestment)?.toFixed(0)
+                        ).toLocaleString('ko-KR') +
+                        '원'
                       }
                     />
                   );
-                } else if (profitType === "monthly") {
+                } else if (profitType === 'monthly') {
                   return (
                     <AsideItem
                       key={index}
                       data-index={index}
-                      title={dayjs(item?.yearMonth).format("YYYY년 MM월")}
+                      title={dayjs(item?.yearMonth).format('YYYY년 MM월')}
                       date={`${item?.tradingDays?.length}일간`}
                       info={
-                        "손익 : " +
+                        '손익 : ' +
                         Number(
-                          Number(item?.totalProfit).toFixed(0)
-                        ).toLocaleString("ko-KR") +
-                        "원 " +
+                          Number(item?.totalProfit)?.toFixed(0)
+                        ).toLocaleString('ko-KR') +
+                        '원 ' +
                         `(${(
                           (Number(item?.totalProfit) /
                             Number(item?.totalInvestment)) *
                           100
-                        ).toFixed(2)}%)`
+                        )?.toFixed(2)}%)`
                       }
                       description={
-                        "판매대금 : " +
+                        '판매대금 : ' +
                         Number(
-                          Number(item.totalInvestment).toFixed(0)
-                        ).toLocaleString("ko-KR") +
-                        "원"
+                          Number(item.totalInvestment)?.toFixed(0)
+                        ).toLocaleString('ko-KR') +
+                        '원'
                       }
                     />
                   );
                 }
-              } else if (activeItem?.title === "분석") {
+              } else if (activeItem?.title === '분석') {
                 return (
                   <AsideItem
                     key={index}
                     data-index={index}
                     logoUrl={getLogoUrlById(item?.logoid)}
                     title={`${item?.description} (${item?.name})`}
-                    date={`${Number(item?.perf_1_m).toFixed(2)}%`}
-                    info={`${item?.close} (${Number(item?.change).toFixed(
+                    date={`${Number(item?.perf_1_m)?.toFixed(2)}%`}
+                    info={`${item?.close} (${Number(item?.change)?.toFixed(
                       2
                     )}%)`}
-                    // description={`${Number(item?.perf_6_m).toFixed(
+                    // description={`${Number(item?.perf_6_m)?.toFixed(
                     //   2
-                    // )}% > ${Number(item?.perf_3_m).toFixed(2)}% > ${Number(
+                    // )}% > ${Number(item?.perf_3_m)?.toFixed(2)}% > ${Number(
                     //   item?.perf_1_m
-                    // ).toFixed(2)}% > ${Number(item?.perf_w).toFixed(2)}%`}
+                    // )?.toFixed(2)}% > ${Number(item?.perf_w)?.toFixed(2)}%`}
                     onClick={() => setCurrent(index)}
                     active={current === index}
                     badge={[item.isHolding, item.isCnnl, null, item.예측결과]}
@@ -951,91 +951,91 @@ export default function DashBoardPage() {
           analysisData={list}
         >
           {list?.map((item, index) => {
-            if (activeItem?.title === "잔고") {
+            if (activeItem?.title === '잔고') {
               return (
                 <SectionTitleItem
                   key={index}
                   logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
                   title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
                   date={`${item?.evlu_pfls_rt}%`}
-                  info={`${Number(item?.frcr_pchs_amt1).toFixed(2)} > ${Number(
+                  info={`${Number(item?.frcr_pchs_amt1)?.toFixed(2)} > ${Number(
                     item?.ovrs_stck_evlu_amt
-                  ).toFixed(2)} (${Number(
-                    (Number(item?.frcr_evlu_pfls_amt) * krw).toFixed(0)
-                  ).toLocaleString("ko-KR")}원)`}
-                  description={`${Number(item?.pchs_avg_pric).toFixed(
+                  )?.toFixed(2)} (${Number(
+                    (Number(item?.frcr_evlu_pfls_amt) * krw)?.toFixed(0)
+                  ).toLocaleString('ko-KR')}원)`}
+                  description={`${Number(item?.pchs_avg_pric)?.toFixed(
                     2
-                  )} > ${Number(item?.now_pric2).toFixed(2)} (${Number(
+                  )} > ${Number(item?.now_pric2)?.toFixed(2)} (${Number(
                     item?.ovrs_cblc_qty
-                  ).toLocaleString("ko-KR")})`}
+                  ).toLocaleString('ko-KR')})`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === "미체결") {
+            } else if (activeItem?.title === '미체결') {
               return (
                 <SectionTitleItem
                   key={index}
                   logoUrl={getLogoUrlByCode(item?.pdno)}
                   title={`${item?.prdt_name} (${item?.pdno})`}
                   date={`${item?.sll_buy_dvsn_cd_name}`}
-                  info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
+                  info={`${Number(item?.ft_ord_unpr3)?.toFixed(2)} (${
                     item?.ft_ccld_qty
                   } / ${item?.ft_ord_qty}) (${(
                     Number(item?.ft_ord_unpr3) *
                     Number(item?.ft_ord_qty) *
                     krw
-                  ).toLocaleString("ko-KR")}원)`}
+                  ).toLocaleString('ko-KR')}원)`}
                   description={`${item?.prcs_stat_name}`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === "체결") {
+            } else if (activeItem?.title === '체결') {
               return (
                 <SectionTitleItem
                   key={index}
                   logoUrl={getLogoUrlByCode(item?.pdno)}
                   title={`${item?.prdt_name} (${item?.pdno})`}
                   date={`${item?.sll_buy_dvsn_cd_name}`}
-                  info={`${Number(item?.ft_ord_unpr3).toFixed(2)} (${
+                  info={`${Number(item?.ft_ord_unpr3)?.toFixed(2)} (${
                     item?.ft_ccld_qty
                   } / ${item?.ft_ord_qty}) (${(
                     Number(item?.ft_ord_unpr3) *
                     Number(item?.ft_ord_qty) *
                     krw
-                  ).toLocaleString("ko-KR")}원)`}
+                  ).toLocaleString('ko-KR')}원)`}
                   description={`${item?.prcs_stat_name}`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === "기간손익") {
+            } else if (activeItem?.title === '기간손익') {
               return (
                 <SectionTitleItem
                   key={index}
                   logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
                   title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
-                  date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
-                  info={`${Number(item?.ovrs_rlzt_pfls_amt).toFixed(
+                  date={`${dayjs(item?.trad_day).format('YYYY-MM-DD')}`}
+                  info={`${Number(item?.ovrs_rlzt_pfls_amt)?.toFixed(
                     0
-                  )}원 (${Number(item?.pftrt).toFixed(2)})`}
-                  description={`${Number(item?.pchs_avg_pric).toFixed(
+                  )}원 (${Number(item?.pftrt)?.toFixed(2)})`}
+                  description={`${Number(item?.pchs_avg_pric)?.toFixed(
                     2
-                  )} > ${Number(item?.avg_sll_unpr).toFixed(2)}`}
+                  )} > ${Number(item?.avg_sll_unpr)?.toFixed(2)}`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === "분석") {
+            } else if (activeItem?.title === '분석') {
               return (
                 <SectionTitleItem
                   key={index}
                   logoUrl={getLogoUrlById(item?.logoid)}
                   title={`${item?.description} (${item?.name})`}
-                  date={`${Number(item?.perf_1_m).toFixed(2)}%`}
-                  info={`${item?.close} (${Number(item?.change).toFixed(2)}%)`}
-                  description={`${Number(item?.perf_6_m).toFixed(
+                  date={`${Number(item?.perf_1_m)?.toFixed(2)}%`}
+                  info={`${item?.close} (${Number(item?.change)?.toFixed(2)}%)`}
+                  description={`${Number(item?.perf_6_m)?.toFixed(
                     2
-                  )}% > ${Number(item?.perf_3_m).toFixed(2)}% > ${Number(
+                  )}% > ${Number(item?.perf_3_m)?.toFixed(2)}% > ${Number(
                     item?.perf_1_m
-                  ).toFixed(2)}% > ${Number(item?.perf_w).toFixed(2)}%`}
+                  )?.toFixed(2)}% > ${Number(item?.perf_w)?.toFixed(2)}%`}
                   active={current === index}
                   badge={[item.isHolding, item.isCnnl, item.예측결과]}
                 />
@@ -1127,15 +1127,15 @@ export default function DashBoardPage() {
                       <CardContent>
                         <div className="grid grid-cols-3 gap-3">
                           {[
-                            { name: "MarketBeat", status: "analyzing" },
-                            { name: "Barchart", status: "analyzing" },
-                            { name: "TipRanks", status: "analyzing" },
-                            { name: "Zacks", status: "analyzing" },
-                            { name: "Yahoo Finance", status: "analyzing" },
-                            { name: "Seeking Alpha", status: "analyzing" },
-                            { name: "Simply Wall St", status: "analyzing" },
-                            { name: "MarketWatch", status: "analyzing" },
-                            { name: "TradingView", status: "analyzing" },
+                            { name: 'MarketBeat', status: 'analyzing' },
+                            { name: 'Barchart', status: 'analyzing' },
+                            { name: 'TipRanks', status: 'analyzing' },
+                            { name: 'Zacks', status: 'analyzing' },
+                            { name: 'Yahoo Finance', status: 'analyzing' },
+                            { name: 'Seeking Alpha', status: 'analyzing' },
+                            { name: 'Simply Wall St', status: 'analyzing' },
+                            { name: 'MarketWatch', status: 'analyzing' },
+                            { name: 'TradingView', status: 'analyzing' },
                           ].map((site, index) => (
                             <div
                               key={site.name}
@@ -1143,9 +1143,9 @@ export default function DashBoardPage() {
                             >
                               <div
                                 className={`w-2 h-2 rounded-full ${
-                                  site.status === "analyzing"
-                                    ? "bg-yellow-500 animate-pulse"
-                                    : "bg-green-500"
+                                  site.status === 'analyzing'
+                                    ? 'bg-yellow-500 animate-pulse'
+                                    : 'bg-green-500'
                                 }`}
                               ></div>
                               <span className="text-sm">{site.name}</span>
@@ -1164,28 +1164,28 @@ export default function DashBoardPage() {
                         <div className="space-y-3">
                           {[
                             {
-                              step: "1",
-                              title: "데이터 수집",
-                              desc: "각 사이트에서 최신 분석 데이터 수집",
-                              status: "progress",
+                              step: '1',
+                              title: '데이터 수집',
+                              desc: '각 사이트에서 최신 분석 데이터 수집',
+                              status: 'progress',
                             },
                             {
-                              step: "2",
-                              title: "AI 분석",
-                              desc: "제미니 AI가 수집된 데이터를 종합 분석",
-                              status: "progress",
+                              step: '2',
+                              title: 'AI 분석',
+                              desc: '제미니 AI가 수집된 데이터를 종합 분석',
+                              status: 'progress',
                             },
                             {
-                              step: "3",
-                              title: "점수 산정",
-                              desc: "1-10점 척도로 투자 의견 점수화",
-                              status: "waiting",
+                              step: '3',
+                              title: '점수 산정',
+                              desc: '1-10점 척도로 투자 의견 점수화',
+                              status: 'waiting',
                             },
                             {
-                              step: "4",
-                              title: "결과 생성",
-                              desc: "한국어 분석 리포트 생성",
-                              status: "waiting",
+                              step: '4',
+                              title: '결과 생성',
+                              desc: '한국어 분석 리포트 생성',
+                              status: 'waiting',
                             },
                           ].map((process) => (
                             <div
@@ -1194,11 +1194,11 @@ export default function DashBoardPage() {
                             >
                               <div
                                 className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                                  process.status === "progress"
-                                    ? "bg-blue-500 text-white animate-pulse"
-                                    : process.status === "complete"
-                                    ? "bg-green-500 text-white"
-                                    : "bg-gray-200 text-gray-500"
+                                  process.status === 'progress'
+                                    ? 'bg-blue-500 text-white animate-pulse'
+                                    : process.status === 'complete'
+                                    ? 'bg-green-500 text-white'
+                                    : 'bg-gray-200 text-gray-500'
                                 }`}
                               >
                                 {process.step}
@@ -1289,14 +1289,14 @@ export default function DashBoardPage() {
                             </div>
                             <div className="text-sm font-medium">
                               {geminiData.summary.averageScore >= 5
-                                ? "강력 매수"
+                                ? '강력 매수'
                                 : geminiData.summary.averageScore >= 4
-                                ? "매수"
+                                ? '매수'
                                 : geminiData.summary.averageScore >= 3
-                                ? "중립"
+                                ? '중립'
                                 : geminiData.summary.averageScore >= 2
-                                ? "매도"
-                                : "강력 매도"}
+                                ? '매도'
+                                : '강력 매도'}
                             </div>
                           </div>
 
@@ -1315,7 +1315,7 @@ export default function DashBoardPage() {
                                 평균 목표주가
                               </div>
                               <div className="text-lg font-bold text-green-600">
-                                {geminiData.summary.averageTargetPrice || "N/A"}
+                                {geminiData.summary.averageTargetPrice || 'N/A'}
                               </div>
                             </div>
                             <div className="text-center">
@@ -1323,7 +1323,7 @@ export default function DashBoardPage() {
                                 현재가 대비
                               </div>
                               <div className="text-lg font-bold text-purple-600">
-                                {geminiData.summary.targetPriceUpside || "N/A"}
+                                {geminiData.summary.targetPriceUpside || 'N/A'}
                               </div>
                             </div>
                           </div>
@@ -1380,12 +1380,12 @@ export default function DashBoardPage() {
                                     <span
                                       className={`px-2 py-1 rounded text-xs font-medium ${
                                         analysis?.score >= 4
-                                          ? "bg-green-100 text-green-800"
+                                          ? 'bg-green-100 text-green-800'
                                           : analysis?.score >= 3
-                                          ? "bg-blue-100 text-blue-800"
+                                          ? 'bg-blue-100 text-blue-800'
                                           : analysis.score >= 2
-                                          ? "bg-yellow-100 text-yellow-800"
-                                          : "bg-red-100 text-red-800"
+                                          ? 'bg-yellow-100 text-yellow-800'
+                                          : 'bg-red-100 text-red-800'
                                       }`}
                                     >
                                       {analysis.ratingText}
@@ -1399,12 +1399,12 @@ export default function DashBoardPage() {
                                       <div
                                         className={`h-2 rounded-full ${
                                           analysis?.score >= 4
-                                            ? "bg-green-500"
+                                            ? 'bg-green-500'
                                             : analysis?.score >= 3
-                                            ? "bg-blue-500"
+                                            ? 'bg-blue-500'
                                             : analysis?.score >= 2
-                                            ? "bg-yellow-500"
-                                            : "bg-red-500"
+                                            ? 'bg-yellow-500'
+                                            : 'bg-red-500'
                                         }`}
                                         style={{
                                           width: `${
@@ -1423,7 +1423,7 @@ export default function DashBoardPage() {
                                       목표주가:
                                     </span>
                                     <span className="text-sm font-medium text-green-600">
-                                      {analysis.targetPrice || "N/A"}
+                                      {analysis.targetPrice || 'N/A'}
                                     </span>
                                   </div>
                                   <div className="flex justify-between">
@@ -1463,7 +1463,7 @@ export default function DashBoardPage() {
                       </div>
                       <div className="text-sm text-red-500 mb-4">
                         {geminiData.message ||
-                          "전문가 분석 중 오류가 발생했습니다."}
+                          '전문가 분석 중 오류가 발생했습니다.'}
                       </div>
                       <div className="text-xs text-gray-500">
                         잠시 후 다시 시도해주세요.
@@ -1549,11 +1549,11 @@ export default function DashBoardPage() {
                                 <div
                                   className={`h-2 rounded-full ${
                                     geminiNewsData.overallSentiment?.score >= 4
-                                      ? "bg-green-600"
+                                      ? 'bg-green-600'
                                       : geminiNewsData.overallSentiment
                                           ?.score >= 3
-                                      ? "bg-blue-600"
-                                      : "bg-red-600"
+                                      ? 'bg-blue-600'
+                                      : 'bg-red-600'
                                   }`}
                                   style={{
                                     width: `${
@@ -1676,11 +1676,11 @@ export default function DashBoardPage() {
                                 </div>
                                 <span
                                   className={`px-2 py-1 rounded text-xs font-medium ${
-                                    news.sentiment.includes("긍정")
-                                      ? "bg-green-100 text-green-800"
-                                      : news.sentiment.includes("부정")
-                                      ? "bg-red-100 text-red-800"
-                                      : "bg-gray-100 text-gray-800"
+                                    news.sentiment.includes('긍정')
+                                      ? 'bg-green-100 text-green-800'
+                                      : news.sentiment.includes('부정')
+                                      ? 'bg-red-100 text-red-800'
+                                      : 'bg-gray-100 text-gray-800'
                                   }`}
                                 >
                                   {news.sentiment}
@@ -1703,7 +1703,7 @@ export default function DashBoardPage() {
                       </div>
                       <div className="text-sm text-red-500 mb-4">
                         {geminiNewsData.message ||
-                          "뉴스 분석 중 오류가 발생했습니다."}
+                          '뉴스 분석 중 오류가 발생했습니다.'}
                       </div>
                       <div className="text-xs text-gray-500">
                         잠시 후 다시 시도해주세요.
@@ -1789,11 +1789,11 @@ export default function DashBoardPage() {
                                   className={`h-2 rounded-full ${
                                     geminiTechnicalData.technicalScore
                                       ?.overallScore >= 4
-                                      ? "bg-green-600"
+                                      ? 'bg-green-600'
                                       : geminiTechnicalData.technicalScore
                                           ?.overallScore >= 3
-                                      ? "bg-blue-600"
-                                      : "bg-red-600"
+                                      ? 'bg-blue-600'
+                                      : 'bg-red-600'
                                   }`}
                                   style={{
                                     width: `${
@@ -1824,16 +1824,16 @@ export default function DashBoardPage() {
                                 className="text-center p-3 bg-gray-50 rounded"
                               >
                                 <div className="text-sm text-muted-foreground mb-1">
-                                  {category === "trend"
-                                    ? "추세"
-                                    : category === "momentum"
-                                    ? "모멘텀"
-                                    : category === "volatility"
-                                    ? "변동성"
-                                    : category === "volume"
-                                    ? "거래량"
-                                    : category === "support_resistance"
-                                    ? "지지/저항"
+                                  {category === 'trend'
+                                    ? '추세'
+                                    : category === 'momentum'
+                                    ? '모멘텀'
+                                    : category === 'volatility'
+                                    ? '변동성'
+                                    : category === 'volume'
+                                    ? '거래량'
+                                    : category === 'support_resistance'
+                                    ? '지지/저항'
                                     : category}
                                 </div>
                                 <div className="text-lg font-bold">{score}</div>
@@ -1913,10 +1913,10 @@ export default function DashBoardPage() {
                                     <span
                                       className={`px-2 py-1 rounded text-xs font-medium ${
                                         indicator.score >= 4
-                                          ? "bg-green-100 text-green-800"
+                                          ? 'bg-green-100 text-green-800'
                                           : indicator.score >= 3
-                                          ? "bg-blue-100 text-blue-800"
-                                          : "bg-red-100 text-red-800"
+                                          ? 'bg-blue-100 text-blue-800'
+                                          : 'bg-red-100 text-red-800'
                                       }`}
                                     >
                                       {indicator.signal}
@@ -2116,7 +2116,7 @@ export default function DashBoardPage() {
                       </div>
                       <div className="text-sm text-red-500 mb-4">
                         {geminiTechnicalData.message ||
-                          "기술 분석 중 오류가 발생했습니다."}
+                          '기술 분석 중 오류가 발생했습니다.'}
                       </div>
                       <div className="text-xs text-gray-500">
                         잠시 후 다시 시도해주세요.
@@ -2206,11 +2206,11 @@ export default function DashBoardPage() {
                                   className={`h-2 rounded-full ${
                                     geminiFinancialData.financialHealth
                                       ?.overallScore >= 7
-                                      ? "bg-green-600"
+                                      ? 'bg-green-600'
                                       : geminiFinancialData.financialHealth
                                           ?.overallScore >= 5
-                                      ? "bg-yellow-600"
-                                      : "bg-red-600"
+                                      ? 'bg-yellow-600'
+                                      : 'bg-red-600'
                                   }`}
                                   style={{
                                     width: `${
@@ -2224,7 +2224,7 @@ export default function DashBoardPage() {
                               </div>
                             </div>
                             <div className="text-sm font-medium">
-                              위험도:{" "}
+                              위험도:{' '}
                               {geminiFinancialData.financialHealth.riskLevel}
                             </div>
                           </div>
@@ -2239,16 +2239,16 @@ export default function DashBoardPage() {
                                 className="text-center p-3 bg-gray-50 rounded"
                               >
                                 <div className="text-sm text-muted-foreground mb-1">
-                                  {category === "profitability"
-                                    ? "수익성"
-                                    : category === "liquidity"
-                                    ? "유동성"
-                                    : category === "solvency"
-                                    ? "건전성"
-                                    : category === "efficiency"
-                                    ? "효율성"
-                                    : category === "growth"
-                                    ? "성장성"
+                                  {category === 'profitability'
+                                    ? '수익성'
+                                    : category === 'liquidity'
+                                    ? '유동성'
+                                    : category === 'solvency'
+                                    ? '건전성'
+                                    : category === 'efficiency'
+                                    ? '효율성'
+                                    : category === 'growth'
+                                    ? '성장성'
                                     : category}
                                 </div>
                                 <div className="text-lg font-bold">
@@ -2258,10 +2258,10 @@ export default function DashBoardPage() {
                                   <div
                                     className={`h-1 rounded-full ${
                                       score >= 7
-                                        ? "bg-green-500"
+                                        ? 'bg-green-500'
                                         : score >= 5
-                                        ? "bg-yellow-500"
-                                        : "bg-red-500"
+                                        ? 'bg-yellow-500'
+                                        : 'bg-red-500'
                                     }`}
                                     style={{ width: `${(score / 10) * 100}%` }}
                                   ></div>
@@ -2297,25 +2297,25 @@ export default function DashBoardPage() {
                             ([key, metric]) => (
                               <div key={key} className="p-4 border rounded-lg">
                                 <h4 className="font-medium text-sm mb-2">
-                                  {key === "revenue"
-                                    ? "매출"
-                                    : key === "netIncome"
-                                    ? "순이익"
-                                    : key === "cashFlow"
-                                    ? "현금흐름"
-                                    : key === "debtToEquity"
-                                    ? "부채비율"
-                                    : key === "roe"
-                                    ? "ROE"
-                                    : key === "roa"
-                                    ? "ROA"
-                                    : key === "grossMargin"
-                                    ? "매출총이익률"
-                                    : key === "operatingMargin"
-                                    ? "영업이익률"
+                                  {key === 'revenue'
+                                    ? '매출'
+                                    : key === 'netIncome'
+                                    ? '순이익'
+                                    : key === 'cashFlow'
+                                    ? '현금흐름'
+                                    : key === 'debtToEquity'
+                                    ? '부채비율'
+                                    : key === 'roe'
+                                    ? 'ROE'
+                                    : key === 'roa'
+                                    ? 'ROA'
+                                    : key === 'grossMargin'
+                                    ? '매출총이익률'
+                                    : key === 'operatingMargin'
+                                    ? '영업이익률'
                                     : key}
                                 </h4>
-                                {typeof metric === "object" ? (
+                                {typeof metric === 'object' ? (
                                   <div className="space-y-1">
                                     <div className="text-lg font-bold">
                                       {metric.current || metric.ratio}
@@ -2509,7 +2509,7 @@ export default function DashBoardPage() {
                       </div>
                       <div className="text-sm text-red-500 mb-4">
                         {geminiFinancialData.message ||
-                          "재무 분석 중 오류가 발생했습니다."}
+                          '재무 분석 중 오류가 발생했습니다.'}
                       </div>
                       <div className="text-xs text-gray-500">
                         잠시 후 다시 시도해주세요.
@@ -2558,38 +2558,38 @@ export default function DashBoardPage() {
                     <CardContent className="grid grid-cols-2 gap-4">
                       <div className="flex flex-col gap-2">
                         <Label>표준상품번호</Label>
-                        <Input value={searchData?.std_pdno || ""} readOnly />
+                        <Input value={searchData?.std_pdno || ''} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상품영문명</Label>
                         <Input
-                          value={searchData?.prdt_eng_name || ""}
+                          value={searchData?.prdt_eng_name || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상품명</Label>
-                        <Input value={searchData?.prdt_name || ""} readOnly />
+                        <Input value={searchData?.prdt_name || ''} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>국가명</Label>
-                        <Input value={searchData?.natn_name || ""} readOnly />
+                        <Input value={searchData?.natn_name || ''} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>국가코드</Label>
-                        <Input value={searchData?.natn_cd || ""} readOnly />
+                        <Input value={searchData?.natn_cd || ''} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상품분류명</Label>
                         <Input
-                          value={searchData?.prdt_clsf_name || ""}
+                          value={searchData?.prdt_clsf_name || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상품분류코드</Label>
                         <Input
-                          value={searchData?.prdt_clsf_cd || ""}
+                          value={searchData?.prdt_clsf_cd || ''}
                           readOnly
                         />
                       </div>
@@ -2609,57 +2609,57 @@ export default function DashBoardPage() {
                       <div className="flex flex-col gap-2">
                         <Label>거래시장명</Label>
                         <Input
-                          value={searchData?.tr_mket_name || ""}
+                          value={searchData?.tr_mket_name || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>거래시장코드</Label>
-                        <Input value={searchData?.tr_mket_cd || ""} readOnly />
+                        <Input value={searchData?.tr_mket_cd || ''} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외거래소명</Label>
                         <Input
-                          value={searchData?.ovrs_excg_name || ""}
+                          value={searchData?.ovrs_excg_name || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외거래소코드</Label>
                         <Input
-                          value={searchData?.ovrs_excg_cd || ""}
+                          value={searchData?.ovrs_excg_cd || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>거래통화코드</Label>
-                        <Input value={searchData?.tr_crcy_cd || ""} readOnly />
+                        <Input value={searchData?.tr_crcy_cd || ''} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>통화명</Label>
-                        <Input value={searchData?.crcy_name || ""} readOnly />
+                        <Input value={searchData?.crcy_name || ''} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외액면가</Label>
-                        <Input value={searchData?.ovrs_papr || ""} readOnly />
+                        <Input value={searchData?.ovrs_papr || ''} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>매수단위수량</Label>
                         <Input
-                          value={searchData?.buy_unit_qty || ""}
+                          value={searchData?.buy_unit_qty || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>매도단위수량</Label>
                         <Input
-                          value={searchData?.sll_unit_qty || ""}
+                          value={searchData?.sll_unit_qty || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>거래단위금액</Label>
-                        <Input value={searchData?.tr_unit_amt || ""} readOnly />
+                        <Input value={searchData?.tr_unit_amt || ''} readOnly />
                       </div>
                     </CardContent>
                   </Card>
@@ -2677,57 +2677,57 @@ export default function DashBoardPage() {
                       <div className="flex flex-col gap-2">
                         <Label>상장주식수</Label>
                         <Input
-                          value={searchData?.lstg_stck_num || ""}
+                          value={searchData?.lstg_stck_num || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상장일자</Label>
-                        <Input value={searchData?.lstg_dt || ""} readOnly />
+                        <Input value={searchData?.lstg_dt || ''} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상장여부</Label>
-                        <Input value={searchData?.lstg_yn || ""} readOnly />
+                        <Input value={searchData?.lstg_yn || ''} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상장폐지종목여부</Label>
                         <Input
-                          value={searchData?.lstg_abol_item_yn || ""}
+                          value={searchData?.lstg_abol_item_yn || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>상장폐지일자</Label>
                         <Input
-                          value={searchData?.lstg_abol_dt || ""}
+                          value={searchData?.lstg_abol_dt || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외주식거래정지구분코드</Label>
                         <Input
-                          value={searchData?.ovrs_stck_tr_stop_dvsn_cd || ""}
+                          value={searchData?.ovrs_stck_tr_stop_dvsn_cd || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외주식상품그룹번호</Label>
                         <Input
-                          value={searchData?.ovrs_stck_prdt_grp_no || ""}
+                          value={searchData?.ovrs_stck_prdt_grp_no || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외주식등록사유코드</Label>
                         <Input
-                          value={searchData?.ovrs_stck_erlm_rosn_cd || ""}
+                          value={searchData?.ovrs_stck_erlm_rosn_cd || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>해외주식이력권리구분코드</Label>
                         <Input
-                          value={searchData?.ovrs_stck_hist_rght_dvsn_cd || ""}
+                          value={searchData?.ovrs_stck_hist_rght_dvsn_cd || ''}
                           readOnly
                         />
                       </div>
@@ -2747,38 +2747,38 @@ export default function DashBoardPage() {
                       <div className="flex flex-col gap-2">
                         <Label>현재가</Label>
                         <Input
-                          value={searchData?.ovrs_now_pric1 || ""}
+                          value={searchData?.ovrs_now_pric1 || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>최종수신일시</Label>
                         <Input
-                          value={searchData?.last_rcvg_dtime || ""}
+                          value={searchData?.last_rcvg_dtime || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>SEDOL번호</Label>
-                        <Input value={searchData?.sedol_no || ""} readOnly />
+                        <Input value={searchData?.sedol_no || ''} readOnly />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>블룸버그티커</Label>
                         <Input
-                          value={searchData?.blbg_tckr_text || ""}
+                          value={searchData?.blbg_tckr_text || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>기관용도ISIN코드</Label>
                         <Input
-                          value={searchData?.istt_usge_isin_cd || ""}
+                          value={searchData?.istt_usge_isin_cd || ''}
                           readOnly
                         />
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label>메모</Label>
-                        <Input value={searchData?.memo_text1 || ""} readOnly />
+                        <Input value={searchData?.memo_text1 || ''} readOnly />
                       </div>
                       {/* 필요시 추가 필드 계속 추가 */}
                     </CardContent>
@@ -2817,11 +2817,11 @@ export default function DashBoardPage() {
                         </div>
                         <span className="text-xs text-muted-foreground shrink-0">
                           {new Date(newsItem.createdAt).toLocaleDateString(
-                            "ko-KR",
+                            'ko-KR',
                             {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
                             }
                           )}
                         </span>
@@ -2857,7 +2857,7 @@ export default function DashBoardPage() {
                           </span>
                           <span className="text-xs text-muted-foreground">
                             {dayjs(comment.createdAt).format(
-                              "YYYY-MM-DD HH:mm"
+                              'YYYY-MM-DD HH:mm'
                             )}
                           </span>
                         </div>

@@ -1,7 +1,7 @@
-import { CarouselItem } from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { CarouselItem } from '@/components/ui/carousel';
+import { Card, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 const SectionTitleItem = ({
   title,
@@ -16,7 +16,7 @@ const SectionTitleItem = ({
     <CarouselItem className="my-4">
       <Card
         className={`${
-          active && "border-primary bg-primary-foreground"
+          active && 'border-primary bg-primary-foreground'
         } mx-4 cursor-pointer h-full transition-all`}
       >
         <CardContent className="px-4 flex items-center gap-4">
@@ -37,11 +37,11 @@ const SectionTitleItem = ({
             </div>
             <span className="font-medium text-sm mb-1">{info}</span>
             <p className="text-xs text-muted-foreground line-clamp-2">
-              <Badge className={!badge?.[0] && "hidden"}>보유</Badge>
-              <Badge className={!badge?.[1] && "hidden"}>체결</Badge>
-              <Badge className={!badge?.[2] && "hidden"}>오를확률</Badge>
-              <Badge className={!badge?.[2] && "hidden"}>
-                {badge?.[2].toFixed(2)}
+              <Badge className={!badge?.[0] && 'hidden'}>보유</Badge>
+              <Badge className={!badge?.[1] && 'hidden'}>체결</Badge>
+              <Badge className={!badge?.[2] && 'hidden'}>오를확률</Badge>
+              <Badge className={!badge?.[2] && 'hidden'}>
+                {badge?.[2]?.toFixed(2)}
               </Badge>
               {description}
             </p>

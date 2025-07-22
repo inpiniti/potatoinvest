@@ -172,7 +172,7 @@ const Sell = () => {
       ? (
           Math.floor((group.totalProfit / group.totalInvestment) * 100 * 100) /
           100
-        ).toFixed(2)
+        )?.toFixed(2)
       : '0.00',
   }));
 
@@ -195,7 +195,7 @@ const Sell = () => {
    * @returns {string} 포맷된 수익률 문자열
    */
   const formatRate = (rate) => {
-    return (Math.floor(parseFloat(rate) * 100) / 100).toFixed(2);
+    return (Math.floor(parseFloat(rate) * 100) / 100)?.toFixed(2);
   };
 
   /**
@@ -255,7 +255,7 @@ const Sell = () => {
       ? (
           Math.floor((group.totalProfit / group.totalInvestment) * 100 * 100) /
           100
-        ).toFixed(2)
+        )?.toFixed(2)
       : '0.00',
   }));
 
@@ -269,7 +269,7 @@ const Sell = () => {
       ? (
           Math.floor((group.totalProfit / group.totalInvestment) * 100 * 100) /
           100
-        ).toFixed(2)
+        )?.toFixed(2)
       : '0.00',
     tradingDays: group.tradingDays,
   }));

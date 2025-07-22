@@ -1,26 +1,26 @@
-"use client";
+'use client';
 
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge"; // 추가: 결제중 배지
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge'; // 추가: 결제중 배지
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-import { BarChart2 } from "lucide-react";
+import { BarChart2 } from 'lucide-react';
 
-import Sell from "./Sell";
-import BuyMore from "./BuyMore";
+import Sell from './Sell';
+import BuyMore from './BuyMore';
 
-import { logos } from "@/json/logoData";
-import { Button } from "@/components/ui/button";
+import { logos } from '@/json/logoData';
+import { Button } from '@/components/ui/button';
 
-import PredictionProgress from "./PredictionProgress"; // AI 예측 컴포넌트
-import StockChart from "./StockChart"; // 종목 차트 컴포넌트
-import { useState } from "react";
+import PredictionProgress from './PredictionProgress'; // AI 예측 컴포넌트
+import StockChart from './StockChart'; // 종목 차트 컴포넌트
+import { useState } from 'react';
 
 // 추출된 StockCard 컴포넌트
 const StockCard = ({ item, onSellComplete, predictions }) => {
   const [showChart, setShowChart] = useState(false);
   const logo = logos.find((logo) => logo.name === item.ovrs_pdno) || {};
-  const colorClass = item.evlu_pfls_rt > 0 ? "text-red-400" : "text-blue-400";
+  const colorClass = item.evlu_pfls_rt > 0 ? 'text-red-400' : 'text-blue-400';
 
   // 해당 종목의 예측값 찾기
   const prediction = predictions?.find((pred) => pred.name === item.ovrs_pdno);
@@ -34,7 +34,7 @@ const StockCard = ({ item, onSellComplete, predictions }) => {
           <Avatar className="border w-10 h-10">
             <AvatarImage
               src={`https://s3-symbol-logo.tradingview.com/${logo.logoid}--big.svg`}
-              alt={item.ovrs_item_name || "로고"}
+              alt={item.ovrs_item_name || '로고'}
             />
             <AvatarFallback>{item.ovrs_pdno?.slice(0, 2)}</AvatarFallback>
           </Avatar>
@@ -64,7 +64,7 @@ const StockCard = ({ item, onSellComplete, predictions }) => {
         >
           <BarChart2
             className={`h-5 w-5 ${
-              showChart ? "text-blue-500" : "text-gray-500"
+              showChart ? 'text-blue-500' : 'text-gray-500'
             }`}
           />
         </Button>
@@ -82,7 +82,8 @@ const StockCard = ({ item, onSellComplete, predictions }) => {
               매입평균가격
             </div>
             <div className="font-medium">
-              ${Number(item.pchs_avg_pric).toFixed(2)} × {item.ovrs_cblc_qty} 주
+              ${Number(item.pchs_avg_pric)?.toFixed(2)} × {item.ovrs_cblc_qty}{' '}
+              주
             </div>
           </div>
           <div className="text-right">
@@ -90,7 +91,7 @@ const StockCard = ({ item, onSellComplete, predictions }) => {
               현재가격
             </div>
             <div className={`font-bold ${colorClass}`}>
-              ${Number(item.now_pric2).toFixed(2)}
+              ${Number(item.now_pric2)?.toFixed(2)}
             </div>
           </div>
           <div>
@@ -101,7 +102,7 @@ const StockCard = ({ item, onSellComplete, predictions }) => {
               $
               {(
                 Number(item.pchs_avg_pric) * Number(item.ovrs_cblc_qty)
-              ).toFixed(2)}
+              )?.toFixed(2)}
             </div>
           </div>
           <div className="text-right">
@@ -109,7 +110,7 @@ const StockCard = ({ item, onSellComplete, predictions }) => {
               평가손익
             </div>
             <div className={`font-bold ${colorClass}`}>
-              {Number(item.evlu_pfls_rt).toFixed(2)}%
+              {Number(item.evlu_pfls_rt)?.toFixed(2)}%
             </div>
           </div>
 
@@ -125,7 +126,7 @@ const StockCard = ({ item, onSellComplete, predictions }) => {
         <Sell
           ovrs_pdno={item.ovrs_pdno}
           ovrs_item_name={item.ovrs_item_name}
-          pchs_avg_pric={Number(item.pchs_avg_pric).toFixed(2)}
+          pchs_avg_pric={Number(item.pchs_avg_pric)?.toFixed(2)}
           ovrs_cblc_qty={item.ovrs_cblc_qty}
           evlu_pfls_rt={item.evlu_pfls_rt}
           onSellComplete={onSellComplete}
@@ -133,7 +134,7 @@ const StockCard = ({ item, onSellComplete, predictions }) => {
         <BuyMore
           ovrs_pdno={item.ovrs_pdno}
           ovrs_item_name={item.ovrs_item_name}
-          pchs_avg_pric={Number(item.pchs_avg_pric).toFixed(2)}
+          pchs_avg_pric={Number(item.pchs_avg_pric)?.toFixed(2)}
           ovrs_cblc_qty={item.ovrs_cblc_qty}
           evlu_pfls_rt={item.evlu_pfls_rt}
           now_pric2={item.now_pric2}

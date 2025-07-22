@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Drawer,
@@ -9,11 +9,11 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
+} from '@/components/ui/drawer';
 
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import useTrading from "@/hooks/useTrading";
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import useTrading from '@/hooks/useTrading';
 
 const BuyMore = ({
   ovrs_pdno,
@@ -49,9 +49,9 @@ const BuyMore = ({
         onBuyComplete();
       }
     } catch (error) {
-      console.error("매수 요청 실패:", error);
+      console.error('매수 요청 실패:', error);
       alert(
-        `매수 요청이 실패했습니다.\n${error.message || "다시 시도해주세요."}`
+        `매수 요청이 실패했습니다.\n${error.message || '다시 시도해주세요.'}`
       );
     } finally {
       setLoading(false);
@@ -71,7 +71,7 @@ const BuyMore = ({
         <div className="px-4 flex gap-2 flex-wrap">
           <div>현재 매입가 : ${pchs_avg_pric}</div>
           <div>보유 수량 : {ovrs_cblc_qty}주</div>
-          <div className={evlu_pfls_rt > 0 ? "text-red-500" : "text-blue-500"}>
+          <div className={evlu_pfls_rt > 0 ? 'text-red-500' : 'text-blue-500'}>
             수익률 : {evlu_pfls_rt}%
           </div>
         </div>
@@ -90,12 +90,12 @@ const BuyMore = ({
                   handleBuy({
                     ovrs_pdno,
                     ord_qty: ovrs_cblc_qty, // 기본 1주 매수
-                    now_pric2: (pchs_avg_pric * 0.98).toFixed(2),
+                    now_pric2: (pchs_avg_pric * 0.98)?.toFixed(2),
                   })
                 }
                 disabled={loading}
               >
-                -2% (${(pchs_avg_pric * 0.98).toFixed(2)})
+                -2% (${(pchs_avg_pric * 0.98)?.toFixed(2)})
               </Button>
 
               <Button
@@ -104,12 +104,12 @@ const BuyMore = ({
                   handleBuy({
                     ovrs_pdno,
                     ord_qty: ovrs_cblc_qty,
-                    now_pric2: (pchs_avg_pric * 0.95).toFixed(2),
+                    now_pric2: (pchs_avg_pric * 0.95)?.toFixed(2),
                   })
                 }
                 disabled={loading}
               >
-                -5% (${(pchs_avg_pric * 0.95).toFixed(2)})
+                -5% (${(pchs_avg_pric * 0.95)?.toFixed(2)})
               </Button>
 
               <Button
@@ -118,12 +118,12 @@ const BuyMore = ({
                   handleBuy({
                     ovrs_pdno,
                     ord_qty: ovrs_cblc_qty,
-                    now_pric2: (pchs_avg_pric * 0.9).toFixed(2),
+                    now_pric2: (pchs_avg_pric * 0.9)?.toFixed(2),
                   })
                 }
                 disabled={loading}
               >
-                -10% (${(pchs_avg_pric * 0.9).toFixed(2)})
+                -10% (${(pchs_avg_pric * 0.9)?.toFixed(2)})
               </Button>
 
               <Button
@@ -132,12 +132,12 @@ const BuyMore = ({
                   handleBuy({
                     ovrs_pdno,
                     ord_qty: ovrs_cblc_qty,
-                    now_pric2: (pchs_avg_pric * 0.7).toFixed(2),
+                    now_pric2: (pchs_avg_pric * 0.7)?.toFixed(2),
                   })
                 }
                 disabled={loading}
               >
-                -30% (${(pchs_avg_pric * 0.7).toFixed(2)})
+                -30% (${(pchs_avg_pric * 0.7)?.toFixed(2)})
               </Button>
             </div>
 
@@ -148,12 +148,12 @@ const BuyMore = ({
                   handleBuy({
                     ovrs_pdno,
                     ord_qty: ovrs_cblc_qty, // 기본 1주 매수
-                    now_pric2: (now_pric2 * 0.98).toFixed(2),
+                    now_pric2: (now_pric2 * 0.98)?.toFixed(2),
                   })
                 }
                 disabled={loading}
               >
-                -2% (${(now_pric2 * 0.98).toFixed(2)})
+                -2% (${(now_pric2 * 0.98)?.toFixed(2)})
               </Button>
 
               <Button
@@ -162,12 +162,12 @@ const BuyMore = ({
                   handleBuy({
                     ovrs_pdno,
                     ord_qty: ovrs_cblc_qty,
-                    now_pric2: (now_pric2 * 0.95).toFixed(2),
+                    now_pric2: (now_pric2 * 0.95)?.toFixed(2),
                   })
                 }
                 disabled={loading}
               >
-                -5% (${(now_pric2 * 0.95).toFixed(2)})
+                -5% (${(now_pric2 * 0.95)?.toFixed(2)})
               </Button>
 
               <Button
@@ -176,12 +176,12 @@ const BuyMore = ({
                   handleBuy({
                     ovrs_pdno,
                     ord_qty: ovrs_cblc_qty,
-                    now_pric2: (now_pric2 * 0.9).toFixed(2),
+                    now_pric2: (now_pric2 * 0.9)?.toFixed(2),
                   })
                 }
                 disabled={loading}
               >
-                -10% (${(now_pric2 * 0.9).toFixed(2)})
+                -10% (${(now_pric2 * 0.9)?.toFixed(2)})
               </Button>
 
               <Button
@@ -190,12 +190,12 @@ const BuyMore = ({
                   handleBuy({
                     ovrs_pdno,
                     ord_qty: ovrs_cblc_qty,
-                    now_pric2: (now_pric2 * 0.7).toFixed(2),
+                    now_pric2: (now_pric2 * 0.7)?.toFixed(2),
                   })
                 }
                 disabled={loading}
               >
-                -30% (${(now_pric2 * 0.7).toFixed(2)})
+                -30% (${(now_pric2 * 0.7)?.toFixed(2)})
               </Button>
             </div>
           </div>

@@ -83,12 +83,12 @@ const Sell = ({
                 handleSell({
                   ovrs_pdno,
                   ovrs_cblc_qty,
-                  now_pric2: (pchs_avg_pric * 1.02).toFixed(2),
+                  now_pric2: (pchs_avg_pric * 1.02)?.toFixed(2),
                 })
               }
               disabled={loading}
             >
-              +2% (${(pchs_avg_pric * 1.02).toFixed(2)})
+              +2% (${(pchs_avg_pric * 1.02)?.toFixed(2)})
             </Button>
 
             <Button
@@ -97,12 +97,12 @@ const Sell = ({
                 handleSell({
                   ovrs_pdno,
                   ovrs_cblc_qty,
-                  now_pric2: (pchs_avg_pric * 1.05).toFixed(2),
+                  now_pric2: (pchs_avg_pric * 1.05)?.toFixed(2),
                 })
               }
               disabled={loading}
             >
-              +5% (${(pchs_avg_pric * 1.05).toFixed(2)})
+              +5% (${(pchs_avg_pric * 1.05)?.toFixed(2)})
             </Button>
 
             <Button
@@ -111,12 +111,12 @@ const Sell = ({
                 handleSell({
                   ovrs_pdno,
                   ovrs_cblc_qty,
-                  now_pric2: (pchs_avg_pric * 1.1).toFixed(2),
+                  now_pric2: (pchs_avg_pric * 1.1)?.toFixed(2),
                 })
               }
               disabled={loading}
             >
-              +10% (${(pchs_avg_pric * 1.1).toFixed(2)})
+              +10% (${(pchs_avg_pric * 1.1)?.toFixed(2)})
             </Button>
 
             <Button
@@ -125,12 +125,12 @@ const Sell = ({
                 handleSell({
                   ovrs_pdno,
                   ovrs_cblc_qty,
-                  now_pric2: (pchs_avg_pric * 1.3).toFixed(2),
+                  now_pric2: (pchs_avg_pric * 1.3)?.toFixed(2),
                 })
               }
               disabled={loading}
             >
-              +30% (${(pchs_avg_pric * 1.3).toFixed(2)})
+              +30% (${(pchs_avg_pric * 1.3)?.toFixed(2)})
             </Button>
           </div>
         </div>
