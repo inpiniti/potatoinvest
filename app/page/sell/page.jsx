@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import useAccount from '@/hooks/useAccount';
-import useApi from '@/hooks/useApi';
-import dayjs from 'dayjs';
-import { useCallback, useEffect, useState } from 'react';
+import useAccount from "@/hooks/useAccount";
+import useApi from "@/hooks/useApi";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useState } from "react";
 
-import { logos } from '@/json/logoData';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { logos } from "@/json/logoData";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -14,22 +14,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Loader2 } from 'lucide-react'; // 로딩 아이콘 추가
+} from "@/components/ui/table";
+import { Loader2 } from "lucide-react"; // 로딩 아이콘 추가
 // 새로 추가할 탭 컴포넌트 임포트
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Sell = () => {
   const api = useApi();
 
   const [cano, acntPrdtCd] = useAccount();
-  const [WCRC_FRCR_DVSN_CD, setWCRC_FRCR_DVSN_CD] = useState('02');
+  const [WCRC_FRCR_DVSN_CD, setWCRC_FRCR_DVSN_CD] = useState("02");
   const [list, setList] = useState([]);
   const [expandedRows, setExpandedRows] = useState({}); // 행 확장 상태
   const [loading, setLoading] = useState(true); // 로딩 상태 추가
 
   // 뷰 타입 상태 (일별/월별)
-  const [viewType, setViewType] = useState('daily');
+  const [viewType, setViewType] = useState("daily");
 
   /**
    * 매매 내역을 조회하는 함수
@@ -48,8 +48,8 @@ const Sell = () => {
       setLoading(true); // 로딩 시작
       let allData = []; // 모든 페이지의 데이터를 저장할 배열
       let hasMore = true; // 더 많은 데이터가 있는지 여부
-      let ctxAreaNk200 = ''; // 연속 조회 키
-      let ctxAreaFk200 = ''; // 연속 조회 검색 조건
+      let ctxAreaNk200 = ""; // 연속 조회 키
+      let ctxAreaFk200 = ""; // 연속 조회 검색 조건
 
       if (cano && acntPrdtCd) {
         // 모든 페이지를 가져올 때까지 반복
@@ -57,12 +57,12 @@ const Sell = () => {
           const payload = {
             CANO: cano,
             ACNT_PRDT_CD: acntPrdtCd,
-            OVRS_EXCG_CD: 'NASD',
-            NATN_CD: '', // 국가코드 : 공란
-            CRCY_CD: '', // 통화코드 : 공란
-            PDNO: '', // 상품번호 : 공란
-            INQR_STRT_DT: '20250301', // 조회시작일자: 1달 전
-            INQR_END_DT: dayjs().format('YYYYMMDD'), // 조회종료일자: 오늘
+            OVRS_EXCG_CD: "NASD",
+            NATN_CD: "", // 국가코드 : 공란
+            CRCY_CD: "", // 통화코드 : 공란
+            PDNO: "", // 상품번호 : 공란
+            INQR_STRT_DT: "20250301", // 조회시작일자: 1달 전
+            INQR_END_DT: dayjs().format("YYYYMMDD"), // 조회종료일자: 오늘
             WCRC_FRCR_DVSN_CD, // 원화외화구분코드 : 01: 외화, 02: 원화
             CTX_AREA_FK200: ctxAreaFk200, // 연속조회검색조건200 : 공란
             CTX_AREA_NK200: ctxAreaNk200, // 연속조회키200 : 이전 응답에서 받은 값
@@ -72,7 +72,7 @@ const Sell = () => {
           const data = await response.json();
 
           // 응답 데이터 확인 및 로깅
-          console.log('API 응답:', data);
+          console.log("API 응답:", data);
 
           if (data?.output1?.length > 0) {
             // 현재 페이지 데이터 처리
@@ -83,7 +83,7 @@ const Sell = () => {
               );
               return {
                 ...item,
-                logo: logoItem?.logoid || '',
+                logo: logoItem?.logoid || "",
               };
             });
 
@@ -91,11 +91,11 @@ const Sell = () => {
             allData = [...allData, ...currentPageData];
 
             // 연속 조회 키가 있는지 확인
-            if (data.ctx_area_nk200 && data.ctx_area_nk200.trim() !== '') {
+            if (data.ctx_area_nk200 && data.ctx_area_nk200.trim() !== "") {
               ctxAreaNk200 = data.ctx_area_nk200; // 다음 페이지 조회 시 사용할 키 업데이트
-              console.log('다음 페이지 조회 키:', ctxAreaNk200);
+              console.log("다음 페이지 조회 키:", ctxAreaNk200);
               ctxAreaFk200 = data.ctx_area_fk200; // 다음 페이지 조회 시 사용할 검색 조건 업데이트
-              console.log('다음 페이지 조회 조건:', ctxAreaFk200);
+              console.log("다음 페이지 조회 조건:", ctxAreaFk200);
             } else {
               // 연속 조회 키가 없으면 모든 데이터를 가져온 것
               hasMore = false;
@@ -110,8 +110,8 @@ const Sell = () => {
         setList(allData);
       }
     } catch (error) {
-      console.error('매매 내역 조회 중 오류:', error);
-      alert('매매 내역을 불러오는 중 오류가 발생했습니다.');
+      console.error("매매 내역 조회 중 오류:", error);
+      alert("매매 내역을 불러오는 중 오류가 발생했습니다.");
     } finally {
       setLoading(false); // 로딩 종료
     }
@@ -173,7 +173,7 @@ const Sell = () => {
           Math.floor((group.totalProfit / group.totalInvestment) * 100 * 100) /
           100
         )?.toFixed(2)
-      : '0.00',
+      : "0.00",
   }));
 
   /**
@@ -185,7 +185,7 @@ const Sell = () => {
   const formatNumber = (number) => {
     return Math.floor(number)
       .toString()
-      .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   /**
@@ -256,7 +256,7 @@ const Sell = () => {
           Math.floor((group.totalProfit / group.totalInvestment) * 100 * 100) /
           100
         )?.toFixed(2)
-      : '0.00',
+      : "0.00",
   }));
 
   /**
@@ -270,7 +270,7 @@ const Sell = () => {
           Math.floor((group.totalProfit / group.totalInvestment) * 100 * 100) /
           100
         )?.toFixed(2)
-      : '0.00',
+      : "0.00",
     tradingDays: group.tradingDays,
   }));
 
@@ -365,15 +365,15 @@ const DailyView = ({
             >
               <TableCell>
                 {item?.trad_day &&
-                  dayjs(item?.trad_day).format('YYYY년 MM월 DD일')}
+                  dayjs(item?.trad_day).format("YYYY년 MM월 DD일")}
               </TableCell>
               <TableCell
                 className={
                   item?.totalProfit > 0
-                    ? 'text-red-500'
+                    ? "text-red-500"
                     : item?.totalProfit < 0
-                    ? 'text-blue-500'
-                    : ''
+                    ? "text-blue-500"
+                    : ""
                 }
               >
                 {formatNumber(item?.totalProfit)}원
@@ -381,10 +381,10 @@ const DailyView = ({
               <TableCell
                 className={
                   parseFloat(item?.yield) > 0
-                    ? 'text-red-500'
+                    ? "text-red-500"
                     : parseFloat(item?.yield) < 0
-                    ? 'text-blue-500'
-                    : ''
+                    ? "text-blue-500"
+                    : ""
                 }
               >
                 {item?.yield}%
@@ -432,15 +432,15 @@ const MonthlyView = ({
               className="cursor-pointer hover:bg-gray-50"
             >
               <TableCell>
-                {dayjs(item?.yearMonth + '01').format('YYYY년 MM월')}
+                {dayjs(item?.yearMonth + "01").format("YYYY년 MM월")}
               </TableCell>
               <TableCell
                 className={
                   item?.totalProfit > 0
-                    ? 'text-red-500'
+                    ? "text-red-500"
                     : item?.totalProfit < 0
-                    ? 'text-blue-500'
-                    : ''
+                    ? "text-blue-500"
+                    : ""
                 }
               >
                 {formatNumber(item?.totalProfit)}원
@@ -448,10 +448,10 @@ const MonthlyView = ({
               <TableCell
                 className={
                   parseFloat(item?.yield) > 0
-                    ? 'text-red-500'
+                    ? "text-red-500"
                     : parseFloat(item?.yield) < 0
-                    ? 'text-blue-500'
-                    : ''
+                    ? "text-blue-500"
+                    : ""
                 }
               >
                 {item?.yield}%
@@ -462,13 +462,13 @@ const MonthlyView = ({
                 <TableCell colSpan={3} className="bg-gray-100 p-0">
                   <div className="p-4">
                     <h4 className="font-medium mb-2">
-                      {dayjs(item?.yearMonth + '01').format('YYYY년 MM월')} 거래
+                      {dayjs(item?.yearMonth + "01").format("YYYY년 MM월")} 거래
                       내역
                     </h4>
                     {item.tradingDays.map((tradDay) => (
                       <div key={tradDay} className="mb-4">
                         <h5 className="text-sm font-medium mb-2 pb-1 border-b">
-                          {dayjs(tradDay).format('MM월 DD일')} 거래
+                          {dayjs(tradDay).format("MM월 DD일")} 거래
                         </h5>
                         <DetailRow
                           tradDay={tradDay}
@@ -523,10 +523,10 @@ const DetailRow = ({ tradDay, list, formatNumber, formatRate }) => {
                   <TableCell
                     className={
                       Number(item?.ovrs_rlzt_pfls_amt) > 0
-                        ? 'text-red-500'
+                        ? "text-red-500"
                         : Number(item?.ovrs_rlzt_pfls_amt) < 0
-                        ? 'text-blue-500'
-                        : ''
+                        ? "text-blue-500"
+                        : ""
                     }
                   >
                     {formatNumber(item?.ovrs_rlzt_pfls_amt)}원
@@ -534,10 +534,10 @@ const DetailRow = ({ tradDay, list, formatNumber, formatRate }) => {
                   <TableCell
                     className={
                       Number(item.pftrt) > 0
-                        ? 'text-red-500'
+                        ? "text-red-500"
                         : Number(item.pftrt) < 0
-                        ? 'text-blue-500'
-                        : ''
+                        ? "text-blue-500"
+                        : ""
                     }
                   >
                     {formatRate(item.pftrt)}%

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Drawer,
@@ -9,11 +9,11 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer';
+} from "@/components/ui/drawer";
 
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import useTrading from '@/hooks/useTrading';
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import useTrading from "@/hooks/useTrading";
 
 const BuyMore = ({
   ovrs_pdno,
@@ -49,9 +49,9 @@ const BuyMore = ({
         onBuyComplete();
       }
     } catch (error) {
-      console.error('매수 요청 실패:', error);
+      console.error("매수 요청 실패:", error);
       alert(
-        `매수 요청이 실패했습니다.\n${error.message || '다시 시도해주세요.'}`
+        `매수 요청이 실패했습니다.\n${error.message || "다시 시도해주세요."}`
       );
     } finally {
       setLoading(false);
@@ -71,7 +71,7 @@ const BuyMore = ({
         <div className="px-4 flex gap-2 flex-wrap">
           <div>현재 매입가 : ${pchs_avg_pric}</div>
           <div>보유 수량 : {ovrs_cblc_qty}주</div>
-          <div className={evlu_pfls_rt > 0 ? 'text-red-500' : 'text-blue-500'}>
+          <div className={evlu_pfls_rt > 0 ? "text-red-500" : "text-blue-500"}>
             수익률 : {evlu_pfls_rt}%
           </div>
         </div>

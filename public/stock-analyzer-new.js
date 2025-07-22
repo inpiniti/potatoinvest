@@ -76,50 +76,6 @@ const INDICATOR_EVALUATIONS = {
         매우우수: { min: 25, max: Infinity, score: 5 },
       },
     },
-    세전마진: {
-      지표명: "pre_tax_margin_ttm",
-      한글명: "세전마진%",
-      단계별범위: {
-        매우낮음: { min: -Infinity, max: 0, score: 0 },
-        낮음: { min: 0, max: 5, score: 1 },
-        적정: { min: 5, max: 15, score: 3 },
-        양호: { min: 15, max: 25, score: 4 },
-        매우우수: { min: 25, max: Infinity, score: 5 },
-      },
-    },
-    FCF마진: {
-      지표명: "free_cash_flow_margin_ttm",
-      한글명: "잉여 현금 흐름 마진 %",
-      단계별범위: {
-        매우낮음: { min: -Infinity, max: 0, score: 0 },
-        낮음: { min: 0, max: 5, score: 1 },
-        적정: { min: 5, max: 15, score: 3 },
-        양호: { min: 15, max: 25, score: 4 },
-        매우우수: { min: 25, max: Infinity, score: 5 },
-      },
-    },
-    투하자본수익률: {
-      지표명: "return_on_invested_capital_fq",
-      한글명: "투하자본 수익률 %",
-      단계별범위: {
-        매우낮음: { min: -Infinity, max: 0, score: 0 },
-        낮음: { min: 0, max: 6, score: 1 },
-        적정: { min: 6, max: 12, score: 3 },
-        양호: { min: 12, max: 20, score: 4 },
-        매우우수: { min: 20, max: Infinity, score: 5 },
-      },
-    },
-    판관비율: {
-      지표명: "sell_gen_admin_exp_other_ratio_ttm",
-      한글명: "판매, 일반 및 관리 비용 비율",
-      단계별범위: {
-        매우우수: { min: -Infinity, max: 10, score: 5 },
-        양호: { min: 10, max: 20, score: 4 },
-        적정: { min: 20, max: 35, score: 3 },
-        높음: { min: 35, max: 50, score: 1 },
-        매우높음: { min: 50, max: Infinity, score: 0 },
-      },
-    },
   },
 
   // 3. 배당 지표 평가
@@ -172,17 +128,6 @@ const INDICATOR_EVALUATIONS = {
         매우우수: { min: 4.0, max: Infinity, score: 5 },
       },
     },
-    당좌비율: {
-      지표명: "quick_ratio_fq",
-      한글명: "당좌비율",
-      단계별범위: {
-        매우위험: { min: -Infinity, max: 0.5, score: 0 },
-        위험: { min: 0.5, max: 0.8, score: 1 },
-        적정: { min: 0.8, max: 1.5, score: 3 },
-        양호: { min: 1.5, max: 2.5, score: 4 },
-        매우우수: { min: 2.5, max: Infinity, score: 5 },
-      },
-    },
     부채비율: {
       지표명: "debt_to_equity_fq",
       한글명: "부채 대 자본 비율",
@@ -194,23 +139,12 @@ const INDICATOR_EVALUATIONS = {
         매우위험: { min: 2.0, max: Infinity, score: 0 },
       },
     },
-    현금부채비율: {
-      지표명: "cash_n_short_term_invest_to_total_debt_fq",
-      한글명: "현금 및 단기 투자 대 총 부채 비율",
-      단계별범위: {
-        매우낮음: { min: -Infinity, max: 0.1, score: 0 },
-        낮음: { min: 0.1, max: 0.3, score: 1 },
-        적정: { min: 0.3, max: 0.6, score: 3 },
-        양호: { min: 0.6, max: 1.0, score: 4 },
-        매우우수: { min: 1.0, max: Infinity, score: 5 },
-      },
-    },
   },
 
   // 5. 기술등급 평가
   기술등급평가: {
     기술등급: {
-      지표명: "recommend_all",
+      지표명: "Recommend.All",
       한글명: "테크니컬 레이팅",
       단계별범위: {
         적극매도: { min: -Infinity, max: -0.4, score: 0 },
@@ -221,19 +155,8 @@ const INDICATOR_EVALUATIONS = {
       },
     },
     MA레이팅: {
-      지표명: "recommend_m_a",
+      지표명: "Recommend.MA",
       한글명: "무빙 애버리지 레이팅",
-      단계별범위: {
-        적극매도: { min: -Infinity, max: -0.4, score: 0 },
-        매도: { min: -0.4, max: -0.15, score: 1 },
-        중립: { min: -0.15, max: 0.15, score: 2.5 },
-        매수: { min: 0.15, max: 0.4, score: 4 },
-        적극매수: { min: 0.4, max: Infinity, score: 5 },
-      },
-    },
-    OS등급: {
-      지표명: "recommend_other",
-      한글명: "오실레이터 레이팅",
       단계별범위: {
         적극매도: { min: -Infinity, max: -0.4, score: 0 },
         매도: { min: -0.4, max: -0.15, score: 1 },
@@ -277,83 +200,6 @@ const INDICATOR_EVALUATIONS = {
         적정: { min: 2, max: 7, score: 3 },
         위험: { min: 7, max: 15, score: 1 },
         매우위험: { min: 15, max: Infinity, score: 0 },
-      },
-    },
-    주가순자산비율: {
-      지표명: "price_book_fq",
-      한글명: "P/B 비율",
-      단계별범위: {
-        매우우수: { min: -Infinity, max: 1, score: 5 },
-        우수: { min: 1, max: 2, score: 4 },
-        적정: { min: 2, max: 5, score: 3 },
-        위험: { min: 5, max: 10, score: 1 },
-        매우위험: { min: 10, max: Infinity, score: 0 },
-      },
-    },
-    주가현금흐름비율: {
-      지표명: "price_to_cash_f_operating_activities_ttm",
-      한글명: "P/CF 비율",
-      단계별범위: {
-        매우우수: { min: -Infinity, max: 5, score: 5 },
-        우수: { min: 5, max: 10, score: 4 },
-        적정: { min: 10, max: 20, score: 3 },
-        위험: { min: 20, max: 30, score: 1 },
-        매우위험: { min: 30, max: Infinity, score: 0 },
-      },
-    },
-    주가잉여현금흐름: {
-      지표명: "price_free_cash_flow_ttm",
-      한글명: "P/FCF 비율",
-      단계별범위: {
-        매우우수: { min: -Infinity, max: 10, score: 5 },
-        우수: { min: 10, max: 15, score: 4 },
-        적정: { min: 15, max: 25, score: 3 },
-        위험: { min: 25, max: 50, score: 1 },
-        매우위험: { min: 50, max: Infinity, score: 0 },
-      },
-    },
-    주가현금비율: {
-      지표명: "price_to_cash_ratio",
-      한글명: "Price/Cash 비율",
-      단계별범위: {
-        매우우수: { min: -Infinity, max: 5, score: 5 },
-        우수: { min: 5, max: 10, score: 4 },
-        적정: { min: 10, max: 20, score: 3 },
-        위험: { min: 20, max: 40, score: 1 },
-        매우위험: { min: 40, max: Infinity, score: 0 },
-      },
-    },
-    EV매출비율: {
-      지표명: "enterprise_value_to_revenue_ttm",
-      한글명: "EV/Revenue 비율",
-      단계별범위: {
-        매우우수: { min: -Infinity, max: 1, score: 5 },
-        우수: { min: 1, max: 5, score: 4 },
-        적정: { min: 5, max: 10, score: 3 },
-        위험: { min: 10, max: 20, score: 1 },
-        매우위험: { min: 20, max: Infinity, score: 0 },
-      },
-    },
-    EV영업이익비율: {
-      지표명: "enterprise_value_to_ebit_ttm",
-      한글명: "EV/EBIT 비율",
-      단계별범위: {
-        매우우수: { min: -Infinity, max: 6, score: 5 },
-        우수: { min: 6, max: 10, score: 4 },
-        적정: { min: 10, max: 20, score: 3 },
-        위험: { min: 20, max: 30, score: 1 },
-        매우위험: { min: 30, max: Infinity, score: 0 },
-      },
-    },
-    EV에비타비율: {
-      지표명: "enterprise_value_ebitda_ttm",
-      한글명: "EV/EBITDA 비율",
-      단계별범위: {
-        매우우수: { min: -Infinity, max: 6, score: 5 },
-        우수: { min: 6, max: 10, score: 4 },
-        적정: { min: 10, max: 15, score: 3 },
-        위험: { min: 15, max: 25, score: 1 },
-        매우위험: { min: 25, max: Infinity, score: 0 },
       },
     },
   },

@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from 'react';
-import useQuotations from '@/hooks/useQuotations';
-import { toast } from 'sonner';
-import { settingStore } from '@/store/settingStore';
+import { useState, useCallback, useEffect } from "react";
+import useQuotations from "@/hooks/useQuotations";
+import { toast } from "sonner";
+import { settingStore } from "@/store/settingStore";
 
 const useStockDetail = () => {
   const [detailData, setDetailData] = useState(null);
@@ -29,10 +29,10 @@ const useStockDetail = () => {
   // 자동 매수 조건 확인 함수 (useCallback으로 래핑)
   const shouldAutoBuy = useCallback(
     (activeTab, detail, buyCondition, 체결데이터, stockObject) => {
-      console.log('detail:', detail);
-      console.log('buyCondition:', buyCondition);
-      console.log('체결데이터:', 체결데이터);
-      console.log('stockObject:', stockObject);
+      console.log("detail:", detail);
+      console.log("buyCondition:", buyCondition);
+      console.log("체결데이터:", 체결데이터);
+      console.log("stockObject:", stockObject);
       // 상세 정보가 없으면 매수하지 않음
       if (!detail || !detail.last) return false;
 
@@ -55,19 +55,19 @@ const useStockDetail = () => {
         }
       }
 
-      console.log('탭 :', activeTab);
-      console.log('종목 :', detail.rsym);
-      console.log('평가손익률 :', detail.evlu_pfls_rt);
-      console.log('매수기준 :', buyCondition?.evluPflsRt);
-      console.log('매수기준 설정값 :', detailSettings.buyRate);
+      console.log("탭 :", activeTab);
+      console.log("종목 :", detail.rsym);
+      console.log("평가손익률 :", detail.evlu_pfls_rt);
+      console.log("매수기준 :", buyCondition?.evluPflsRt);
+      console.log("매수기준 설정값 :", detailSettings.buyRate);
 
       // 탭별 매수 조건
       switch (activeTab) {
-        case '분석':
+        case "분석":
           // 분석 탭에서는 조건 없이 모든 종목 매수
           return true;
 
-        case '구매':
+        case "구매":
           // 보유종목 탭에서는 설정된 매수기준 이하인 종목만 매수
           const evluPflsRt = buyCondition?.evluPflsRt;
 
@@ -75,8 +75,8 @@ const useStockDetail = () => {
           if (evluPflsRt !== undefined && evluPflsRt !== null) {
             // evlu_pfls_rt는 문자열 퍼센트 값으로 제공될 수 있으므로 숫자로 변환
             const profitRate =
-              typeof evluPflsRt === 'string'
-                ? parseFloat(evluPflsRt.replace('%', ''))
+              typeof evluPflsRt === "string"
+                ? parseFloat(evluPflsRt.replace("%", ""))
                 : Number(evluPflsRt);
 
             console.log(`[${detail.rsym}] 평가손익률: ${profitRate}%`);
@@ -221,8 +221,8 @@ const useStockDetail = () => {
   const fetchStockDetail = useCallback(
     async (stockCode, options = {}) => {
       // 종목코드가 비어 있거나 유효하지 않은 경우
-      if (!stockCode || typeof stockCode !== 'string' || !stockCode.trim()) {
-        toast.error('유효한 종목코드가 없습니다');
+      if (!stockCode || typeof stockCode !== "string" || !stockCode.trim()) {
+        toast.error("유효한 종목코드가 없습니다");
         return null;
       }
 
@@ -236,10 +236,10 @@ const useStockDetail = () => {
         toast.info(`${cleanStockCode} 종목 현재가 조회 중...`);
         const detail = await 현재가상세(cleanStockCode);
 
-        console.log('==== 종목 상세 정보 ====');
-        console.log('종목코드:', cleanStockCode);
-        console.log('현재가 API 응답 데이터', detail);
-        console.log('분석 or 체결 or 구매 데이터', options.stockObject);
+        console.log("==== 종목 상세 정보 ====");
+        console.log("종목코드:", cleanStockCode);
+        console.log("현재가 API 응답 데이터", detail);
+        console.log("분석 or 체결 or 구매 데이터", options.stockObject);
 
         // 상세 데이터 설정
         setDetailData(detail);
@@ -264,11 +264,11 @@ const useStockDetail = () => {
               const evluPflsRt = options.buyCondition?.evluPflsRt;
               options.onBuy(cleanStockCode, {
                 ...detail,
-                is분석: options.activeTab === '분석',
+                is분석: options.activeTab === "분석",
                 perf_1_m: options.stockObject.perf_1_m,
                 evluPflsRt:
-                  typeof evluPflsRt === 'string'
-                    ? parseFloat(evluPflsRt.replace('%', ''))
+                  typeof evluPflsRt === "string"
+                    ? parseFloat(evluPflsRt.replace("%", ""))
                     : Number(evluPflsRt),
               });
             }
@@ -277,7 +277,7 @@ const useStockDetail = () => {
           // 매도 조건 확인 및 실행
           if (
             options.autoSell &&
-            options.activeTab === '구매' &&
+            options.activeTab === "구매" &&
             options.stockObject &&
             options.onSell
           ) {
@@ -337,8 +337,8 @@ const useStockDetail = () => {
 
         return detail;
       } catch (error) {
-        console.error('종목 상세 정보 조회 실패:', error);
-        setError('종목 상세 정보를 가져오는데 실패했습니다.');
+        console.error("종목 상세 정보 조회 실패:", error);
+        setError("종목 상세 정보를 가져오는데 실패했습니다.");
         toast.error(`${cleanStockCode} 현재가 조회 실패`);
         return null;
       } finally {

@@ -1,38 +1,38 @@
-import { useState, useEffect } from 'react';
-import useApi from '@/hooks/useApi';
-import useAccount from '@/hooks/useAccount';
+import { useState, useEffect } from "react";
+import useApi from "@/hooks/useApi";
+import useAccount from "@/hooks/useAccount";
 
 const useMarketIndicators = () => {
   const [indicators, setIndicators] = useState([
     {
-      region: '미국국채',
-      type: '나스닥 선물',
-      value: '0',
-      change: '0',
+      region: "미국국채",
+      type: "나스닥 선물",
+      value: "0",
+      change: "0",
     },
     {
-      region: '미국국채',
-      type: '나스닥 종합',
-      value: '0',
-      change: '0',
+      region: "미국국채",
+      type: "나스닥 종합",
+      value: "0",
+      change: "0",
     },
     {
-      region: '미국국채',
-      type: 'S&P500',
-      value: '0',
-      change: '0',
+      region: "미국국채",
+      type: "S&P500",
+      value: "0",
+      change: "0",
     },
     {
-      region: '지갑아이콘',
-      type: '평가손익',
-      value: '0원',
-      change: '0',
+      region: "지갑아이콘",
+      type: "평가손익",
+      value: "0원",
+      change: "0",
     },
     {
-      region: '돈 아이콘',
-      type: '외화가능액',
-      value: '0원',
-      change: '0',
+      region: "돈 아이콘",
+      type: "외화가능액",
+      value: "0원",
+      change: "0",
     },
   ]);
 
@@ -49,7 +49,7 @@ const useMarketIndicators = () => {
     try {
       // 두 API 응답 데이터를 먼저 가져옴
       const [marketData, balanceData] = await Promise.all([
-        fetch('/api/yahoo')
+        fetch("/api/yahoo")
           .then((res) => (res.ok ? res.json() : []))
           .catch(() => []),
 
@@ -57,10 +57,10 @@ const useMarketIndicators = () => {
           .inquirePresentBalance({
             CANO,
             ACNT_PRDT_CD,
-            WCRC_FRCR_DVSN_CD: '01',
-            NATN_CD: '000',
-            TR_MKET_CD: '00',
-            INQR_DVSN_CD: '00',
+            WCRC_FRCR_DVSN_CD: "01",
+            NATN_CD: "000",
+            TR_MKET_CD: "00",
+            INQR_DVSN_CD: "00",
           })
           .then((res) => res.json())
           .catch(() => ({})),
@@ -75,7 +75,7 @@ const useMarketIndicators = () => {
           const index = updatedIndicators.findIndex(
             (indicator) =>
               indicator.type === item.type ||
-              (indicator.type === 'S&P500' && item.type === 'S&P 500')
+              (indicator.type === "S&P500" && item.type === "S&P 500")
           );
 
           if (index !== -1) {
@@ -105,7 +105,7 @@ const useMarketIndicators = () => {
 
         // 평가손익 업데이트
         const evalProfitIndex = updatedIndicators.findIndex(
-          (item) => item.type === '평가손익'
+          (item) => item.type === "평가손익"
         );
         if (evalProfitIndex !== -1) {
           updatedIndicators[evalProfitIndex] = {
@@ -117,13 +117,13 @@ const useMarketIndicators = () => {
 
         // 외화가능액 업데이트
         const availableAmountIndex = updatedIndicators.findIndex(
-          (item) => item.type === '외화가능액'
+          (item) => item.type === "외화가능액"
         );
         if (availableAmountIndex !== -1) {
           updatedIndicators[availableAmountIndex] = {
             ...updatedIndicators[availableAmountIndex],
             value: formatKRW(balanceInfo.frcr_evlu_tota),
-            change: '0',
+            change: "0",
           };
         }
       }
@@ -131,8 +131,8 @@ const useMarketIndicators = () => {
       // 통합된 상태 업데이트 1회만 수행
       setIndicators(updatedIndicators);
     } catch (err) {
-      console.error('지표 데이터 새로고침 실패:', err);
-      setError(err.message || '데이터를 가져오는데 실패했습니다');
+      console.error("지표 데이터 새로고침 실패:", err);
+      setError(err.message || "데이터를 가져오는데 실패했습니다");
     } finally {
       setLoading(false);
     }

@@ -1,13 +1,13 @@
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const Buy = ({ priceDetailData }) => {
-  const [priceType, setPriceType] = useState('current'); // 기준가격
-  const [buyQuantity, setBuyQuantity] = useState('1'); // 구매수량
-  const [buyRatio, setBuyRatio] = useState('0'); // 가격조정
+  const [priceType, setPriceType] = useState("current"); // 기준가격
+  const [buyQuantity, setBuyQuantity] = useState("1"); // 구매수량
+  const [buyRatio, setBuyRatio] = useState("0"); // 가격조정
   // 개당가격
   const pricePerUnit = useMemo(() => {
     return (priceDetailData?.last * (1 + buyRatio / 100))?.toFixed(2);

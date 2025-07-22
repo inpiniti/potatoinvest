@@ -173,55 +173,25 @@ const processData = async (rawData, aiModels) => {
         processedAt: new Date().toISOString(),
       };
 
-      // 배당 분석을 위한 데이터 구조 생성
-      const dividendData = {
-        continuous_dividend_payout: row.continuous_dividend_payout || 0,
-        continuous_dividend_growth: row.continuous_dividend_growth || 0,
-        dps_common_stock_prim_issue_yoy_growth_fy:
-          row.dps_common_stock_prim_issue_yoy_growth_fy || 0,
-        dividend_payout_ratio_ttm: row.dividend_payout_ratio_ttm || 0,
-        dividends_yield_current: row.dividends_yield_current || 0,
-      };
-
-      // 현금흐름 분석을 위한 데이터 구조 생성
-      //       "cash_f_operating_activities_ttm", // 운영 활동으로 인한 현금 흐름(TTM)
-      // "cash_f_investing_activities_ttm", // 투자 활동으로 인한 현금 흐름(TTM)
-      // "cash_f_financing_activities_ttm", // 재무 활동으로 인한 현금 흐름(TTM)
-      // "free_cash_flow_ttm", // 자유 현금 흐름(TTM)
-      // "capital_expenditures_ttm", // 자본 지출(TTM)
-      const cashFlowData = {
-        cash_f_operating_activities_ttm:
-          row.cash_f_operating_activities_ttm || 0,
-        cash_f_investing_activities_ttm:
-          row.cash_f_investing_activities_ttm || 0,
-        cash_f_financing_activities_ttm:
-          row.cash_f_financing_activities_ttm || 0,
-        free_cash_flow_ttm: row.free_cash_flow_ttm || 0,
-        capital_expenditures_ttm: row.capital_expenditures_ttm || 0,
-      };
-
-      // stock-analyzer를 사용하여 배당 분석 수행
-      let dividendAnalysis = null;
-      let cashFlowAnalysis = null;
+      // 새로운 6가지 지표 종합 분석 수행
+      let comprehensiveAnalysis = null;
       try {
         if (typeof analyzeStock === "function") {
-          const stockAnalysis = analyzeStock({
-            dividend: dividendData,
-            cashFlow: cashFlowData,
-          });
-          dividendAnalysis = stockAnalysis.dividend;
-          // 현금흐름 분석
-          cashFlowAnalysis = stockAnalysis.cashFlow;
+          // 전체 종목 데이터를 분석기에 전달
+          comprehensiveAnalysis = analyzeStock(row);
         }
       } catch (error) {
-        console.warn("배당 분석 중 오류:", error.message);
+        console.warn("종합 분석 중 오류:", error.message);
       }
 
-      // dividend 필드에 분석 결과 추가
+      // 종합 분석 결과 추가
       return {
         ...stockWithPrediction,
-        dividend: dividendAnalysis,
-        cashFlow: cashFlowAnalysis,
+        // 기존 호환성을 위한 필드들 (배당, 현금흐름)
+        dividend: comprehensiveAnalysis?.배당지표평가 || null,
+        cashFlow: comprehensiveAnalysis?.대차대조표평가 || null,
+        // 새로운 6가지 지표 분석 결과
+        comprehensiveAnalysis: comprehensiveAnalysis,
       };
     });
 

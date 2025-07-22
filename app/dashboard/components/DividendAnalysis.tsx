@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   TrendingUp,
   DollarSign,
@@ -8,7 +8,7 @@ import {
   BarChart3,
   AlertTriangle,
   Info,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   RadialBarChart,
   RadialBar,
@@ -16,7 +16,7 @@ import {
   PieChart,
   Pie,
   Cell,
-} from 'recharts';
+} from "recharts";
 
 interface DividendMetric {
   analysis: string;
@@ -36,34 +36,34 @@ interface DividendData {
 
 const metricConfig = {
   continuous_dividend_growth: {
-    label: '배당 성장',
+    label: "배당 성장",
     icon: TrendingUp,
-    color: '#10b981',
-    shortName: '성장',
+    color: "#10b981",
+    shortName: "성장",
   },
   continuous_dividend_payout: {
-    label: '지급 연속성',
+    label: "지급 연속성",
     icon: BarChart3,
-    color: '#3b82f6',
-    shortName: '연속성',
+    color: "#3b82f6",
+    shortName: "연속성",
   },
   dividend_payout_ratio_ttm: {
-    label: '지급비율',
+    label: "지급비율",
     icon: Target,
-    color: '#8b5cf6',
-    shortName: '비율',
+    color: "#8b5cf6",
+    shortName: "비율",
   },
   dividends_yield_current: {
-    label: '배당수익률',
+    label: "배당수익률",
     icon: DollarSign,
-    color: '#f59e0b',
-    shortName: '수익률',
+    color: "#f59e0b",
+    shortName: "수익률",
   },
   dps_common_stock_prim_issue_yoy_growth_fy: {
-    label: 'DPS 성장',
+    label: "DPS 성장",
     icon: TrendingUp,
-    color: '#ef4444',
-    shortName: 'DPS',
+    color: "#ef4444",
+    shortName: "DPS",
   },
 };
 
@@ -99,30 +99,30 @@ export function DividendAnalysis({ data }: { data: DividendData }) {
   const safeData = {
     averageScore: data.averageScore || 0,
     overallAnalysis:
-      data.overallAnalysis || '배당 분석 데이터를 처리 중입니다...',
+      data.overallAnalysis || "배당 분석 데이터를 처리 중입니다...",
     continuous_dividend_growth: data.continuous_dividend_growth || {
-      analysis: '데이터 없음',
+      analysis: "데이터 없음",
       score: 0,
       value: 0,
     },
     continuous_dividend_payout: data.continuous_dividend_payout || {
-      analysis: '데이터 없음',
+      analysis: "데이터 없음",
       score: 0,
       value: 0,
     },
     dividend_payout_ratio_ttm: data.dividend_payout_ratio_ttm || {
-      analysis: '데이터 없음',
+      analysis: "데이터 없음",
       score: 0,
       value: 0,
     },
     dividends_yield_current: data.dividends_yield_current || {
-      analysis: '데이터 없음',
+      analysis: "데이터 없음",
       score: 0,
       value: 0,
     },
     dps_common_stock_prim_issue_yoy_growth_fy:
       data.dps_common_stock_prim_issue_yoy_growth_fy || {
-        analysis: '데이터 없음',
+        analysis: "데이터 없음",
         score: 0,
         value: 0,
       },
@@ -130,14 +130,14 @@ export function DividendAnalysis({ data }: { data: DividendData }) {
 
   // 레이달 차트용 데이터 준비
   const chartData = Object.entries(safeData)
-    .filter(([key]) => key !== 'averageScore' && key !== 'overallAnalysis')
+    .filter(([key]) => key !== "averageScore" && key !== "overallAnalysis")
     .map(([key, metric]) => {
       const config = metricConfig[key as keyof typeof metricConfig];
       if (
         !config ||
-        typeof metric !== 'object' ||
+        typeof metric !== "object" ||
         metric === null ||
-        !('score' in metric)
+        !("score" in metric)
       )
         return null;
       return {
@@ -153,19 +153,19 @@ export function DividendAnalysis({ data }: { data: DividendData }) {
   // 전체 점수 차트 데이터
   const overallChartData = [
     {
-      name: '점수',
+      name: "점수",
       value: Math.max(0, Math.min(100, (safeData.averageScore / 5) * 100)),
       fill:
         safeData.averageScore >= 3
-          ? '#10b981'
+          ? "#10b981"
           : safeData.averageScore >= 2
-          ? '#f59e0b'
-          : '#ef4444',
+          ? "#f59e0b"
+          : "#ef4444",
     },
   ];
 
   const formatValue = (value: number, key: string) => {
-    if (key.includes('yield') || key.includes('ratio')) {
+    if (key.includes("yield") || key.includes("ratio")) {
       return value < 1
         ? `${(value * 100)?.toFixed(2)}%`
         : `${value?.toFixed(2)}%`;
@@ -236,18 +236,18 @@ export function DividendAnalysis({ data }: { data: DividendData }) {
               <Badge
                 variant={
                   safeData.averageScore >= 3
-                    ? 'default'
+                    ? "default"
                     : safeData.averageScore >= 2
-                    ? 'secondary'
-                    : 'destructive'
+                    ? "secondary"
+                    : "destructive"
                 }
                 className="px-4 py-1"
               >
                 {safeData.averageScore >= 3
-                  ? '양호'
+                  ? "양호"
                   : safeData.averageScore >= 2
-                  ? '보통'
-                  : '개선필요'}
+                  ? "보통"
+                  : "개선필요"}
               </Badge>
             </div>
           </CardContent>
@@ -274,8 +274,8 @@ export function DividendAnalysis({ data }: { data: DividendData }) {
               >
                 <RadialBar
                   label={{
-                    position: 'insideStart',
-                    fill: '#fff',
+                    position: "insideStart",
+                    fill: "#fff",
                     fontSize: 12,
                   }}
                   background
@@ -314,11 +314,11 @@ export function DividendAnalysis({ data }: { data: DividendData }) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Object.entries(safeData).map(([key, metric]) => {
           if (
-            key === 'averageScore' ||
-            key === 'overallAnalysis' ||
+            key === "averageScore" ||
+            key === "overallAnalysis" ||
             !metric ||
-            typeof metric !== 'object' ||
-            !('analysis' in metric)
+            typeof metric !== "object" ||
+            !("analysis" in metric)
           )
             return null;
 
@@ -348,10 +348,10 @@ export function DividendAnalysis({ data }: { data: DividendData }) {
                   <Badge
                     variant={
                       (metric.score || 0) >= 4
-                        ? 'default'
+                        ? "default"
                         : (metric.score || 0) >= 2
-                        ? 'secondary'
-                        : 'destructive'
+                        ? "secondary"
+                        : "destructive"
                     }
                     className="text-xs"
                   >

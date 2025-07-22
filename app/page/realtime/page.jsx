@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import IStock from '@/app/interface/IStock';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import IStock from "@/app/interface/IStock";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -9,8 +9,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import {
   Pagination,
   PaginationContent,
@@ -18,7 +18,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination';
+} from "@/components/ui/pagination";
 import {
   ArrowDown,
   ArrowUp,
@@ -27,13 +27,13 @@ import {
   ArrowLeft,
   ArrowRight,
   RefreshCw,
-} from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import useTrading from '@/hooks/useTrading';
-import useAccount from '@/hooks/useAccount';
-import useAi from '@/hooks/useAi';
-import useApi from '@/hooks/useApi'; // API 훅 추가
-import useQuotations from '@/hooks/useQuotations'; // 시세 조회 훅 추가
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import useTrading from "@/hooks/useTrading";
+import useAccount from "@/hooks/useAccount";
+import useAi from "@/hooks/useAi";
+import useApi from "@/hooks/useApi"; // API 훅 추가
+import useQuotations from "@/hooks/useQuotations"; // 시세 조회 훅 추가
 
 import {
   Dialog,
@@ -43,7 +43,7 @@ import {
   DialogDescription,
   DialogClose,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 import {
   Card,
@@ -51,11 +51,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 
-import OpacityLoader from '@/components/ui/opacity-loader';
+import OpacityLoader from "@/components/ui/opacity-loader";
 
-import aiModels from '@/json/ai_models.json'; // AI 모델 데이터 추가
+import aiModels from "@/json/ai_models.json"; // AI 모델 데이터 추가
 
 const RealTime = () => {
   const [cano, acntPrdtCd] = useAccount();
@@ -69,8 +69,8 @@ const RealTime = () => {
   const [미체결리스트, set미체결리스트] = useState([]);
   const [구매내역, set구매내역] = useState([]); // 구매내역 상태 추가
   const [predictionsLoading, setPredictionsLoading] = useState(true);
-  const [sortField, setSortField] = useState('close');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [sortField, setSortField] = useState("close");
+  const [sortOrder, setSortOrder] = useState("desc");
   const [isLoading, setIsLoading] = useState(true);
   const [pendingLoading, setPendingLoading] = useState(false);
   const [models, setModels] = useState([]); // 모델 상태 추가
@@ -95,7 +95,7 @@ const RealTime = () => {
         const detail = await 현재가상세(stockCode);
         setStockDetail(detail);
       } catch (error) {
-        console.error('종목 상세 정보 조회 실패:', error);
+        console.error("종목 상세 정보 조회 실패:", error);
         setStockDetail(null);
       } finally {
         setDetailLoading(false);
@@ -118,7 +118,7 @@ const RealTime = () => {
   const handleBuy = useCallback(
     async (stockCode, quantity, price) => {
       if (!stockCode || !quantity || !price) {
-        alert('종목코드, 수량, 가격을 모두 입력해주세요.');
+        alert("종목코드, 수량, 가격을 모두 입력해주세요.");
         return;
       }
 
@@ -132,7 +132,7 @@ const RealTime = () => {
           ord_qty: String(quantity),
         });
 
-        if (response.rt_cd === '0') {
+        if (response.rt_cd === "0") {
           // 성공적으로 주문이 접수된 경우
           alert(
             `[${stockCode}] ${quantity}주 매수 주문이 접수되었습니다. (지정가: ${price})`
@@ -142,8 +142,8 @@ const RealTime = () => {
           alert(`매수 주문 실패: ${response.msg1}`);
         }
       } catch (error) {
-        console.error('매수 오류:', error);
-        alert('매수 주문 중 오류가 발생했습니다.');
+        console.error("매수 오류:", error);
+        alert("매수 주문 중 오류가 발생했습니다.");
       } finally {
         setDetailLoading(false);
       }
@@ -178,18 +178,18 @@ const RealTime = () => {
           setModels(loadedModels);
           사용할모델들 = loadedModels;
         } catch (modelError) {
-          console.warn('모델 로딩 실패:', modelError);
+          console.warn("모델 로딩 실패:", modelError);
           // 기본 모델이라도 시도해봄
           try {
             const defaultModel = await 역직렬화(
-              'stock_prediction_model',
-              'default_weights'
+              "stock_prediction_model",
+              "default_weights"
             );
             사용할모델들 = [defaultModel];
             setModels([defaultModel]);
           } catch (defaultModelError) {
-            console.error('기본 모델 로드 실패:', defaultModelError);
-            throw new Error('AI 모델을 로드할 수 없습니다');
+            console.error("기본 모델 로드 실패:", defaultModelError);
+            throw new Error("AI 모델을 로드할 수 없습니다");
           }
         }
       }
@@ -215,13 +215,13 @@ const RealTime = () => {
       // 예측이 완료된 데이터로 상태 업데이트
       setStockData(최종분석데이터.filter((item) => item.예측결과 > 0.6));
     } catch (error) {
-      console.error('데이터 가져오기 및 예측 중 오류:', error);
+      console.error("데이터 가져오기 및 예측 중 오류:", error);
       // 데이터만 설정하고 예측은 건너뜀
       try {
         const basicData = await 데이터가져오기();
         setStockData(basicData);
       } catch (dataError) {
-        console.error('기본 데이터 가져오기 실패:', dataError);
+        console.error("기본 데이터 가져오기 실패:", dataError);
         setStockData([]);
       }
     } finally {
@@ -237,10 +237,10 @@ const RealTime = () => {
         const payload = {
           CANO: cano,
           ACNT_PRDT_CD: acntPrdtCd,
-          OVRS_EXCG_CD: 'NASD',
-          TR_CRCY_CD: 'USD',
-          CTX_AREA_FK200: '',
-          CTX_AREA_NK200: '',
+          OVRS_EXCG_CD: "NASD",
+          TR_CRCY_CD: "USD",
+          CTX_AREA_FK200: "",
+          CTX_AREA_NK200: "",
         };
 
         const response = await api.trading.inquireBalance(payload);
@@ -249,7 +249,7 @@ const RealTime = () => {
         set구매내역(data.output1 || []);
       }
     } catch (error) {
-      console.error('구매내역 조회 실패:', error);
+      console.error("구매내역 조회 실패:", error);
       set구매내역([]);
     }
   };
@@ -262,7 +262,7 @@ const RealTime = () => {
         set미체결리스트(data.output || []);
       }
     } catch (error) {
-      console.error('미체결 내역 조회 실패:', error);
+      console.error("미체결 내역 조회 실패:", error);
     }
   };
 
@@ -273,7 +273,7 @@ const RealTime = () => {
       await 미체결내역조회();
       await 구매내역조회();
     } catch (error) {
-      console.error('미체결/구매내역 조회 실패:', error);
+      console.error("미체결/구매내역 조회 실패:", error);
     } finally {
       setPendingLoading(false);
     }
@@ -315,7 +315,7 @@ const RealTime = () => {
         bValue = b[sortField];
       }
 
-      return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+      return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
     });
   }, [stockData, sortField, sortOrder]);
 
@@ -333,7 +333,7 @@ const RealTime = () => {
       if (currentIndex === -1) return;
 
       let nextIndex;
-      if (direction === 'next') {
+      if (direction === "next") {
         nextIndex = (currentIndex + 1) % sortedData.length;
       } else {
         nextIndex = (currentIndex - 1 + sortedData.length) % sortedData.length;
@@ -361,10 +361,10 @@ const RealTime = () => {
   // Handle sort
   const handleSort = (field) => {
     if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
-      setSortOrder('desc');
+      setSortOrder("desc");
     }
   };
 
@@ -395,7 +395,7 @@ const RealTime = () => {
 
       // Add ellipsis if needed
       if (startPage > 2) {
-        pages.push('...');
+        pages.push("...");
       }
 
       // Add pages in range
@@ -405,7 +405,7 @@ const RealTime = () => {
 
       // Add ellipsis if needed
       if (endPage < totalPages - 1) {
-        pages.push('...');
+        pages.push("...");
       }
 
       // Always show last page
@@ -419,7 +419,7 @@ const RealTime = () => {
    * 숫자를 가격 형식으로 포맷팅 (예: 1,234,567)
    */
   function formatPrice(price) {
-    if (!price) return '0';
+    if (!price) return "0";
     return Number(price).toLocaleString();
   }
 
@@ -427,7 +427,7 @@ const RealTime = () => {
    * 숫자를 천 단위 구분자가 있는 형식으로 포맷팅 (예: 1,234,567)
    */
   function formatNumber(number) {
-    if (!number) return '0';
+    if (!number) return "0";
     return Number(number).toLocaleString();
   }
 
@@ -476,15 +476,15 @@ const RealTime = () => {
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 className={
                   currentPage === 1
-                    ? 'pointer-events-none opacity-50'
-                    : 'cursor-pointer'
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
                 }
               />
             </PaginationItem>
 
             {pageNumbers.map((page, index) => (
               <PaginationItem key={index}>
-                {page === '...' ? (
+                {page === "..." ? (
                   <div className="px-2">...</div>
                 ) : (
                   <PaginationLink
@@ -505,8 +505,8 @@ const RealTime = () => {
                 }
                 className={
                   currentPage === totalPages
-                    ? 'pointer-events-none opacity-50'
-                    : 'cursor-pointer'
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
                 }
               />
             </PaginationItem>
@@ -532,11 +532,11 @@ const RealTime = () => {
                 <TableHead>종목코드</TableHead>
                 <TableHead
                   className="cursor-pointer hover:bg-gray-50"
-                  onClick={() => handleSort('close')}
+                  onClick={() => handleSort("close")}
                 >
-                  종가{' '}
-                  {sortField === 'close' &&
-                    (sortOrder === 'asc' ? (
+                  종가{" "}
+                  {sortField === "close" &&
+                    (sortOrder === "asc" ? (
                       <ArrowUp className="inline h-4 w-4" />
                     ) : (
                       <ArrowDown className="inline h-4 w-4" />
@@ -544,11 +544,11 @@ const RealTime = () => {
                 </TableHead>
                 <TableHead
                   className="cursor-pointer hover:bg-gray-50"
-                  onClick={() => handleSort('perf_1_m')}
+                  onClick={() => handleSort("perf_1_m")}
                 >
-                  1개월{' '}
-                  {sortField === 'perf_1_m' &&
-                    (sortOrder === 'asc' ? (
+                  1개월{" "}
+                  {sortField === "perf_1_m" &&
+                    (sortOrder === "asc" ? (
                       <ArrowUp className="inline h-4 w-4" />
                     ) : (
                       <ArrowDown className="inline h-4 w-4" />
@@ -556,11 +556,11 @@ const RealTime = () => {
                 </TableHead>
                 <TableHead
                   className="cursor-pointer hover:bg-gray-50 hidden sm:table-cell"
-                  onClick={() => handleSort('perf_3_m')}
+                  onClick={() => handleSort("perf_3_m")}
                 >
-                  3개월{' '}
-                  {sortField === 'perf_3_m' &&
-                    (sortOrder === 'asc' ? (
+                  3개월{" "}
+                  {sortField === "perf_3_m" &&
+                    (sortOrder === "asc" ? (
                       <ArrowUp className="inline h-4 w-4" />
                     ) : (
                       <ArrowDown className="inline h-4 w-4" />
@@ -580,7 +580,7 @@ const RealTime = () => {
                   <TableRow
                     key={live.name || live.code}
                     className={`${
-                      hasSettlement || hasPurchased ? 'bg-gray-50' : ''
+                      hasSettlement || hasPurchased ? "bg-gray-50" : ""
                     } cursor-pointer hover:bg-gray-100`}
                     onClick={() => handleStockSelect(live)}
                   >
@@ -591,7 +591,7 @@ const RealTime = () => {
                           alt="@radix-vue"
                         />
                         <AvatarFallback>
-                          {live.description?.slice(0, 2) || 'NA'}
+                          {live.description?.slice(0, 2) || "NA"}
                         </AvatarFallback>
                       </Avatar>
                     </TableCell>
@@ -601,8 +601,8 @@ const RealTime = () => {
                     <TableCell
                       className={
                         Number(live.change) < 0
-                          ? 'text-blue-400'
-                          : 'text-red-400'
+                          ? "text-blue-400"
+                          : "text-red-400"
                       }
                     >
                       {live.close} ({Number(live.change || 0)?.toFixed(1)}%)
@@ -610,8 +610,8 @@ const RealTime = () => {
                     <TableCell
                       className={
                         Number(live.perf_1_m) < 0
-                          ? 'text-blue-400'
-                          : 'text-red-400'
+                          ? "text-blue-400"
+                          : "text-red-400"
                       }
                     >
                       {Number(live.perf_1_m || 0)?.toFixed(1)}%
@@ -619,8 +619,8 @@ const RealTime = () => {
                     <TableCell
                       className={`${
                         Number(live.perf_3_m) < 0
-                          ? 'text-blue-400'
-                          : 'text-red-400'
+                          ? "text-blue-400"
+                          : "text-red-400"
                       } hidden sm:table-cell`}
                     >
                       {Number(live.perf_3_m || 0)?.toFixed(1)}%
@@ -642,17 +642,17 @@ const RealTime = () => {
                         <span
                           className={`px-2 py-1 rounded-full text-xs ${
                             prediction > 0
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {prediction > 0 ? '상승' : '하락'} (
+                          {prediction > 0 ? "상승" : "하락"} (
                           {prediction?.toFixed(2)}%)
                         </span>
                       ) : predictionsLoading ? (
                         <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
                       ) : (
-                        '-'
+                        "-"
                       )}
                     </TableCell>
                   </TableRow>
@@ -671,15 +671,15 @@ const RealTime = () => {
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 className={
                   currentPage === 1
-                    ? 'pointer-events-none opacity-50'
-                    : 'cursor-pointer'
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
                 }
               />
             </PaginationItem>
 
             {pageNumbers.map((page, index) => (
               <PaginationItem key={index}>
-                {page === '...' ? (
+                {page === "..." ? (
                   <div className="px-2">...</div>
                 ) : (
                   <PaginationLink
@@ -700,8 +700,8 @@ const RealTime = () => {
                 }
                 className={
                   currentPage === totalPages
-                    ? 'pointer-events-none opacity-50'
-                    : 'cursor-pointer'
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
                 }
               />
             </PaginationItem>
@@ -720,11 +720,11 @@ const RealTime = () => {
                     alt={selectedStock.name || selectedStock.code}
                   />
                   <AvatarFallback>
-                    {selectedStock?.description?.slice(0, 2) || 'NA'}
+                    {selectedStock?.description?.slice(0, 2) || "NA"}
                   </AvatarFallback>
                 </Avatar>
               )}
-              {selectedStock?.name || selectedStock?.code}{' '}
+              {selectedStock?.name || selectedStock?.code}{" "}
               <span className="text-gray-500 text-sm font-normal">
                 {selectedStock?.description}
               </span>
@@ -765,22 +765,22 @@ const RealTime = () => {
                           <p className="text-sm text-gray-500">현재가</p>
                           <p
                             className={`text-2xl font-bold ${
-                              stockDetail.t_xsgn === '1'
-                                ? 'text-blue-600'
-                                : stockDetail.t_xsgn === '2'
-                                ? 'text-red-600'
-                                : 'text-gray-700'
+                              stockDetail.t_xsgn === "1"
+                                ? "text-blue-600"
+                                : stockDetail.t_xsgn === "2"
+                                ? "text-red-600"
+                                : "text-gray-700"
                             }`}
                           >
                             {Number(stockDetail.last)?.toFixed(3)} $
                           </p>
                           <p
                             className={`text-sm ${
-                              stockDetail.t_xsgn === '1'
-                                ? 'text-blue-500'
-                                : stockDetail.t_xsgn === '2'
-                                ? 'text-red-500'
-                                : 'text-gray-500'
+                              stockDetail.t_xsgn === "1"
+                                ? "text-blue-500"
+                                : stockDetail.t_xsgn === "2"
+                                ? "text-red-500"
+                                : "text-gray-500"
                             }`}
                           >
                             {stockDetail.t_xrat}% (
@@ -793,7 +793,7 @@ const RealTime = () => {
                             {formatNumber(stockDetail.pvol)}
                           </p>
                           <p className="text-sm text-gray-500">
-                            거래대금:{' '}
+                            거래대금:{" "}
                             {formatNumber(
                               Math.round(stockDetail.pamt / 1000000)
                             )}
@@ -872,7 +872,7 @@ const RealTime = () => {
                             className="flex-1 bg-green-600 hover:bg-green-700 text-sm"
                             onClick={() => {
                               const quantity =
-                                document.getElementById('quantity').value || 1;
+                                document.getElementById("quantity").value || 1;
                               const currentPrice = Number(stockDetail.last);
                               // 소수점 둘째자리까지 반올림
                               const formattedPrice =
@@ -891,7 +891,7 @@ const RealTime = () => {
                             className="flex-1 bg-blue-600 hover:bg-blue-700 text-sm"
                             onClick={() => {
                               const quantity =
-                                document.getElementById('quantity').value || 1;
+                                document.getElementById("quantity").value || 1;
                               const currentPrice = Number(stockDetail.last);
                               // 1% 할인된 가격, 소수점 둘째자리까지 반올림
                               const discountedPrice =
@@ -910,7 +910,7 @@ const RealTime = () => {
                             className="flex-1 bg-purple-600 hover:bg-purple-700 text-sm"
                             onClick={() => {
                               const quantity =
-                                document.getElementById('quantity').value || 1;
+                                document.getElementById("quantity").value || 1;
                               const currentPrice = Number(stockDetail.last);
                               // 2% 할인된 가격, 소수점 둘째자리까지 반올림
                               const discountedPrice =
@@ -1026,13 +1026,13 @@ const RealTime = () => {
                           <p
                             className={`text-xl font-bold ${
                               selectedStock.예측결과 > 0
-                                ? 'text-green-600'
-                                : 'text-red-600'
+                                ? "text-green-600"
+                                : "text-red-600"
                             }`}
                           >
                             {selectedStock.예측결과 > 0
-                              ? '상승 예측'
-                              : '하락 예측'}
+                              ? "상승 예측"
+                              : "하락 예측"}
                           </p>
                           <p className="text-sm text-gray-500">
                             예상 변동률: {selectedStock.예측결과?.toFixed(2)}%
@@ -1060,7 +1060,7 @@ const RealTime = () => {
               type="button"
               variant="outline"
               size="icon"
-              onClick={() => navigateToStock('prev')}
+              onClick={() => navigateToStock("prev")}
               disabled={detailLoading || sortedData.length <= 1}
             >
               <ArrowLeft className="h-4 w-4" />
@@ -1071,7 +1071,7 @@ const RealTime = () => {
               type="button"
               variant="outline"
               size="icon"
-              onClick={() => navigateToStock('next')}
+              onClick={() => navigateToStock("next")}
               disabled={detailLoading || sortedData.length <= 1}
             >
               <ArrowRight className="h-4 w-4" />

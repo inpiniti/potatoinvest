@@ -1,13 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   TrendingUp,
   DollarSign,
   AlertTriangle,
   Info,
   Banknote,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   RadialBarChart,
   RadialBar,
@@ -15,7 +15,7 @@ import {
   PieChart,
   Pie,
   Cell,
-} from 'recharts';
+} from "recharts";
 
 interface CashFlowMetric {
   analysis: string;
@@ -33,25 +33,25 @@ interface CashFlowData {
 
 const metricConfig = {
   cash_f_operating_activities_ttm: {
-    label: '영업활동 현금흐름',
+    label: "영업활동 현금흐름",
     icon: TrendingUp,
-    color: '#10b981',
-    shortName: '영업',
-    description: '본업으로 버는 돈',
+    color: "#10b981",
+    shortName: "영업",
+    description: "본업으로 버는 돈",
   },
   cash_f_financing_activities_ttm: {
-    label: '재무활동 현금흐름',
+    label: "재무활동 현금흐름",
     icon: Banknote,
-    color: '#8b5cf6',
-    shortName: '재무',
-    description: '자금조달 및 상환',
+    color: "#8b5cf6",
+    shortName: "재무",
+    description: "자금조달 및 상환",
   },
   free_cash_flow_ttm: {
-    label: '자유현금흐름(FCF)',
+    label: "자유현금흐름(FCF)",
     icon: DollarSign,
-    color: '#f59e0b',
-    shortName: 'FCF',
-    description: '자유롭게 쓸 수 있는 돈',
+    color: "#f59e0b",
+    shortName: "FCF",
+    description: "자유롭게 쓸 수 있는 돈",
   },
 };
 
@@ -88,19 +88,19 @@ export function CashFlowAnalysis({ data }: { data: CashFlowData }) {
   const safeData = {
     averageScore: data.averageScore || 0,
     overallAnalysis:
-      data.overallAnalysis || '현금흐름 분석 데이터를 처리 중입니다...',
+      data.overallAnalysis || "현금흐름 분석 데이터를 처리 중입니다...",
     cash_f_operating_activities_ttm: data.cash_f_operating_activities_ttm || {
-      analysis: '데이터 없음',
+      analysis: "데이터 없음",
       score: 0,
       value: 0,
     },
     cash_f_financing_activities_ttm: data.cash_f_financing_activities_ttm || {
-      analysis: '데이터 없음',
+      analysis: "데이터 없음",
       score: 0,
       value: 0,
     },
     free_cash_flow_ttm: data.free_cash_flow_ttm || {
-      analysis: '데이터 없음',
+      analysis: "데이터 없음",
       score: 0,
       value: 0,
     },
@@ -108,14 +108,14 @@ export function CashFlowAnalysis({ data }: { data: CashFlowData }) {
 
   // 레이달 차트용 데이터 준비
   const chartData = Object.entries(safeData)
-    .filter(([key]) => key !== 'averageScore' && key !== 'overallAnalysis')
+    .filter(([key]) => key !== "averageScore" && key !== "overallAnalysis")
     .map(([key, metric]) => {
       const config = metricConfig[key as keyof typeof metricConfig];
       if (
         !config ||
-        typeof metric !== 'object' ||
+        typeof metric !== "object" ||
         metric === null ||
-        !('score' in metric)
+        !("score" in metric)
       )
         return null;
       return {
@@ -131,14 +131,14 @@ export function CashFlowAnalysis({ data }: { data: CashFlowData }) {
   // 전체 점수 차트 데이터
   const overallChartData = [
     {
-      name: '점수',
+      name: "점수",
       value: Math.max(0, Math.min(100, (safeData.averageScore / 5) * 100)),
       fill:
         safeData.averageScore >= 3
-          ? '#10b981'
+          ? "#10b981"
           : safeData.averageScore >= 2
-          ? '#f59e0b'
-          : '#ef4444',
+          ? "#f59e0b"
+          : "#ef4444",
     },
   ];
 
@@ -222,18 +222,18 @@ export function CashFlowAnalysis({ data }: { data: CashFlowData }) {
               <Badge
                 variant={
                   safeData.averageScore >= 3
-                    ? 'default'
+                    ? "default"
                     : safeData.averageScore >= 2
-                    ? 'secondary'
-                    : 'destructive'
+                    ? "secondary"
+                    : "destructive"
                 }
                 className="px-4 py-1"
               >
                 {safeData.averageScore >= 3
-                  ? '건전'
+                  ? "건전"
                   : safeData.averageScore >= 2
-                  ? '보통'
-                  : '위험'}
+                  ? "보통"
+                  : "위험"}
               </Badge>
             </div>
           </CardContent>
@@ -260,8 +260,8 @@ export function CashFlowAnalysis({ data }: { data: CashFlowData }) {
               >
                 <RadialBar
                   label={{
-                    position: 'insideStart',
-                    fill: '#fff',
+                    position: "insideStart",
+                    fill: "#fff",
                     fontSize: 12,
                   }}
                   background
@@ -300,11 +300,11 @@ export function CashFlowAnalysis({ data }: { data: CashFlowData }) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Object.entries(safeData).map(([key, metric]) => {
           if (
-            key === 'averageScore' ||
-            key === 'overallAnalysis' ||
+            key === "averageScore" ||
+            key === "overallAnalysis" ||
             !metric ||
-            typeof metric !== 'object' ||
-            !('analysis' in metric)
+            typeof metric !== "object" ||
+            !("analysis" in metric)
           )
             return null;
 
@@ -342,10 +342,10 @@ export function CashFlowAnalysis({ data }: { data: CashFlowData }) {
                   <Badge
                     variant={
                       (metric.score || 0) >= 4
-                        ? 'default'
+                        ? "default"
                         : (metric.score || 0) >= 2
-                        ? 'secondary'
-                        : 'destructive'
+                        ? "secondary"
+                        : "destructive"
                     }
                     className="text-xs"
                   >
@@ -358,7 +358,7 @@ export function CashFlowAnalysis({ data }: { data: CashFlowData }) {
                   <span className="text-gray-500">현재 값</span>
                   <span
                     className={`font-semibold ${
-                      isNegative ? 'text-red-600' : 'text-green-600'
+                      isNegative ? "text-red-600" : "text-green-600"
                     }`}
                   >
                     {formatValue(metric.value || 0)}

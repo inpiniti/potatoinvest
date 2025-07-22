@@ -115,15 +115,15 @@ const crawling = async (countryCode: string) => {
       "name",
       "description",
       "logoid",
-      "operating_margin_ttm",
+      //"operating_margin_ttm",
       "relative_volume_10d_calc",
-      "enterprise_value_to_revenue_ttm",
+      //"enterprise_value_to_revenue_ttm",
       "Volatility.W", //"volatility_w",
       "Volatility.M", //"volatility_m",
       "dividends_yield_current",
       "gap",
       "volume_change",
-      "pre_tax_margin_ttm",
+      //"pre_tax_margin_ttm",
       // "perf_1_y_market_cap",
       // "perf_w",
       // "perf_1_m",
@@ -147,9 +147,9 @@ const crawling = async (countryCode: string) => {
       // "recommend_all",
       // "recommend_m_a",
       // "recommend_other",
-      "Recommend.All", // 모든 추천
-      "Recommend.MA", // 이동 평균 추천
-      "Recommend.Other", // 기타 추천
+      //"Recommend.All", // 모든 추천
+      //"Recommend.MA", // 이동 평균 추천
+      //"Recommend.Other", // 기타 추천
 
       // "r_s_i",
       // "mom",
@@ -243,28 +243,28 @@ const crawling = async (countryCode: string) => {
     //   "volume_change", // 거래량 변동
     //   "exchange", // 거래소
     // ];
-    // const 평가 = [
-    //   "name", // 이름
-    //   "description", // 설명
-    //   "logoid", // 로고 ID
-    //   "update_mode", // 업데이트 모드
-    //   "type", // 유형
-    //   "market_cap_basic", // 기본 시장 규모
-    //   "fundamental_currency_code", // 기본 통화 코드
-    //   "Perf.1Y.MarketCap", // 1년 시장 규모 성과
-    //   "price_earnings_ttm", // 시가 총액 대비 이익(TTM)
-    //   "price_earnings_growth_ttm", // 시가 총액 대비 이익 성장(TTM)
-    //   "price_sales_current", // 현재 매출 대비 가격
-    //   "price_book_fq", // 분기별 자산 대비 가격
-    //   "price_to_cash_f_operating_activities_ttm", // 영업 활동으로 인한 현금 흐름 대비 가격(TTM)
-    //   "price_free_cash_flow_ttm", // 자유 현금 흐름 대비 가격(TTM)
-    //   "price_to_cash_ratio", // 현금 대비 가격 비율
-    //   "enterprise_value_current", // 현재 기업 가치
-    //   "enterprise_value_to_revenue_ttm", // 수익 대비 기업 가치(TTM)
-    //   "enterprise_value_to_ebit_ttm", // EBIT 대비 기업 가치(TTM)
-    //   "enterprise_value_ebitda_ttm", // EBITDA 대비 기업 가치(TTM)
-    //   "exchange", // 거래소
-    // ];
+    const 평가 = [
+      //   "name", // 이름
+      //   "description", // 설명
+      //   "logoid", // 로고 ID
+      //   "update_mode", // 업데이트 모드
+      //   "type", // 유형
+      //   "market_cap_basic", // 기본 시장 규모
+      //   "fundamental_currency_code", // 기본 통화 코드
+      //   "Perf.1Y.MarketCap", // 1년 시장 규모 성과
+      "price_earnings_ttm", // 시가 총액 대비 이익(TTM)
+      "price_earnings_growth_ttm", // 시가 총액 대비 이익 성장(TTM)
+      "price_sales_current", // 현재 매출 대비 가격
+      "price_book_fq", // 분기별 자산 대비 가격
+      "price_to_cash_f_operating_activities_ttm", // 영업 활동으로 인한 현금 흐름 대비 가격(TTM)
+      "price_free_cash_flow_ttm", // 자유 현금 흐름 대비 가격(TTM)
+      "price_to_cash_ratio", // 현금 대비 가격 비율
+      //   "enterprise_value_current", // 현재 기업 가치
+      "enterprise_value_to_revenue_ttm", // 수익 대비 기업 가치(TTM)
+      "enterprise_value_to_ebit_ttm", // EBIT 대비 기업 가치(TTM)
+      "enterprise_value_ebitda_ttm", // EBITDA 대비 기업 가치(TTM)
+      //   "exchange", // 거래소
+    ];
     const 배당 = [
       //   "name", // 이름
       //   "description", // 설명
@@ -273,70 +273,72 @@ const crawling = async (countryCode: string) => {
       //   "type", // 유형
       //   "dps_common_stock_prim_issue_fy", // 주식 기본 발행 DPS(연간)
       //   "fundamental_currency_code", // 기본 통화 코드
-      "dividends_yield_current", // 배당 수익률%
+      //"dividends_yield_current", // 배당 수익률%
       // "dividends_yield", // 배당 수익률%
-      "dividend_payout_ratio_ttm", // 배당 비율%(TTM)
-      "dps_common_stock_prim_issue_yoy_growth_fy", // 주식 기본 발행 DPS 연간 성장률(FY)
+      //"dividend_payout_ratio_ttm", // 배당 비율%(TTM)
+      //"dps_common_stock_prim_issue_yoy_growth_fy", // 주식 기본 발행 DPS 연간 성장률(FY)
       "continuous_dividend_payout", // 연속 배당 지급
       "continuous_dividend_growth", // 연속 배당 성장
       //   "exchange", // 거래소
     ];
-    // const 수익성 = [
-    //   "name", // 이름
-    //   "description", // 설명
-    //   "logoid", // 로고 ID
-    //   "update_mode", // 업데이트 모드
-    //   "type", // 유형
-    //   "gross_margin_ttm", // 총 마진(TTM)
-    //   "operating_margin_ttm", // 운영 마진(TTM)
-    //   "pre_tax_margin_ttm", // 세전 마진(TTM)
-    //   "net_margin_ttm", // 순 마진(TTM)
-    //   "free_cash_flow_margin_ttm", // 자유 현금 흐름 마진(TTM)
-    //   "return_on_assets_fq", // 자산 대비 수익률(분기별)
-    //   "return_on_equity_fq", // 자본 대비 수익률(분기별)
-    //   "return_on_invested_capital_fq", // 투자된 자본 대비 수익률(분기별)
-    //   "research_and_dev_ratio_ttm", // 연구 개발 비율(TTM)
-    //   "sell_gen_admin_exp_other_ratio_ttm", // 판매, 일반 및 관리 비용 비율(TTM)
-    //   "exchange", // 거래소
-    // ];
-    // const 손익계산 = [
-    //   "name", // 이름
-    //   "description", // 설명
-    //   "logoid", // 로고 ID
-    //   "update_mode", // 업데이트 모드
-    //   "type", // 유형
-    //   "gross_margin_ttm", // 총 마진(TTM)
-    //   "operating_margin_ttm", // 운영 마진(TTM)
-    //   "pre_tax_margin_ttm", // 세전 마진(TTM)
-    //   "net_margin_ttm", // 순 마진(TTM)
-    //   "free_cash_flow_margin_ttm", // 자유 현금 흐름 마진(TTM)
-    //   "return_on_assets_fq", // 자산 대비 수익률(분기별)
-    //   "return_on_equity_fq", // 자본 대비 수익률(분기별)
-    //   "return_on_invested_capital_fq", // 투자된 자본 대비 수익률(분기별)
-    //   "research_and_dev_ratio_ttm", // 연구 개발 비율(TTM)
-    //   "sell_gen_admin_exp_other_ratio_ttm", // 판매, 일반 및 관리 비용 비율(TTM)
-    //   "exchange", // 거래소
-    // ];
-    // const 대차대조표 = [
-    //   "name", // 이름
-    //   "description", // 설명
-    //   "logoid", // 로고 ID
-    //   "update_mode", // 업데이트 모드
-    //   "type", // 유형
-    //   "total_assets_fq", // 총 자산(분기별)
-    //   "fundamental_currency_code", // 기본 통화 코드
-    //   "total_current_assets_fq", // 총 유동 자산(분기별)
-    //   "cash_n_short_term_invest_fq", // 현금 및 단기 투자(분기별)
-    //   "total_liabilities_fq", // 총 부채(분기별)
-    //   "total_debt_fq", // 총 부채(분기별)
-    //   "net_debt_fq", // 순 부채(분기별)
-    //   "total_equity_fq", // 총 자본(분기별)
-    //   "current_ratio_fq", // 유동비율(분기별)
-    //   "quick_ratio_fq", // 당좌비율(분기별)
-    //   "debt_to_equity_fq", // 부채 대 자본 비율(분기별)
-    //   "cash_n_short_term_invest_to_total_debt_fq", // 현금 및 단기 투자 대 총 부채 비율(분기별)
-    //   "exchange", // 거래소
-    // ];
+    const 수익성 = [
+      //   "name", // 이름
+      //   "description", // 설명
+      //   "logoid", // 로고 ID
+      //   "update_mode", // 업데이트 모드
+      //   "type", // 유형
+      "gross_margin_ttm", // 총 마진(TTM)
+      "operating_margin_ttm", // 운영 마진(TTM)
+      "pre_tax_margin_ttm", // 세전 마진(TTM)
+      //   "net_margin_ttm", // 순 마진(TTM)
+      "free_cash_flow_margin_ttm", // 자유 현금 흐름 마진(TTM)
+      "return_on_assets_fq", // 자산 대비 수익률(분기별)
+      "return_on_equity_fq", // 자본 대비 수익률(분기별)
+      "return_on_invested_capital_fq", // 투자된 자본 대비 수익률(분기별)
+      //"research_and_dev_ratio_ttm", // 연구 개발 비율(TTM)
+      "sell_gen_admin_exp_other_ratio_ttm", // 판매, 일반 및 관리 비용 비율(TTM)
+      //   "exchange", // 거래소
+    ];
+    const 손익계산 = [
+      //   "name", // 이름
+      //   "description", // 설명
+      //   "logoid", // 로고 ID
+      //   "update_mode", // 업데이트 모드
+      //   "type", // 유형
+      //   "gross_margin_ttm", // 총 마진(TTM)
+      //   "operating_margin_ttm", // 운영 마진(TTM)
+      //   "pre_tax_margin_ttm", // 세전 마진(TTM)
+      //   "net_margin_ttm", // 순 마진(TTM)
+      //   "free_cash_flow_margin_ttm", // 자유 현금 흐름 마진(TTM)
+      //   "return_on_assets_fq", // 자산 대비 수익률(분기별)
+      //   "return_on_equity_fq", // 자본 대비 수익률(분기별)
+      //   "return_on_invested_capital_fq", // 투자된 자본 대비 수익률(분기별)
+      //   "research_and_dev_ratio_ttm", // 연구 개발 비율(TTM)
+      //   "sell_gen_admin_exp_other_ratio_ttm", // 판매, 일반 및 관리 비용 비율(TTM)
+      //   "exchange", // 거래소
+      "total_revenue_yoy_growth_ttm",
+      "earnings_per_share_diluted_yoy_growth_ttm",
+    ];
+    const 대차대조표 = [
+      //   "name", // 이름
+      //   "description", // 설명
+      //   "logoid", // 로고 ID
+      //   "update_mode", // 업데이트 모드
+      //   "type", // 유형
+      //   "total_assets_fq", // 총 자산(분기별)
+      //   "fundamental_currency_code", // 기본 통화 코드
+      //   "total_current_assets_fq", // 총 유동 자산(분기별)
+      //   "cash_n_short_term_invest_fq", // 현금 및 단기 투자(분기별)
+      //   "total_liabilities_fq", // 총 부채(분기별)
+      //   "total_debt_fq", // 총 부채(분기별)
+      //   "net_debt_fq", // 순 부채(분기별)
+      //   "total_equity_fq", // 총 자본(분기별)
+      "current_ratio_fq", // 유동비율(분기별)
+      "quick_ratio_fq", // 당좌비율(분기별)
+      "debt_to_equity_fq", // 부채 대 자본 비율(분기별)
+      "cash_n_short_term_invest_to_total_debt_fq", // 현금 및 단기 투자 대 총 부채 비율(분기별)
+      //   "exchange", // 거래소
+    ];
     const 현금흐름 = [
       //   "name", // 이름
       //   "description", // 설명
@@ -351,40 +353,40 @@ const crawling = async (countryCode: string) => {
       "capital_expenditures_ttm", // 자본 지출(TTM)
       //   "exchange", // 거래소
     ];
-    // const 테크니컬즈 = [
-    //   "name", // 이름
-    //   "description", // 설명
-    //   "logoid", // 로고 ID
-    //   "update_mode", // 업데이트 모드
-    //   "type", // 유형
-    //   "Recommend.All", // 모든 추천
-    //   "Recommend.MA", // 이동 평균 추천
-    //   "Recommend.Other", // 기타 추천
-    //   "RSI", // 상대 강도 지수
-    //   "Mom", // 모멘텀
-    //   "pricescale", // 가격 척도
-    //   "minmov", // 최소 이동
-    //   "fractional", // 분수
-    //   "minmove2", // 최소 이동 2
-    //   "AO", // 놀람의 오실레이터
-    //   "CCI20", // 상품 채널 지수 20
-    //   "Stoch.K", // 스토캐스틱 K
-    //   "Stoch.D", // 스토캐스틱 D
-    //   "exchange", // 거래소
-    // ];
+    const 테크니컬즈 = [
+      //   "name", // 이름
+      //   "description", // 설명
+      //   "logoid", // 로고 ID
+      //   "update_mode", // 업데이트 모드
+      //   "type", // 유형
+      "Recommend.All", // 모든 추천
+      "Recommend.MA", // 이동 평균 추천
+      "Recommend.Other", // 기타 추천
+      //   "RSI", // 상대 강도 지수
+      //   "Mom", // 모멘텀
+      //   "pricescale", // 가격 척도
+      //   "minmov", // 최소 이동
+      //   "fractional", // 분수
+      //   "minmove2", // 최소 이동 2
+      //   "AO", // 놀람의 오실레이터
+      //   "CCI20", // 상품 채널 지수 20
+      //   "Stoch.K", // 스토캐스틱 K
+      //   "Stoch.D", // 스토캐스틱 D
+      //   "exchange", // 거래소
+    ];
 
     const columns: string[] = Array.from(
       new Set([
         // ...오버뷰,
         // ...성과,
         // ...시간외,
-        // ...평가,
+        ...평가,
         ...배당,
-        // ...손익계산,
-        // ...대차대조표,
+        ...손익계산,
+        ...대차대조표,
         ...현금흐름,
-        // ...테크니컬즈,
-        // ...수익성,
+        ...테크니컬즈,
+        ...수익성,
         ...분석용,
       ])
     );

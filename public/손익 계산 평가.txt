@@ -1,5 +1,5 @@
   매출성장률: {
-    지표명: "revenue_growth_ttm",
+    지표명: "total_revenue_yoy_growth_ttm",
     한글명: "매출 성장률 %",
     단계별범위: {
       매우부정적: "< -20%",

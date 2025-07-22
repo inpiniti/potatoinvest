@@ -1,12 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     // 심볼과 지수 이름 매핑
     const symbolsMap = {
-      '^IXIC': '나스닥 종합',
-      '^GSPC': 'S&P 500',
-      'NQ=F': '나스닥 선물',
+      "^IXIC": "나스닥 종합",
+      "^GSPC": "S&P 500",
+      "NQ=F": "나스닥 선물",
     };
 
     const symbols = Object.keys(symbolsMap);
@@ -21,9 +21,9 @@ export async function GET() {
 
     // indicators 초기값 정의
     const indicators = [
-      { type: '나스닥 종합', value: '0', change: '0' },
-      { type: 'S&P 500', value: '0', change: '0' },
-      { type: '나스닥 선물', value: '0', change: '0' },
+      { type: "나스닥 종합", value: "0", change: "0" },
+      { type: "S&P 500", value: "0", change: "0" },
+      { type: "나스닥 선물", value: "0", change: "0" },
     ];
 
     // 모든 결과 처리
@@ -56,19 +56,19 @@ export async function GET() {
     return NextResponse.json(indicators, {
       status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=60',
-        'CDN-Cache-Control': 'public, s-maxage=3600',
-        'Vercel-CDN-Cache-Control': 'public, s-maxage=3600',
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=60",
+        "CDN-Cache-Control": "public, s-maxage=3600",
+        "Vercel-CDN-Cache-Control": "public, s-maxage=3600",
       },
     });
   } catch (error) {
-    console.error('시장 지표 가져오기 실패:', error);
+    console.error("시장 지표 가져오기 실패:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch market indices' },
+      { error: "Failed to fetch market indices" },
       {
         status: 500,
         headers: {
-          'Cache-Control': 'no-store',
+          "Cache-Control": "no-store",
         },
       }
     );

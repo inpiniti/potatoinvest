@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Drawer,
@@ -9,12 +9,12 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer';
+} from "@/components/ui/drawer";
 
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import useTrading from '@/hooks/useTrading';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import useTrading from "@/hooks/useTrading";
+import { toast } from "sonner";
 
 const Sell = ({
   ovrs_pdno,
@@ -37,7 +37,7 @@ const Sell = ({
     try {
       setLoading(true);
       await 매도(params);
-      toast.success('매도 요청이 완료되었습니다.', {
+      toast.success("매도 요청이 완료되었습니다.", {
         description: `${params.ovrs_pdno} ${params.ovrs_cblc_qty}주 (${params.now_pric2}$)`,
       });
       setIsOpen(false);
@@ -46,9 +46,9 @@ const Sell = ({
         onSellComplete();
       }
     } catch (error) {
-      console.error('매도 요청 실패:', error);
-      toast.error('매도 요청이 실패했습니다.', {
-        description: error.message || '다시 시도해주세요.',
+      console.error("매도 요청 실패:", error);
+      toast.error("매도 요청이 실패했습니다.", {
+        description: error.message || "다시 시도해주세요.",
       });
     } finally {
       setLoading(false);
@@ -70,7 +70,7 @@ const Sell = ({
         <div className="px-4 flex gap-2 flex-wrap">
           <div>매입가 : ${pchs_avg_pric}</div>
           <div>수량 : {ovrs_cblc_qty}주</div>
-          <div className={evlu_pfls_rt > 0 ? 'text-red-500' : 'text-blue-500'}>
+          <div className={evlu_pfls_rt > 0 ? "text-red-500" : "text-blue-500"}>
             수익률 : {evlu_pfls_rt}%
           </div>
         </div>
