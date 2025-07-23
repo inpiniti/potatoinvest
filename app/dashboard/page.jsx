@@ -91,6 +91,12 @@ import { ComprehensiveAnalysis } from "./components/ComprehensiveAnalysis";
 const data = {
   navMain: [
     {
+      title: "분석",
+      url: "#",
+      icon: BarChart3,
+      isActive: false,
+    },
+    {
       title: "잔고",
       url: "#",
       icon: Wallet,
@@ -112,12 +118,6 @@ const data = {
       title: "기간손익",
       url: "#",
       icon: LineChart,
-      isActive: false,
-    },
-    {
-      title: "분석",
-      url: "#",
-      icon: BarChart3,
       isActive: false,
     },
   ],
@@ -212,7 +212,7 @@ export default function DashBoardPage() {
     const currentItem = list[current];
     const code = currentItem?.[KEY_MAP[activeItem?.title]];
     return analysisData.find((item) => item.name === code);
-  }, [analysisData, current]);
+  }, [analysisData, current, list]);
 
   const handleMenuChange = (newActive) => {
     setActiveItem(newActive);
@@ -299,12 +299,12 @@ export default function DashBoardPage() {
   // 처음에 기본값? 셋팅
   useEffect(() => {
     // Only set the list once when holdingData is first available
-    if (holdingData && holdingData.length > 0 && !dataInitialized.current) {
-      setList(holdingData);
+    if (analysisData && analysisData.length > 0 && !dataInitialized.current) {
+      setList(analysisData);
       //getDetailData(0);
       dataInitialized.current = true;
     }
-  }, [holdingData]);
+  }, [analysisData]);
 
   useEffect(() => {
     getDetailData(current);
@@ -312,6 +312,7 @@ export default function DashBoardPage() {
 
   // 디테일 데이터 가져오기
   const getDetailData = (index) => {
+    console.log("getDetailData index", index);
     const newItem = list?.[index];
     const code = newItem?.[KEY_MAP[activeItem?.title]];
     if (!code) {
@@ -989,7 +990,7 @@ export default function DashBoardPage() {
         </SectionTitle>
         <Separator className="mr-2 h-4" />
         <div className="h-full overflow-y-scroll flex flex-col gap-4 p-4 scrollbar-hide">
-          <Tabs defaultValue="chart">
+          <Tabs defaultValue="analysis">
             <TabsList>
               <TabsTrigger value="analysis">분석</TabsTrigger>
               <TabsTrigger value="chart">차트</TabsTrigger>
