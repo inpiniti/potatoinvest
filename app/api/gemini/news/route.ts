@@ -38,72 +38,93 @@ export async function GET(request: NextRequest) {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-lite-preview-06-17",
       contents: [
-        `당신은 전문 금융 뉴스 분석가 AI입니다. 종목코드 ${qry}의 최근 2-3일간 뉴스를 분석하여 호재/악재를 판단하고 JSON 형식으로만 응답하세요.
-  
-          ⚠️ 중요: 최근 ${threeDaysAgoStr} ~ ${todayStr} 기간에 해당하는 뉴스만 분석하세요. 
-          이 기간에 뉴스가 없다면 "hasRecentNews": false로 명시하고 분석을 중단하세요.
-  
-          다음 뉴스 사이트들에서 ${qry} 관련 최근 뉴스를 검색하고 분석해주세요:
-          
-          https://finance.yahoo.com/quote/${qry}/news/
-          https://www.marketwatch.com/investing/stock/${qry}?mod=mw_quote_tab
-          https://seekingalpha.com/symbol/${qry}/news
-          https://www.cnbc.com/quotes/${qry}
-          https://www.bloomberg.com/quote/${qry}:US
-          https://www.reuters.com/markets/companies/${qry}/
-          https://finviz.com/quote.ashx?t=${qry}
-          https://www.benzinga.com/quote/${qry}
-  
-          다음 JSON 구조로만 응답하세요:
-          {
-            "companyName": "회사명",
-            "ticker": "${qry}",
-            "analysisDate": "${todayStr}",
-            "analysisperiod": "${threeDaysAgoStr} ~ ${todayStr}",
-            "hasRecentNews": true,
-            "dataAvailability": {
-              "newsCount": 5,
-              "sourcesWithData": ["Yahoo Finance", "MarketWatch"],
-              "coverage": "양호/부족/없음"
-            },
-            "overallSentiment": {
-              "score": 3.0,
-              "rating": "중립",
-              "scoreMeaning": {
-                "5": "매우 긍정적 (강한 호재)",
-                "4": "긍정적 (호재)",
-                "3": "중립",
-                "2": "부정적 (악재)",
-                "1": "매우 부정적 (강한 악재)"
-              },
-              "summary_kr": "최근 뉴스 종합 분석 요약 또는 '최근 뉴스 데이터 없음'",
-              "keyFactors": []
-            },
-            "newsAnalysis": [],
-            "noNewsReason": "해당 기간에 뉴스가 없는 이유 (소형주, 거래량 부족, 특별한 이슈 없음 등)"
-          }
-  
-          ❌ 만약 최근 3일간 뉴스가 없다면:
-          {
-            "companyName": "회사명",
-            "ticker": "${qry}",
-            "analysisDate": "${todayStr}",
-            "analysisperiod": "${threeDaysAgoStr} ~ ${todayStr}",
-            "hasRecentNews": false,
-            "dataAvailability": {
-              "newsCount": 0,
-              "sourcesWithData": [],
-              "coverage": "없음"
-            },
-            "overallSentiment": {
-              "score": 3,
-              "rating": "중립 (데이터 없음)",
-              "summary_kr": "최근 3일간 해당 종목과 관련된 뉴스를 찾을 수 없습니다.",
-              "keyFactors": []
-            },
-            "newsAnalysis": [],
-            "noNewsReason": "최근 3일간 관련 뉴스 없음"
-          }`,
+`당신은 전문 금융 뉴스 분석가 AI입니다. 종목코드 ${qry}의 최근 3일간 뉴스를 신뢰도, 중복, 최신성 기준으로 분석하여 호재/악재를 판단하고 반드시 JSON 형식으로만 응답하세요.
+
+⚠️ 중요: 최근 ${threeDaysAgoStr} ~ ${todayStr} 기간에 해당하는 뉴스만 분석합니다. 
+이 기간에 뉴스가 없으면 "hasRecentNews": false로 하고, 분석을 중단하세요.
+단, 거래량 매우 적은 소형주/특수상장주 등 "뉴스 부재가 당연한" 종목은 "noNewsReason"에 이유를 명확히 기입하세요.
+
+다음 뉴스 사이트들에서 ${qry} 관련 최근 뉴스를 검색, 중복 제거 후 분석:
+https://finance.yahoo.com/quote/${qry}/news/
+https://www.marketwatch.com/investing/stock/${qry}?mod=mw_quote_tab
+https://seekingalpha.com/symbol/${qry}/news
+https://www.cnbc.com/quotes/${qry}
+https://www.bloomberg.com/quote/${qry}:US
+https://www.reuters.com/markets/companies/${qry}/
+https://finviz.com/quote.ashx?t=${qry}
+https://www.benzinga.com/quote/${qry}
+https://investing.com/equities/${qry}-news
+https://www.fool.com/quote/${qry}/
+https://www.barrons.com/market-data/stocks/${qry}
+https://www.nasdaq.com/market-activity/stocks/${qry}/news
+https://markets.businessinsider.com/stocks/${qry}-stock/news
+
+분석 시 각 뉴스 출처의 신뢰도(가중치)를 고려해 종합 점수를 산정하세요. (예: Bloomberg, Reuters, Barron's는 신뢰도 ↑, Benzinga, Finviz는 신뢰도 ↓)
+동일 뉴스(제목/링크)가 여러 사이트에 있으면 반드시 중복 제거 후 분석하세요.
+반드시 최근 3일 이내 뉴스만 분석하세요.
+newsAnalysis에는 각 뉴스별 주요 키워드와 긍/부정 판단의 근거 문장을 포함하세요.
+
+아래 JSON 구조로만 응답하세요:
+{
+  "companyName": "회사명",
+  "ticker": "${qry}",
+  "analysisDate": "${todayStr}",
+  "analysisperiod": "${threeDaysAgoStr} ~ ${todayStr}",
+  "hasRecentNews": true,
+  "dataAvailability": {
+    "newsCount": 5,
+    "sourcesWithData": ["Yahoo Finance", "MarketWatch"],
+    "coverage": "양호/부족/없음"
+  },
+  "overallSentiment": {
+    "score": 3.0,
+    "rating": "중립",
+    "scoreMeaning": {
+      "5": "매우 긍정적 (강한 호재)",
+      "4": "긍정적 (호재)",
+      "3": "중립",
+      "2": "부정적 (악재)",
+      "1": "매우 부정적 (강한 악재)"
+    },
+    "summary_kr": "최근 뉴스 종합 분석 요약",
+    "keyFactors": []
+  },
+  "newsAnalysis": [
+    {
+      "source": "Yahoo Finance",
+      "title": "뉴스 제목",
+      "url": "뉴스 링크",
+      "datetime": "YYYY-MM-DD",
+      "sentiment": "긍정/부정/중립",
+      "keywords": ["키워드1", "키워드2"],
+      "reason_kr": "긍/부정 판단의 주요 근거 문장"
+    }
+  ],
+  "noNewsReason": ""
+}
+
+❌ 만약 최근 3일간 뉴스가 없다면:
+{
+  "companyName": "회사명",
+  "ticker": "${qry}",
+  "analysisDate": "${todayStr}",
+  "analysisperiod": "${threeDaysAgoStr} ~ ${todayStr}",
+  "hasRecentNews": false,
+  "dataAvailability": {
+    "newsCount": 0,
+    "sourcesWithData": [],
+    "coverage": "없음"
+  },
+  "overallSentiment": {
+    "score": 2,
+    "rating": "부정적 (뉴스 부재 악재)",
+    "summary_kr": "최근 3일간 해당 종목 관련 뉴스가 없어 투자 관심이 낮거나 특별 이슈가 없는 상태로 판단됩니다.",
+    "keyFactors": []
+  },
+  "newsAnalysis": [],
+  "noNewsReason": "최근 3일간 관련 뉴스 없음 (소형주/특수상장주 등은 예외 사유 명시)"
+}
+`,
       ],
       config: {
         tools: [{ urlContext: {} }, { googleSearch: {} }],
