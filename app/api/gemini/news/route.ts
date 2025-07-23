@@ -53,6 +53,18 @@ export async function GET(request: NextRequest) {
           https://www.reuters.com/markets/companies/${qry}/
           https://finviz.com/quote.ashx?t=${qry}
           https://www.benzinga.com/quote/${qry}
+          https://www.investing.com/equities/${qry}-news
+          https://www.fool.com/quote/${qry}/
+          https://www.barrons.com/market-data/stocks/${qry}
+          https://www.nasdaq.com/market-activity/stocks/${qry}/news
+          https://markets.businessinsider.com/stocks/${qry}-stock/news
+
+          분석 시 다음 지침을 따르세요:
+          - 각 뉴스 출처의 신뢰도(가중치)를 고려해 점수를 산정하세요. (예: Bloomberg, Reuters, Barron's는 신뢰도 ↑, Benzinga, Finviz는 신뢰도 ↓)
+          - 동일한 뉴스(제목/링크)가 여러 사이트에 있으면 중복 제거 후 분석하세요.
+          - 반드시 최근 3일 이내 뉴스만 분석하세요.
+          - newsAnalysis에는 각 뉴스별 주요 키워드, 긍/부정 판단의 근거 문장도 포함하세요.
+          - 거래량이 매우 적은 소형주나 특수상장주의 경우 뉴스 부재가 당연할 수 있으므로 이를 고려하세요.
   
           다음 JSON 구조로만 응답하세요:
           {
@@ -96,9 +108,9 @@ export async function GET(request: NextRequest) {
               "coverage": "없음"
             },
             "overallSentiment": {
-              "score": 3,
-              "rating": "중립 (데이터 없음)",
-              "summary_kr": "최근 3일간 해당 종목과 관련된 뉴스를 찾을 수 없습니다.",
+              "score": 2,
+              "rating": "부정적 (뉴스 부재 악재)",
+              "summary_kr": "최근 3일간 해당 종목 관련 뉴스가 없어 투자 관심이 낮거나 특별 이슈가 없는 상태로 판단됩니다.",
               "keyFactors": []
             },
             "newsAnalysis": [],
