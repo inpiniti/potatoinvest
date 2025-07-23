@@ -53,7 +53,7 @@ https://www.bloomberg.com/quote/${qry}:US
 https://www.reuters.com/markets/companies/${qry}/
 https://finviz.com/quote.ashx?t=${qry}
 https://www.benzinga.com/quote/${qry}
-https://investing.com/equities/${qry}-news
+https://www.investing.com/equities/${qry}-news
 https://www.fool.com/quote/${qry}/
 https://www.barrons.com/market-data/stocks/${qry}
 https://www.nasdaq.com/market-activity/stocks/${qry}/news
