@@ -35,8 +35,43 @@ export async function GET(request: NextRequest) {
     const todayStr = today.toISOString().split("T")[0];
     const threeDaysAgoStr = threeDaysAgo.toISOString().split("T")[0];
 
+    // 모델은 총 5가지이다. 횟수는 다음과 같다.
+    // 1. gemini-2.5-pro : 100
+    // 2. gemini-2.5-flash : 250
+    // 3. gemini-2.5-flash-lite : 1000
+    // 4. gemini-2.0-flash : 200
+    // 5. gemini-2.0-flash-lite : 200
+
+    // 랜덤으로 모델을 선택하게 해야 되는데,
+    // 비율을 2:5:20:4:4 으로 설정한다.
+    // 랜덤으로 만들어주는 함수
+    function getRandomModel() {
+      const models = [
+        { name: "gemini-2.5-pro", weight: 2 },
+        { name: "gemini-2.5-flash", weight: 5 },
+        { name: "gemini-2.5-flash-lite", weight: 20 },
+        { name: "gemini-2.0-flash", weight: 4 },
+        { name: "gemini-2.0-flash-lite", weight: 4 },
+      ];
+
+      const totalWeight = models.reduce((sum, model) => sum + model.weight, 0);
+      const random = Math.random() * totalWeight;
+
+      let cumulativeWeight = 0;
+      for (const model of models) {
+        cumulativeWeight += model.weight;
+        if (random < cumulativeWeight) {
+          return model.name;
+        }
+      }
+
+      return models[0].name; // 기본값
+    }
+
+    const model = getRandomModel();
+
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: model,
       contents: [
         `당신은 전문 금융 뉴스 분석가 AI입니다. 종목코드 ${qry}의 최근 일주일간 뉴스를 분석하여 호재/악재를 판단하고 JSON 형식으로만 응답하세요.
   
@@ -143,6 +178,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           ...result,
+          model,
           message: "최근 뉴스 데이터가 없어 분석을 수행할 수 없습니다.",
         },
         {
@@ -154,14 +190,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(result, {
-      status: 200,
-      headers: {
-        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
-        "CDN-Cache-Control": "public, s-maxage=86400",
-        "Vercel-CDN-Cache-Control": "public, s-maxage=86400",
+    return NextResponse.json(
+      {
+        result,
+        model,
       },
-    });
+      {
+        status: 200,
+        headers: {
+          "Cache-Control":
+            "public, s-maxage=86400, stale-while-revalidate=86400",
+          "CDN-Cache-Control": "public, s-maxage=86400",
+          "Vercel-CDN-Cache-Control": "public, s-maxage=86400",
+        },
+      }
+    );
   } catch (error: unknown) {
     console.error("뉴스 분석 API 오류:", error);
     return NextResponse.json(
