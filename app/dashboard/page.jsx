@@ -988,21 +988,21 @@ export default function DashBoardPage() {
         <div className="h-full overflow-y-scroll flex flex-col gap-4 p-4 scrollbar-hide">
           <Tabs defaultValue="analysis">
             <TabsList>
-              <TabsTrigger value="newsAnalysis">뉴스분석</TabsTrigger>
               <TabsTrigger value="analysis">분석</TabsTrigger>
+              <TabsTrigger value="newsAnalysis">뉴스분석</TabsTrigger>
               <TabsTrigger value="chart">차트</TabsTrigger>
               <TabsTrigger value="stock">종목정보</TabsTrigger>
               {/* <TabsTrigger value="news">뉴스</TabsTrigger> */}
               <TabsTrigger value="community">커뮤니티</TabsTrigger>
               {/* <TabsTrigger value="order">주문</TabsTrigger> */}
             </TabsList>
-            <TabsContent value="newsAnalysis">
-              <NewsAnalysis ticker={currentAnalysisData?.name} />
-            </TabsContent>
             <TabsContent value="analysis">
               <ComprehensiveAnalysis
                 data={currentAnalysisData?.comprehensiveAnalysis}
               />
+            </TabsContent>
+            <TabsContent value="newsAnalysis">
+              <NewsAnalysis ticker={currentAnalysisData?.name} />
             </TabsContent>
             <TabsContent value="chart">
               <div className="py-2">
