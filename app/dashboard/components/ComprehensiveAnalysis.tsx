@@ -196,7 +196,7 @@ export function ComprehensiveAnalysis({ data }: { data: ComprehensiveData }) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-3 px-6 py-3 bg-white rounded-full shadow-lg border">
@@ -219,7 +219,7 @@ export function ComprehensiveAnalysis({ data }: { data: ComprehensiveData }) {
       </Alert>
 
       {/* Main Dashboard */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Overall Score Chart */}
         <Card className="lg:col-span-1">
           <CardHeader className="text-center pb-2">
@@ -307,7 +307,7 @@ export function ComprehensiveAnalysis({ data }: { data: ComprehensiveData }) {
             </ResponsiveContainer>
 
             {/* Chart Legend */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
               {radarData.map((item) => (
                 <div key={item.category} className="flex items-center gap-2">
                   <div
@@ -329,7 +329,7 @@ export function ComprehensiveAnalysis({ data }: { data: ComprehensiveData }) {
         <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
           항목별 분석 결과
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Object.entries(data).map(([key, category]) => {
             if (key === "종합평가") return null;
 
