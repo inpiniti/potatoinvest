@@ -73,39 +73,39 @@ export async function GET(request: Request) {
     const comments = communityData?.result?.comments?.body || [];
 
     // Step 3: Get company code using the product code
-    const companyResponse = await fetch(
-      `${INFO_API_URL}/v2/stock-infos/${productCode}`
-    );
+    // const companyResponse = await fetch(
+    //   `${INFO_API_URL}/v2/stock-infos/${productCode}`
+    // );
 
-    const companyData = await companyResponse.json();
-    const companyCode = companyData?.result?.companyCode;
+    // const companyData = await companyResponse.json();
+    // const companyCode = companyData?.result?.companyCode;
 
-    if (!companyCode) {
-      return NextResponse.json(
-        { error: "Company code not found for the given product code" },
-        { status: 404 }
-      );
-    }
+    // if (!companyCode) {
+    //   return NextResponse.json(
+    //     { error: "Company code not found for the given product code" },
+    //     { status: 404 }
+    //   );
+    // }
 
     // Step 4: Get news using the company code
-    const newsResponse = await fetch(
-      `${INFO_API_URL}/v2/news/companies/${companyCode}?size=20&orderBy=latest`
-    );
-    console.log(
-      "News API URL:",
-      `${INFO_API_URL}/v2/news/companies/${companyCode}?size=20&orderBy=latest`
-    );
+    // const newsResponse = await fetch(
+    //   `${INFO_API_URL}/v2/news/companies/${companyCode}?size=20&orderBy=latest`
+    // );
+    // console.log(
+    //   "News API URL:",
+    //   `${INFO_API_URL}/v2/news/companies/${companyCode}?size=20&orderBy=latest`
+    // );
 
-    const newsData = await newsResponse.json();
-    console.log("News Data:", newsData);
-    const news = newsData?.result?.body || [];
+    //const newsData = await newsResponse.json();
+    //console.log("News Data:", newsData);
+    //const news = newsData?.result?.body || [];
 
     // Combine results and return
     return NextResponse.json(
       {
         productCode,
-        companyCode,
-        news,
+        //companyCode,
+        //news,
         comments,
       },
       {

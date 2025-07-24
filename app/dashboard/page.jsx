@@ -992,9 +992,9 @@ export default function DashBoardPage() {
               <TabsTrigger value="analysis">분석</TabsTrigger>
               <TabsTrigger value="chart">차트</TabsTrigger>
               <TabsTrigger value="stock">종목정보</TabsTrigger>
-              <TabsTrigger value="news">뉴스</TabsTrigger>
+              {/* <TabsTrigger value="news">뉴스</TabsTrigger> */}
               <TabsTrigger value="community">커뮤니티</TabsTrigger>
-              <TabsTrigger value="order">주문</TabsTrigger>
+              {/* <TabsTrigger value="order">주문</TabsTrigger> */}
             </TabsList>
             <TabsContent value="newsAnalysis">
               <NewsAnalysis ticker={currentAnalysisData?.name} />
@@ -1265,7 +1265,7 @@ export default function DashBoardPage() {
                 </CardContent>
               </div>
             </TabsContent>
-            <TabsContent value="news">
+            {/* <TabsContent value="news">
               <div className="py-2">
                 <CardTitle>뉴스</CardTitle>
                 <CardDescription className="pt-1">
@@ -1309,7 +1309,7 @@ export default function DashBoardPage() {
                   ))}
                 </div>
               </div>
-            </TabsContent>
+            </TabsContent> */}
 
             <TabsContent value="community">
               <div className="py-2">
@@ -1347,7 +1347,7 @@ export default function DashBoardPage() {
                 </div>
               </div>
             </TabsContent>
-            <TabsContent value="order">
+            {/* <TabsContent value="order">
               <div className="py-2">
                 <CardTitle>주문</CardTitle>
                 <CardDescription className="pt-1">
@@ -1373,7 +1373,7 @@ export default function DashBoardPage() {
                   </TabsContent>
                 </Tabs>
               </div>
-            </TabsContent>
+            </TabsContent> */}
           </Tabs>
         </div>
       </Main>
