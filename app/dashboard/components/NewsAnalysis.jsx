@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import useGeminiNews from "../hooks/useGeminiNews";
 
 const analysisSteps = [
@@ -116,21 +116,53 @@ const getReliabilityColor = (reliability) => {
 const TypewriterText = ({ text, speed = 50 }) => {
   const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
+  const timerRef = useRef(null);
 
+  // text가 변경되면 즉시 초기화하고 이전 타이머 정리
   useEffect(() => {
-    if (currentIndex < text.length) {
-      const timer = setTimeout(() => {
-        setDisplayText((prev) => prev + text[currentIndex]);
-        setCurrentIndex((prev) => prev + 1);
-      }, speed);
-      return () => clearTimeout(timer);
+    // 이전 타이머가 있다면 정리
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
     }
-  }, [currentIndex, text, speed]);
 
-  useEffect(() => {
     setDisplayText("");
     setCurrentIndex(0);
   }, [text]);
+
+  // 타이핑 애니메이션 효과
+  useEffect(() => {
+    // 이전 타이머 정리
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    if (currentIndex < text.length) {
+      timerRef.current = setTimeout(() => {
+        setDisplayText((prev) => prev + text[currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
+      }, speed);
+    }
+
+    // cleanup 함수
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [currentIndex, text.length]); // speed 의존성 제거
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, []);
 
   return <span>{displayText}</span>;
 };
@@ -438,11 +470,11 @@ export function NewsAnalysis({ ticker }) {
           <TrendingUp className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800">
             <strong>
-              종합 감성 점수: {geminiNewsData.overallSentiment.score}/5.0 (
-              {geminiNewsData.overallSentiment.rating})
+              종합 감성 점수: {geminiNewsData.overallSentiment?.score}/5.0 (
+              {geminiNewsData.overallSentiment?.rating})
             </strong>
             <br />
-            {geminiNewsData.overallSentiment.summary_kr}
+            {geminiNewsData.overallSentiment?.summary_kr}
           </AlertDescription>
         </Alert>
 
@@ -464,12 +496,12 @@ export function NewsAnalysis({ ticker }) {
                       data={[
                         {
                           value:
-                            (geminiNewsData.overallSentiment.score / 5) * 100,
+                            (geminiNewsData.overallSentiment?.score / 5) * 100,
                         },
                         {
                           value:
                             100 -
-                            (geminiNewsData.overallSentiment.score / 5) * 100,
+                            (geminiNewsData.overallSentiment?.score / 5) * 100,
                         },
                       ]}
                       cx="50%"
@@ -489,7 +521,7 @@ export function NewsAnalysis({ ticker }) {
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">
-                      {geminiNewsData.overallSentiment.score.toFixed(1)}
+                      {geminiNewsData.overallSentiment?.score.toFixed(1)}
                     </div>
                     <div className="text-sm text-gray-500">/ 5.0</div>
                   </div>
@@ -497,7 +529,7 @@ export function NewsAnalysis({ ticker }) {
               </div>
               <div className="text-center mt-4">
                 <Badge variant="default" className="px-4 py-1">
-                  {geminiNewsData.overallSentiment.rating}
+                  {geminiNewsData.overallSentiment?.rating}
                 </Badge>
               </div>
             </CardContent>
@@ -592,14 +624,14 @@ export function NewsAnalysis({ ticker }) {
         </div>
 
         {/* Key Factors */}
-        {geminiNewsData.overallSentiment.keyFactors.length > 0 && (
+        {geminiNewsData.overallSentiment?.keyFactors.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>주요 요인</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {geminiNewsData.overallSentiment.keyFactors.map(
+                {geminiNewsData.overallSentiment?.keyFactors.map(
                   (factor, index) => (
                     <Badge key={index} variant="outline" className="px-3 py-1">
                       {factor}
