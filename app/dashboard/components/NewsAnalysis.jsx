@@ -20,57 +20,129 @@ import {
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import useGeminiNews from "../hooks/useGeminiNews";
 
 const analysisSteps = [
   {
     step: 1,
-    message: "Yahoo Finance 뉴스 수집 중...",
+    message: "Yahoo Finance 뉴스 수집 시작...",
     icon: Globe,
     color: "#7c3aed",
   },
   {
     step: 2,
-    message: "Seeking Alpha 분석 중...",
+    message: "Yahoo Finance 데이터 파싱 중...",
     icon: Search,
-    color: "#2563eb",
+    color: "#6d28d9",
   },
   {
     step: 3,
-    message: "CNBC 데이터 크롤링 중...",
+    message: "Seeking Alpha 연결 중...",
     icon: Activity,
-    color: "#dc2626",
+    color: "#2563eb",
   },
   {
     step: 4,
-    message: "MarketWatch 뉴스 분석 중...",
-    icon: Newspaper,
-    color: "#059669",
+    message: "Seeking Alpha 분석 데이터 수집...",
+    icon: BarChart3,
+    color: "#1d4ed8",
   },
   {
     step: 5,
-    message: "Bloomberg 데이터 처리 중...",
-    icon: BarChart3,
-    color: "#ea580c",
+    message: "CNBC 뉴스 크롤링 시작...",
+    icon: Newspaper,
+    color: "#dc2626",
   },
   {
     step: 6,
-    message: "Reuters 뉴스 감성 분석 중...",
+    message: "CNBC 기사 텍스트 추출 중...",
     icon: Brain,
-    color: "#7c2d12",
+    color: "#b91c1c",
   },
   {
     step: 7,
-    message: "Financial Times 기사 평가 중...",
-    icon: TrendingUp,
-    color: "#be123c",
+    message: "MarketWatch 접속 중...",
+    icon: Globe,
+    color: "#059669",
   },
   {
     step: 8,
-    message: "종합 분석 및 점수 산출 중...",
-    icon: Sparkles,
+    message: "MarketWatch 뉴스 분석 중...",
+    icon: TrendingUp,
+    color: "#047857",
+  },
+  {
+    step: 9,
+    message: "Bloomberg 데이터 소스 연결...",
+    icon: Search,
+    color: "#ea580c",
+  },
+  {
+    step: 10,
+    message: "Bloomberg 실시간 뉴스 처리...",
+    icon: Activity,
+    color: "#c2410c",
+  },
+  {
+    step: 11,
+    message: "Reuters 뉴스 API 호출 중...",
+    icon: Newspaper,
+    color: "#7c2d12",
+  },
+  {
+    step: 12,
+    message: "Reuters 기사 감성 분석...",
+    icon: Brain,
+    color: "#92400e",
+  },
+  {
+    step: 13,
+    message: "Financial Times 프리미엄 뉴스 수집...",
+    icon: BarChart3,
+    color: "#be123c",
+  },
+  {
+    step: 14,
+    message: "Wall Street Journal 데이터 분석...",
+    icon: TrendingUp,
+    color: "#9f1239",
+  },
+  {
+    step: 15,
+    message: "AI 자연어 처리 엔진 가동...",
+    icon: Brain,
     color: "#a21caf",
+  },
+  {
+    step: 16,
+    message: "감성 점수 알고리즘 계산 중...",
+    icon: Sparkles,
+    color: "#86198f",
+  },
+  {
+    step: 17,
+    message: "키워드 중요도 분석 중...",
+    icon: Search,
+    color: "#065f46",
+  },
+  {
+    step: 18,
+    message: "신뢰도 검증 프로세스 실행...",
+    icon: CheckCircle,
+    color: "#1e40af",
+  },
+  {
+    step: 19,
+    message: "종합 분석 리포트 생성 중...",
+    icon: Activity,
+    color: "#7c3aed",
+  },
+  {
+    step: 20,
+    message: "최종 결과 검토 및 완료...",
+    icon: Sparkles,
+    color: "#059669",
   },
 ];
 
@@ -145,7 +217,7 @@ export function NewsAnalysis({ ticker }) {
   } = useGeminiNews(); // 뉴스 데이터
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [stepInterval, setStepInterval] = useState(null);
+  const stepInterval = useRef(null);
 
   // ticker가 변경되면 상태 초기화
   useEffect(() => {
@@ -162,22 +234,22 @@ export function NewsAnalysis({ ticker }) {
     // 단계별 진행을 위한 함수
     const progressSteps = () => {
       return new Promise((resolve) => {
-        if (stepInterval) {
-          clearInterval(stepInterval);
-          setStepInterval(null);
+        if (stepInterval.current) {
+          clearInterval(stepInterval.current);
+          stepInterval.current = null;
         }
 
         let step = 0;
-        stepInterval = setInterval(() => {
+        stepInterval.current = setInterval(() => {
           setCurrentStep(step);
           step++;
 
-          if (step >= analysisSteps.length && stepInterval) {
-            clearInterval(stepInterval);
-            stepInterval = null;
+          if (step >= analysisSteps.length && stepInterval.current) {
+            clearInterval(stepInterval.current);
+            stepInterval.current = null;
             resolve();
           }
-        }, 5000); // 5초마다 단계 진행
+        }, 2000); // 2초마다 단계 진행
       });
     };
 
@@ -189,19 +261,22 @@ export function NewsAnalysis({ ticker }) {
           code: ticker,
         }),
       ]);
-
-      if (stepInterval) {
-        clearInterval(stepInterval);
-        setStepInterval(null);
-      }
-
-      // 완료 후 마지막 단계로 설정
-      setCurrentStep(analysisSteps.length - 1);
     } catch (error) {
       console.error("분석 중 오류:", error);
       setCurrentStep(0);
     }
   };
+
+  useEffect(() => {
+    // 팬딩이 완료 되었다면?
+    if (!geminiNewsPending && geminiNewsData) {
+      if (stepInterval.current) {
+        clearInterval(stepInterval.current);
+        setCurrentStep(0);
+        stepInterval.current = null;
+      }
+    }
+  }, [geminiNewsPending]);
 
   const getSentimentChartData = () => {
     if (!geminiNewsData?.newsAnalysis) return [];
@@ -239,7 +314,7 @@ export function NewsAnalysis({ ticker }) {
               {ticker} 종목의 최근 뉴스를 AI로 분석하여 시장 감성을 파악합니다
             </p>
           </div>
-
+          currentStep : {currentStep}
           <Card className="max-w-md mx-auto">
             <CardContent className="pt-8 pb-6">
               <div className="text-center space-y-6">
@@ -287,7 +362,7 @@ export function NewsAnalysis({ ticker }) {
             {ticker} 종목의 뉴스 데이터를 실시간으로 분석하고 있습니다
           </p>
         </div>
-
+        currentStep : {currentStep}
         {/* Progress Card */}
         <Card className="relative overflow-hidden">
           <CardContent className="pt-8 pb-6">
@@ -319,7 +394,7 @@ export function NewsAnalysis({ ticker }) {
 
               {/* Progress Steps */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {analysisSteps.slice(0, 8).map((step, index) => (
+                {analysisSteps.slice(0, 20).map((step, index) => (
                   <div
                     key={index}
                     className={`p-3 rounded-lg border transition-all ${
@@ -362,7 +437,6 @@ export function NewsAnalysis({ ticker }) {
             </div>
           </CardContent>
         </Card>
-
         {/* Loading Skeletons */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card>
@@ -567,28 +641,28 @@ export function NewsAnalysis({ ticker }) {
             <CardContent className="space-y-4">
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-600">
-                  {geminiNewsData.dataAvailability.newsCount}
+                  {geminiNewsData.dataAvailability?.newsCount}
                 </div>
                 <div className="text-sm text-gray-500">개 뉴스 분석</div>
               </div>
               <div className="space-y-2">
                 <Badge
                   variant={
-                    geminiNewsData.dataAvailability.coverage === "양호"
+                    geminiNewsData.dataAvailability?.coverage === "양호"
                       ? "default"
                       : "secondary"
                   }
                   className="w-full justify-center"
                 >
-                  커버리지: {geminiNewsData.dataAvailability.coverage}
+                  커버리지: {geminiNewsData.dataAvailability?.coverage}
                 </Badge>
                 <div className="text-xs text-gray-600 text-center">
-                  {geminiNewsData.dataAvailability.sourcesWithData.length}개
+                  {geminiNewsData.dataAvailability?.sourcesWithData.length}개
                   소스에서 수집
                 </div>
               </div>
               <div className="space-y-1">
-                {geminiNewsData.dataAvailability.sourcesWithData.map(
+                {geminiNewsData.dataAvailability?.sourcesWithData.map(
                   (source, index) => (
                     <div
                       key={index}
