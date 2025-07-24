@@ -36,9 +36,9 @@ export async function GET(request: NextRequest) {
     const threeDaysAgoStr = threeDaysAgo.toISOString().split("T")[0];
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-lite-preview-06-17",
+      model: "gemini-2.5-flash",
       contents: [
-        `당신은 전문 금융 뉴스 분석가 AI입니다. 종목코드 ${qry}의 최근 한달간 뉴스를 분석하여 호재/악재를 판단하고 JSON 형식으로만 응답하세요.
+        `당신은 전문 금융 뉴스 분석가 AI입니다. 종목코드 ${qry}의 최근 일주일간 뉴스를 분석하여 호재/악재를 판단하고 JSON 형식으로만 응답하세요.
   
           ⚠️ 중요: 최근 ${threeDaysAgoStr} ~ ${todayStr} 기간에 해당하는 뉴스만 분석하세요. 
           이 기간에 뉴스가 없다면 "hasRecentNews": false로 명시하고 분석을 중단하세요.
