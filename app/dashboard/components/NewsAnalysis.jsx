@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { motion } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import useGeminiNews from "../hooks/useGeminiNews";
 
 const analysisSteps = [
@@ -116,53 +116,21 @@ const getReliabilityColor = (reliability) => {
 const TypewriterText = ({ text, speed = 50 }) => {
   const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
-  const timerRef = useRef(null);
 
-  // text가 변경되면 즉시 초기화하고 이전 타이머 정리
   useEffect(() => {
-    // 이전 타이머가 있다면 정리
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-
-    setDisplayText("");
-    setCurrentIndex(0);
-  }, [text]);
-
-  // 타이핑 애니메이션 효과
-  useEffect(() => {
-    // 이전 타이머 정리
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-
     if (currentIndex < text.length) {
-      timerRef.current = setTimeout(() => {
+      const timer = setTimeout(() => {
         setDisplayText((prev) => prev + text[currentIndex]);
         setCurrentIndex((prev) => prev + 1);
       }, speed);
+      return () => clearTimeout(timer);
     }
+  }, [currentIndex, text, speed]);
 
-    // cleanup 함수
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, [currentIndex, text.length]); // speed 의존성 제거
-
-  // 컴포넌트 언마운트 시 타이머 정리
   useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, []);
+    setDisplayText("");
+    setCurrentIndex(0);
+  }, [text]);
 
   return <span>{displayText}</span>;
 };
@@ -177,56 +145,60 @@ export function NewsAnalysis({ ticker }) {
   } = useGeminiNews(); // 뉴스 데이터
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [stepInterval, setStepInterval] = useState(null);
 
   // ticker가 변경되면 상태 초기화
   useEffect(() => {
     setCurrentStep(0);
     resetGeminiNews(); // fetch된 데이터도 초기화
   }, [ticker, resetGeminiNews]);
+
   const startAnalysis = async () => {
     setCurrentStep(0);
 
     // 이전 데이터 초기화
     resetGeminiNews();
 
-    // interval 참조를 저장할 변수
-    let stepInterval = null;
+    // 단계별 진행을 위한 함수
+    const progressSteps = () => {
+      return new Promise((resolve) => {
+        if (stepInterval) {
+          clearInterval(stepInterval);
+          setStepInterval(null);
+        }
 
-    // 단계별 진행 시작
-    let step = 0;
-    stepInterval = setInterval(() => {
-      setCurrentStep(step);
-      step++;
+        let step = 0;
+        stepInterval = setInterval(() => {
+          setCurrentStep(step);
+          step++;
 
-      // 최대 단계에 도달하면 정지 (무한 루프 방지)
-      if (step >= analysisSteps.length) {
-        clearInterval(stepInterval);
-      }
-    }, 2000); // 2초마다 단계 진행
+          if (step >= analysisSteps.length && stepInterval) {
+            clearInterval(stepInterval);
+            stepInterval = null;
+            resolve();
+          }
+        }, 5000); // 5초마다 단계 진행
+      });
+    };
 
     try {
-      // API 호출 실행
-      const apiResult = await fetchGeminiNewsData({
-        code: ticker,
-      });
+      progressSteps();
+      // 단계 진행과 API 호출을 병렬로 실행
+      await Promise.all([
+        fetchGeminiNewsData({
+          code: ticker,
+        }),
+      ]);
 
-      // API 완료되면 즉시 interval 정리
       if (stepInterval) {
         clearInterval(stepInterval);
-        stepInterval = null;
+        setStepInterval(null);
       }
 
       // 완료 후 마지막 단계로 설정
       setCurrentStep(analysisSteps.length - 1);
     } catch (error) {
       console.error("분석 중 오류:", error);
-      
-      // 에러 발생 시에도 interval 정리
-      if (stepInterval) {
-        clearInterval(stepInterval);
-        stepInterval = null;
-      }
-      
       setCurrentStep(0);
     }
   };
