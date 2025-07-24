@@ -53,6 +53,20 @@ export async function GET(request: NextRequest) {
           https://www.reuters.com/markets/companies/${qry}/
           https://finviz.com/quote.ashx?t=${qry}
           https://www.benzinga.com/quote/${qry}
+          https://www.investing.com/equities/${qry}-news
+          https://www.fool.com/quote/${qry}/
+          https://www.barrons.com/market-data/stocks/${qry}
+          https://www.nasdaq.com/market-activity/stocks/${qry}/news
+          https://markets.businessinsider.com/stocks/${qry}-stock/news
+          
+          ⚠️ 분석 시 주의사항:
+          • 각 뉴스 출처의 신뢰도를 고려하여 가중치를 적용하세요:
+            - 높은 신뢰도: Bloomberg, Reuters, Barron's, CNBC
+            - 중간 신뢰도: Yahoo Finance, MarketWatch, Nasdaq, Business Insider
+            - 낮은 신뢰도: Seeking Alpha, Benzinga, Finviz, The Motley Fool, Investing.com
+          • 동일한 뉴스(제목/링크)가 여러 사이트에 중복 게재된 경우 중복 제거 후 분석하세요
+          • 반드시 최근 3일 이내 뉴스만 분석하세요
+          • newsAnalysis에는 각 뉴스별 주요 키워드와 긍정/부정 판단의 구체적 근거 문장을 포함하세요
   
           다음 JSON 구조로만 응답하세요:
           {
@@ -79,7 +93,18 @@ export async function GET(request: NextRequest) {
               "summary_kr": "최근 뉴스 종합 분석 요약 또는 '최근 뉴스 데이터 없음'",
               "keyFactors": []
             },
-            "newsAnalysis": [],
+            "newsAnalysis": [
+              {
+                "title": "뉴스 제목",
+                "url": "뉴스 링크",
+                "source": "출처",
+                "publishDate": "발행일자",
+                "sentiment": "긍정/부정/중립",
+                "keywords": ["키워드1", "키워드2"],
+                "reasoning": "긍정/부정 판단의 구체적 근거 문장",
+                "reliability": "높음/중간/낮음"
+              }
+            ],
             "noNewsReason": "해당 기간에 뉴스가 없는 이유 (소형주, 거래량 부족, 특별한 이슈 없음 등)"
           }
   
@@ -96,13 +121,13 @@ export async function GET(request: NextRequest) {
               "coverage": "없음"
             },
             "overallSentiment": {
-              "score": 3,
-              "rating": "중립 (데이터 없음)",
-              "summary_kr": "최근 3일간 해당 종목과 관련된 뉴스를 찾을 수 없습니다.",
-              "keyFactors": []
+              "score": 2,
+              "rating": "부정적 (뉴스 부재 악재)",
+              "summary_kr": "최근 3일간 관련 뉴스가 없어 투자자 관심도가 낮은 상황입니다. 다만 소형주나 거래량이 적은 종목의 경우 정상적인 현상일 수 있습니다.",
+              "keyFactors": ["뉴스 부재", "투자자 관심도 저조"]
             },
             "newsAnalysis": [],
-            "noNewsReason": "최근 3일간 관련 뉴스 없음"
+            "noNewsReason": "최근 3일간 관련 뉴스 없음 (소형주나 저거래량 종목의 경우 정상적 현상일 수 있음)"
           }`,
       ],
       config: {
