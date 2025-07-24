@@ -189,35 +189,44 @@ export function NewsAnalysis({ ticker }) {
     // 이전 데이터 초기화
     resetGeminiNews();
 
-    // 단계별 진행을 위한 함수
-    const progressSteps = () => {
-      return new Promise((resolve) => {
-        let step = 0;
-        const stepInterval = setInterval(() => {
-          setCurrentStep(step);
-          step++;
+    // interval 참조를 저장할 변수
+    let stepInterval = null;
 
-          if (step >= analysisSteps.length) {
-            clearInterval(stepInterval);
-            resolve();
-          }
-        }, 5000); // 5초마다 단계 진행
-      });
-    };
+    // 단계별 진행 시작
+    let step = 0;
+    stepInterval = setInterval(() => {
+      setCurrentStep(step);
+      step++;
+
+      // 최대 단계에 도달하면 정지 (무한 루프 방지)
+      if (step >= analysisSteps.length) {
+        clearInterval(stepInterval);
+      }
+    }, 2000); // 2초마다 단계 진행
 
     try {
-      // 단계 진행과 API 호출을 병렬로 실행
-      const [, apiResult] = await Promise.all([
-        progressSteps(),
-        fetchGeminiNewsData({
-          code: ticker,
-        }),
-      ]);
+      // API 호출 실행
+      const apiResult = await fetchGeminiNewsData({
+        code: ticker,
+      });
+
+      // API 완료되면 즉시 interval 정리
+      if (stepInterval) {
+        clearInterval(stepInterval);
+        stepInterval = null;
+      }
 
       // 완료 후 마지막 단계로 설정
       setCurrentStep(analysisSteps.length - 1);
     } catch (error) {
       console.error("분석 중 오류:", error);
+      
+      // 에러 발생 시에도 interval 정리
+      if (stepInterval) {
+        clearInterval(stepInterval);
+        stepInterval = null;
+      }
+      
       setCurrentStep(0);
     }
   };
