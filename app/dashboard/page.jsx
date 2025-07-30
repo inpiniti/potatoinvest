@@ -223,8 +223,9 @@ export default function DashBoardPage() {
             isNotCnnl: cnnlData
               ?.filter((item) => item?.prcs_stat_name !== "완료")
               .some((cnnlItem) => cnnlItem?.pdno === item.ovrs_pdno),
-            예측결과: analysisData?.find((item) => item.name === item.ovrs_pdno)
-              ?.예측결과,
+            예측결과: analysisData?.find(
+              (_item) => _item.name === item.ovrs_pdno
+            )?.예측결과,
           }))
         );
         break;
