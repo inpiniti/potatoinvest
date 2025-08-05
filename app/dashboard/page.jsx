@@ -224,6 +224,9 @@ export default function DashBoardPage() {
             isNotCnnl: cnnlData
               ?.filter((item) => item?.prcs_stat_name !== '완료')
               .some((cnnlItem) => cnnlItem?.pdno === item.ovrs_pdno),
+            예측결과: analysisData?.find(
+              (_item) => _item.name === item.ovrs_pdno
+            )?.예측결과,
           }))
         );
         break;
@@ -239,6 +242,7 @@ export default function DashBoardPage() {
             // .filter((item) => item?.예측결과 >= 0.6)
             // .filter((item) => item?.close !== undefined && item?.close >= 3)
             // .filter((item) => Number(item?.perf_1_m) <= 0)
+            .slice(0, 100)
             .map((item) => {
               return {
                 ...item,
@@ -635,7 +639,12 @@ export default function DashBoardPage() {
                     // ).toLocaleString("ko-KR")})`}
                     onClick={() => setCurrent(index)}
                     active={current === index}
-                    badge={[false, item?.isCnnl, item?.isNotCnnl]}
+                    badge={[
+                      false,
+                      item?.isCnnl,
+                      item?.isNotCnnl,
+                      item?.예측결과,
+                    ]}
                   />
                 );
               } else if (activeItem?.title === '미체결') {
