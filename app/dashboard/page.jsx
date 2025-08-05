@@ -201,21 +201,7 @@ export default function DashBoardPage() {
   const [autoBuy, toggleAutoBuy] = useState(false);
   const [autoSell, toggleAutoSell] = useState(false);
 
-  const [list, setList] = useState(
-    analysisData
-      // .filter((item) => item?.예측결과 >= 0.6)
-      // .filter((item) => item?.close !== undefined && item?.close >= 3)
-      // .filter((item) => Number(item?.perf_1_m) <= 0)
-      .map((item) => {
-        return {
-          ...item,
-          isHolding: holdingData?.some(
-            (holdingItem) => holdingItem?.ovrs_pdno === item.name
-          ),
-          isCnnl: cnnlData?.some((cnnlItem) => cnnlItem?.pdno === item.name),
-        };
-      })
-  );
+  const [list, setList] = useState([]);
 
   // 현재 종목 분석 데이터
   const currentAnalysisData = useMemo(() => {
@@ -310,9 +296,10 @@ export default function DashBoardPage() {
   useEffect(() => {
     // Only set the list once when holdingData is first available
     if (analysisData && analysisData.length > 0 && !dataInitialized.current) {
-      setList(analysisData);
+      //setList(analysisData);
       //getDetailData(0);
-      dataInitialized.current = true;
+      //dataInitialized.current = true;
+      handleMenuChange(activeItem); // 초기 메뉴 설정
     }
   }, [analysisData]);
 
