@@ -214,6 +214,7 @@ export default function DashBoardPage() {
     setActiveItem(newActive);
     switch (newActive?.title) {
       case '잔고':
+        console.log('잔고');
         setList(
           holdingData.map((item) => ({
             ...item,
@@ -227,10 +228,11 @@ export default function DashBoardPage() {
         );
         break;
       case '미체결':
+        console.log('미체결');
         setList(cnnlData?.filter((item) => item?.prcs_stat_name !== '완료'));
         break;
       case '분석':
-        console.log('analysisData[0]', analysisData[0]);
+        console.log('분석데이터');
 
         setList(
           analysisData
@@ -251,9 +253,11 @@ export default function DashBoardPage() {
         );
         break;
       case '체결':
+        console.log('체결');
         setList(cnnlData?.filter((item) => item?.prcs_stat_name === '완료'));
         break;
       case '기간손익':
+        console.log('기간손익');
         setList(profitData);
         break;
       default:
@@ -298,7 +302,7 @@ export default function DashBoardPage() {
     if (analysisData && analysisData.length > 0 && !dataInitialized.current) {
       //setList(analysisData);
       //getDetailData(0);
-      //dataInitialized.current = true;
+      dataInitialized.current = true;
       handleMenuChange(activeItem); // 초기 메뉴 설정
     }
   }, [analysisData]);
@@ -421,6 +425,7 @@ export default function DashBoardPage() {
   }, [priceDetailPending]);
 
   useEffect(() => {
+    console.log('기간손익');
     setList(profitData);
   }, [profitType]);
 
