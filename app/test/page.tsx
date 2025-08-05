@@ -7,25 +7,6 @@ import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import useRealTimePrice from "@/hooks/useRealTimePrice";
 import { useEffect, useRef, useState } from "react";
 
-export default function Home() {
-  const { data } = useRealTimePrice([
-    "AAPL",
-    "MSFT",
-    "GOOGL",
-    "AMZN",
-    "TSLA",
-    "UPWK",
-  ]);
-
-  return (
-    <div className="flex gap-4 p-4">
-      {Object.values(data).map((stock) => (
-        <StockCard key={(stock as StockData).SYMB} stock={stock as StockData} />
-      ))}
-    </div>
-  );
-}
-
 interface StockData {
   RSYM: string; // 실시간종목코드
   SYMB: string; // 종목코드
@@ -226,5 +207,24 @@ export function StockCard({ stock }: { stock: StockData }) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+export default function Home() {
+  const { data } = useRealTimePrice([
+    "AAPL",
+    "MSFT",
+    "GOOGL",
+    "AMZN",
+    "TSLA",
+    "UPWK",
+  ]);
+
+  return (
+    <div className="flex gap-4 p-4">
+      {Object.values(data).map((stock) => (
+        <StockCard key={(stock as StockData).SYMB} stock={stock as StockData} />
+      ))}
+    </div>
   );
 }
