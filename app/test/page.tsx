@@ -5,12 +5,20 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 import useRealTimePrice from "@/hooks/useRealTimePrice";
+import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
-  const { data } = useRealTimePrice(["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA"]);
+  const { data } = useRealTimePrice([
+    "AAPL",
+    "MSFT",
+    "GOOGL",
+    "AMZN",
+    "TSLA",
+    "UPWK",
+  ]);
 
   return (
-    <div className="grid grid-cols-5 gap-4">
+    <div className="flex gap-4 p-4">
       {Object.values(data).map((stock) => (
         <StockCard key={stock.SYMB} stock={stock} />
       ))}
@@ -49,6 +57,19 @@ interface StockData {
 }
 
 export function StockCard({ stock }: StockData) {
+  const [isChanged, setIsChanged] = useState(false);
+  const prevLastRef = useRef(stock.LAST);
+
+  useEffect(() => {
+    if (prevLastRef.current !== stock.LAST) {
+      setIsChanged(true);
+      const timer = setTimeout(() => setIsChanged(false), 1000);
+      prevLastRef.current = stock.LAST;
+      return () => clearTimeout(timer);
+    }
+    prevLastRef.current = stock.LAST;
+  }, [stock.LAST]);
+
   // 등락 구분에 따른 색상 결정
   const isPositive = stock.SIGN === "1" || stock.SIGN === "2"; // 상승
   const isNegative = stock.SIGN === "4" || stock.SIGN === "5"; // 하락
@@ -106,7 +127,11 @@ export function StockCard({ stock }: StockData) {
   };
 
   return (
-    <Card className="h-full hover:shadow-lg transition-shadow w-fit">
+    <Card
+      className={`h-full hover:shadow-lg transition-shadow w-60 ${
+        isChanged ? "border-2 border-red-500" : "border"
+      }`}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
@@ -131,9 +156,7 @@ export function StockCard({ stock }: StockData) {
             className={`flex items-center gap-2 text-2xl ${getPriceColor()}`}
           >
             {getPriceIcon()}
-            <span className="font-mono">
-              {formatPrice(stock.LAST, stock.ZDIV)}
-            </span>
+            <span className="font-mono">{stock.LAST}</span>
           </div>
           <div className={`flex items-center gap-2 text-sm ${getPriceColor()}`}>
             <span className="font-mono">
@@ -173,18 +196,14 @@ export function StockCard({ stock }: StockData) {
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <div className="text-muted-foreground mb-1">매수호가</div>
-            <div className="font-mono text-blue-600">
-              {formatPrice(stock.PBID, stock.ZDIV)}
-            </div>
+            <div className="font-mono text-blue-600">{stock.PBID}</div>
             <div className="text-xs text-muted-foreground">
               잔량: {formatNumber(stock.VBID)}
             </div>
           </div>
           <div>
             <div className="text-muted-foreground mb-1">매도호가</div>
-            <div className="font-mono text-red-600">
-              {formatPrice(stock.PASK, stock.ZDIV)}
-            </div>
+            <div className="font-mono text-red-600">{stock.PASK}</div>
             <div className="text-xs text-muted-foreground">
               잔량: {formatNumber(stock.VASK)}
             </div>
