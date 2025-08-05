@@ -20,7 +20,7 @@ export default function Home() {
   return (
     <div className="flex gap-4 p-4">
       {Object.values(data).map((stock) => (
-        <StockCard key={stock.SYMB} stock={stock} />
+        <StockCard key={(stock as StockData).SYMB} stock={stock as StockData} />
       ))}
     </div>
   );
@@ -56,7 +56,7 @@ interface StockData {
   name?: string; // 종목명 (추가)
 }
 
-export function StockCard({ stock }: StockData) {
+export function StockCard({ stock }: { stock: StockData }) {
   const [isChanged, setIsChanged] = useState(false);
   const prevLastRef = useRef(stock.LAST);
 
@@ -73,7 +73,6 @@ export function StockCard({ stock }: StockData) {
   // 등락 구분에 따른 색상 결정
   const isPositive = stock.SIGN === "1" || stock.SIGN === "2"; // 상승
   const isNegative = stock.SIGN === "4" || stock.SIGN === "5"; // 하락
-  const isFlat = stock.SIGN === "3"; // 보합
 
   const getPriceColor = () => {
     if (isPositive) return "text-red-600";
