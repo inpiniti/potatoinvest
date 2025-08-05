@@ -37,7 +37,7 @@ interface StockData {
   name?: string; // 종목명 (추가)
 }
 
-export function StockCard({ stock }: { stock: StockData }) {
+function StockCard({ stock }: { stock: StockData }) {
   const [isChanged, setIsChanged] = useState(false);
   const prevLastRef = useRef(stock.LAST);
 
