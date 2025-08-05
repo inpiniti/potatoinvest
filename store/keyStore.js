@@ -41,6 +41,8 @@ export const keyStore = create(
               key.vtsSecretKey && decrypt(password, key.vtsSecretKey),
             account: key.account && decrypt(password, key.account),
             vtsAccount: key.vtsAccount && decrypt(password, key.vtsAccount),
+            approval_key:
+              key.approval_key && decrypt(password, key.approval_key),
           };
         },
       }),

@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { keyStore } from '@/store/keyStore';
-import { tempKeyStore } from '@/store/tempKeyStore';
-import useToken from '@/hooks/useToken';
-import dayjs from 'dayjs';
-import { FaArrowLeft, FaArrowRight } from 'react-icons/fa'; // 화살표 아이콘 추가
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { keyStore } from "@/store/keyStore";
+import { tempKeyStore } from "@/store/tempKeyStore";
+import useToken from "@/hooks/useToken";
+import dayjs from "dayjs";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa"; // 화살표 아이콘 추가
+import { Button } from "@/components/ui/button";
 
 export default function Token() {
   /**
@@ -22,13 +22,13 @@ export default function Token() {
    * @type {[string, Function]} 토큰 발급 상태와 업데이트 함수
    * 'idle': 초기 상태, 'loading': 토큰 발급 중, 'success': 토큰 발급 성공, 'error': 토큰 발급 실패
    */
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState("idle");
 
   /**
    * 에러 메시지를 저장하는 변수
    * @type {[string, Function]} 에러 메시지와 업데이트 함수
    */
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   /**
    * 저장된 키 정보를 담는 객체
@@ -46,7 +46,7 @@ export default function Token() {
    * 토큰 발급 및 확인 관련 함수
    * @type {Object} 토큰 관련 함수들
    */
-  const { 토큰발급, 발급된토큰확인 } = useToken();
+  const { 토큰발급, 발급된토큰확인, 웹소켓토큰발급 } = useToken();
 
   /**
    * 컴포넌트 마운트 시 필수 정보가 있는지 확인합니다.
@@ -57,9 +57,9 @@ export default function Token() {
   useEffect(() => {
     // 필수 정보가 설정되어 있는지 확인
     if (!key.account || !key.appKey || !key.secretKey) {
-      setStatus('error');
+      setStatus("error");
       setErrorMessage(
-        '계좌번호, App Key, Secret Key가 모두 설정되어 있어야 합니다.'
+        "계좌번호, App Key, Secret Key가 모두 설정되어 있어야 합니다."
       );
     }
   }, [key.account, key.appKey, key.secretKey]);
@@ -77,14 +77,17 @@ export default function Token() {
     try {
       // 필수 정보가 설정되어 있는지 확인
       if (!key.account || !key.appKey || !key.secretKey) {
-        setStatus('error');
+        setStatus("error");
         setErrorMessage(
-          '계좌번호, App Key, Secret Key가 모두 설정되어 있어야 합니다.'
+          "계좌번호, App Key, Secret Key가 모두 설정되어 있어야 합니다."
         );
         return;
       }
 
-      setStatus('loading');
+      setStatus("loading");
+
+      // 웹 소켓 토큰 발급
+      const webSocketResult = await 웹소켓토큰발급();
 
       // 이미 발급된 토큰이 있는지 확인
       const hasToken = await 발급된토큰확인();
@@ -100,11 +103,11 @@ export default function Token() {
 
           // 토큰이 유효한 경우 (만료 시간이 현재보다 나중)
           if (expiry.isAfter(now)) {
-            setStatus('success');
+            setStatus("success");
             return;
           }
           // 토큰이 만료된 경우
-          console.log('토큰이 만료되어 재발급을 시도합니다.');
+          console.log("토큰이 만료되어 재발급을 시도합니다.");
         }
       }
 
@@ -112,17 +115,14 @@ export default function Token() {
       const result = await 토큰발급();
 
       if (result) {
-        setStatus('success');
-      } else {
-        setStatus('error');
-        setErrorMessage(
-          '토큰 발급에 실패했습니다. 입력한 정보를 확인해주세요.'
-        );
+        // 웹 소켓 토큰 발급 실패
+        setStatus("error");
+        setErrorMessage("웹 소켓 토큰 발급에 실패했습니다.");
       }
     } catch (error) {
-      console.error('토큰 발급 중 오류:', error);
-      setStatus('error');
-      setErrorMessage(error.message || '토큰 발급 중 오류가 발생했습니다.');
+      console.error("토큰 발급 중 오류:", error);
+      setStatus("error");
+      setErrorMessage(error.message || "토큰 발급 중 오류가 발생했습니다.");
     }
   };
 
@@ -134,10 +134,10 @@ export default function Token() {
    * 2. 토큰 발급이 실패한 경우 키 입력 화면(/start/keys)으로 이동합니다.
    */
   const handleSubmit = () => {
-    if (status === 'success') {
-      router.push('/start/setting');
+    if (status === "success") {
+      router.push("/start/setting");
     } else {
-      router.push('/start/keys');
+      router.push("/start/keys");
     }
   };
 
@@ -146,7 +146,7 @@ export default function Token() {
    * @returns {JSX.Element} 토큰 정보 UI
    */
   const renderTokenInfo = () => {
-    if (status !== 'success') return null;
+    if (status !== "success") return null;
 
     const tokenInfo = key.isVts ? tempKey : realKey;
 
@@ -158,13 +158,13 @@ export default function Token() {
           <div className="flex justify-between border-b pb-2">
             <span className="text-neutral-600">계좌 타입:</span>
             <span className="font-medium">
-              {key.isVts ? '모의투자계좌' : '실전계좌'}
+              {key.isVts ? "모의투자계좌" : "실전계좌"}
             </span>
           </div>
 
           <div className="flex justify-between border-b pb-2">
             <span className="text-neutral-600">토큰 유형:</span>
-            <span className="font-medium">{tokenInfo?.token_type || '-'}</span>
+            <span className="font-medium">{tokenInfo?.token_type || "-"}</span>
           </div>
 
           <div className="flex justify-between border-b pb-2">
@@ -172,9 +172,9 @@ export default function Token() {
             <span className="font-medium">
               {tokenInfo?.access_token_token_expired
                 ? dayjs(tokenInfo.access_token_token_expired).format(
-                    'YYYY-MM-DD HH:mm:ss'
+                    "YYYY-MM-DD HH:mm:ss"
                   )
-                : '-'}
+                : "-"}
             </span>
           </div>
         </div>
@@ -196,7 +196,7 @@ export default function Token() {
             objectFit="cover"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = '/images/key.jpg'; // 대체 이미지
+              e.target.src = "/images/key.jpg"; // 대체 이미지
             }}
           />
         </div>
@@ -212,7 +212,7 @@ export default function Token() {
         <div className="flex gap-6 items-center flex-col w-full max-w-md">
           {/* 토큰 발급 상태에 따른 UI */}
           <div className="flex flex-col items-center gap-4 w-full">
-            {status === 'idle' && (
+            {status === "idle" && (
               <div className="flex flex-col items-center gap-4">
                 <p className="text-center text-neutral-700">
                   아래 버튼을 클릭하여 토큰을 발급해주세요.
@@ -226,14 +226,14 @@ export default function Token() {
               </div>
             )}
 
-            {status === 'loading' && (
+            {status === "loading" && (
               <div className="flex flex-col items-center gap-4">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
                 <p className="text-center">토큰을 발급 중입니다...</p>
               </div>
             )}
 
-            {status === 'error' && (
+            {status === "error" && (
               <div className="flex flex-col items-center gap-4">
                 <div className="text-red-500 text-5xl">!</div>
                 <p className="text-center text-red-500 font-medium">
@@ -252,7 +252,7 @@ export default function Token() {
               </div>
             )}
 
-            {status === 'success' && (
+            {status === "success" && (
               <div className="flex flex-col items-center gap-4">
                 <div className="text-green-500 text-5xl">✓</div>
                 <p className="text-center text-green-500 font-medium">
@@ -267,12 +267,12 @@ export default function Token() {
           </div>
 
           {/* 다음 단계 버튼 부분 수정 - 성공 또는 실패 상태일 때만 표시 */}
-          {(status === 'success' || status === 'error') && (
+          {(status === "success" || status === "error") && (
             <div className="flex w-full justify-between mt-8">
               {/* 뒤로가기 버튼 */}
               <button
                 className="rounded-full border border-neutral-300 transition-colors flex items-center justify-center bg-white text-neutral-700 hover:bg-neutral-50 cursor-pointer font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-                onClick={() => router.push('/start/keys')}
+                onClick={() => router.push("/start/keys")}
               >
                 <FaArrowLeft className="mr-2" /> 뒤로
               </button>
@@ -282,7 +282,7 @@ export default function Token() {
                 className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background hover:bg-[#383838] dark:hover:bg-[#ccc] cursor-pointer font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
                 onClick={handleSubmit}
               >
-                {status === 'success' ? (
+                {status === "success" ? (
                   <>
                     다음 <FaArrowRight className="ml-2" />
                   </>

@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import { tempKeyStore } from '@/store/tempKeyStore';
-import useApi from '@/hooks/useApi';
-import { delay } from '@/utils/util';
-import { keyStore } from '@/store/keyStore';
-import dayjs from 'dayjs';
-import { useEffect, useState, useMemo } from 'react';
+import { tempKeyStore } from "@/store/tempKeyStore";
+import useApi from "@/hooks/useApi";
+import { delay } from "@/utils/util";
+import { keyStore } from "@/store/keyStore";
+import dayjs from "dayjs";
+import { useEffect, useState, useMemo } from "react";
 
 const useToken = () => {
   const api = useApi();
   const {
     key: { isVts },
+    setKey: setWebSocketKey,
   } = keyStore();
   const { key, setKey, realKey, setRealKey, _hasHydrated } = tempKeyStore();
 
@@ -21,7 +22,7 @@ const useToken = () => {
   useEffect(() => {
     if (_hasHydrated) {
       setIsReady(true);
-      console.log('🔥 토큰 스토어 준비됨:', { key, realKey });
+      console.log("🔥 토큰 스토어 준비됨:", { key, realKey });
     }
   }, [_hasHydrated, key, realKey]);
 
@@ -30,14 +31,8 @@ const useToken = () => {
    * 토큰이 있고 유효하면 true, 없거나 만료되었으면 false
    */
   const 발급된토큰확인 = async (): Promise<boolean> => {
-    console.log('isVts:', isVts);
-
     // 계정 타입에 따른 토큰 정보 확인
     const tokenInfo = isVts ? key : realKey;
-
-    console.log('tokenInfo:', tokenInfo);
-    console.log('key:', key);
-    console.log('realKey:', realKey);
 
     // 토큰이 없으면 false 반환
     if (!tokenInfo.access_token) {
@@ -74,7 +69,7 @@ const useToken = () => {
       const data = await response.json();
 
       if (response.status !== 200) {
-        console.error('모의투자 토큰 발급 실패', response.status, data);
+        console.error("모의투자 토큰 발급 실패", response.status, data);
         success = false;
       } else {
         setKey({
@@ -89,7 +84,7 @@ const useToken = () => {
     const data = await response.json();
 
     if (response.status !== 200) {
-      console.error('실전 토큰 발급 실패', response.status, data);
+      console.error("실전 토큰 발급 실패", response.status, data);
       if (!isVts) {
         // 실전 계정인 경우에만 실패로 간주
         success = false;
@@ -98,6 +93,31 @@ const useToken = () => {
       setRealKey({
         ...realKey,
         ...data,
+      });
+    }
+
+    return success;
+  };
+
+  /**
+   * 웹소켓 토큰 발급
+   */
+  const 웹소켓토큰발급 = async () => {
+    let success = true;
+
+    // 실전 계정인 경우 실전 웹소켓 토큰 발급
+    const response = await api.oauth2.approval();
+    const data = await response.json();
+    if (response.status !== 200) {
+      console.error("실전 웹소켓 토큰 발급 실패", response.status, data);
+      if (!isVts) {
+        // 실전 계정인 경우에만 실패로 간주
+        success = false;
+      }
+    } else {
+      setWebSocketKey({
+        filed: "approval_key",
+        approval_key: data.approval_key,
       });
     }
 
@@ -150,7 +170,14 @@ const useToken = () => {
     return expiry.isAfter(now);
   }, [isReady, isVts, key, realKey]);
 
-  return { 발급된토큰확인, 토큰발급, 토큰남은시간확인, isTokenValid, isReady };
+  return {
+    발급된토큰확인,
+    토큰발급,
+    토큰남은시간확인,
+    isTokenValid,
+    isReady,
+    웹소켓토큰발급,
+  };
 };
 
 export default useToken;
