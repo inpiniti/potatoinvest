@@ -8,10 +8,10 @@ let aiModels = null;
 const loadTensorFlow = async () => {
   if (!tf) {
     try {
-      tf = await import("@tensorflow/tfjs-node");
-    } catch (error) {
-      console.warn("TensorFlow.js 로드 실패, CPU 백엔드로 대체 시도:", error);
       tf = await import("@tensorflow/tfjs");
+    } catch (error) {
+      console.warn("TensorFlow.js 로드 실패:", error);
+      tf = null;
     }
   }
   return tf;
@@ -220,31 +220,6 @@ export async function GET(req) {
     });
   } catch (error) {
     console.error("API 처리 오류:", error);
-    return NextResponse.json(
-      { error: "An error occurred while fetching data" },
-      {
-        status: 500,
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      }
-    );
-  }
-}
-
-export async function GET() {
-  try {
-    const res = await crawling("us");
-    return NextResponse.json(res, {
-      status: 200,
-      headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=60",
-        "CDN-Cache-Control": "public, s-maxage=60",
-        "Vercel-CDN-Cache-Control": "public, s-maxage=60",
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching data:", error);
     return NextResponse.json(
       { error: "An error occurred while fetching data" },
       {
