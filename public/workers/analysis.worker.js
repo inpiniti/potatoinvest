@@ -1,7 +1,5 @@
 // 웹 워커 스크립트 - React 라이브러리 사용 불가
-
-// TensorFlow.js 라이브러리 불러오기 (웹 워커에서 사용 가능한 방식)
-importScripts("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js");
+// 서버에서 예측을 처리하므로 TensorFlow.js는 더 이상 필요하지 않음
 
 // Stock Analyzer 불러오기 (public 폴더에서)
 importScripts("/stock-analyzer.js");
@@ -16,163 +14,11 @@ const fetchData = async (url) => {
   }
 };
 
-// 전처리 함수
-const preprocess = (data) => {
+// 클라이언트사이드 분석 처리 함수 (서버에서 예측결과를 받아 추가 분석만 수행)
+const processData = async (serverProcessedData) => {
   try {
-    const features = [];
-
-    data.forEach((row) => {
-      // 사용할 필드 이름을 배열로 정의
-      const selectedFields = [
-        "operating_margin_ttm",
-        "relative_volume_10d_calc",
-        "enterprise_value_to_revenue_ttm",
-        "volatility_w",
-        "volatility_m",
-        "dividends_yield_current",
-        "gap",
-        "volume_change",
-        "pre_tax_margin_ttm",
-        "perf_1_y_market_cap",
-        "perf_w",
-        "perf_1_m",
-        "perf_3_m",
-        "perf_6_m",
-        "perf_y_t_d",
-        "perf_y",
-        "perf_5_y",
-        "perf_10_y",
-        "recommend_all",
-        "recommend_m_a",
-        "recommend_other",
-        "r_s_i",
-        "mom",
-        "c_c_i20",
-        "stoch_k",
-        "stoch_d",
-      ];
-
-      // 선택된 필드만 feature 배열에 추가
-      const feature = selectedFields.map((field) => {
-        const value = row[field];
-        return isNaN(parseFloat(value)) ? 0 : parseFloat(value);
-      });
-
-      features.push(feature);
-    });
-
-    return tf.tensor2d(features);
-  } catch (error) {
-    throw new Error(`전처리 오류: ${error.message}`);
-  }
-};
-
-// 객체를 일반 Object로 변환하는 함수
-function toObject(proxy) {
-  if (Array.isArray(proxy)) {
-    return proxy.map((item) => toObject(item));
-  } else if (proxy !== null && typeof proxy === "object") {
-    const obj = {};
-    for (const key in proxy) {
-      if (proxy.hasOwnProperty(key)) {
-        obj[key] = toObject(proxy[key]);
-      }
-    }
-    return obj;
-  } else {
-    return proxy;
-  }
-}
-
-// 모델 역직렬화 함수
-const deserializeModel = async (modelJson, weightsJson) => {
-  try {
-    // 모델 JSON을 기반으로 새로운 모델 생성
-    const model = await tf.models.modelFromJSON(modelJson);
-
-    // 가중치 복원
-    const weightsArray = toObject(weightsJson);
-    const weights = weightsArray.map((weight, index) => {
-      const shape = model.weights[index].shape;
-
-      // weight 객체의 값을 배열로 변환
-      const weightValues = Object.values(weight).map((value) => Number(value));
-
-      return tf.tensor(weightValues, shape);
-    });
-
-    // 가중치 설정
-    model.setWeights(weights);
-
-    return model;
-  } catch (error) {
-    throw new Error(`모델 역직렬화 오류: ${error.message}`);
-  }
-};
-
-// 예측 함수
-const predict = async (model, inputData) => {
-  try {
-    // 입력 데이터 확인
-    if (!inputData || inputData.length === 0) {
-      throw new Error("입력 데이터가 비어있습니다");
-    }
-
-    // 모델을 사용하여 예측
-    const predictions = model.predict(inputData);
-
-    // 예측 결과를 배열로 변환
-    const predictedValues = await predictions.data();
-
-    // 텐서 해제
-    predictions.dispose();
-
-    // 예측 결과 반환
-    return Array.from(predictedValues);
-  } catch (error) {
-    throw new Error(`예측 오류: ${error.message}`);
-  }
-};
-
-// 데이터 처리 및 분석 주 함수
-const processData = async (rawData, aiModels) => {
-  try {
-    // 1. 데이터 전처리
-    const processedData = preprocess(rawData);
-
-    // 2. 모델 로드 및 역직렬화 - 모든 모델 병렬 처리
-    const models = await Promise.all(
-      aiModels.map((model) => deserializeModel(model.model, model.weights))
-    );
-
-    // 3. 예측 수행 - 모든 모델 병렬 처리
-    const predictions = await Promise.all(
-      models.map((model) => predict(model, processedData))
-    );
-
-    // 4. 예측 결과 평균 계산
-    const predictionAverage = predictions[0].map((_, colIndex) => {
-      let sum = 0;
-      for (let rowIndex = 0; rowIndex < predictions.length; rowIndex++) {
-        sum += predictions[rowIndex][colIndex];
-      }
-      return sum / predictions.length;
-    });
-
-    // 5. 텐서 해제
-    processedData.dispose();
-    models.forEach((model) => model.dispose());
-
-    // 6. 분석 데이터에 예측 결과 추가
-    const analysisData = rawData.map((row, index) => {
-      // 기본 데이터에 예측 결과 추가
-      const stockWithPrediction = {
-        ...row,
-        예측결과: predictionAverage[index],
-        type: "분석",
-        processedAt: new Date().toISOString(),
-      };
-
+    // 서버에서 이미 예측 결과가 포함된 데이터를 받아서 추가 분석만 수행
+    const analysisData = serverProcessedData.map((row) => {
       // 새로운 6가지 지표 종합 분석 수행
       let comprehensiveAnalysis = null;
       try {
@@ -184,9 +30,9 @@ const processData = async (rawData, aiModels) => {
         console.warn("종합 분석 중 오류:", error.message);
       }
 
-      // 종합 분석 결과 추가
+      // 종합 분석 결과 추가 (서버에서 온 예측결과는 그대로 유지)
       return {
-        ...stockWithPrediction,
+        ...row,
         // 기존 호환성을 위한 필드들 (배당, 현금흐름)
         dividend: comprehensiveAnalysis?.배당지표평가 || null,
         cashFlow: comprehensiveAnalysis?.대차대조표평가 || null,
@@ -197,7 +43,7 @@ const processData = async (rawData, aiModels) => {
 
     return analysisData;
   } catch (error) {
-    throw new Error(`데이터 처리 오류: ${error.message}`);
+    throw new Error(`클라이언트 분석 처리 오류: ${error.message}`);
   }
 };
 
@@ -247,21 +93,23 @@ self.addEventListener("message", async (e) => {
   try {
     switch (type) {
       case "PROCESS_DATA": {
-        const { rawData, aiModels } = payload;
-        const result = await processData(rawData, aiModels);
+        // 서버에서 예측 결과가 포함된 데이터를 받아서 추가 분석만 수행
+        const { serverProcessedData } = payload;
+        const result = await processData(serverProcessedData);
         self.postMessage({ type: "PROCESS_COMPLETE", payload: result });
         break;
       }
 
       case "FETCH_AND_PROCESS": {
-        const { url, aiModels } = payload;
+        // 서버 API에서 예측 결과가 포함된 데이터를 가져와서 추가 분석 수행
+        const { url } = payload;
         const data = await fetchData(url);
 
         if (data.error) {
           throw new Error(data.error);
         }
 
-        const result = await processData(data, aiModels);
+        const result = await processData(data);
         self.postMessage({ type: "PROCESS_COMPLETE", payload: result });
         break;
       }

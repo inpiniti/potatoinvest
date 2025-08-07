@@ -34,7 +34,8 @@
     "app/page/log/page.jsx",
     "hooks/useAi.js",
     "app/page/sell/page.jsx",
-    "app/dashboard/page.jsx"
+    "app/dashboard/page.jsx",
+    "app/api/hello/route.js"
   ],
   "exclude": ["node_modules"]
 }
