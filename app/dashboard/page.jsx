@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import { Separator } from '@/components/ui/separator';
+import React from "react";
+import { Separator } from "@/components/ui/separator";
 import {
   Wallet, // 잔고에 적합한 지갑 아이콘
   CheckSquare, // 체결에 적합한 체크 아이콘
@@ -15,8 +16,9 @@ import {
   Settings,
   Play,
   RotateCw,
-} from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+  Zap, // 부스터 아이콘
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Card,
@@ -24,12 +26,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 import {
   Sheet,
@@ -40,104 +42,124 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet';
+} from "@/components/ui/sheet";
 
-import { Toaster } from 'sonner';
+import { Toaster } from "sonner";
 
-import useToken from '@/hooks/useToken'; // 토큰 유효성 검사 훅
+import useToken from "@/hooks/useToken"; // 토큰 유효성 검사 훅
 
-import useAnalysis from './hooks/useAnalysis'; // 분석 데이터 훅
-import useHolding from './hooks/useHolding'; // 보유 종목 데이터 훅
-import useCnnl from './hooks/useCnnl'; // 체결 데이터 훅
-import useProfit from './hooks/useProfit'; // 기간 손익 데이터 훅
+import useAnalysis from "./hooks/useAnalysis"; // 분석 데이터 훅
+import useHolding from "./hooks/useHolding"; // 보유 종목 데이터 훅
+import useCnnl from "./hooks/useCnnl"; // 체결 데이터 훅
+import useProfit from "./hooks/useProfit"; // 기간 손익 데이터 훅
 
-import useGemini from './hooks/useGemini'; // 제미니 관련 훅
-import useGeminiNews from './hooks/useGeminiNews'; // 제미니 뉴스 훅
-import useGeminiTechnical from './hooks/useGeminiTechnical'; // 제미니 기술적 분석 훅
-import useGeminiFinancial from './hooks/useGeminiFinancial'; // 제미니 재무 데이터 훅
+import useGemini from "./hooks/useGemini"; // 제미니 관련 훅
+import useGeminiNews from "./hooks/useGeminiNews"; // 제미니 뉴스 훅
+import useGeminiTechnical from "./hooks/useGeminiTechnical"; // 제미니 기술적 분석 훅
+import useGeminiFinancial from "./hooks/useGeminiFinancial"; // 제미니 재무 데이터 훅
 
-import useSearchInfo from './hooks/useSearchInfo'; // 현재가 상세 정보 훅
-import useDailyprice from './hooks/useDailyprice'; // 기간별 시세 훅
-import usePriceDetail from './hooks/usePriceDetail'; // 현제가 상세 훅
-import useNewsCommunity from './hooks/useNewsCommunity'; // 뉴스 및 커뮤니티 훅
-import useExchangeRate from './hooks/useExchangeRate'; // 환율 훅
+import useSearchInfo from "./hooks/useSearchInfo"; // 현재가 상세 정보 훅
+import useDailyprice from "./hooks/useDailyprice"; // 기간별 시세 훅
+import usePriceDetail from "./hooks/usePriceDetail"; // 현제가 상세 훅
+import useNewsCommunity from "./hooks/useNewsCommunity"; // 뉴스 및 커뮤니티 훅
+import useExchangeRate from "./hooks/useExchangeRate"; // 환율 훅
 
-import useBuy from './hooks/useBuy'; // 매수 훅
+import useBuy from "./hooks/useBuy"; // 매수 훅
+import useRealTimePrice from "../../hooks/useRealTimePrice"; // 실시간 가격 훅
 
-import SettingsButton from '../page/log/components/header/buttons/SettingsButton';
-import AutoPlayToggle from '../page/log/components/header/navigation/AutoPlayToggle';
-import BuyToggle from '../page/log/components/header/navigation/BuyToggle';
-import SellToggle from '../page/log/components/header/navigation/SellToggle';
+import SettingsButton from "../page/log/components/header/buttons/SettingsButton";
+import AutoPlayToggle from "../page/log/components/header/navigation/AutoPlayToggle";
+import BuyToggle from "../page/log/components/header/navigation/BuyToggle";
+import SellToggle from "../page/log/components/header/navigation/SellToggle";
 
-import PageWrap from './components/PageWrap';
-import Header from './components/Header';
-import Aside from './components/Aside';
-import AsideItem from './components/AsideItem';
-import Main from './components/Main';
-import SectionHeader from './components/SectionHeader';
-import SectionTitle from './components/SectionTitle';
-import SectionTitleItem from './components/SectionTitleItem';
-import LoginButton from './components/LoginButton';
-import { ChartAreaDefault } from './components/ChartAreaDefault';
-import Buy from './components/Buy';
+import PageWrap from "./components/PageWrap";
+import Header from "./components/Header";
+import Aside from "./components/Aside";
+import AsideItem from "./components/AsideItem";
+import Main from "./components/Main";
+import SectionHeader from "./components/SectionHeader";
+import SectionTitle from "./components/SectionTitle";
+import SectionTitleItem from "./components/SectionTitleItem";
+import LoginButton from "./components/LoginButton";
+import { ChartAreaDefault } from "./components/ChartAreaDefault";
+import Buy from "./components/Buy";
+import BoosterCard from "./components/BoosterCard";
 
-import dayjs from 'dayjs';
-import { Skeleton } from '@/components/ui/skeleton';
-import { getLogoUrlByCode, getLogoUrlById } from '../page/log/utils/logoUtils';
-import { DividendAnalysis } from './components/DividendAnalysis';
-import { CashFlowAnalysis } from './components/CashFlowAnalysis';
-import { ComprehensiveAnalysis } from './components/ComprehensiveAnalysis';
-import { NewsAnalysis } from './components/NewsAnalysis';
+import dayjs from "dayjs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getLogoUrlByCode, getLogoUrlById } from "../page/log/utils/logoUtils";
+import { DividendAnalysis } from "./components/DividendAnalysis";
+import { CashFlowAnalysis } from "./components/CashFlowAnalysis";
+import { ComprehensiveAnalysis } from "./components/ComprehensiveAnalysis";
+import { NewsAnalysis } from "./components/NewsAnalysis";
 
 const data = {
   navMain: [
     {
-      title: '분석',
-      url: '#',
+      title: "분석",
+      url: "#",
       icon: BarChart3,
       isActive: false,
     },
     {
-      title: '잔고',
-      url: '#',
+      title: "잔고",
+      url: "#",
       icon: Wallet,
       isActive: true,
     },
     {
-      title: '체결',
-      url: '#',
+      title: "체결",
+      url: "#",
       icon: CheckSquare,
       isActive: false,
     },
     {
-      title: '미체결',
-      url: '#',
+      title: "미체결",
+      url: "#",
       icon: Clock,
       isActive: false,
     },
     {
-      title: '기간손익',
-      url: '#',
+      title: "기간손익",
+      url: "#",
       icon: LineChart,
+      isActive: false,
+    },
+    {
+      title: "부스터",
+      url: "#",
+      icon: Zap,
       isActive: false,
     },
   ],
 };
 
 const KEY_MAP = {
-  잔고: 'ovrs_pdno',
-  체결: 'pdno',
-  미체결: 'pdno',
-  기간손익: 'ovrs_pdno',
-  분석: 'name',
+  잔고: "ovrs_pdno",
+  체결: "pdno",
+  미체결: "pdno",
+  기간손익: "ovrs_pdno",
+  분석: "name",
+  부스터: "ovrs_pdno",
 };
 
 export default function DashBoardPage() {
   const [activeItem, setActiveItem] = useState(data.navMain[0]);
   const [current, setCurrent] = useState(0);
 
+  // 부스터 관련 상태
+  const [boosterSymbols, setBoosterSymbols] = useState([]); // 부스터에 추가된 종목 코드 리스트
+  const [lastNotificationTime, setLastNotificationTime] = useState({}); // 마지막 알림 시간 추적
+  const [previousPrices, setPreviousPrices] = useState({}); // 이전 가격 추적
+  const [priceChangeAnimation, setPriceChangeAnimation] = useState({}); // 가격변동 애니메이션 상태
+
+  // priceChangeAnimation 상태 변경 추적
+  React.useEffect(() => {
+    console.log("📊 priceChangeAnimation 상태 변경:", priceChangeAnimation);
+  }, [priceChangeAnimation]);
+
   // 매매
-  const { mutation } = useBuy();
+  const { mutation, analyzeBoosterData } = useBuy();
 
   // 분석 데이터
   const { analysisData, isPending: analysisPending } = useAnalysis(120000); // 분석
@@ -181,6 +203,9 @@ export default function DashBoardPage() {
   const { data: exchangeRateData, mutate: fetchExchangeRate } =
     useExchangeRate(); // 환율
 
+  // 실시간 가격 데이터 (부스터용)
+  const { data: realTimePriceData } = useRealTimePrice(boosterSymbols);
+
   // 토큰이 유효한지 확인
   const { isTokenValid } = useToken();
 
@@ -190,6 +215,7 @@ export default function DashBoardPage() {
     미체결: cnnlPending,
     기간손익: profitPending,
     분석: analysisPending,
+    부스터: false, // 부스터는 로딩이 없음
   };
 
   const krw = useMemo(
@@ -203,6 +229,58 @@ export default function DashBoardPage() {
 
   const [list, setList] = useState([]);
 
+  // 부스터 토글 함수
+  const toggleBooster = (symbol) => {
+    setBoosterSymbols((prev) => {
+      if (prev.includes(symbol)) {
+        // 이미 존재하면 제거
+        return prev.filter((s) => s !== symbol);
+      } else {
+        // 존재하지 않으면 추가
+        return [...prev, symbol];
+      }
+    });
+  };
+
+  // 테스트용 가격 변동 시뮬레이션 함수
+  const testPriceChange = (symbol) => {
+    console.log("🔥 테스트 가격 변동 시뮬레이션 시작:", symbol);
+    setPriceChangeAnimation((prev) => {
+      const newState = {
+        ...prev,
+        [symbol]: true,
+      };
+      console.log("🎯 테스트 애니메이션 상태 활성화:", newState);
+      return newState;
+    });
+
+    setTimeout(() => {
+      setPriceChangeAnimation((prev) => {
+        const newState = {
+          ...prev,
+          [symbol]: false,
+        };
+        console.log("⏰ 테스트 애니메이션 상태 비활성화:", newState);
+        return newState;
+      });
+    }, 2000); // 2초간 애니메이션 유지
+  };
+
+  // 부스터 데이터 생성 (실시간 데이터와 잔고 데이터 조인)
+  const boosterData = useMemo(() => {
+    return boosterSymbols.map((symbol) => {
+      const realTimeData = realTimePriceData[symbol];
+      const holdingItem = holdingData.find((item) => item.ovrs_pdno === symbol);
+
+      return {
+        symbol,
+        realTimeData,
+        holdingData: holdingItem,
+        pchs_avg_pric: holdingItem?.pchs_avg_pric || 0, // 평균매입단가
+      };
+    }); // 실시간 데이터가 없어도 표시 (Loading... 상태로)
+  }, [boosterSymbols, realTimePriceData, holdingData]);
+
   // 현재 종목 분석 데이터
   const currentAnalysisData = useMemo(() => {
     const currentItem = list[current];
@@ -213,8 +291,8 @@ export default function DashBoardPage() {
   const handleMenuChange = (newActive) => {
     setActiveItem(newActive);
     switch (newActive?.title) {
-      case '잔고':
-        console.log('잔고');
+      case "잔고":
+        console.log("잔고");
         setList(
           holdingData.map((item) => ({
             ...item,
@@ -222,7 +300,7 @@ export default function DashBoardPage() {
               (cnnlItem) => cnnlItem?.pdno === item.ovrs_pdno
             ),
             isNotCnnl: cnnlData
-              ?.filter((item) => item?.prcs_stat_name !== '완료')
+              ?.filter((item) => item?.prcs_stat_name !== "완료")
               .some((cnnlItem) => cnnlItem?.pdno === item.ovrs_pdno),
             예측결과: analysisData?.find(
               (_item) => _item.name === item.ovrs_pdno
@@ -230,12 +308,12 @@ export default function DashBoardPage() {
           }))
         );
         break;
-      case '미체결':
-        console.log('미체결');
-        setList(cnnlData?.filter((item) => item?.prcs_stat_name !== '완료'));
+      case "미체결":
+        console.log("미체결");
+        setList(cnnlData?.filter((item) => item?.prcs_stat_name !== "완료"));
         break;
-      case '분석':
-        console.log('분석데이터');
+      case "분석":
+        console.log("분석데이터");
 
         setList(
           analysisData
@@ -256,13 +334,17 @@ export default function DashBoardPage() {
             })
         );
         break;
-      case '체결':
-        console.log('체결');
-        setList(cnnlData?.filter((item) => item?.prcs_stat_name === '완료'));
+      case "체결":
+        console.log("체결");
+        setList(cnnlData?.filter((item) => item?.prcs_stat_name === "완료"));
         break;
-      case '기간손익':
-        console.log('기간손익');
+      case "기간손익":
+        console.log("기간손익");
         setList(profitData);
+        break;
+      case "부스터":
+        console.log("부스터");
+        setList(boosterData);
         break;
       default:
         setList([]);
@@ -274,20 +356,20 @@ export default function DashBoardPage() {
 
   // current 값이 변경될 때 스크롤 이동
   useEffect(() => {
-    console.log('useEffect current');
+    console.log("useEffect current");
     if (asideScrollContainerRef.current) {
-      console.log('useEffect current asideScrollContainerRef.current');
+      console.log("useEffect current asideScrollContainerRef.current");
       const activeItemElement = asideScrollContainerRef.current.querySelector(
         `[data-index="${current}"]`
       );
-      console.log('useEffect current activeItemElement');
+      console.log("useEffect current activeItemElement");
       if (activeItemElement) {
-        console.log('useEffect current activeItemElement 2');
+        console.log("useEffect current activeItemElement 2");
         activeItemElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
+          behavior: "smooth",
+          block: "start",
         });
-        console.log('activeItemElement.scrollIntoView');
+        console.log("activeItemElement.scrollIntoView");
       }
     }
   }, [current]);
@@ -315,9 +397,93 @@ export default function DashBoardPage() {
     getDetailData(current);
   }, [current, list]);
 
+  // 실시간 가격 변동 감지 (부스터용)
+  useEffect(() => {
+    console.log("🔄 실시간 가격 데이터 useEffect 실행");
+    console.log("realTimePriceData:", realTimePriceData);
+    console.log("현재 previousPrices:", previousPrices);
+
+    if (!realTimePriceData || Object.keys(realTimePriceData).length === 0) {
+      console.log("❌ realTimePriceData가 비어있음");
+      return;
+    }
+
+    console.log("✅ 실시간 가격 데이터 존재, 처리 시작");
+
+    Object.keys(realTimePriceData).forEach((symbol) => {
+      const currentData = realTimePriceData[symbol];
+      if (currentData && currentData.LAST) {
+        const currentPrice = parseFloat(currentData.LAST);
+        const previousPrice = previousPrices[symbol];
+
+        console.log(
+          `📊 ${symbol}: 현재=${currentPrice}, 이전=${previousPrice}`
+        );
+
+        // 이전 가격이 존재하고 현재 가격과 다를 때 애니메이션 실행
+        if (previousPrice !== undefined && previousPrice !== currentPrice) {
+          console.log(
+            `� ${symbol} 실제 가격 변동 감지!!! ${previousPrice} -> ${currentPrice}`
+          );
+
+          // 가격 변동 애니메이션 트리거
+          setPriceChangeAnimation((prev) => {
+            const newState = {
+              ...prev,
+              [symbol]: true,
+            };
+            console.log("💡 priceChangeAnimation 활성화:", newState);
+            return newState;
+          });
+
+          // 2초 후 애니메이션 제거
+          setTimeout(() => {
+            setPriceChangeAnimation((prev) => {
+              const newState = {
+                ...prev,
+                [symbol]: false,
+              };
+              console.log("⏰ priceChangeAnimation 비활성화:", newState);
+              return newState;
+            });
+          }, 2000);
+
+          // 자동매매 로직 실행 (부스터에서)
+          if (activeItem?.title === "부스터") {
+            const boosterItem = boosterData.find(
+              (item) => item.symbol === symbol
+            );
+            if (boosterItem && boosterItem.holdingData) {
+              analyzeBoosterData(
+                boosterItem,
+                lastNotificationTime,
+                setLastNotificationTime,
+                cnnlData
+              );
+            }
+          }
+        }
+
+        // 현재 가격을 이전 가격으로 저장
+        setPreviousPrices((prev) => ({
+          ...prev,
+          [symbol]: currentPrice,
+        }));
+      }
+    });
+  }, [realTimePriceData]); // realTimePriceData 변경시에만 실행
+
+  // 부스터 데이터가 변경될 때마다 리스트 업데이트
+  useEffect(() => {
+    if (activeItem?.title === "부스터") {
+      console.log("부스터 리스트 업데이트:", boosterData.length, "개 종목");
+      setList(boosterData);
+    }
+  }, [boosterData, activeItem?.title]); // 의존성 배열 단순화
+
   // 디테일 데이터 가져오기
   const getDetailData = (index) => {
-    console.log('getDetailData index', index);
+    console.log("getDetailData index", index);
     const newItem = list?.[index];
     const code = newItem?.[KEY_MAP[activeItem?.title]];
     if (!code) {
@@ -405,20 +571,20 @@ export default function DashBoardPage() {
 
     // 현재가 상세의 isError 를 보고 정상 조회가 되었을때만 mutation 실행
     if (!isError)
-      mutation({
-        currentItem, // 현재 데이터
-        priceDetailData, // 현재가 상세
-        analysisItem, // 분석 데이터
-        menu: activeItem.title, // 현재 메뉴
-        //newsScore, // 뉴스분석 점수 (1-5)
-        //expertScore, // 전문가 분석 점수 (1-5)
-        //technicalScore, // 기술적 분석 점수 (1-5)
-        //financialScore, // 재무 분석 점수 (1-5로 변환)
-      });
+      if (autoPlay) {
+        // mutation({
+        //   currentItem, // 현재 데이터
+        //   priceDetailData, // 현재가 상세
+        //   analysisItem, // 분석 데이터
+        //   menu: activeItem.title, // 현재 메뉴
+        //   //newsScore, // 뉴스분석 점수 (1-5)
+        //   //expertScore, // 전문가 분석 점수 (1-5)
+        //   //technicalScore, // 기술적 분석 점수 (1-5)
+        //   //financialScore, // 재무 분석 점수 (1-5로 변환)
+        // });
 
-    if (autoPlay) {
-      timeoutId = setTimeout(next, 2000);
-    }
+        timeoutId = setTimeout(next, 2000);
+      }
 
     // 클린업 함수로 이전 타이머 취소
     return () => {
@@ -429,7 +595,7 @@ export default function DashBoardPage() {
   }, [priceDetailPending]);
 
   useEffect(() => {
-    console.log('기간손익');
+    console.log("기간손익");
     setList(profitData);
   }, [profitType]);
 
@@ -447,7 +613,7 @@ export default function DashBoardPage() {
 
       // 기간손익을 제외한 메뉴만 필터링
       const availableMenus = data.navMain.filter(
-        (item) => !['기간손익', '체결'].includes(item.title)
+        (item) => !["기간손익", "체결"].includes(item.title)
       );
 
       const currentIndex = availableMenus.findIndex(
@@ -475,7 +641,7 @@ export default function DashBoardPage() {
         activeItem={activeItem}
         length={list?.length || 0}
         subItems={
-          activeItem?.title === '기간손익' && (
+          activeItem?.title === "기간손익" && (
             <Tabs
               value={profitType}
               onValueChange={setProfitType}
@@ -490,7 +656,7 @@ export default function DashBoardPage() {
           )
         }
       >
-        {activeItem?.title === '기간손익' && (
+        {activeItem?.title === "기간손익" && (
           <div className="flex">
             <div className="flex flex-col text-xs flex-1">
               <div className="text-neutral-500">총 매매손익</div>
@@ -498,7 +664,7 @@ export default function DashBoardPage() {
                 <div className="font-bold text-lg">
                   {Number(
                     Number(totalProfit?.totalProfit)?.toFixed(0)
-                  ).toLocaleString('ko-KR')}
+                  ).toLocaleString("ko-KR")}
                 </div>
                 (
                 {(
@@ -515,13 +681,13 @@ export default function DashBoardPage() {
                 <div className="font-bold text-lg">
                   {Number(
                     Number(totalProfit?.totalInvestment)?.toFixed(0)
-                  ).toLocaleString('ko-KR')}
+                  ).toLocaleString("ko-KR")}
                 </div>
               </div>
             </div>
           </div>
         )}
-        {activeItem?.title === '잔고' && (
+        {activeItem?.title === "잔고" && (
           <div className="flex">
             <div className="flex flex-col text-xs flex-1">
               <div className="text-neutral-500">평가금액</div>
@@ -529,7 +695,7 @@ export default function DashBoardPage() {
                 <div className="font-bold text-lg">
                   {Number(
                     Number(holdingData2?.tot_evlu_pfls_amt * krw)?.toFixed(0)
-                  ).toLocaleString('ko-KR')}
+                  ).toLocaleString("ko-KR")}
                 </div>
               </div>
             </div>
@@ -539,7 +705,7 @@ export default function DashBoardPage() {
                 <div className="font-bold text-lg">
                   {Number(
                     Number(holdingData2?.ovrs_tot_pfls * krw)?.toFixed(0)
-                  ).toLocaleString('ko-KR')}
+                  ).toLocaleString("ko-KR")}
                 </div>
                 ({Number(holdingData2?.tot_pftrt)?.toFixed(1)}
                 %)
@@ -621,7 +787,7 @@ export default function DashBoardPage() {
         ) : (
           <>
             {list?.map((item, index) => {
-              if (activeItem?.title === '잔고') {
+              if (activeItem?.title === "잔고") {
                 return (
                   <AsideItem
                     key={index}
@@ -631,12 +797,7 @@ export default function DashBoardPage() {
                     date={`${item?.evlu_pfls_rt}%`}
                     info={`${Number(
                       (Number(item?.frcr_evlu_pfls_amt) * krw)?.toFixed(0)
-                    ).toLocaleString('ko-KR')}원`}
-                    // description={`${Number(item?.pchs_avg_pric)?.toFixed(
-                    //   2
-                    // )} > ${Number(item?.now_pric2)?.toFixed(2)} (${Number(
-                    //   item?.ovrs_cblc_qty
-                    // ).toLocaleString("ko-KR")})`}
+                    ).toLocaleString("ko-KR")}원`}
                     onClick={() => setCurrent(index)}
                     active={current === index}
                     badge={[
@@ -645,9 +806,55 @@ export default function DashBoardPage() {
                       item?.isNotCnnl,
                       item?.예측결과,
                     ]}
+                    additionalButton={
+                      <Button
+                        variant={
+                          boosterSymbols.includes(item?.ovrs_pdno)
+                            ? "default"
+                            : "outline"
+                        }
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBooster(item?.ovrs_pdno);
+                        }}
+                      >
+                        <Zap className="w-3 h-3 mr-1" />
+                        {boosterSymbols.includes(item?.ovrs_pdno)
+                          ? "ON"
+                          : "OFF"}
+                      </Button>
+                    }
                   />
                 );
-              } else if (activeItem?.title === '미체결') {
+              } else if (activeItem?.title === "부스터") {
+                return (
+                  <AsideItem
+                    key={index}
+                    data-index={index}
+                    logoUrl={getLogoUrlByCode(item?.symbol)}
+                    title={`${item?.symbol} ${
+                      item?.holdingData?.ovrs_item_name || ""
+                    }`}
+                    date={
+                      item?.realTimeData
+                        ? `${item?.realTimeData?.RATE}%`
+                        : "Loading..."
+                    }
+                    info={
+                      item?.realTimeData
+                        ? `$${parseFloat(
+                            item?.realTimeData?.LAST || 0
+                          ).toLocaleString()}`
+                        : "Loading..."
+                    }
+                    onClick={() => setCurrent(index)}
+                    active={current === index}
+                    badge={[false, false, false, null]}
+                    isPriceChanged={priceChangeAnimation[item.symbol] || false}
+                  />
+                );
+              } else if (activeItem?.title === "미체결") {
                 return (
                   <AsideItem
                     key={index}
@@ -663,13 +870,13 @@ export default function DashBoardPage() {
                         Number(item?.ft_ord_qty) *
                         krw
                       )?.toFixed(0)
-                    ).toLocaleString('ko-KR')}원)`}
+                    ).toLocaleString("ko-KR")}원)`}
                     description={`${item?.prcs_stat_name}`}
                     onClick={() => setCurrent(index)}
                     active={current === index}
                   />
                 );
-              } else if (activeItem?.title === '체결') {
+              } else if (activeItem?.title === "체결") {
                 return (
                   <AsideItem
                     key={index}
@@ -685,24 +892,24 @@ export default function DashBoardPage() {
                         Number(item?.ft_ord_qty) *
                         krw
                       )?.toFixed(0)
-                    ).toLocaleString('ko-KR')}원)`}
+                    ).toLocaleString("ko-KR")}원)`}
                     description={`${item?.prcs_stat_name}`}
                     onClick={() => setCurrent(index)}
                     active={current === index}
                   />
                 );
-              } else if (activeItem?.title === '기간손익') {
-                if (profitType === 'individual') {
+              } else if (activeItem?.title === "기간손익") {
+                if (profitType === "individual") {
                   return (
                     <AsideItem
                       key={index}
                       data-index={index}
                       logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
                       title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
-                      date={`${dayjs(item?.trad_day).format('YYYY-MM-DD')}`}
+                      date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
                       info={`${Number(
                         Number(item?.ovrs_rlzt_pfls_amt)?.toFixed(0)
-                      ).toLocaleString('ko-KR')}원 (${Number(
+                      ).toLocaleString("ko-KR")}원 (${Number(
                         item?.pftrt
                       )?.toFixed(2)})`}
                       description={`${Number(item?.pchs_avg_pric)?.toFixed(
@@ -712,19 +919,19 @@ export default function DashBoardPage() {
                       active={current === index}
                     />
                   );
-                } else if (profitType === 'daily') {
+                } else if (profitType === "daily") {
                   return (
                     <AsideItem
                       key={index}
                       data-index={index}
-                      title={dayjs(item?.trad_day).format('YYYY-MM-DD')}
+                      title={dayjs(item?.trad_day).format("YYYY-MM-DD")}
                       date=""
                       info={
-                        '손익 : ' +
+                        "손익 : " +
                         Number(
                           Number(item?.totalProfit)?.toFixed(0)
-                        ).toLocaleString('ko-KR') +
-                        '원 ' +
+                        ).toLocaleString("ko-KR") +
+                        "원 " +
                         `(${(
                           (Number(item?.totalProfit) /
                             Number(item?.totalInvestment)) *
@@ -732,27 +939,27 @@ export default function DashBoardPage() {
                         )?.toFixed(2)}%)`
                       }
                       description={
-                        '판매대금 : ' +
+                        "판매대금 : " +
                         Number(
                           Number(item.totalInvestment)?.toFixed(0)
-                        ).toLocaleString('ko-KR') +
-                        '원'
+                        ).toLocaleString("ko-KR") +
+                        "원"
                       }
                     />
                   );
-                } else if (profitType === 'monthly') {
+                } else if (profitType === "monthly") {
                   return (
                     <AsideItem
                       key={index}
                       data-index={index}
-                      title={dayjs(item?.yearMonth).format('YYYY년 MM월')}
+                      title={dayjs(item?.yearMonth).format("YYYY년 MM월")}
                       date={`${item?.tradingDays?.length}일간`}
                       info={
-                        '손익 : ' +
+                        "손익 : " +
                         Number(
                           Number(item?.totalProfit)?.toFixed(0)
-                        ).toLocaleString('ko-KR') +
-                        '원 ' +
+                        ).toLocaleString("ko-KR") +
+                        "원 " +
                         `(${(
                           (Number(item?.totalProfit) /
                             Number(item?.totalInvestment)) *
@@ -760,16 +967,16 @@ export default function DashBoardPage() {
                         )?.toFixed(2)}%)`
                       }
                       description={
-                        '판매대금 : ' +
+                        "판매대금 : " +
                         Number(
                           Number(item.totalInvestment)?.toFixed(0)
-                        ).toLocaleString('ko-KR') +
-                        '원'
+                        ).toLocaleString("ko-KR") +
+                        "원"
                       }
                     />
                   );
                 }
-              } else if (activeItem?.title === '분석') {
+              } else if (activeItem?.title === "분석") {
                 return (
                   <AsideItem
                     key={index}
@@ -788,6 +995,23 @@ export default function DashBoardPage() {
                     onClick={() => setCurrent(index)}
                     active={current === index}
                     badge={[item.isHolding, item.isCnnl, null, item.예측결과]}
+                    additionalButton={
+                      <Button
+                        variant={
+                          boosterSymbols.includes(item?.name)
+                            ? "default"
+                            : "outline"
+                        }
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBooster(item?.name);
+                        }}
+                      >
+                        <Zap className="w-3 h-3 mr-1" />
+                        {boosterSymbols.includes(item?.name) ? "ON" : "OFF"}
+                      </Button>
+                    }
                   />
                 );
               }
@@ -907,7 +1131,7 @@ export default function DashBoardPage() {
           analysisData={list}
         >
           {list?.map((item, index) => {
-            if (activeItem?.title === '잔고') {
+            if (activeItem?.title === "잔고") {
               return (
                 <SectionTitleItem
                   key={index}
@@ -918,16 +1142,16 @@ export default function DashBoardPage() {
                     item?.ovrs_stck_evlu_amt
                   )?.toFixed(2)} (${Number(
                     (Number(item?.frcr_evlu_pfls_amt) * krw)?.toFixed(0)
-                  ).toLocaleString('ko-KR')}원)`}
+                  ).toLocaleString("ko-KR")}원)`}
                   description={`${Number(item?.pchs_avg_pric)?.toFixed(
                     2
                   )} > ${Number(item?.now_pric2)?.toFixed(2)} (${Number(
                     item?.ovrs_cblc_qty
-                  ).toLocaleString('ko-KR')})`}
+                  ).toLocaleString("ko-KR")})`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === '미체결') {
+            } else if (activeItem?.title === "미체결") {
               return (
                 <SectionTitleItem
                   key={index}
@@ -940,12 +1164,12 @@ export default function DashBoardPage() {
                     Number(item?.ft_ord_unpr3) *
                     Number(item?.ft_ord_qty) *
                     krw
-                  ).toLocaleString('ko-KR')}원)`}
+                  ).toLocaleString("ko-KR")}원)`}
                   description={`${item?.prcs_stat_name}`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === '체결') {
+            } else if (activeItem?.title === "체결") {
               return (
                 <SectionTitleItem
                   key={index}
@@ -958,18 +1182,18 @@ export default function DashBoardPage() {
                     Number(item?.ft_ord_unpr3) *
                     Number(item?.ft_ord_qty) *
                     krw
-                  ).toLocaleString('ko-KR')}원)`}
+                  ).toLocaleString("ko-KR")}원)`}
                   description={`${item?.prcs_stat_name}`}
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === '기간손익') {
+            } else if (activeItem?.title === "기간손익") {
               return (
                 <SectionTitleItem
                   key={index}
                   logoUrl={getLogoUrlByCode(item?.ovrs_pdno)}
                   title={`${item?.ovrs_item_name} (${item?.ovrs_pdno})`}
-                  date={`${dayjs(item?.trad_day).format('YYYY-MM-DD')}`}
+                  date={`${dayjs(item?.trad_day).format("YYYY-MM-DD")}`}
                   info={`${Number(item?.ovrs_rlzt_pfls_amt)?.toFixed(
                     0
                   )}원 (${Number(item?.pftrt)?.toFixed(2)})`}
@@ -979,7 +1203,7 @@ export default function DashBoardPage() {
                   active={current === index}
                 />
               );
-            } else if (activeItem?.title === '분석') {
+            } else if (activeItem?.title === "분석") {
               return (
                 <SectionTitleItem
                   key={index}
@@ -996,291 +1220,387 @@ export default function DashBoardPage() {
                   badge={[item.isHolding, item.isCnnl, item.예측결과]}
                 />
               );
+            } else if (activeItem?.title === "부스터") {
+              return (
+                <SectionTitleItem
+                  key={index}
+                  logoUrl={getLogoUrlByCode(item?.symbol)}
+                  title={`${
+                    item?.holdingData?.ovrs_item_name || item?.symbol
+                  } (${item?.symbol})`}
+                  date={
+                    item?.realTimeData
+                      ? `${item?.realTimeData?.RATE}%`
+                      : "Loading..."
+                  }
+                  info={
+                    item?.realTimeData
+                      ? `$${parseFloat(
+                          item?.realTimeData?.LAST || 0
+                        ).toLocaleString()}`
+                      : "Loading..."
+                  }
+                  description={
+                    item?.realTimeData
+                      ? `매수: $${parseFloat(
+                          item?.realTimeData?.PBID || 0
+                        ).toLocaleString()} | 매도: $${parseFloat(
+                          item?.realTimeData?.PASK || 0
+                        ).toLocaleString()}`
+                      : "Loading..."
+                  }
+                  active={current === index}
+                  badge={[false, false, null]}
+                />
+              );
             }
           })}
         </SectionTitle>
         <Separator className="mr-2 h-4" />
         <div className="h-full overflow-y-scroll flex flex-col gap-4 p-4 scrollbar-hide">
-          <Tabs defaultValue="analysis">
-            <TabsList>
-              <TabsTrigger value="analysis">분석</TabsTrigger>
-              <TabsTrigger value="newsAnalysis">뉴스분석</TabsTrigger>
-              <TabsTrigger value="chart">차트</TabsTrigger>
-              <TabsTrigger value="stock">종목정보</TabsTrigger>
-              {/* <TabsTrigger value="news">뉴스</TabsTrigger> */}
-              <TabsTrigger value="community">커뮤니티</TabsTrigger>
-              {/* <TabsTrigger value="order">주문</TabsTrigger> */}
-            </TabsList>
-            <TabsContent value="analysis">
-              <ComprehensiveAnalysis
-                data={currentAnalysisData?.comprehensiveAnalysis}
-              />
-            </TabsContent>
-            <TabsContent value="newsAnalysis">
-              <NewsAnalysis ticker={currentAnalysisData?.name} />
-            </TabsContent>
-            <TabsContent value="chart">
-              <div className="py-2">
-                <CardTitle>차트</CardTitle>
-                <CardDescription className="pt-1">
-                  한국투자증권의 해외주식 기간별시세 기반의 데이터 입니다.
-                </CardDescription>
-                <Separator className="my-4" />
-                <ChartAreaDefault
-                  dailyPriceData={dailyPriceData}
-                  onChange={handleChartChange}
+          {activeItem?.title === "부스터" ? (
+            // 부스터 전용 UI
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <CardTitle>부스터 - 실시간 모니터링</CardTitle>
+                  <CardDescription className="mt-2">
+                    선택한 종목들의 실시간 가격 정보를 모니터링합니다.
+                  </CardDescription>
+                </div>
+                <div className="text-xs text-muted-foreground bg-gray-100 p-2 rounded">
+                  <div>
+                    활성 애니메이션:{" "}
+                    {Object.entries(priceChangeAnimation)
+                      .filter(([_, value]) => value)
+                      .map(([key, _]) => key)
+                      .join(", ") || "없음"}
+                  </div>
+                  <div>부스터 종목: {boosterSymbols.join(", ") || "없음"}</div>
+                </div>
+              </div>
+              <Separator className="my-4" />
+
+              {list.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+                  <Zap size={48} className="mb-4" />
+                  <p>부스터에 추가된 종목이 없습니다.</p>
+                  <p className="text-sm">
+                    잔고 메뉴에서 종목을 부스터에 추가해보세요.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {list.map((item, index) => (
+                    <BoosterCard
+                      key={index}
+                      data={item}
+                      krw={krw}
+                      isPriceChanged={
+                        priceChangeAnimation[item.symbol] || false
+                      }
+                      onTestPriceChange={testPriceChange}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            // 기존 Tabs UI
+            <Tabs defaultValue="analysis">
+              <TabsList>
+                <TabsTrigger value="analysis">분석</TabsTrigger>
+                <TabsTrigger value="newsAnalysis">뉴스분석</TabsTrigger>
+                <TabsTrigger value="chart">차트</TabsTrigger>
+                <TabsTrigger value="stock">종목정보</TabsTrigger>
+                {/* <TabsTrigger value="news">뉴스</TabsTrigger> */}
+                <TabsTrigger value="community">커뮤니티</TabsTrigger>
+                {/* <TabsTrigger value="order">주문</TabsTrigger> */}
+              </TabsList>
+              <TabsContent value="analysis">
+                <ComprehensiveAnalysis
+                  data={currentAnalysisData?.comprehensiveAnalysis}
                 />
-              </div>
-            </TabsContent>
-            <TabsContent value="stock">
-              <div className="py-2">
-                <CardTitle>종목정보</CardTitle>
-                <CardDescription className="pt-1">
-                  한국투자증권의 해외주식 상품기본정보 기반의 데이터 입니다.
-                </CardDescription>
-                <Separator className="my-4" />
-                <CardContent className="grid grid-cols-2 gap-4 px-0">
-                  {/* 기본 정보 */}
-                  <Card className="bg-white">
-                    <CardHeader>
-                      <CardTitle>기본 정보</CardTitle>
-                      <CardDescription>
-                        종목의 표준상품번호, 영문명, 국가, 상품분류 등 기본적인
-                        식별 정보를 제공합니다.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-2">
-                        <Label>표준상품번호</Label>
-                        <Input value={searchData?.std_pdno || ''} readOnly />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>상품영문명</Label>
-                        <Input
-                          value={searchData?.prdt_eng_name || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>상품명</Label>
-                        <Input value={searchData?.prdt_name || ''} readOnly />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>국가명</Label>
-                        <Input value={searchData?.natn_name || ''} readOnly />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>국가코드</Label>
-                        <Input value={searchData?.natn_cd || ''} readOnly />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>상품분류명</Label>
-                        <Input
-                          value={searchData?.prdt_clsf_name || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>상품분류코드</Label>
-                        <Input
-                          value={searchData?.prdt_clsf_cd || ''}
-                          readOnly
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+              </TabsContent>
+              <TabsContent value="newsAnalysis">
+                <NewsAnalysis ticker={currentAnalysisData?.name} />
+              </TabsContent>
+              <TabsContent value="chart">
+                <div className="py-2">
+                  <CardTitle>차트</CardTitle>
+                  <CardDescription className="pt-1">
+                    한국투자증권의 해외주식 기간별시세 기반의 데이터 입니다.
+                  </CardDescription>
+                  <Separator className="my-4" />
+                  <ChartAreaDefault
+                    dailyPriceData={dailyPriceData}
+                    onChange={handleChartChange}
+                  />
+                </div>
+              </TabsContent>
+              <TabsContent value="stock">
+                <div className="py-2">
+                  <CardTitle>종목정보</CardTitle>
+                  <CardDescription className="pt-1">
+                    한국투자증권의 해외주식 상품기본정보 기반의 데이터 입니다.
+                  </CardDescription>
+                  <Separator className="my-4" />
+                  <CardContent className="grid grid-cols-2 gap-4 px-0">
+                    {/* 기본 정보 */}
+                    <Card className="bg-white">
+                      <CardHeader>
+                        <CardTitle>기본 정보</CardTitle>
+                        <CardDescription>
+                          종목의 표준상품번호, 영문명, 국가, 상품분류 등
+                          기본적인 식별 정보를 제공합니다.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-2">
+                          <Label>표준상품번호</Label>
+                          <Input value={searchData?.std_pdno || ""} readOnly />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>상품영문명</Label>
+                          <Input
+                            value={searchData?.prdt_eng_name || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>상품명</Label>
+                          <Input value={searchData?.prdt_name || ""} readOnly />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>국가명</Label>
+                          <Input value={searchData?.natn_name || ""} readOnly />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>국가코드</Label>
+                          <Input value={searchData?.natn_cd || ""} readOnly />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>상품분류명</Label>
+                          <Input
+                            value={searchData?.prdt_clsf_name || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>상품분류코드</Label>
+                          <Input
+                            value={searchData?.prdt_clsf_cd || ""}
+                            readOnly
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                  {/* 거래 정보 */}
-                  <Card className="bg-white">
-                    <CardHeader>
-                      <CardTitle>거래 정보</CardTitle>
-                      <CardDescription>
-                        거래시장, 거래소, 통화, 단위 등 실제 매매와 관련된 거래
-                        조건 정보를 확인할 수 있습니다.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-2">
-                        <Label>거래시장명</Label>
-                        <Input
-                          value={searchData?.tr_mket_name || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>거래시장코드</Label>
-                        <Input value={searchData?.tr_mket_cd || ''} readOnly />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>해외거래소명</Label>
-                        <Input
-                          value={searchData?.ovrs_excg_name || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>해외거래소코드</Label>
-                        <Input
-                          value={searchData?.ovrs_excg_cd || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>거래통화코드</Label>
-                        <Input value={searchData?.tr_crcy_cd || ''} readOnly />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>통화명</Label>
-                        <Input value={searchData?.crcy_name || ''} readOnly />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>해외액면가</Label>
-                        <Input value={searchData?.ovrs_papr || ''} readOnly />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>매수단위수량</Label>
-                        <Input
-                          value={searchData?.buy_unit_qty || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>매도단위수량</Label>
-                        <Input
-                          value={searchData?.sll_unit_qty || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>거래단위금액</Label>
-                        <Input value={searchData?.tr_unit_amt || ''} readOnly />
-                      </div>
-                    </CardContent>
-                  </Card>
+                    {/* 거래 정보 */}
+                    <Card className="bg-white">
+                      <CardHeader>
+                        <CardTitle>거래 정보</CardTitle>
+                        <CardDescription>
+                          거래시장, 거래소, 통화, 단위 등 실제 매매와 관련된
+                          거래 조건 정보를 확인할 수 있습니다.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-2">
+                          <Label>거래시장명</Label>
+                          <Input
+                            value={searchData?.tr_mket_name || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>거래시장코드</Label>
+                          <Input
+                            value={searchData?.tr_mket_cd || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>해외거래소명</Label>
+                          <Input
+                            value={searchData?.ovrs_excg_name || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>해외거래소코드</Label>
+                          <Input
+                            value={searchData?.ovrs_excg_cd || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>거래통화코드</Label>
+                          <Input
+                            value={searchData?.tr_crcy_cd || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>통화명</Label>
+                          <Input value={searchData?.crcy_name || ""} readOnly />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>해외액면가</Label>
+                          <Input value={searchData?.ovrs_papr || ""} readOnly />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>매수단위수량</Label>
+                          <Input
+                            value={searchData?.buy_unit_qty || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>매도단위수량</Label>
+                          <Input
+                            value={searchData?.sll_unit_qty || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>거래단위금액</Label>
+                          <Input
+                            value={searchData?.tr_unit_amt || ""}
+                            readOnly
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                  {/* 상장/상태 정보 */}
-                  <Card className="bg-white">
-                    <CardHeader>
-                      <CardTitle>상장/상태 정보</CardTitle>
-                      <CardDescription>
-                        상장주식수, 상장일자, 상장여부, 폐지여부 등 종목의 상장
-                        및 상태 관련 정보를 보여줍니다.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-2">
-                        <Label>상장주식수</Label>
-                        <Input
-                          value={searchData?.lstg_stck_num || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>상장일자</Label>
-                        <Input value={searchData?.lstg_dt || ''} readOnly />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>상장여부</Label>
-                        <Input value={searchData?.lstg_yn || ''} readOnly />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>상장폐지종목여부</Label>
-                        <Input
-                          value={searchData?.lstg_abol_item_yn || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>상장폐지일자</Label>
-                        <Input
-                          value={searchData?.lstg_abol_dt || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>해외주식거래정지구분코드</Label>
-                        <Input
-                          value={searchData?.ovrs_stck_tr_stop_dvsn_cd || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>해외주식상품그룹번호</Label>
-                        <Input
-                          value={searchData?.ovrs_stck_prdt_grp_no || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>해외주식등록사유코드</Label>
-                        <Input
-                          value={searchData?.ovrs_stck_erlm_rosn_cd || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>해외주식이력권리구분코드</Label>
-                        <Input
-                          value={searchData?.ovrs_stck_hist_rght_dvsn_cd || ''}
-                          readOnly
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                    {/* 상장/상태 정보 */}
+                    <Card className="bg-white">
+                      <CardHeader>
+                        <CardTitle>상장/상태 정보</CardTitle>
+                        <CardDescription>
+                          상장주식수, 상장일자, 상장여부, 폐지여부 등 종목의
+                          상장 및 상태 관련 정보를 보여줍니다.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-2">
+                          <Label>상장주식수</Label>
+                          <Input
+                            value={searchData?.lstg_stck_num || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>상장일자</Label>
+                          <Input value={searchData?.lstg_dt || ""} readOnly />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>상장여부</Label>
+                          <Input value={searchData?.lstg_yn || ""} readOnly />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>상장폐지종목여부</Label>
+                          <Input
+                            value={searchData?.lstg_abol_item_yn || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>상장폐지일자</Label>
+                          <Input
+                            value={searchData?.lstg_abol_dt || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>해외주식거래정지구분코드</Label>
+                          <Input
+                            value={searchData?.ovrs_stck_tr_stop_dvsn_cd || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>해외주식상품그룹번호</Label>
+                          <Input
+                            value={searchData?.ovrs_stck_prdt_grp_no || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>해외주식등록사유코드</Label>
+                          <Input
+                            value={searchData?.ovrs_stck_erlm_rosn_cd || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>해외주식이력권리구분코드</Label>
+                          <Input
+                            value={
+                              searchData?.ovrs_stck_hist_rght_dvsn_cd || ""
+                            }
+                            readOnly
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                  {/* 기타 정보 */}
-                  <Card className="bg-white">
-                    <CardHeader>
-                      <CardTitle>기타 정보</CardTitle>
-                      <CardDescription>
-                        현재가, SEDOL, 블룸버그티커, 메모 등 기타 참고용 부가
-                        정보를 제공합니다.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-2">
-                        <Label>현재가</Label>
-                        <Input
-                          value={searchData?.ovrs_now_pric1 || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>최종수신일시</Label>
-                        <Input
-                          value={searchData?.last_rcvg_dtime || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>SEDOL번호</Label>
-                        <Input value={searchData?.sedol_no || ''} readOnly />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>블룸버그티커</Label>
-                        <Input
-                          value={searchData?.blbg_tckr_text || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>기관용도ISIN코드</Label>
-                        <Input
-                          value={searchData?.istt_usge_isin_cd || ''}
-                          readOnly
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>메모</Label>
-                        <Input value={searchData?.memo_text1 || ''} readOnly />
-                      </div>
-                      {/* 필요시 추가 필드 계속 추가 */}
-                    </CardContent>
-                  </Card>
-                </CardContent>
-              </div>
-            </TabsContent>
-            {/* <TabsContent value="news">
+                    {/* 기타 정보 */}
+                    <Card className="bg-white">
+                      <CardHeader>
+                        <CardTitle>기타 정보</CardTitle>
+                        <CardDescription>
+                          현재가, SEDOL, 블룸버그티커, 메모 등 기타 참고용 부가
+                          정보를 제공합니다.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-2">
+                          <Label>현재가</Label>
+                          <Input
+                            value={searchData?.ovrs_now_pric1 || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>최종수신일시</Label>
+                          <Input
+                            value={searchData?.last_rcvg_dtime || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>SEDOL번호</Label>
+                          <Input value={searchData?.sedol_no || ""} readOnly />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>블룸버그티커</Label>
+                          <Input
+                            value={searchData?.blbg_tckr_text || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>기관용도ISIN코드</Label>
+                          <Input
+                            value={searchData?.istt_usge_isin_cd || ""}
+                            readOnly
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label>메모</Label>
+                          <Input
+                            value={searchData?.memo_text1 || ""}
+                            readOnly
+                          />
+                        </div>
+                        {/* 필요시 추가 필드 계속 추가 */}
+                      </CardContent>
+                    </Card>
+                  </CardContent>
+                </div>
+              </TabsContent>
+              {/* <TabsContent value="news">
               <div className="py-2">
                 <CardTitle>뉴스</CardTitle>
                 <CardDescription className="pt-1">
@@ -1326,43 +1646,43 @@ export default function DashBoardPage() {
               </div>
             </TabsContent> */}
 
-            <TabsContent value="community">
-              <div className="py-2">
-                <CardTitle>커뮤니티</CardTitle>
-                <CardDescription className="pt-1">
-                  최신 커뮤니티 글입니다.
-                </CardDescription>
-                <Separator className="my-4" />
-                <div className="flex flex-col gap-4">
-                  {newsData?.comments.map((comment) => (
-                    <Card
-                      key={comment.id}
-                      className="flex flex-row items-start px-4 gap-4"
-                    >
-                      <img
-                        src={comment.author.profilePictureUrl}
-                        alt={comment.author.nickname}
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">
-                            {comment.author.nickname}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {dayjs(comment.createdAt).format(
-                              'YYYY-MM-DD HH:mm'
-                            )}
-                          </span>
+              <TabsContent value="community">
+                <div className="py-2">
+                  <CardTitle>커뮤니티</CardTitle>
+                  <CardDescription className="pt-1">
+                    최신 커뮤니티 글입니다.
+                  </CardDescription>
+                  <Separator className="my-4" />
+                  <div className="flex flex-col gap-4">
+                    {newsData?.comments.map((comment) => (
+                      <Card
+                        key={comment.id}
+                        className="flex flex-row items-start px-4 gap-4"
+                      >
+                        <img
+                          src={comment.author.profilePictureUrl}
+                          alt={comment.author.nickname}
+                          className="w-10 h-10 rounded-full"
+                        />
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">
+                              {comment.author.nickname}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {dayjs(comment.createdAt).format(
+                                "YYYY-MM-DD HH:mm"
+                              )}
+                            </span>
+                          </div>
+                          <p className="text-sm">{comment.message}</p>
                         </div>
-                        <p className="text-sm">{comment.message}</p>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </TabsContent>
-            {/* <TabsContent value="order">
+              </TabsContent>
+              {/* <TabsContent value="order">
               <div className="py-2">
                 <CardTitle>주문</CardTitle>
                 <CardDescription className="pt-1">
@@ -1389,7 +1709,8 @@ export default function DashBoardPage() {
                 </Tabs>
               </div>
             </TabsContent> */}
-          </Tabs>
+            </Tabs>
+          )}
         </div>
       </Main>
     </PageWrap>

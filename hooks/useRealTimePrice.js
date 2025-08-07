@@ -40,7 +40,7 @@ const useRealTimePrice = (symbols) => {
 
   // 1. 소켓 연결 및 메시지 핸들링
   useEffect(() => {
-    const socket = new WebSocket("wss://ops.koreainvestment.com:21000");
+    const socket = new WebSocket("ws://ops.koreainvestment.com:21000");
     socketRef.current = socket;
 
     socket.onopen = () => {
