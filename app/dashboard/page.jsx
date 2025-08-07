@@ -153,11 +153,6 @@ export default function DashBoardPage() {
   const [previousPrices, setPreviousPrices] = useState({}); // 이전 가격 추적
   const [priceChangeAnimation, setPriceChangeAnimation] = useState({}); // 가격변동 애니메이션 상태
 
-  // priceChangeAnimation 상태 변경 추적
-  React.useEffect(() => {
-    console.log("📊 priceChangeAnimation 상태 변경:", priceChangeAnimation);
-  }, [priceChangeAnimation]);
-
   // 매매
   const { mutation, analyzeBoosterData } = useBuy();
 
@@ -244,13 +239,11 @@ export default function DashBoardPage() {
 
   // 테스트용 가격 변동 시뮬레이션 함수
   const testPriceChange = (symbol) => {
-    console.log("🔥 테스트 가격 변동 시뮬레이션 시작:", symbol);
     setPriceChangeAnimation((prev) => {
       const newState = {
         ...prev,
         [symbol]: true,
       };
-      console.log("🎯 테스트 애니메이션 상태 활성화:", newState);
       return newState;
     });
 
@@ -260,7 +253,6 @@ export default function DashBoardPage() {
           ...prev,
           [symbol]: false,
         };
-        console.log("⏰ 테스트 애니메이션 상태 비활성화:", newState);
         return newState;
       });
     }, 2000); // 2초간 애니메이션 유지
@@ -292,7 +284,6 @@ export default function DashBoardPage() {
     setActiveItem(newActive);
     switch (newActive?.title) {
       case "잔고":
-        console.log("잔고");
         setList(
           holdingData.map((item) => ({
             ...item,
@@ -309,12 +300,9 @@ export default function DashBoardPage() {
         );
         break;
       case "미체결":
-        console.log("미체결");
         setList(cnnlData?.filter((item) => item?.prcs_stat_name !== "완료"));
         break;
       case "분석":
-        console.log("분석데이터");
-
         setList(
           analysisData
             // .filter((item) => item?.예측결과 >= 0.6)
@@ -335,15 +323,12 @@ export default function DashBoardPage() {
         );
         break;
       case "체결":
-        console.log("체결");
         setList(cnnlData?.filter((item) => item?.prcs_stat_name === "완료"));
         break;
       case "기간손익":
-        console.log("기간손익");
         setList(profitData);
         break;
       case "부스터":
-        console.log("부스터");
         setList(boosterData);
         break;
       default:
@@ -356,20 +341,15 @@ export default function DashBoardPage() {
 
   // current 값이 변경될 때 스크롤 이동
   useEffect(() => {
-    console.log("useEffect current");
     if (asideScrollContainerRef.current) {
-      console.log("useEffect current asideScrollContainerRef.current");
       const activeItemElement = asideScrollContainerRef.current.querySelector(
         `[data-index="${current}"]`
       );
-      console.log("useEffect current activeItemElement");
       if (activeItemElement) {
-        console.log("useEffect current activeItemElement 2");
         activeItemElement.scrollIntoView({
           behavior: "smooth",
           block: "start",
         });
-        console.log("activeItemElement.scrollIntoView");
       }
     }
   }, [current]);
@@ -399,16 +379,9 @@ export default function DashBoardPage() {
 
   // 실시간 가격 변동 감지 (부스터용)
   useEffect(() => {
-    console.log("🔄 실시간 가격 데이터 useEffect 실행");
-    console.log("realTimePriceData:", realTimePriceData);
-    console.log("현재 previousPrices:", previousPrices);
-
     if (!realTimePriceData || Object.keys(realTimePriceData).length === 0) {
-      console.log("❌ realTimePriceData가 비어있음");
       return;
     }
-
-    console.log("✅ 실시간 가격 데이터 존재, 처리 시작");
 
     Object.keys(realTimePriceData).forEach((symbol) => {
       const currentData = realTimePriceData[symbol];
@@ -416,23 +389,14 @@ export default function DashBoardPage() {
         const currentPrice = parseFloat(currentData.LAST);
         const previousPrice = previousPrices[symbol];
 
-        console.log(
-          `📊 ${symbol}: 현재=${currentPrice}, 이전=${previousPrice}`
-        );
-
         // 이전 가격이 존재하고 현재 가격과 다를 때 애니메이션 실행
         if (previousPrice !== undefined && previousPrice !== currentPrice) {
-          console.log(
-            `� ${symbol} 실제 가격 변동 감지!!! ${previousPrice} -> ${currentPrice}`
-          );
-
           // 가격 변동 애니메이션 트리거
           setPriceChangeAnimation((prev) => {
             const newState = {
               ...prev,
               [symbol]: true,
             };
-            console.log("💡 priceChangeAnimation 활성화:", newState);
             return newState;
           });
 
@@ -443,7 +407,6 @@ export default function DashBoardPage() {
                 ...prev,
                 [symbol]: false,
               };
-              console.log("⏰ priceChangeAnimation 비활성화:", newState);
               return newState;
             });
           }, 2000);
@@ -477,14 +440,12 @@ export default function DashBoardPage() {
   // 부스터 데이터가 변경될 때마다 리스트 업데이트
   useEffect(() => {
     if (activeItem?.title === "부스터") {
-      console.log("부스터 리스트 업데이트:", boosterData.length, "개 종목");
       setList(boosterData);
     }
   }, [boosterData, activeItem?.title]); // 의존성 배열 단순화
 
   // 디테일 데이터 가져오기
   const getDetailData = (index) => {
-    console.log("getDetailData index", index);
     const newItem = list?.[index];
     const code = newItem?.[KEY_MAP[activeItem?.title]];
     if (!code) {
@@ -596,7 +557,6 @@ export default function DashBoardPage() {
   }, [priceDetailPending]);
 
   useEffect(() => {
-    console.log("기간손익");
     setList(profitData);
   }, [profitType]);
 

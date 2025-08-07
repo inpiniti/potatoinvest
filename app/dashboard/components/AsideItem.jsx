@@ -15,14 +15,6 @@ const AsideItem = ({
   isPriceChanged = false, // 가격변동 애니메이션 속성 추가
   ...props
 }) => {
-  // 디버그: isPriceChanged 상태 로깅
-  React.useEffect(() => {
-    if (isPriceChanged) {
-      console.log(
-        `🔴 AsideItem 애니메이션 활성화: ${title}, isPriceChanged: ${isPriceChanged}`
-      );
-    }
-  }, [isPriceChanged, title]);
   // 카드에 필요한 값
   // key
   // title

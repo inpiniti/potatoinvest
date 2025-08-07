@@ -6,7 +6,13 @@ const useBuy = () => {
   const { 매수 } = useTrading();
 
   // 부스터 실시간 데이터 분석 함수
-  const analyzeBoosterData = async (boosterItem, lastNotificationTime, setLastNotificationTime, cnnlData, toggleBooster) => {
+  const analyzeBoosterData = async (
+    boosterItem,
+    lastNotificationTime,
+    setLastNotificationTime,
+    cnnlData,
+    toggleBooster
+  ) => {
     if (!boosterItem.realTimeData || !boosterItem.holdingData) return;
 
     const { realTimeData, holdingData } = boosterItem;
@@ -16,48 +22,52 @@ const useBuy = () => {
     const bidPrice = parseFloat(realTimeData.PBID || 0); // 매수호가
     const holdingQty = parseInt(holdingData.ovrs_cblc_qty || 0); // 보유수량
     const currentPrice = parseFloat(realTimeData.LAST || 0); // 현재가
-    
+
     if (avgPrice <= 0) return; // 평균매입가가 0이면 skip
 
     // 현재 체결 중인 주문이 있는지 확인 (미체결수량이 0이 아닌 경우)
-    const ongoingOrder = cnnlData?.find(order => 
-      order.pdno === symbol && parseInt(order.nccs_qty || 0) > 0
+    const ongoingOrder = cnnlData?.find(
+      (order) => order.pdno === symbol && parseInt(order.nccs_qty || 0) > 0
     );
-    
+
     if (ongoingOrder) {
       console.log(`${symbol} 체결 진행 중이므로 주문 스킵`);
       return; // 체결 중인 주문이 있으면 새 주문 생성하지 않음
     }
 
     // 체결 완료된 주문 확인 (토스트용)
-    const completedOrder = cnnlData?.find(order => 
-      order.pdno === symbol && parseInt(order.nccs_qty || 0) === 0
+    const completedOrder = cnnlData?.find(
+      (order) => order.pdno === symbol && parseInt(order.nccs_qty || 0) === 0
     );
 
     const now = Date.now();
     const lastTime = lastNotificationTime[symbol] || 0;
     const timeDiff = now - lastTime;
-    
+
     // 같은 종목에 대해 30초 이내에는 알림을 다시 보내지 않음
     if (timeDiff < 30000) return;
 
     let shouldExecute = false;
-    let message = '';
-    let orderType = '';
+    let message = "";
+    let orderType = "";
 
     // 매도호가가 평균매입가보다 1% 이상 높을 때 (매도 조건)
     if (askPrice > avgPrice * 1.01 && holdingQty > 0) {
-      const profitRate = ((askPrice - avgPrice) / avgPrice * 100).toFixed(2);
-      message = `${symbol} $${currentPrice.toFixed(2)}에 ${holdingQty}주 매도 주문 실행 (+${profitRate}%)`;
+      const profitRate = (((askPrice - avgPrice) / avgPrice) * 100).toFixed(2);
+      message = `${symbol} $${currentPrice.toFixed(
+        2
+      )}에 ${holdingQty}주 매도 주문 실행 (+${profitRate}%)`;
       shouldExecute = true;
-      orderType = 'sell';
+      orderType = "sell";
     }
     // 매수호가가 평균매입가보다 1% 이하일 때 (매수 조건)
     else if (bidPrice < avgPrice * 0.99) {
-      const lossRate = ((bidPrice - avgPrice) / avgPrice * 100).toFixed(2);
-      message = `${symbol} $${currentPrice.toFixed(2)}에 ${holdingQty}주 매수 주문 실행 (${lossRate}%)`;
+      const lossRate = (((bidPrice - avgPrice) / avgPrice) * 100).toFixed(2);
+      message = `${symbol} $${currentPrice.toFixed(
+        2
+      )}에 ${holdingQty}주 매수 주문 실행 (${lossRate}%)`;
       shouldExecute = true;
-      orderType = 'buy';
+      orderType = "buy";
     }
 
     // 체결 완료된 주문이 있을 때만 알림
@@ -69,26 +79,26 @@ const useBuy = () => {
     if (shouldExecute) {
       try {
         let response;
-        
-        if (orderType === 'sell') {
+
+        if (orderType === "sell") {
           response = await 매도({
             ovrs_pdno: symbol,
             ovrs_cblc_qty: String(holdingQty),
             now_pric2: currentPrice.toFixed(2),
           });
-        } else if (orderType === 'buy') {
+        } else if (orderType === "buy") {
           response = await 매수({
             ovrs_pdno: symbol,
             now_pric2: currentPrice.toFixed(2),
-            ord_qty: String(holdingQty),
+            ord_qty: "1", //String(holdingQty),
           });
         }
 
         if (response?.rt_cd === "0") {
           toast.success(message);
-          
+
           // 매도 성공시 부스터에서 해당 종목 제거
-          if (orderType === 'sell' && toggleBooster) {
+          if (orderType === "sell" && toggleBooster) {
             toggleBooster(symbol);
             toast.info(`${symbol} 매도 완료로 부스터에서 제거됨`);
           }
@@ -99,9 +109,9 @@ const useBuy = () => {
         toast.error(`${symbol} 주문 실행 중 오류: ${error.message}`);
       }
 
-      setLastNotificationTime(prev => ({
+      setLastNotificationTime((prev) => ({
         ...prev,
-        [symbol]: now
+        [symbol]: now,
       }));
     }
   };
