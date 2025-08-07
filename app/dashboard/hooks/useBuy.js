@@ -6,7 +6,7 @@ const useBuy = () => {
   const { 매수 } = useTrading();
 
   // 부스터 실시간 데이터 분석 함수
-  const analyzeBoosterData = async (boosterItem, lastNotificationTime, setLastNotificationTime, cnnlData) => {
+  const analyzeBoosterData = async (boosterItem, lastNotificationTime, setLastNotificationTime, cnnlData, toggleBooster) => {
     if (!boosterItem.realTimeData || !boosterItem.holdingData) return;
 
     const { realTimeData, holdingData } = boosterItem;
@@ -86,6 +86,12 @@ const useBuy = () => {
 
         if (response?.rt_cd === "0") {
           toast.success(message);
+          
+          // 매도 성공시 부스터에서 해당 종목 제거
+          if (orderType === 'sell' && toggleBooster) {
+            toggleBooster(symbol);
+            toast.info(`${symbol} 매도 완료로 부스터에서 제거됨`);
+          }
         } else {
           toast.error(response?.msg1 || `${symbol} 주문 실패`);
         }

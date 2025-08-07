@@ -458,7 +458,8 @@ export default function DashBoardPage() {
                 boosterItem,
                 lastNotificationTime,
                 setLastNotificationTime,
-                cnnlData
+                cnnlData,
+                toggleBooster
               );
             }
           }
