@@ -23,6 +23,16 @@ const useBuy = () => {
     const holdingQty = parseInt(holdingData.ovrs_cblc_qty || 0); // 보유수량
     const currentPrice = parseFloat(realTimeData.LAST || 0); // 현재가
 
+    // 현재 체결 중인 주문이 있는지 확인 (미체결수량이 0이 아닌 경우)
+    const ongoingOrder = cnnlData?.find(
+      (order) => order.pdno === symbol && parseInt(order.nccs_qty || 0) > 0
+    );
+
+    if (ongoingOrder) {
+      console.log(`${symbol} 체결 진행 중이므로 주문 스킵`);
+      return; // 체결 중인 주문이 있으면 새 주문 생성하지 않음
+    }
+
     // ---------------- 최초 매수 로직 (평균매입가가 0인 경우) ----------------
     // 평균매입가가 0이라는 것은 아직 보유하지 않은 신규 진입 시나리오로 간주
     // 현재가보다 2% 낮은 지정가(= currentPrice * 0.98)로 1주(또는 기본 수량) 매수 시도
@@ -59,16 +69,6 @@ const useBuy = () => {
         }));
       }
       return; // 최초 매수 처리 후 종료 (아래 평균매입가 기반 로직 건너뜀)
-    }
-
-    // 현재 체결 중인 주문이 있는지 확인 (미체결수량이 0이 아닌 경우)
-    const ongoingOrder = cnnlData?.find(
-      (order) => order.pdno === symbol && parseInt(order.nccs_qty || 0) > 0
-    );
-
-    if (ongoingOrder) {
-      console.log(`${symbol} 체결 진행 중이므로 주문 스킵`);
-      return; // 체결 중인 주문이 있으면 새 주문 생성하지 않음
     }
 
     // 체결 완료된 주문 확인 (토스트용)
