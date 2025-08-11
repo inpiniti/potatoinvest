@@ -17,13 +17,49 @@ const useBuy = () => {
 
     const { realTimeData, holdingData } = boosterItem;
     const symbol = boosterItem.symbol;
-    const avgPrice = parseFloat(holdingData.pchs_avg_pric || 0); // 평균매입가
+    const avgPrice = parseFloat(holdingData.pchs_avg_pric || 0); // 평균매입가 (0이면 최초 매수 대상)
     const askPrice = parseFloat(realTimeData.PASK || 0); // 매도호가
     const bidPrice = parseFloat(realTimeData.PBID || 0); // 매수호가
     const holdingQty = parseInt(holdingData.ovrs_cblc_qty || 0); // 보유수량
     const currentPrice = parseFloat(realTimeData.LAST || 0); // 현재가
 
-    if (avgPrice <= 0) return; // 평균매입가가 0이면 skip
+    // ---------------- 최초 매수 로직 (평균매입가가 0인 경우) ----------------
+    // 평균매입가가 0이라는 것은 아직 보유하지 않은 신규 진입 시나리오로 간주
+    // 현재가보다 2% 낮은 지정가(= currentPrice * 0.98)로 1주(또는 기본 수량) 매수 시도
+    // - 재알림/중복 주문 방지를 위해 동일 심볼 30초 쿨타임 유지 (아래 로직과 동일한 규칙 적용)
+    if (avgPrice <= 0) {
+      const now = Date.now();
+      const lastTime = lastNotificationTime[symbol] || 0;
+      const timeDiff = now - lastTime;
+      if (timeDiff < 30000) return; // 30초 내 재시도 방지
+
+      if (currentPrice > 0) {
+        const targetPrice = (currentPrice * 0.98).toFixed(2); // 2% 낮은 지정가
+        try {
+          const response = await 매수({
+            ovrs_pdno: symbol,
+            now_pric2: targetPrice,
+            ord_qty: '1', // 최초 진입 기본 수량 (필요 시 설정값으로 교체 가능)
+          });
+
+          if (response?.rt_cd === '0') {
+            toast.success(
+              `${symbol} 1주 $${targetPrice} (현재가 대비 -2%) 최초 매수 주문 완료`
+            );
+          } else {
+            toast.error(response?.msg1 || `${symbol} 최초 매수 주문 실패`);
+          }
+        } catch (error) {
+          toast.error(`${symbol} 최초 매수 주문 오류: ${error.message}`);
+        }
+
+        setLastNotificationTime((prev) => ({
+          ...prev,
+          [symbol]: now,
+        }));
+      }
+      return; // 최초 매수 처리 후 종료 (아래 평균매입가 기반 로직 건너뜀)
+    }
 
     // 현재 체결 중인 주문이 있는지 확인 (미체결수량이 0이 아닌 경우)
     const ongoingOrder = cnnlData?.find(
@@ -83,13 +119,13 @@ const useBuy = () => {
         if (orderType === 'sell') {
           response = await 매도({
             ovrs_pdno: symbol,
-            ovrs_cblc_qty: String(holdingQty),
-            now_pric2: '1', //currentPrice.toFixed(2),
+            ovrs_cblc_qty: '1', //String(holdingQty),
+            now_pric2: askPrice.toFixed(2),
           });
         } else if (orderType === 'buy') {
           response = await 매수({
             ovrs_pdno: symbol,
-            now_pric2: currentPrice.toFixed(2),
+            now_pric2: bidPrice.toFixed(2),
             ord_qty: '1', //String(holdingQty),
           });
         }
