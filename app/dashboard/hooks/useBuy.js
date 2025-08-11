@@ -1,5 +1,5 @@
-import useTrading from "@/hooks/useTrading";
-import { toast } from "sonner";
+import useTrading from '@/hooks/useTrading';
+import { toast } from 'sonner';
 
 const useBuy = () => {
   const { 매도 } = useTrading();
@@ -17,13 +17,11 @@ const useBuy = () => {
 
     const { realTimeData, holdingData } = boosterItem;
     const symbol = boosterItem.symbol;
-    const avgPrice = parseFloat(holdingData.pchs_avg_pric || 0); // 평균매입가
+    const avgPrice = parseFloat(holdingData.pchs_avg_pric || 0); // 평균매입가 (0이면 최초 매수 대상)
     const askPrice = parseFloat(realTimeData.PASK || 0); // 매도호가
     const bidPrice = parseFloat(realTimeData.PBID || 0); // 매수호가
     const holdingQty = parseInt(holdingData.ovrs_cblc_qty || 0); // 보유수량
     const currentPrice = parseFloat(realTimeData.LAST || 0); // 현재가
-
-    if (avgPrice <= 0) return; // 평균매입가가 0이면 skip
 
     // 현재 체결 중인 주문이 있는지 확인 (미체결수량이 0이 아닌 경우)
     const ongoingOrder = cnnlData?.find(
@@ -33,6 +31,44 @@ const useBuy = () => {
     if (ongoingOrder) {
       console.log(`${symbol} 체결 진행 중이므로 주문 스킵`);
       return; // 체결 중인 주문이 있으면 새 주문 생성하지 않음
+    }
+
+    // ---------------- 최초 매수 로직 (평균매입가가 0인 경우) ----------------
+    // 평균매입가가 0이라는 것은 아직 보유하지 않은 신규 진입 시나리오로 간주
+    // 현재가보다 2% 낮은 지정가(= currentPrice * 0.98)로 1주(또는 기본 수량) 매수 시도
+    // - 재알림/중복 주문 방지를 위해 동일 심볼 30초 쿨타임 유지 (아래 로직과 동일한 규칙 적용)
+    if (avgPrice <= 0) {
+      const now = Date.now();
+      const lastTime = lastNotificationTime[symbol] || 0;
+      const timeDiff = now - lastTime;
+      if (timeDiff < 30000) return; // 30초 내 재시도 방지
+
+      if (currentPrice > 0) {
+        const targetPrice = (currentPrice * 0.98).toFixed(2); // 2% 낮은 지정가
+        try {
+          const response = await 매수({
+            ovrs_pdno: symbol,
+            now_pric2: targetPrice,
+            ord_qty: '1', // 최초 진입 기본 수량 (필요 시 설정값으로 교체 가능)
+          });
+
+          if (response?.rt_cd === '0') {
+            toast.success(
+              `${symbol} 1주 $${targetPrice} (현재가 대비 -2%) 최초 매수 주문 완료`
+            );
+          } else {
+            toast.error(response?.msg1 || `${symbol} 최초 매수 주문 실패`);
+          }
+        } catch (error) {
+          toast.error(`${symbol} 최초 매수 주문 오류: ${error.message}`);
+        }
+
+        setLastNotificationTime((prev) => ({
+          ...prev,
+          [symbol]: now,
+        }));
+      }
+      return; // 최초 매수 처리 후 종료 (아래 평균매입가 기반 로직 건너뜀)
     }
 
     // 체결 완료된 주문 확인 (토스트용)
@@ -48,8 +84,8 @@ const useBuy = () => {
     if (timeDiff < 30000) return;
 
     let shouldExecute = false;
-    let message = "";
-    let orderType = "";
+    let message = '';
+    let orderType = '';
 
     // 매도호가가 평균매입가보다 1% 이상 높을 때 (매도 조건)
     if (askPrice > avgPrice * 1.01 && holdingQty > 0) {
@@ -58,7 +94,7 @@ const useBuy = () => {
         2
       )}에 ${holdingQty}주 매도 주문 실행 (+${profitRate}%)`;
       shouldExecute = true;
-      orderType = "sell";
+      orderType = 'sell';
     }
     // 매수호가가 평균매입가보다 1% 이하일 때 (매수 조건)
     else if (bidPrice < avgPrice * 0.99) {
@@ -67,7 +103,7 @@ const useBuy = () => {
         2
       )}에 ${holdingQty}주 매수 주문 실행 (${lossRate}%)`;
       shouldExecute = true;
-      orderType = "buy";
+      orderType = 'buy';
     }
 
     // 체결 완료된 주문이 있을 때만 알림
@@ -80,25 +116,25 @@ const useBuy = () => {
       try {
         let response;
 
-        if (orderType === "sell") {
+        if (orderType === 'sell') {
           response = await 매도({
             ovrs_pdno: symbol,
-            ovrs_cblc_qty: String(holdingQty),
-            now_pric2: currentPrice.toFixed(2),
+            ovrs_cblc_qty: '1', //String(holdingQty),
+            now_pric2: askPrice.toFixed(2),
           });
-        } else if (orderType === "buy") {
+        } else if (orderType === 'buy') {
           response = await 매수({
             ovrs_pdno: symbol,
-            now_pric2: currentPrice.toFixed(2),
-            ord_qty: "1", //String(holdingQty),
+            now_pric2: bidPrice.toFixed(2),
+            ord_qty: '1', //String(holdingQty),
           });
         }
 
-        if (response?.rt_cd === "0") {
+        if (response?.rt_cd === '0') {
           toast.success(message);
 
           // 매도 성공시 부스터에서 해당 종목 제거
-          if (orderType === "sell" && toggleBooster) {
+          if (orderType === 'sell' && toggleBooster) {
             toggleBooster(symbol);
             toast.info(`${symbol} 매도 완료로 부스터에서 제거됨`);
           }
@@ -126,10 +162,10 @@ const useBuy = () => {
     technicalScore, // 기술적 분석 점수 (1-5)
     financialScore, // 재무 분석 점수 (1-5로 변환)
   }) => {
-    console.log("newsScore > 3", newsScore > 3);
-    console.log("expertScore > 3", expertScore > 3);
-    console.log("technicalScore > 3", technicalScore > 3);
-    console.log("financialScore > 3", financialScore > 3);
+    console.log('newsScore > 3', newsScore > 3);
+    console.log('expertScore > 3', expertScore > 3);
+    console.log('technicalScore > 3', technicalScore > 3);
+    console.log('financialScore > 3', financialScore > 3);
 
     // 1. 메뉴가 잔고라면
     // 매입평균단가(currentItem.pchs_avg_pric)와
@@ -139,7 +175,7 @@ const useBuy = () => {
     // 매도가능수량(currentItem.ord_psbl_qty)
     // 보유수량(currentItem.ovrs_cblc_qty)
     // 종목코드(currentItem.ovrs_pdno)
-    if (menu === "잔고") {
+    if (menu === '잔고') {
       // 현재가가 매입평균단가보다 2% 이상 높아야 매도 가능
       const purchasePrice = parseFloat(currentItem?.pchs_avg_pric);
       const currentPrice = parseFloat(priceDetailData?.last);
@@ -147,17 +183,17 @@ const useBuy = () => {
       const holdingQty = currentItem?.ovrs_cblc_qty;
       const code = currentItem?.ovrs_pdno;
 
-      console.log("현재가격", currentPrice);
-      console.log("매입평균단가", purchasePrice);
+      console.log('현재가격', currentPrice);
+      console.log('매입평균단가', purchasePrice);
       console.log(
-        "currentPrice > purchasePrice * 1.02",
+        'currentPrice > purchasePrice * 1.02',
         currentPrice > purchasePrice * 1.02
       );
 
       // 2% 이상 올라야 매도 가능
       if (currentPrice > purchasePrice * 1.02) {
         if (currentItem.isNotCnnl) {
-          toast.error("미체결된 종목은 매도 할 수 없습니다.");
+          toast.error('미체결된 종목은 매도 할 수 없습니다.');
           return;
         }
 
@@ -171,16 +207,16 @@ const useBuy = () => {
           now_pric2: currentPrice?.toFixed(2), // 매도가
         });
 
-        if (response?.rt_cd === "0") {
+        if (response?.rt_cd === '0') {
           toast.success(
             `${code} ${qty}주 $${currentPrice?.toFixed(2)}에 매도 주문 완료`
           );
         } else {
-          toast.error(response.msg1 || "매도 주문 실패");
+          toast.error(response.msg1 || '매도 주문 실패');
         }
       } else {
         if (currentItem.isCnnl) {
-          toast.error("체결된 종목은 추가매수 할 수 없습니다.");
+          toast.error('체결된 종목은 추가매수 할 수 없습니다.');
           return;
         }
         // 매입평균단가(currentItem.pchs_avg_pric)와
@@ -230,19 +266,19 @@ const useBuy = () => {
             ord_qty: String(holdingQty),
           });
           if (response) {
-            if (response.rt_cd === "0") {
+            if (response.rt_cd === '0') {
               toast.success(
                 `${code} ${holdingQty}주 $${currentPrice?.toFixed(
                   2
                 )}에 매수 주문 완료`
               );
             } else {
-              toast.error(response.msg1 || "매수 주문 실패");
+              toast.error(response.msg1 || '매수 주문 실패');
             }
           }
         }
       }
-    } else if (menu === "분석") {
+    } else if (menu === '분석') {
       // 보유 수량(currentItem.isHolding)이 아니면서, 체결수량(currentItem.isCnnl)도 아닌 경우
       // 현재가격(currentPrice)의
       // 한달간떨어진비율?(analysisItem.perf_1_m) * -1만원치
@@ -266,7 +302,7 @@ const useBuy = () => {
 
         if (calculatedQty < 1) {
           toast.error(
-            "계산된 수량이 1주 미만입니다. 매수 주문을 진행할 수 없습니다."
+            '계산된 수량이 1주 미만입니다. 매수 주문을 진행할 수 없습니다.'
           );
         } else {
           // toast.success(
@@ -281,14 +317,14 @@ const useBuy = () => {
             ord_qty: String(calculatedQty), // 수량
           });
 
-          if (response?.rt_cd === "0") {
+          if (response?.rt_cd === '0') {
             toast.success(
               `${currentItem.name} ${calculatedQty}주 $${currentPrice?.toFixed(
                 2
               )}에 매수 주문 완료`
             );
           } else {
-            toast.error(response.msg1 || "매수 주문 실패");
+            toast.error(response.msg1 || '매수 주문 실패');
           }
         }
       }
