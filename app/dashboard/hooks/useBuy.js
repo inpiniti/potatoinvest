@@ -1,5 +1,5 @@
-import useTrading from "@/hooks/useTrading";
-import { toast } from "sonner";
+import useTrading from '@/hooks/useTrading';
+import { toast } from 'sonner';
 
 const useBuy = () => {
   const { 매도 } = useTrading();
@@ -48,8 +48,8 @@ const useBuy = () => {
     if (timeDiff < 30000) return;
 
     let shouldExecute = false;
-    let message = "";
-    let orderType = "";
+    let message = '';
+    let orderType = '';
 
     // 매도호가가 평균매입가보다 1% 이상 높을 때 (매도 조건)
     if (askPrice > avgPrice * 1.01 && holdingQty > 0) {
@@ -58,7 +58,7 @@ const useBuy = () => {
         2
       )}에 ${holdingQty}주 매도 주문 실행 (+${profitRate}%)`;
       shouldExecute = true;
-      orderType = "sell";
+      orderType = 'sell';
     }
     // 매수호가가 평균매입가보다 1% 이하일 때 (매수 조건)
     else if (bidPrice < avgPrice * 0.99) {
@@ -67,7 +67,7 @@ const useBuy = () => {
         2
       )}에 ${holdingQty}주 매수 주문 실행 (${lossRate}%)`;
       shouldExecute = true;
-      orderType = "buy";
+      orderType = 'buy';
     }
 
     // 체결 완료된 주문이 있을 때만 알림
@@ -80,25 +80,25 @@ const useBuy = () => {
       try {
         let response;
 
-        if (orderType === "sell") {
+        if (orderType === 'sell') {
           response = await 매도({
             ovrs_pdno: symbol,
             ovrs_cblc_qty: String(holdingQty),
-            now_pric2: currentPrice.toFixed(2),
+            now_pric2: '1', //currentPrice.toFixed(2),
           });
-        } else if (orderType === "buy") {
+        } else if (orderType === 'buy') {
           response = await 매수({
             ovrs_pdno: symbol,
             now_pric2: currentPrice.toFixed(2),
-            ord_qty: "1", //String(holdingQty),
+            ord_qty: '1', //String(holdingQty),
           });
         }
 
-        if (response?.rt_cd === "0") {
+        if (response?.rt_cd === '0') {
           toast.success(message);
 
           // 매도 성공시 부스터에서 해당 종목 제거
-          if (orderType === "sell" && toggleBooster) {
+          if (orderType === 'sell' && toggleBooster) {
             toggleBooster(symbol);
             toast.info(`${symbol} 매도 완료로 부스터에서 제거됨`);
           }
@@ -126,10 +126,10 @@ const useBuy = () => {
     technicalScore, // 기술적 분석 점수 (1-5)
     financialScore, // 재무 분석 점수 (1-5로 변환)
   }) => {
-    console.log("newsScore > 3", newsScore > 3);
-    console.log("expertScore > 3", expertScore > 3);
-    console.log("technicalScore > 3", technicalScore > 3);
-    console.log("financialScore > 3", financialScore > 3);
+    console.log('newsScore > 3', newsScore > 3);
+    console.log('expertScore > 3', expertScore > 3);
+    console.log('technicalScore > 3', technicalScore > 3);
+    console.log('financialScore > 3', financialScore > 3);
 
     // 1. 메뉴가 잔고라면
     // 매입평균단가(currentItem.pchs_avg_pric)와
@@ -139,7 +139,7 @@ const useBuy = () => {
     // 매도가능수량(currentItem.ord_psbl_qty)
     // 보유수량(currentItem.ovrs_cblc_qty)
     // 종목코드(currentItem.ovrs_pdno)
-    if (menu === "잔고") {
+    if (menu === '잔고') {
       // 현재가가 매입평균단가보다 2% 이상 높아야 매도 가능
       const purchasePrice = parseFloat(currentItem?.pchs_avg_pric);
       const currentPrice = parseFloat(priceDetailData?.last);
@@ -147,17 +147,17 @@ const useBuy = () => {
       const holdingQty = currentItem?.ovrs_cblc_qty;
       const code = currentItem?.ovrs_pdno;
 
-      console.log("현재가격", currentPrice);
-      console.log("매입평균단가", purchasePrice);
+      console.log('현재가격', currentPrice);
+      console.log('매입평균단가', purchasePrice);
       console.log(
-        "currentPrice > purchasePrice * 1.02",
+        'currentPrice > purchasePrice * 1.02',
         currentPrice > purchasePrice * 1.02
       );
 
       // 2% 이상 올라야 매도 가능
       if (currentPrice > purchasePrice * 1.02) {
         if (currentItem.isNotCnnl) {
-          toast.error("미체결된 종목은 매도 할 수 없습니다.");
+          toast.error('미체결된 종목은 매도 할 수 없습니다.');
           return;
         }
 
@@ -171,16 +171,16 @@ const useBuy = () => {
           now_pric2: currentPrice?.toFixed(2), // 매도가
         });
 
-        if (response?.rt_cd === "0") {
+        if (response?.rt_cd === '0') {
           toast.success(
             `${code} ${qty}주 $${currentPrice?.toFixed(2)}에 매도 주문 완료`
           );
         } else {
-          toast.error(response.msg1 || "매도 주문 실패");
+          toast.error(response.msg1 || '매도 주문 실패');
         }
       } else {
         if (currentItem.isCnnl) {
-          toast.error("체결된 종목은 추가매수 할 수 없습니다.");
+          toast.error('체결된 종목은 추가매수 할 수 없습니다.');
           return;
         }
         // 매입평균단가(currentItem.pchs_avg_pric)와
@@ -230,19 +230,19 @@ const useBuy = () => {
             ord_qty: String(holdingQty),
           });
           if (response) {
-            if (response.rt_cd === "0") {
+            if (response.rt_cd === '0') {
               toast.success(
                 `${code} ${holdingQty}주 $${currentPrice?.toFixed(
                   2
                 )}에 매수 주문 완료`
               );
             } else {
-              toast.error(response.msg1 || "매수 주문 실패");
+              toast.error(response.msg1 || '매수 주문 실패');
             }
           }
         }
       }
-    } else if (menu === "분석") {
+    } else if (menu === '분석') {
       // 보유 수량(currentItem.isHolding)이 아니면서, 체결수량(currentItem.isCnnl)도 아닌 경우
       // 현재가격(currentPrice)의
       // 한달간떨어진비율?(analysisItem.perf_1_m) * -1만원치
@@ -266,7 +266,7 @@ const useBuy = () => {
 
         if (calculatedQty < 1) {
           toast.error(
-            "계산된 수량이 1주 미만입니다. 매수 주문을 진행할 수 없습니다."
+            '계산된 수량이 1주 미만입니다. 매수 주문을 진행할 수 없습니다.'
           );
         } else {
           // toast.success(
@@ -281,14 +281,14 @@ const useBuy = () => {
             ord_qty: String(calculatedQty), // 수량
           });
 
-          if (response?.rt_cd === "0") {
+          if (response?.rt_cd === '0') {
             toast.success(
               `${currentItem.name} ${calculatedQty}주 $${currentPrice?.toFixed(
                 2
               )}에 매수 주문 완료`
             );
           } else {
-            toast.error(response.msg1 || "매수 주문 실패");
+            toast.error(response.msg1 || '매수 주문 실패');
           }
         }
       }
