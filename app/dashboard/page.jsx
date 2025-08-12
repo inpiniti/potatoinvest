@@ -149,10 +149,11 @@ export default function DashBoardPage() {
   const [current, setCurrent] = useState(0);
 
   // 부스터 관련 상태 (zustand로 영속화)
-  const boosterSymbols = boosterStore((s) => s.symbols);
-  const addBoosterSymbol = boosterStore((s) => s.addSymbol);
-  const removeBoosterSymbol = boosterStore((s) => s.removeSymbol);
-  const toggleBoosterSymbol = boosterStore((s) => s.toggleSymbol);
+  const [boosterSymbols, setBoosterSymbols] = useState([]);
+  // const boosterSymbols = boosterStore((s) => s.symbols);
+  // const addBoosterSymbol = boosterStore((s) => s.addSymbol);
+  // const removeBoosterSymbol = boosterStore((s) => s.removeSymbol);
+  // const toggleBoosterSymbol = boosterStore((s) => s.toggleSymbol);
   const [lastNotificationTime, setLastNotificationTime] = useState({}); // 마지막 알림 시간 추적
   const [previousPrices, setPreviousPrices] = useState({}); // 이전 가격 추적
   const [priceChangeAnimation, setPriceChangeAnimation] = useState({}); // 가격변동 애니메이션 상태
@@ -234,7 +235,13 @@ export default function DashBoardPage() {
 
   // 부스터 토글 함수
   const toggleBooster = (symbol) => {
-    toggleBoosterSymbol(symbol);
+    setBoosterSymbols((prev) => {
+      if (prev.includes(symbol)) {
+        return prev.filter((item) => item !== symbol);
+      } else {
+        return [...prev, symbol];
+      }
+    });
   };
 
   // 테스트용 가격 변동 시뮬레이션 함수
@@ -437,9 +444,6 @@ export default function DashBoardPage() {
                           (item) => item.nccs_qty !== 0
                         );
                         boosterCnnlRefetchTsRef.current = nowTs;
-                        console.log(
-                          "cnnldata refreshed before analyzeBoosterData"
-                        );
 
                         analyzeBoosterData(
                           boosterItem,
