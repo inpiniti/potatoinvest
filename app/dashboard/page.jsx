@@ -161,7 +161,11 @@ export default function DashBoardPage() {
   const { balanceData, isPending: balancePending } = useHolding(120000); // 잔고
   const holdingData = balanceData?.holdingData || [];
   const holdingData2 = balanceData?.output2 || {};
-  const { data: cnnlData, isPending: cnnlPending } = useCnnl(120000); // 체결 데이터
+  const {
+    data: cnnlData,
+    isPending: cnnlPending,
+    refetch: refetchCnnl,
+  } = useCnnl(120000); // 체결 데이터 (refetch 가능)
   const {
     profitData,
     totalProfit,
@@ -378,6 +382,8 @@ export default function DashBoardPage() {
   }, [current, list]);
 
   // 실시간 가격 변동 감지 (부스터용)
+  const boosterCnnlRefetchTsRef = useRef(0); // 최근 수동 refetch 타임스탬프
+
   useEffect(() => {
     if (!realTimePriceData || Object.keys(realTimePriceData).length === 0) {
       return;
@@ -416,14 +422,36 @@ export default function DashBoardPage() {
             const boosterItem = boosterData.find(
               (item) => item.symbol === symbol
             );
-            if (boosterItem && boosterItem.holdingData) {
-              analyzeBoosterData(
-                boosterItem,
-                lastNotificationTime,
-                setLastNotificationTime,
-                cnnlData,
-                toggleBooster
-              );
+            if (boosterItem) {
+              (async () => {
+                let latestCnnl = cnnlData;
+                const nowTs = Date.now();
+                // 5초 내 중복 refetch 방지
+                if (nowTs - boosterCnnlRefetchTsRef.current > 5000) {
+                  try {
+                    const refetchResult = await refetchCnnl();
+                    if (refetchResult?.data) {
+                      latestCnnl = refetchResult.data;
+                      boosterCnnlRefetchTsRef.current = nowTs;
+                      console.log(
+                        "cnnldata refreshed before analyzeBoosterData"
+                      );
+                    }
+                  } catch (e) {
+                    console.warn(
+                      "cnnldata refetch failed, fallback to cached",
+                      e
+                    );
+                  }
+                }
+                analyzeBoosterData(
+                  boosterItem,
+                  lastNotificationTime,
+                  setLastNotificationTime,
+                  latestCnnl,
+                  toggleBooster
+                );
+              })();
             }
           }
         }
