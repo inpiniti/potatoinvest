@@ -49,7 +49,7 @@ const useRealTimePrice = (symbols) => {
         alertedRef.current = true;
         try {
           alert(
-            "웹소캣 연결에 오류가 발생하였습니다. 실시간 가격은 비활성화됩니다."
+            "웹소캣 연결에 오류가 발생하였습니다. 실시간 가격은 비활성화됩니다.\n파이어폭스로 이용가능 - about:config - network.websocket.allowInsecureFromHTTPS → true\nnetwork.websocket.allowInsecureFromHTTPS.override → true (버전에 따라 존재)"
           );
         } catch {}
       }
