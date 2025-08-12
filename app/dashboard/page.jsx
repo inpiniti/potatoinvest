@@ -451,6 +451,8 @@ export default function DashBoardPage() {
                       e
                     );
                   }
+                } else {
+                  console.log("5초 내 중복 refetch 방지");
                 }
               })();
             }
