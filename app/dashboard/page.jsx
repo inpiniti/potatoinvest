@@ -430,13 +430,6 @@ export default function DashBoardPage() {
                     );
 
                     if (hasItem) {
-                      analyzeBoosterData(
-                        boosterItem,
-                        lastNotificationTime,
-                        setLastNotificationTime,
-                        latestCnnl,
-                        toggleBooster
-                      );
                     } else {
                       const refetchResult = await refetchCnnl();
                       if (refetchResult?.data) {

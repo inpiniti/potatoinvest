@@ -88,7 +88,7 @@ const useHolding = (refetchInterval = 1000 * 60) => {
     queryKey: ["holdingData"],
     queryFn: fetchHoldingData,
     refetchInterval,
-    refetchIntervalInBackground: false,
+    refetchIntervalInBackground: true,
     staleTime: refetchInterval - 10000,
     enabled: !!appKey && !!secretKey, // appKey와 secretKey가 존재할 때만 실행
     onError: (error) => {

@@ -101,7 +101,7 @@ const useCnnl = (refetchInterval = 1000 * 60) => {
     queryKey: ["cnnData"],
     queryFn: fetchCnnlData,
     refetchInterval,
-    refetchIntervalInBackground: false,
+    refetchIntervalInBackground: true,
     staleTime: refetchInterval - 10000,
     enabled: !!appKey && !!secretKey && !!CANO && !!ACNT_PRDT_CD, // API 키와 계좌 정보가 있을 때만 실행
     retry: 1, // 실패 시 한 번만 재시도
