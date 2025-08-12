@@ -436,6 +436,14 @@ export default function DashBoardPage() {
                       console.log(
                         "cnnldata refreshed before analyzeBoosterData"
                       );
+
+                      analyzeBoosterData(
+                        boosterItem,
+                        lastNotificationTime,
+                        setLastNotificationTime,
+                        latestCnnl,
+                        toggleBooster
+                      );
                     }
                   } catch (e) {
                     console.warn(
@@ -444,13 +452,6 @@ export default function DashBoardPage() {
                     );
                   }
                 }
-                analyzeBoosterData(
-                  boosterItem,
-                  lastNotificationTime,
-                  setLastNotificationTime,
-                  latestCnnl,
-                  toggleBooster
-                );
               })();
             }
           }
