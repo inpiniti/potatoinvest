@@ -19,6 +19,7 @@ import {
   Zap, // 부스터 아이콘
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { boosterStore } from "@/store/boosterStore";
 
 import {
   Card,
@@ -147,8 +148,11 @@ export default function DashBoardPage() {
   const [activeItem, setActiveItem] = useState(data.navMain[0]);
   const [current, setCurrent] = useState(0);
 
-  // 부스터 관련 상태
-  const [boosterSymbols, setBoosterSymbols] = useState([]); // 부스터에 추가된 종목 코드 리스트
+  // 부스터 관련 상태 (zustand로 영속화)
+  const boosterSymbols = boosterStore((s) => s.symbols);
+  const addBoosterSymbol = boosterStore((s) => s.addSymbol);
+  const removeBoosterSymbol = boosterStore((s) => s.removeSymbol);
+  const toggleBoosterSymbol = boosterStore((s) => s.toggleSymbol);
   const [lastNotificationTime, setLastNotificationTime] = useState({}); // 마지막 알림 시간 추적
   const [previousPrices, setPreviousPrices] = useState({}); // 이전 가격 추적
   const [priceChangeAnimation, setPriceChangeAnimation] = useState({}); // 가격변동 애니메이션 상태
@@ -230,15 +234,7 @@ export default function DashBoardPage() {
 
   // 부스터 토글 함수
   const toggleBooster = (symbol) => {
-    setBoosterSymbols((prev) => {
-      if (prev.includes(symbol)) {
-        // 이미 존재하면 제거
-        return prev.filter((s) => s !== symbol);
-      } else {
-        // 존재하지 않으면 추가
-        return [...prev, symbol];
-      }
-    });
+    toggleBoosterSymbol(symbol);
   };
 
   // 테스트용 가격 변동 시뮬레이션 함수
