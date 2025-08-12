@@ -135,7 +135,7 @@ export default function Token() {
    */
   const handleSubmit = () => {
     if (status === "success") {
-      router.push("/start/setting");
+      router.push("/dashboard");
     } else {
       router.push("/start/keys");
     }
