@@ -420,19 +420,16 @@ export default function DashBoardPage() {
             );
             if (boosterItem) {
               (async () => {
-                let latestCnnl = cnnlData;
+                let latestCnnl = cnnlData.filter((item) => item.nccs_qty !== 0);
                 const nowTs = Date.now();
                 // 5초 내 중복 refetch 방지
                 if (nowTs - boosterCnnlRefetchTsRef.current > 5000) {
                   try {
-                    const refetchResult = await refetchCnnl();
-                    if (refetchResult?.data) {
-                      latestCnnl = refetchResult.data;
-                      boosterCnnlRefetchTsRef.current = nowTs;
-                      console.log(
-                        "cnnldata refreshed before analyzeBoosterData"
-                      );
+                    const hasItem = latestCnnl.some(
+                      (item) => item.pdno === boosterItem.pdno
+                    );
 
+                    if (hasItem) {
                       analyzeBoosterData(
                         boosterItem,
                         lastNotificationTime,
@@ -440,6 +437,25 @@ export default function DashBoardPage() {
                         latestCnnl,
                         toggleBooster
                       );
+                    } else {
+                      const refetchResult = await refetchCnnl();
+                      if (refetchResult?.data) {
+                        latestCnnl = refetchResult.data.filter(
+                          (item) => item.nccs_qty !== 0
+                        );
+                        boosterCnnlRefetchTsRef.current = nowTs;
+                        console.log(
+                          "cnnldata refreshed before analyzeBoosterData"
+                        );
+
+                        analyzeBoosterData(
+                          boosterItem,
+                          lastNotificationTime,
+                          setLastNotificationTime,
+                          latestCnnl,
+                          toggleBooster
+                        );
+                      }
                     }
                   } catch (e) {
                     console.warn(
