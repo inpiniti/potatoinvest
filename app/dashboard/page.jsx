@@ -426,7 +426,7 @@ export default function DashBoardPage() {
                 if (nowTs - boosterCnnlRefetchTsRef.current > 5000) {
                   try {
                     const hasItem = latestCnnl.some(
-                      (item) => item.pdno === boosterItem.pdno
+                      (item) => item.pdno === symbol
                     );
 
                     if (hasItem) {
