@@ -35,7 +35,7 @@ const useBuy = () => {
 
     // ---------------- 최초 매수 로직 (평균매입가가 0인 경우) ----------------
     // 평균매입가가 0이라는 것은 아직 보유하지 않은 신규 진입 시나리오로 간주
-    // 현재가보다 2% 낮은 지정가(= currentPrice * 0.98)로 1주(또는 기본 수량) 매수 시도
+    // 현재가보다 0.5% 낮은 지정가(= currentPrice * 0.995)로 1주(또는 기본 수량) 매수 시도
     // - 재알림/중복 주문 방지를 위해 동일 심볼 30초 쿨타임 유지 (아래 로직과 동일한 규칙 적용)
     if (avgPrice <= 0) {
       console.log(`최초 매수 로직 실행: ${symbol}`);
@@ -45,7 +45,7 @@ const useBuy = () => {
       if (timeDiff < 30000) return; // 30초 내 재시도 방지
 
       if (currentPrice > 0) {
-        const targetPrice = (currentPrice * 0.98).toFixed(2); // 2% 낮은 지정가
+        const targetPrice = (currentPrice * 0.995).toFixed(2); // 0.5% 낮은 지정가
         try {
           const response = await 매수({
             ovrs_pdno: symbol,
