@@ -43,9 +43,10 @@ const useRealTimePrice = (symbols) => {
     const isLocal =
       typeof window !== 'undefined' && window.location.hostname === 'localhost';
     const socket = new WebSocket(
-      isLocal
-        ? 'ws://ops.koreainvestment.com:21000'
-        : 'wss://ops.koreainvestment.com:21000'
+      'wss://ops.koreainvestment.com:21000'
+      // isLocal
+      //   ? 'ws://ops.koreainvestment.com:21000'
+      //   : 'wss://ops.koreainvestment.com:21000'
     );
     socketRef.current = socket;
 
