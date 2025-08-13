@@ -118,6 +118,34 @@ const predict = async (model, inputData, tfInstance) => {
   }
 };
 
+// 쿼리 파라미터에서 종목코드 배열 추출 (codes, symbols, tickers 모두 허용)
+const parseCodesFromSearchParams = (searchParams) => {
+  const keys = ["codes", "symbols", "tickers"];
+  const raw = [];
+  for (const k of keys) {
+    // 반복 파라미터와 콤마 구분 모두 허용
+    const values = searchParams.getAll(k);
+    if (values && values.length) raw.push(...values);
+  }
+  if (raw.length === 0) return [];
+  const list = raw
+    .flatMap((v) => (typeof v === "string" ? v.split(",") : v))
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => s.toUpperCase());
+  // 중복 제거
+  return Array.from(new Set(list));
+};
+
+// 종목코드 매칭 ("NASDAQ:AAPL" vs "AAPL" 모두 대응)
+const isCodeMatched = (itemName, codesSet) => {
+  if (!itemName) return false;
+  const up = String(itemName).toUpperCase();
+  if (codesSet.has(up)) return true;
+  const base = up.includes(":") ? up.split(":").pop() : up;
+  return codesSet.has(base);
+};
+
 // 서버사이드 예측 처리 함수
 const processServerPredictions = async (rawData) => {
   try {
@@ -185,6 +213,7 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const country = searchParams.get("country") || "us";
     const includePredictions = searchParams.get("predictions") !== "false"; // 기본값 true
+  const codes = parseCodesFromSearchParams(searchParams); // 선택적 종목코드 리스트
 
     // 결과를 캐시하여 반복 요청 방지
     const headers = {
@@ -199,15 +228,20 @@ export async function GET(req) {
     // 크롤링 데이터 가져오기
     const rawData = await crawling(country);
 
+    // codes가 제공된 경우, 해당 종목만 선별하여 분석 범위를 축소
+    const targetData = Array.isArray(codes) && codes.length > 0
+      ? rawData.filter((item) => isCodeMatched(item?.name, new Set(codes)))
+      : rawData;
+
     // 예측 처리 여부에 따라 분기
     let processedData;
     if (includePredictions) {
       console.log("서버사이드 예측 처리 시작...");
-      processedData = await processServerPredictions(rawData);
+      processedData = await processServerPredictions(targetData);
       console.log(`서버사이드 예측 처리 완료: ${processedData.length}개 항목`);
     } else {
       // 예측 없이 기본 데이터만 반환
-      processedData = rawData.map((item) => ({
+      processedData = targetData.map((item) => ({
         ...item,
         type: "분석",
         processedAt: new Date().toISOString(),
