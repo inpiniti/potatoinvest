@@ -72,11 +72,6 @@ const useBuy = () => {
       return; // 최초 매수 처리 후 종료 (아래 평균매입가 기반 로직 건너뜀)
     }
 
-    // 체결 완료된 주문 확인 (토스트용)
-    const completedOrder = cnnlData?.find(
-      (order) => order.pdno === symbol && parseInt(order.nccs_qty || 0) === 0
-    );
-
     const now = Date.now();
     const lastTime = lastNotificationTime[symbol] || 0;
     const timeDiff = now - lastTime;
@@ -94,6 +89,7 @@ const useBuy = () => {
       message = `${symbol} $${currentPrice.toFixed(
         2
       )}에 ${holdingQty}주 매도 주문 실행 (+${profitRate}%)`;
+      console.log(message);
       shouldExecute = true;
       orderType = "sell";
     }
@@ -103,6 +99,7 @@ const useBuy = () => {
       message = `${symbol} $${currentPrice.toFixed(
         2
       )}에 ${holdingQty}주 매수 주문 실행 (${lossRate}%)`;
+      console.log(message);
       shouldExecute = true;
       orderType = "buy";
     }
