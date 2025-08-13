@@ -107,12 +107,6 @@ const useBuy = () => {
       orderType = "buy";
     }
 
-    // 체결 완료된 주문이 있을 때만 알림
-    if (completedOrder) {
-      const orderTypeName = completedOrder.sll_buy_dvsn_cd_name;
-      toast.success(`${symbol} ${orderTypeName} 주문 체결 완료!`);
-    }
-
     if (shouldExecute) {
       try {
         let response;
