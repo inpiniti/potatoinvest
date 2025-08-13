@@ -437,7 +437,6 @@ export default function DashBoardPage() {
                     const hasItem = latestCnnl.some(
                       (item) => item.pdno === symbol
                     );
-                    console.log("hasItem", hasItem);
 
                     if (hasItem) {
                       console.log(`${symbol} 이미 체결중임`);
@@ -467,7 +466,7 @@ export default function DashBoardPage() {
                     );
                   }
                 } else {
-                  console.log("5초 내 중복 refetch 방지");
+                  console.log(`${symbol} 5초 내 중복 refetch 방지`);
                 }
               })();
             } else {
