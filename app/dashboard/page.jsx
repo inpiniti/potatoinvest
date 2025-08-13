@@ -437,6 +437,7 @@ export default function DashBoardPage() {
                     );
 
                     if (hasItem) {
+                      console.log(`${symbol} 이미 체결중임`);
                     } else {
                       const refetchResult = await refetchCnnl();
                       if (refetchResult?.data) {
@@ -452,6 +453,8 @@ export default function DashBoardPage() {
                           latestCnnl,
                           toggleBooster
                         );
+                      } else {
+                        console.log("cnnldata refetch failed, no data");
                       }
                     }
                   } catch (e) {
@@ -464,7 +467,11 @@ export default function DashBoardPage() {
                   console.log("5초 내 중복 refetch 방지");
                 }
               })();
+            } else {
+              console.warn(`부스터 데이터에 ${symbol}이 없습니다.`);
             }
+          } else {
+            console.log(`부스터 창에서만 자동 매매가 실행됨`);
           }
         }
 
