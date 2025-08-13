@@ -83,9 +83,6 @@ const useBuy = () => {
     let message = "";
     let orderType = "";
 
-    console.log("매도호가", askPrice);
-    console.log("매수호가", bidPrice);
-
     // 매도호가가 평균매입가보다 1% 이상 높을 때 (매도 조건)
     if (askPrice > avgPrice * 1.01 && holdingQty > 0) {
       const profitRate = (((askPrice - avgPrice) / avgPrice) * 100).toFixed(2);
@@ -105,6 +102,18 @@ const useBuy = () => {
       console.log(message);
       shouldExecute = true;
       orderType = "buy";
+    }
+    // 매도호가가 평균매입가 대비 몇% 인지 계산하여
+    // 매수호가가 평균매입가 대비 몇% 인지 계산하여
+    // console.log
+    else {
+      const askRate = ((askPrice - avgPrice) / avgPrice) * 100;
+      const bidRate = ((bidPrice - avgPrice) / avgPrice) * 100;
+      console.log(
+        `${symbol} 매도호가: ${askPrice.toFixed(2)} (${askRate.toFixed(
+          2
+        )}%), 매수호가: ${bidPrice.toFixed(2)} (${bidRate.toFixed(2)}%)`
+      );
     }
 
     if (shouldExecute) {

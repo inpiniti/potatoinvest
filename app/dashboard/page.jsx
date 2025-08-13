@@ -437,7 +437,6 @@ export default function DashBoardPage() {
                     const hasItem = latestCnnl.some(
                       (item) => item.pdno === symbol
                     );
-                    console.log("latestCnnl", latestCnnl);
                     console.log("hasItem", hasItem);
 
                     if (hasItem) {
