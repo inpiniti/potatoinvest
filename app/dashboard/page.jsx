@@ -427,7 +427,9 @@ export default function DashBoardPage() {
             );
             if (boosterItem) {
               (async () => {
-                let latestCnnl = cnnlData.filter((item) => item.nccs_qty !== 0);
+                let latestCnnl = cnnlData.filter(
+                  (item) => item.nccs_qty !== "0"
+                );
                 const nowTs = Date.now();
                 // 5초 내 중복 refetch 방지
                 if (nowTs - boosterCnnlRefetchTsRef.current > 5000) {
