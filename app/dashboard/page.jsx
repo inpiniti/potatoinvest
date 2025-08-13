@@ -398,75 +398,35 @@ export default function DashBoardPage() {
         const currentPrice = parseFloat(currentData.LAST);
         const previousPrice = previousPrices[symbol];
 
-        // 이전 가격이 존재하고 현재 가격과 다를 때 애니메이션 실행
         if (previousPrice !== undefined && previousPrice !== currentPrice) {
-          // 가격 변동 애니메이션 트리거
-          setPriceChangeAnimation((prev) => {
-            const newState = {
-              ...prev,
-              [symbol]: true,
-            };
-            return newState;
-          });
-
-          // 2초 후 애니메이션 제거
+          setPriceChangeAnimation((prev) => ({
+            ...prev,
+            [symbol]: true,
+          }));
           setTimeout(() => {
-            setPriceChangeAnimation((prev) => {
-              const newState = {
-                ...prev,
-                [symbol]: false,
-              };
-              return newState;
-            });
+            setPriceChangeAnimation((prev) => ({
+              ...prev,
+              [symbol]: false,
+            }));
           }, 2000);
 
-          // 자동매매 로직 실행 (부스터에서)
-          if (activeItem?.title === "부스터") {
-            const boosterItem = boosterData.find(
-              (item) => item.symbol === symbol
-            );
+            if (activeItem?.title === "부스터") {
+            const boosterItem = boosterData.find((item) => item.symbol === symbol);
             if (boosterItem) {
               (async () => {
-                let latestCnnl = cnnlData.filter(
-                  (item) => item.nccs_qty !== "0"
-                );
-                const nowTs = Date.now();
-                // 5초 내 중복 refetch 방지
-                if (nowTs - boosterCnnlRefetchTsRef.current > 5000) {
-                  try {
-                    const hasItem = latestCnnl.some(
-                      (item) => item.pdno === symbol
-                    );
-
-                    if (hasItem) {
-                      console.log(`${symbol} 이미 체결중임`);
-                    } else {
-                      const refetchResult = await refetchCnnl();
-                      if (refetchResult?.data) {
-                        latestCnnl = refetchResult.data.filter(
-                          (item) => item.nccs_qty !== 0
-                        );
-                        boosterCnnlRefetchTsRef.current = nowTs;
-
-                        analyzeBoosterData(
-                          boosterItem,
-                          lastNotificationTime,
-                          setLastNotificationTime,
-                          latestCnnl,
-                          toggleBooster
-                        );
-                      } else {
-                        console.log("cnnldata refetch failed, no data");
-                      }
-                    }
-                  } catch (e) {
-                    console.warn(
-                      "cnnldata refetch failed, fallback to cached",
-                      e
-                    );
-                  }
-                } else {
-                  console.log(`${symbol} 5초 내 중복 refetch 방지`);
+                // 기존: 사전 refetch 후 조건 검사 → 변경: 주문 직전에 refetch (useBuy 내부)
+                // 현재 보유하고 있는 cnnlData(캐시)만 1차 전달, 실제 주문 직전 최신 refetch는 useBuy.analyzeBoosterData 내부에서 수행
+                try {
+                  analyzeBoosterData(
+                    boosterItem,
+                    lastNotificationTime,
+                    setLastNotificationTime,
+                    cnnlData,
+                    toggleBooster,
+                    refetchCnnl // refetch 함수 전달 (주문 직전 실행됨)
+                  );
+                } catch (e) {
+                  console.warn("부스터 자동매매 analyzeBoosterData 실행 실패", e);
                 }
               })();
             } else {
@@ -477,7 +437,6 @@ export default function DashBoardPage() {
           }
         }
 
-        // 현재 가격을 이전 가격으로 저장
         setPreviousPrices((prev) => ({
           ...prev,
           [symbol]: currentPrice,
@@ -994,9 +953,7 @@ export default function DashBoardPage() {
                     logoUrl={getLogoUrlById(item?.logoid)}
                     title={`${item?.description} (${item?.name})`}
                     date={`${Number(item?.perf_1_m)?.toFixed(2)}%`}
-                    info={`${item?.close} (${Number(item?.change)?.toFixed(
-                      2
-                    )}%)`}
+                    info={`${item?.close} (${Number(item?.change)?.toFixed(2)}%)`}
                     // description={`${Number(item?.perf_6_m)?.toFixed(
                     //   2
                     // )}% > ${Number(item?.perf_3_m)?.toFixed(2)}% > ${Number(

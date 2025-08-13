@@ -11,9 +11,10 @@ const useBuy = () => {
     lastNotificationTime,
     setLastNotificationTime,
     cnnlData,
-    toggleBooster
+    toggleBooster,
+    refetchCnnl // 새로 추가: 실제 주문 직전에 최신 체결/미체결 상태 확인용
   ) => {
-    if (!boosterItem.realTimeData) return;
+    if (!boosterItem?.realTimeData) return;
 
     const { realTimeData, holdingData } = boosterItem;
     const symbol = boosterItem?.symbol;
@@ -23,137 +24,110 @@ const useBuy = () => {
     const holdingQty = parseInt(holdingData?.ovrs_cblc_qty || 0); // 보유수량
     const currentPrice = parseFloat(realTimeData?.LAST || 0); // 현재가
 
-    // 현재 체결 중인 주문이 있는지 확인 (미체결수량이 0이 아닌 경우)
-    const ongoingOrder = cnnlData?.find(
-      (order) => order.pdno === symbol && parseInt(order.nccs_qty || 0) > 0
-    );
-
-    if (ongoingOrder) {
-      console.log(`${symbol} 체결 진행 중이므로 주문 스킵`);
-      return; // 체결 중인 주문이 있으면 새 주문 생성하지 않음
-    }
-
-    // ---------------- 최초 매수 로직 (평균매입가가 0인 경우) ----------------
-    // 평균매입가가 0이라는 것은 아직 보유하지 않은 신규 진입 시나리오로 간주
-    // 현재가보다 0.5% 낮은 지정가(= currentPrice * 0.995)로 1주(또는 기본 수량) 매수 시도
-    // - 재알림/중복 주문 방지를 위해 동일 심볼 30초 쿨타임 유지 (아래 로직과 동일한 규칙 적용)
-    if (avgPrice <= 0) {
-      console.log(`최초 매수 로직 실행: ${symbol}`);
-      const now = Date.now();
-      const lastTime = lastNotificationTime[symbol] || 0;
-      const timeDiff = now - lastTime;
-      if (timeDiff < 30000) return; // 30초 내 재시도 방지
-
-      if (currentPrice > 0) {
-        const targetPrice = (currentPrice * 0.995).toFixed(2); // 0.5% 낮은 지정가
-        try {
-          const response = await 매수({
-            ovrs_pdno: symbol,
-            now_pric2: targetPrice,
-            ord_qty: "1", // 최초 진입 기본 수량 (필요 시 설정값으로 교체 가능)
-          });
-
-          if (response?.rt_cd === "0") {
-            toast.success(
-              `${symbol} 1주 $${targetPrice} (현재가 대비 -2%) 최초 매수 주문 완료`
-            );
-          } else {
-            toast.error(response?.msg1 || `${symbol} 최초 매수 주문 실패`);
-          }
-        } catch (error) {
-          toast.error(`${symbol} 최초 매수 주문 오류: ${error.message}`);
-        }
-
-        setLastNotificationTime((prev) => ({
-          ...prev,
-          [symbol]: now,
-        }));
-      }
-      return; // 최초 매수 처리 후 종료 (아래 평균매입가 기반 로직 건너뜀)
-    }
-
     const now = Date.now();
     const lastTime = lastNotificationTime[symbol] || 0;
     const timeDiff = now - lastTime;
+    if (timeDiff < 30000) return; // 30초 쿨타임 유지
 
-    // 같은 종목에 대해 30초 이내에는 알림을 다시 보내지 않음
-    if (timeDiff < 30000) return;
-
+    // 주문 실행 필요 여부 판단 변수
     let shouldExecute = false;
+    let orderType = ""; // buy | sell | firstBuy
     let message = "";
-    let orderType = "";
 
-    // 매도호가가 평균매입가보다 1% 이상 높을 때 (매도 조건)
-    if (askPrice > avgPrice * 1.01 && holdingQty > 0) {
-      const profitRate = (((askPrice - avgPrice) / avgPrice) * 100).toFixed(2);
-      message = `${symbol} $${currentPrice.toFixed(
-        2
-      )}에 ${holdingQty}주 매도 주문 실행 (+${profitRate}%)`;
-      console.log(message);
+    // ---------------- 최초 매수 로직 (평균매입가 0) ----------------
+    if (avgPrice <= 0 && currentPrice > 0) {
+      orderType = "firstBuy";
       shouldExecute = true;
-      orderType = "sell";
-    }
-    // 매수호가가 평균매입가보다 1% 이하일 때 (매수 조건)
-    else if (bidPrice < avgPrice * 0.99) {
-      const lossRate = (((bidPrice - avgPrice) / avgPrice) * 100).toFixed(2);
-      message = `${symbol} $${currentPrice.toFixed(
-        2
-      )}에 ${holdingQty}주 매수 주문 실행 (${lossRate}%)`;
-      console.log(message);
-      shouldExecute = true;
-      orderType = "buy";
-    }
-    // 매도호가가 평균매입가 대비 몇% 인지 계산하여
-    // 매수호가가 평균매입가 대비 몇% 인지 계산하여
-    // console.log
-    else {
-      const askRate = ((askPrice - avgPrice) / avgPrice) * 100;
-      const bidRate = ((bidPrice - avgPrice) / avgPrice) * 100;
-      console.log(
-        `${symbol} 매도호가: ${askPrice.toFixed(2)} (${askRate.toFixed(
-          2
-        )}%), 매수호가: ${bidPrice.toFixed(2)} (${bidRate.toFixed(2)}%)`
-      );
+      message = `${symbol} 최초 매수 시도`;
+    } else {
+      // 매도 조건: 매도호가가 평균매입가 대비 +1% 이상 & 보유수량 > 0
+      if (askPrice > avgPrice * 1.01 && holdingQty > 0) {
+        orderType = "sell";
+        shouldExecute = true;
+        const profitRate = (((askPrice - avgPrice) / avgPrice) * 100).toFixed(2);
+        message = `${symbol} $${currentPrice.toFixed(2)}에 ${holdingQty}주 매도 조건 충족 (+${profitRate}%)`;
+      }
+      // 매수 조건: 매수호가가 평균매입가 대비 -1% 이하
+      else if (bidPrice < avgPrice * 0.99) {
+        orderType = "buy";
+        shouldExecute = true;
+        const lossRate = (((bidPrice - avgPrice) / avgPrice) * 100).toFixed(2);
+        message = `${symbol} $${currentPrice.toFixed(2)} 추가 매수 조건 충족 (${lossRate}%)`;
+      } else {
+        const askRate = ((askPrice - avgPrice) / avgPrice) * 100;
+        const bidRate = ((bidPrice - avgPrice) / avgPrice) * 100;
+        console.log(
+          `${symbol} 매도호가: ${askPrice.toFixed(2)} (${askRate.toFixed(
+            2
+          )}%), 매수호가: ${bidPrice.toFixed(2)} (${bidRate.toFixed(2)}%)`
+        );
+      }
     }
 
-    if (shouldExecute) {
-      try {
-        let response;
+    if (!shouldExecute) return;
 
-        if (orderType === "sell") {
-          response = await 매도({
-            ovrs_pdno: symbol,
-            ovrs_cblc_qty: "1", //String(holdingQty),
-            now_pric2: askPrice.toFixed(2),
-          });
-        } else if (orderType === "buy") {
-          response = await 매수({
-            ovrs_pdno: symbol,
-            now_pric2: bidPrice.toFixed(2),
-            ord_qty: "1", //String(holdingQty),
-          });
+    // === 주문 직전 최신 체결/미체결 상태 확인 ===
+    try {
+      let latest = cnnlData || [];
+      if (typeof refetchCnnl === "function") {
+        const refetchResult = await refetchCnnl();
+        if (refetchResult?.data) {
+          latest = refetchResult.data;
         }
+      }
+      const isOngoing = latest
+        .filter((item) => item.nccs_qty !== "0")
+        .some((item) => item.pdno === symbol);
+      if (isOngoing) {
+        console.log(`${symbol} 이미 체결 진행 중 -> 주문 스킵`);
+        return; // 주문 중복 방지
+      }
+    } catch (e) {
+      console.warn("refetchCnnl 실패, 기존 데이터로 진행", e);
+    }
 
-        if (response?.rt_cd === "0") {
-          toast.success(message);
-
-          // 매도 성공시 부스터에서 해당 종목 제거
-          if (orderType === "sell" && toggleBooster) {
-            toggleBooster(symbol);
-            toast.info(`${symbol} 매도 완료로 부스터에서 제거됨`);
-          }
-        } else {
-          toast.error(response?.msg1 || `${symbol} 주문 실패`);
-        }
-      } catch (error) {
-        toast.error(`${symbol} 주문 실행 중 오류: ${error.message}`);
+    // === 실제 주문 실행 ===
+    try {
+      let response;
+      if (orderType === "sell") {
+        response = await 매도({
+          ovrs_pdno: symbol,
+          ovrs_cblc_qty: "1", // 혹은 holdingQty 전체? 기존 로직 유지
+          now_pric2: askPrice.toFixed(2),
+        });
+      } else if (orderType === "buy") {
+        response = await 매수({
+          ovrs_pdno: symbol,
+          now_pric2: bidPrice.toFixed(2),
+          ord_qty: "1",
+        });
+      } else if (orderType === "firstBuy") {
+        const targetPrice = (currentPrice * 0.995).toFixed(2); // 0.5% 낮은 지정가
+        response = await 매수({
+          ovrs_pdno: symbol,
+            now_pric2: targetPrice,
+          ord_qty: "1",
+        });
+        message = `${symbol} 1주 $${targetPrice} 최초 매수 주문`;
       }
 
-      setLastNotificationTime((prev) => ({
-        ...prev,
-        [symbol]: now,
-      }));
+      if (response?.rt_cd === "0") {
+        toast.success(`${message} 완료`);
+        if (orderType === "sell" && toggleBooster) {
+          toggleBooster(symbol);
+          toast.info(`${symbol} 매도 완료로 부스터에서 제거됨`);
+        }
+      } else {
+        toast.error(response?.msg1 || `${symbol} 주문 실패`);
+      }
+    } catch (error) {
+      toast.error(`${symbol} 주문 실행 중 오류: ${error.message}`);
     }
+
+    setLastNotificationTime((prev) => ({
+      ...prev,
+      [symbol]: now,
+    }));
   };
 
   const mutation = async ({
