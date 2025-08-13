@@ -1278,16 +1278,6 @@ export default function DashBoardPage() {
                     선택한 종목들의 실시간 가격 정보를 모니터링합니다.
                   </CardDescription>
                 </div>
-                <div className="text-xs text-muted-foreground bg-gray-100 p-2 rounded">
-                  <div>
-                    활성 애니메이션:{" "}
-                    {Object.entries(priceChangeAnimation)
-                      .filter(([_, value]) => value)
-                      .map(([key, _]) => key)
-                      .join(", ") || "없음"}
-                  </div>
-                  <div>부스터 종목: {boosterSymbols.join(", ") || "없음"}</div>
-                </div>
               </div>
               <Separator className="my-4" />
 
