@@ -436,6 +436,7 @@ export default function DashBoardPage() {
                       (item) => item.pdno === symbol
                     );
                     console.log("latestCnnl", latestCnnl);
+                    console.log("hasItem", hasItem);
 
                     if (hasItem) {
                       console.log(`${symbol} 이미 체결중임`);
