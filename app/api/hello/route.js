@@ -213,7 +213,7 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const country = searchParams.get("country") || "us";
     const includePredictions = searchParams.get("predictions") !== "false"; // 기본값 true
-  const codes = parseCodesFromSearchParams(searchParams); // 선택적 종목코드 리스트
+    const codes = parseCodesFromSearchParams(searchParams); // 선택적 종목코드 리스트
 
     // 결과를 캐시하여 반복 요청 방지
     const headers = {
@@ -229,9 +229,10 @@ export async function GET(req) {
     const rawData = await crawling(country);
 
     // codes가 제공된 경우, 해당 종목만 선별하여 분석 범위를 축소
-    const targetData = Array.isArray(codes) && codes.length > 0
-      ? rawData.filter((item) => isCodeMatched(item?.name, new Set(codes)))
-      : rawData;
+    const targetData =
+      Array.isArray(codes) && codes.length > 0
+        ? rawData.filter((item) => isCodeMatched(item?.name, new Set(codes)))
+        : rawData;
 
     // 예측 처리 여부에 따라 분기
     let processedData;
@@ -424,7 +425,7 @@ const crawling = async (countryCode) => {
       //   "earnings_per_share_diluted_ttm", // 주당 순이익(TTM, 희석)
       //   "earnings_per_share_diluted_yoy_growth_ttm", // 주당 순이익 연간 성장률(TTM, 희석)
       //   "dividends_yield_current", // 현재 배당 수익률
-      //   "sector.tr", // TR 섹터
+      "sector.tr", // TR 섹터
       //   "market", // 시장
       //   "sector", // 섹터
       "recommendation_mark", // 추천 마크
