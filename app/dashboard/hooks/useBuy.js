@@ -66,8 +66,19 @@ const useBuy = () => {
 
     if (!shouldExecute) return;
 
-    // === 주문 직전 최신 체결/미체결 상태 확인 ===
+    // === 주문 직전 최신 체결/미체결 상태 확인 로직 개선 ===
     try {
+      // 1) 현재 전달된 cnnlData(스냅샷)에서 이미 미체결(진행중) 주문이 있는지 먼저 확인
+      //    (nccs_qty !== "0" 이고 해당 종목 코드가 일치)
+      const hasOngoingInSnapshot = (cnnlData || []).some(
+        (item) => item.pdno === symbol && item.nccs_qty !== "0"
+      );
+      if (hasOngoingInSnapshot) {
+        console.log(`${symbol} 스냅샷에 이미 진행중 주문 존재 -> refetch 생략 & 주문 스킵`);
+        return; // 이미 존재하면 refetchCnnl 호출하지 않음
+      }
+
+      // 2) 스냅샷에 없을 때만 실제 refetch 로 재확인 (네트워크 호출 최소화)
       let latest = cnnlData || [];
       if (typeof refetchCnnl === "function") {
         const refetchResult = await refetchCnnl();
@@ -75,15 +86,18 @@ const useBuy = () => {
           latest = refetchResult.data;
         }
       }
-      const isOngoing = latest
-        .filter((item) => item.nccs_qty !== "0")
-        .some((item) => item.pdno === symbol);
-      if (isOngoing) {
-        console.log(`${symbol} 이미 체결 진행 중 -> 주문 스킵`);
-        return; // 주문 중복 방지
+      const hasOngoingAfterRefetch = latest.some(
+        (item) => item.pdno === symbol && item.nccs_qty !== "0"
+      );
+      if (hasOngoingAfterRefetch) {
+        console.log(`${symbol} refetch 후 진행중 주문 확인 -> 주문 스킵`);
+        return;
       }
+      // 진행중 주문이 없음을 두 단계로 확정한 경우에만 주문 계속 진행
     } catch (e) {
-      console.warn("refetchCnnl 실패, 기존 데이터로 진행", e);
+      console.warn("체결/미체결 상태 확인 중 오류 (refetchCnnl)", e);
+      // 오류 시에는 보수적으로 주문을 진행하지 않는 것도 한 방법이지만,
+      // 현재는 네트워크 오류로 인한 기회 손실을 줄이기 위해 진행 (필요시 정책 변경)
     }
 
     // === 실제 주문 실행 ===
@@ -105,7 +119,7 @@ const useBuy = () => {
         const targetPrice = (currentPrice * 0.995).toFixed(2); // 0.5% 낮은 지정가
         response = await 매수({
           ovrs_pdno: symbol,
-            now_pric2: targetPrice,
+          now_pric2: targetPrice,
           ord_qty: "1",
         });
         message = `${symbol} 1주 $${targetPrice} 최초 매수 주문`;
