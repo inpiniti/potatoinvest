@@ -417,3 +417,58 @@ Dialog 세부:
 - Dialog: ARIA Title/Description (`DialogTitle`, `DialogDescription`)
 - 폼 label-for 연결 (id="login-id" / id="login-pw")
 
+### Kakao 소셜 로그인 (Supabase OAuth) 추가
+
+구현 상태:
+- `components/nav-auth-logged-out.tsx` 에 카카오 로그인 버튼 추가 (Supabase OAuth 호출)
+- 이메일/비밀번호 폼은 UI 상 노출되지만 비활성화(opacity, pointer-events none)되어 현재 사용 불가
+- Supabase 세션 변화는 `components/sidebar-right.tsx` 에서 `supabase.auth.onAuthStateChange` 로 감지하여 우측 패널 사용자 상태 갱신
+- 로그아웃 시 Supabase `signOut()` 호출 후 상태 초기화
+
+필요 환경 변수 (.env.local):
+```
+NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-public-key>
+```
+임시 placeholder 값은 `lib/supabaseClient.ts` 내부에서 사용 중 (실 서비스 이전 반드시 교체).
+
+Supabase 설정 절차:
+1. Supabase 프로젝트 생성 (이미 있다면 생략)
+2. Dashboard > Authentication > Providers 이동
+3. Kakao Provider 활성화
+4. Kakao Developers 콘솔에서 앱 생성 후 다음 값 확보:
+  - REST API 키 (Client ID)
+  - Client Secret (필요 시)
+  - Redirect URI: `https://<your-project>.supabase.co/auth/v1/callback` 와 로컬 개발용 `http://localhost:3000` (Supabase 기본 OAuth callback 경로 활용)
+5. Supabase Kakao Provider 설정 화면에 REST API 키/Secret 입력 및 Redirect URL 등록
+6. (선택) 로컬 개발용 Redirect URI 를 Kakao Dev 콘솔에도 추가 등록
+7. Supabase Settings > API 에서 Project URL / anon key 복사 → `.env.local` 반영 후 dev 서버 재시작
+
+동작 흐름:
+1. 사용자 `카카오로 로그인` 버튼 클릭
+2. `supabase.auth.signInWithOAuth({ provider: 'kakao', redirectTo: <origin>/studio/home })` 실행
+3. Kakao 인증 → Supabase callback → 세션 저장
+4. 복귀 후 `sidebar-right.tsx` 의 `getSession` & `onAuthStateChange` 로 세션 감지 → `NavUser` 렌더
+5. Log out 시 `supabase.auth.signOut()` → 상태 초기화
+
+사용자 메타데이터:
+- Kakao 프로필 이미지/닉네임은 `session.user.user_metadata.avatar_url`, `name` 등에 제공될 수 있으며 없을 경우 기본 아바타로 대체.
+
+추가 예정:
+- 이메일 로그인 활성화 및 서버 검증
+- 오류 토스트(sonner) 연동 및 로딩 표시
+- 전역 Zustand store 로 auth 상태 추출 & 다중 탭 sync
+- Access token 갱신/만료 처리
+
+보안 메모:
+- Supabase anon key 는 public 가능하나 RLS 정책으로 DB 접근 제한 필요
+- Kakao Client Secret 은 서버/환경변수로만 관리 (코드 커밋 금지)
+
+테스트 체크리스트:
+- 환경 변수 설정 후 dev: `/studio` → 로그인 → Kakao → redirect → 사용자 표시
+- 새 탭 열어도 세션 유지 여부 확인
+- Log out 후 즉시 NavAuthLoggedOut 로 전환 확인
+
+HOTFIX 기록:
+- 초기 Kakao 버튼 통합 중 JSX 구조 손상 → `nav-auth-logged-out.tsx` 재작성 및 lint 통과
+
