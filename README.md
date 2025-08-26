@@ -321,3 +321,99 @@ function StockInfoComponent() {
 - 시세 데이터는 실시간이 아닌 일정 간격으로 갱신되므로, 주문 시 최신 정보인지 확인해야 합니다.
 - 대량의 시세 데이터 요청은 API 호출 제한에 걸릴 수 있으므로, 적절한 간격을 두고 호출하는 것이 좋습니다.
 - 해외 거래소 휴장일에는 데이터가 업데이트되지 않을 수 있습니다.
+
+## Studio 워크스페이스 (/studio)
+
+Google AI Studio 레이아웃을 참고한 내부 투자 분석/실험용 화면. 1개의 Page와 10개의 전용 컴포넌트로 구성되어 다중 뷰/설정 패널/내비게이션을 통합 제공합니다.
+
+### 구성 요소 개요
+Page (app/studio/page.jsx)
+- 전체 레이아웃 조립: 좌측 SidebarLeft, 우측 SidebarRight, 중앙 컨텐츠(Inset) + 상단 헤더(Breadcrumb, SidebarTrigger)
+
+컴포넌트 (10)
+1. `components/sidebar-left.tsx` (SidebarLeft)
+  - 좌측 내비게이션 컨테이너. TeamSwitcher, NavMain, NavSecondary, NavFavorites, NavWorkspaces 등을 포함하도록 확장 예정.
+2. `components/sidebar-right.tsx` (SidebarRight)
+  - 우측 설정/보조 패널. 사용자 정보(NavUser), DatePicker, Calendars, 추가 액션(New Calendar) 제공.
+3. `components/team-switcher.tsx` (TeamSwitcher)
+  - 팀 전환 드롭다운. 활성 팀 표시, 목록/단축키, 팀 추가 placeholder.
+4. `components/nav-main.tsx` (NavMain)
+  - 1차 주요 메뉴 목록 (아이콘 + 제목, 활성 상태 isActive prop).
+5. `components/nav-secondary.tsx` (NavSecondary)
+  - 보조 메뉴 그룹. 배지(SidebarMenuBadge) 지원.
+6. `components/nav-favorites.tsx` (NavFavorites)
+  - 즐겨찾기 목록 + 항목별 컨텍스트 메뉴(Remove, Copy Link 등) + More 항목.
+7. `components/nav-workspaces.tsx` (NavWorkspaces)
+  - 워크스페이스별 Collapsible + 하위 페이지(Sub) 구조, 펼침/추가 액션.
+8. `components/nav-user.tsx` (NavUser)
+  - 사용자 아바타/계정 메뉴(Upgrade, Account, Billing, Notifications, Logout 등) 드롭다운.
+9. `components/calendars.tsx` (Calendars)
+  - 다중 카테고리 캘린더 그룹(접기/펼치기), 항목 선택 상태(체크 아이콘) 표시.
+10. `components/date-picker.tsx` (DatePicker)
+   - 단일 월 달력(Calendar) 컴포넌트(선택 스타일을 sidebar-primary 토큰에 맞춤).
+
+### 레이아웃 및 토큰 사용
+- 좌측 사이드바: `--sidebar`, `--sidebar-accent`, `--sidebar-primary` 계열 색상.
+- 우측 패널: `--panel`, `--surface-*`, 경계선 `--border`.
+- 드롭다운 / Popover: `--popover`, `--popover-foreground`, focus에 `--ring`.
+- 상단 헤더: `--background`, 경계선/분리자 `--border`.
+- 아이콘/상태 강조: `--accent`, `--primary` (활성/선택), 체크박스 유사 표시에는 border 대비.
+
+### 상태 & 접근성
+- Radix UI 기반: Dropdown / Collapsible / Menu State (data-[state=open]) 활용.
+- NavFavorites / Workspaces 항목 hover 시 액션 버튼 노출(showOnHover prop).
+- 키보드 내비게이션: Radix 포커스 관리, 추후 focus-visible 링 강화 예정.
+
+### 앞으로 추가 예정 (로드맵)
+- 중앙 컨텐츠 실제 뷰 매핑 (포트폴리오 설정, 지표 대시보드, 종목 상세 등)
+- URL 쿼리 또는 segment 라우팅으로 뷰 상태 동기화
+- Zustand/React Query 연동하여 우측 패널 설정/날짜 선택 상태 보존
+- 다크 모드 토글 + prefers-color-scheme 감지
+- 접근성 검사(aXe) 및 시각 회귀(Playwright) 테스트
+- Team 추가 플로우 모달 구현
+- Workspace & Favorites 동적 CRUD (서버/스토어 연동)
+
+### 사용 방법 (현재)
+개발 서버 실행 후 `/studio` 경로 접속 → 좌/우 패널 및 드롭다운/Collapsible 상호작용으로 테마/레이어 구조 확인. 중앙 박스는 추후 실제 기능으로 대체.
+
+### 참고
+구글 AI Studio의 3-패널 구조/중립 톤과 내부 OKLCH 기반 토큰 세트를 결합하여 일관된 색상/간격 실험 목적. 기능 로직은 본 프로젝트 요구에 따라 점진 확장.
+
+### 인증 / 로그아웃 (Studio 우측 패널)
+우측 패널 상단 계정 영역은 로그인 상태와 로그아웃 상태에 따라 다른 컴포넌트를 렌더링합니다.
+
+구성:
+- 로그인 상태: `NavUser` (아바타, 계정 드롭다운, Log out 메뉴)
+- 로그아웃 상태: `NavAuthLoggedOut` (로그인 버튼 + Dialog)
+
+상태 전환 흐름:
+1. 초기(auth.loggedIn=true 가정) → `NavUser` 표시
+2. 드롭다운에서 Log out 선택 → 상태 `{ loggedIn:false }` 로 전환 → `NavAuthLoggedOut` 표시
+3. 로그아웃 UI에서 로그인 버튼 클릭 → Dialog 열림 (아이디/비밀번호 입력)
+4. 로그인 폼 제출(onLogin) → 검증 후 `{ loggedIn:true, user }` 저장 → `NavUser` 재표시
+
+파일:
+- `components/nav-user.tsx` : onLogout prop 추가, Log out 클릭 시 호출
+- `components/nav-auth-logged-out.tsx` : Dialog 기반 로그인 폼 (아이디, 비밀번호, 취소, 로그인 버튼)
+- `components/sidebar-right.tsx` : `useState` 로 auth 상태 관리 및 조건부 렌더링
+
+Dialog 세부:
+- Radix Dialog 래퍼(`ui/dialog.tsx`) 사용
+- 폼 요소는 기본 input + focus ring(`focus:ring-2`)과 surface 토큰(`bg-surface-inset`, `border`) 적용
+- 제출 중 비활성화 문구(로그인 중...) 처리 (간단한 UX 표시)
+
+추후 확장 아이디어:
+- 실제 인증 API 연동 (`onLogin` 비동기 검증 / 에러 메시지)
+- 비밀번호 찾기 / 회원가입 링크
+- 소셜 로그인 버튼(예: OAuth) 추가
+- 토큰 저장 시 보안 고려(HTTPOnly 쿠키 or secure storage)
+- 전역 auth store(Zustand) 추출 및 다중 탭 동기화
+
+간단 API 계약(현재 임시):
+- onLogin({ id, password }): Promise<void> | void (빈 문자열이면 거부 / TODO 위치)
+- onLogout(): void (store reset)
+
+접근성:
+- Dialog: ARIA Title/Description (`DialogTitle`, `DialogDescription`)
+- 폼 label-for 연결 (id="login-id" / id="login-pw")
+
