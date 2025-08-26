@@ -1,7 +1,8 @@
 "use client";
 import * as React from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, LogIn, Check, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import { accountTokenStore } from '@/store/accountTokenStore';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 
@@ -16,6 +17,8 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [accounts, setAccounts] = React.useState<AccountItem[]>([]);
+  const [activeId, setActiveId] = React.useState<number | null>(null);
+  const [loggingInId, setLoggingInId] = React.useState<number | null>(null);
   const [fetching, setFetching] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const accountRef = React.useRef<HTMLInputElement | null>(null);
@@ -89,7 +92,7 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('삭제하시겠습니까?')) return;
+  if (!window.confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('세션 만료');
@@ -105,6 +108,39 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
       await loadAccounts();
     } catch (e) {
       alert(e instanceof Error ? e.message : '삭제 중 오류');
+    }
+  };
+
+  const handleLogin = async (id: number) => {
+    setLoggingInId(id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('세션 만료');
+      const res = await fetch('/api/accounts/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ id }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || '로그인 실패');
+      // store token
+      accountTokenStore.getState().setToken({
+        accountId: id,
+        access_token: json.access_token,
+        token_type: json.token_type,
+        expires_in: json.expires_in,
+        access_token_token_expired: json.access_token_token_expired,
+        fetched_at: Date.now(),
+      });
+      setActiveId(id);
+    } catch (e) {
+      setActiveId(null);
+      alert(e instanceof Error ? e.message : '로그인 실패');
+    } finally {
+      setLoggingInId(null);
     }
   };
 
@@ -164,9 +200,26 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
               const dateStr = date ? date.toLocaleDateString() : '';
               return (
                 <li key={a.id} className="rounded-md border bg-surface-inset px-2 py-1 text-[11px] leading-tight">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="font-medium truncate">{a.alias || '(무닉네임)'}</div>
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-1 min-w-0">
+                      <button
+                        onClick={() => handleLogin(a.id)}
+                        disabled={loggingInId === a.id}
+                        className="h-4 w-4 flex items-center justify-center rounded border text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
+                        title={activeId === a.id ? '로그인됨' : '로그인'}
+                        aria-label={activeId === a.id ? '로그인됨' : '로그인'}
+                      >
+                        {loggingInId === a.id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : activeId === a.id ? (
+                          <Check className="h-3 w-3 text-green-500" />
+                        ) : (
+                          <LogIn className="h-3 w-3" />
+                        )}
+                      </button>
+                      <div className="font-medium truncate" title={a.alias || '(무닉네임)'}>{a.alias || '(무닉네임)'}</div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
                       <span className="text-[10px] text-muted-foreground">{dateStr}</span>
                       <button onClick={() => handleDelete(a.id)} className="text-muted-foreground hover:text-destructive transition-colors" aria-label="삭제" title="삭제">×</button>
                     </div>

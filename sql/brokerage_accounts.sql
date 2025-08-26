@@ -5,6 +5,7 @@ create table if not exists public.brokerage_accounts (
   account_no text not null,
   api_key text not null,
   secret_key_hash text not null,
+  secret_key_enc text null,
   alias text null,
   created_at timestamptz default now(),
   unique(user_id, account_no)

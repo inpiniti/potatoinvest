@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { encryptSecret, isEncryptionAvailable } from '@/lib/secretCrypto';
 
 // Headers: Authorization: Bearer <supabase access token>
 // POST body accepts either { accountNumber, apiKey, apiSecret } or { account, apiKey, secretKey }
@@ -55,16 +56,30 @@ export async function POST(req: NextRequest) {
     if (!accountRaw || !apiKey || !apiSecretRaw) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
-    // Simple hashing of secret (not reversible). Production could use encryption (KMS) if needed.
+    // Hash (immutable) + encryption (reversible for token issuance). Encryption required for login flow.
     const secretHash = crypto.createHash('sha256').update(apiSecretRaw).digest('hex');
+    let secretEnc: string | null = null;
+    try {
+      secretEnc = encryptSecret(apiSecretRaw);
+    } catch (err) {
+      // Provide explicit feedback instead of silently ignoring so user can fix env configuration.
+      console.error('Account secret encryption failed:', err);
+      if (!isEncryptionAvailable()) {
+        return NextResponse.json({
+          error: 'Encryption key missing or invalid. Set ACCOUNT_SECRET_ENC_KEY (32-byte raw / 64-char hex / base64) then re-add the account.'
+        }, { status: 500 });
+      }
+      return NextResponse.json({ error: 'Secret encryption failed' }, { status: 500 });
+    }
     const admin = getAdmin();
-    const { data, error } = await admin
+  const { data, error } = await admin
       .from('brokerage_accounts')
       .insert({
         user_id: auth.user.id,
         account_no: accountRaw,
         api_key: apiKey,
-        secret_key_hash: secretHash,
+  secret_key_hash: secretHash,
+  secret_key_enc: secretEnc,
         alias,
       })
       .select('id')

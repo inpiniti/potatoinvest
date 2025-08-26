@@ -485,11 +485,13 @@ API 경로:
 - GET /api/accounts → { accounts: [{ id, account_number, alias, created_at }] }
 - POST /api/accounts body: { accountNumber, apiKey, apiSecret, alias? }
 - DELETE /api/accounts body: { id }
+- POST /api/accounts/login body: { id } → { accountId, access_token, token_type, expires_in, access_token_token_expired }
 
 보안 처리:
 - 클라이언트는 Supabase access_token 만 전송 (Kakao 원본 토큰 X)
 - 서버(route handler)에서 `admin.auth.getUser(token)` 으로 유효성 검증
-- 비밀키는 SHA-256 해시(`secret_key_hash`) 로 저장 (복호화 불가 / 단순 비교용). 향후 필요 시 KMS 기반 암호화로 교체 가능.
+- 비밀키: SHA-256 해시(`secret_key_hash`) + AES-256-GCM 암호문(`secret_key_enc`) 모두 저장 → 해시는 탐지/중복, 암호문은 토큰 발급 시 복호화
+- 암호화 키: 환경 변수 `ACCOUNT_SECRET_ENC_KEY` (32바이트 raw/hex/base64) 로 초기화
 - service role key 는 `.env.local` 의 `SUPABASE_SERVICE_ROLE_KEY` (절대 클라이언트 번들에 포함 금지)
 
 테이블 스키마(SQL): `sql/brokerage_accounts.sql` (요약)
@@ -500,6 +502,7 @@ create table public.brokerage_accounts (
   account_no text not null,
   api_key text not null,
   secret_key_hash text not null,
+  secret_key_enc text null,
   alias text null,
   created_at timestamptz default now(),
   unique(user_id, account_no)
@@ -516,17 +519,76 @@ SUPABASE_SERVICE_ROLE_KEY=... # server only
 
 프론트 흐름:
 1. 세션 확보: `supabase.auth.getSession()`
-2. Bearer 토큰 포함 fetch (POST/GET/DELETE)
-3. 저장 성공 시 Dialog 닫고 입력 필드 초기화 후 목록 재로드
-4. 삭제 클릭 → confirm 후 DELETE → 목록 재로드
+2. Bearer 토큰 포함 fetch (GET/POST/DELETE/LOGIN)
+3. 저장 성공 → Dialog 닫고 필드 초기화 → 목록 재로드
+4. 삭제 → confirm 후 DELETE → 목록 재로드
+5. 로그인 아이콘 클릭 → /api/accounts/login → 토큰 수신 → zustand 저장 → 체크 아이콘
 
 추가 예정:
 - 계좌 수정(닉네임 변경 / 키 회전)
-- 키 회전(재발급) 및 secret 재해시
-- 암호화 모듈 도입 (libsodium / pgcrypto) → 현재는 해시만 저장
+- 키 회전(재발급) 및 secret 재암호화
+- 만료 임박 토큰 자동 갱신 / background refresh
 - 서버 로깅 및 감사 추적
+- activeAccountId 삭제 시 처리
 
 주의:
-- 현재 해시는 재검증용으로만 사용 (원문 복구 불가). API 호출 시 원문 필요하면 암호화 저장 전략으로 전환 필요.
+- ACCOUNT_SECRET_ENC_KEY 없으면 secret_key_enc 저장 실패(해시만 저장) → /api/accounts/login 복호화 불가
+- 암호화 키 분실 시 복호화 불가 (재등록 필요)
+- 운영/개발 키 분리, 회전 시 재암호화 작업 필요
+
+환경 변수 추가:
+```
+ACCOUNT_SECRET_ENC_KEY=your-32-byte-key
+```
+
+토큰 저장 (zustand `accountTokenStore`):
+```
+{
+  activeAccountId: number|null,
+  tokens: {
+    [accountId]: {
+      accountId,
+      access_token,
+      token_type,
+      expires_in,
+      access_token_token_expired,
+      fetched_at
+    }
+  }
+}
+```
+
+### 계좌 암호화 문제 해결 (Secret not stored encrypted)
+
+계좌 추가 후 `/api/accounts/login` 호출 시 `Secret not stored encrypted` 오류가 발생한다면 암호화 키 설정 문제일 가능성이 높습니다.
+
+체크리스트:
+1. `.env.local` 에 `ACCOUNT_SECRET_ENC_KEY` 가 설정되어 있는지 확인
+2. 값이 다음 중 하나의 형식을 만족하는지 확인
+  - 32바이트 ASCII (예: `12345678901234567890123456789012`)
+  - 64자 hex (예: `a3f4...` 64글자)
+  - base64 로 인코딩된 32바이트 (길이 43~44 포함 `=` 패딩)
+3. 서버 재시작 (키는 빌드 타임 로드되므로 dev 서버를 다시 실행해야 함)
+4. 기존에 암호화 없이 저장된 계좌는 복호화할 수 없으니 삭제 후 다시 등록
+
+로컬에서 빠른 확인 방법 (Windows PowerShell):
+```powershell
+$raw = [Text.Encoding]::UTF8.GetBytes('12345678901234567890123456789012'); $raw.Length  # 32 인지 확인
+```
+
+Base64 키 생성 예시:
+```powershell
+[Convert]::ToBase64String((New-Object byte[] 32 | ForEach-Object {$_ = Get-Random -Minimum 0 -Maximum 256; $_}))
+```
+
+오류 원인별 대응:
+- `Missing ACCOUNT_SECRET_ENC_KEY`: 환경변수 누락 → `.env.local` 추가 후 서버 재시작
+- `ACCOUNT_SECRET_ENC_KEY must be 32-byte`: 형식 불일치 → 규격 맞춰 재생성
+- 계좌 추가 시 서버 응답: `Encryption key missing or invalid...` → 위 1~3 단계 수행 후 재시도
+- 로그인 시 `Secret not stored encrypted`: 해당 레코드에 `secret_key_enc` 가 NULL → 계좌 삭제 후 재등록 (키 정상 설정 후)
+
+보안 권장:
+- 운영 환경에서는 .env 파일 대신 안전한 Secret 관리 (예: Vercel Project Secrets, Vault)
+- 키 회전 필요 시: (1) 새 키 주입 (2) 기존 레코드 순회 복호화/재암호화 마이그레이션 스크립트 실행 (3) 구 키 폐기
 
 
