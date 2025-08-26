@@ -472,3 +472,61 @@ Supabase 설정 절차:
 HOTFIX 기록:
 - 초기 Kakao 버튼 통합 중 JSX 구조 손상 → `nav-auth-logged-out.tsx` 재작성 및 lint 통과
 
+### 계좌 관리 (Accounts Section)
+
+구현 상태:
+- `components/accounts-section.tsx` : 로그인 섹션 아래 "계좌" 헤더 + + 버튼 + 계좌 목록 (닉네임 / 생성일 / 삭제 / 계좌번호)
+- + 버튼 클릭 → Dialog (계좌 / 닉네임 / 키 / 비밀키) 입력 후 저장
+- 저장 시 `/api/accounts` POST (서버) 로 Supabase access_token Bearer 전달 → 서버에서 service role 로 사용자 검증 후 `public.brokerage_accounts` 테이블에 삽입
+- 목록은 `/api/accounts` GET (fields: id, account_number, alias, created_at)
+- 항목 우측 × 클릭 시 `/api/accounts` DELETE (body: { id }) 로 삭제
+
+API 경로:
+- GET /api/accounts → { accounts: [{ id, account_number, alias, created_at }] }
+- POST /api/accounts body: { accountNumber, apiKey, apiSecret, alias? }
+- DELETE /api/accounts body: { id }
+
+보안 처리:
+- 클라이언트는 Supabase access_token 만 전송 (Kakao 원본 토큰 X)
+- 서버(route handler)에서 `admin.auth.getUser(token)` 으로 유효성 검증
+- 비밀키는 SHA-256 해시(`secret_key_hash`) 로 저장 (복호화 불가 / 단순 비교용). 향후 필요 시 KMS 기반 암호화로 교체 가능.
+- service role key 는 `.env.local` 의 `SUPABASE_SERVICE_ROLE_KEY` (절대 클라이언트 번들에 포함 금지)
+
+테이블 스키마(SQL): `sql/brokerage_accounts.sql` (요약)
+```
+create table public.brokerage_accounts (
+  id bigserial primary key,
+  user_id uuid references auth.users(id) on delete cascade,
+  account_no text not null,
+  api_key text not null,
+  secret_key_hash text not null,
+  alias text null,
+  created_at timestamptz default now(),
+  unique(user_id, account_no)
+);
+```
+RLS 정책은 사용자 자신의 행만 CRUD 가능하도록 구성.
+
+환경 변수 (.env.local 예시):
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=... # server only
+```
+
+프론트 흐름:
+1. 세션 확보: `supabase.auth.getSession()`
+2. Bearer 토큰 포함 fetch (POST/GET/DELETE)
+3. 저장 성공 시 Dialog 닫고 입력 필드 초기화 후 목록 재로드
+4. 삭제 클릭 → confirm 후 DELETE → 목록 재로드
+
+추가 예정:
+- 계좌 수정(닉네임 변경 / 키 회전)
+- 키 회전(재발급) 및 secret 재해시
+- 암호화 모듈 도입 (libsodium / pgcrypto) → 현재는 해시만 저장
+- 서버 로깅 및 감사 추적
+
+주의:
+- 현재 해시는 재검증용으로만 사용 (원문 복구 불가). API 호출 시 원문 필요하면 암호화 저장 전략으로 전환 필요.
+
+
