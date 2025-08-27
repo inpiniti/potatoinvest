@@ -1,10 +1,19 @@
-"use client";
+'use client';
 import * as React from 'react';
 import { Plus, LogIn, Check, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { accountTokenStore } from '@/store/accountTokenStore';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 interface AccountItem {
   id: number;
@@ -30,7 +39,9 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
     setFetching(true);
     setError(null);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) return;
       const res = await fetch('/api/accounts', {
         headers: { Authorization: `Bearer ${session.access_token}` },
@@ -38,7 +49,7 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
       });
       if (!res.ok) throw new Error('계좌 조회 실패');
       const json = await res.json();
-  setAccounts(json.accounts || []);
+      setAccounts(json.accounts || []);
     } catch (e) {
       setError(e instanceof Error ? e.message : '알 수 없는 오류');
     } finally {
@@ -54,9 +65,9 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
     e.preventDefault();
     if (loading) return;
     const account = accountRef.current?.value.trim();
-  const apiKey = keyRef.current?.value.trim();
-  const apiSecret = secretRef.current?.value.trim();
-  const alias = aliasRef.current?.value.trim();
+    const apiKey = keyRef.current?.value.trim();
+    const apiSecret = secretRef.current?.value.trim();
+    const alias = aliasRef.current?.value.trim();
     if (!account || !apiKey || !apiSecret) {
       setError('모든 필드를 입력하세요');
       return;
@@ -64,7 +75,9 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
     setLoading(true);
     setError(null);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) throw new Error('세션 만료');
       const res = await fetch('/api/accounts', {
         method: 'POST',
@@ -72,7 +85,12 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
         },
-  body: JSON.stringify({ accountNumber: account, apiKey, apiSecret, alias }),
+        body: JSON.stringify({
+          accountNumber: account,
+          apiKey,
+          apiSecret,
+          alias,
+        }),
       });
       if (!res.ok) {
         const txt = await res.text();
@@ -92,9 +110,12 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
   };
 
   const handleDelete = async (id: number) => {
-  if (!window.confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+    if (!window.confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'))
+      return;
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) throw new Error('세션 만료');
       const res = await fetch('/api/accounts', {
         method: 'DELETE',
@@ -114,7 +135,9 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
   const handleLogin = async (id: number) => {
     setLoggingInId(id);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) throw new Error('세션 만료');
       const res = await fetch('/api/accounts/login', {
         method: 'POST',
@@ -145,12 +168,19 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
   };
 
   return (
-  <div className="mt-2 space-y-2 pb-2 border-b">
+    <div className="mt-2 space-y-2 pb-2 border-b">
       <div className="flex items-center justify-between px-2">
-        <h4 className="text-xs font-semibold text-muted-foreground tracking-wide">계좌</h4>
+        <h4 className="text-xs font-semibold text-muted-foreground tracking-wide">
+          계좌
+        </h4>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="icon" variant="ghost" disabled={disabled} className="h-6 w-6">
+            <Button
+              size="icon"
+              variant="ghost"
+              disabled={disabled}
+              className="h-6 w-6"
+            >
               <Plus className="h-4 w-4" />
               <span className="sr-only">계좌 추가</span>
             </Button>
@@ -158,48 +188,93 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>계좌 추가</DialogTitle>
-              <DialogDescription>API 호출에 사용할 계좌/키 정보를 안전하게 저장합니다.</DialogDescription>
+              <DialogDescription>
+                API 호출에 사용할 계좌/키 정보를 안전하게 저장합니다.
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSave} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="acc-account" className="text-sm font-medium">계좌</label>
-                <input id="acc-account" ref={accountRef} className="w-full rounded-md border bg-surface-inset px-3 py-2 text-sm" placeholder="123-456-789" autoFocus />
+                <label htmlFor="acc-account" className="text-sm font-medium">
+                  계좌
+                </label>
+                <input
+                  id="acc-account"
+                  ref={accountRef}
+                  className="w-full rounded-md border bg-surface-inset px-3 py-2 text-sm"
+                  placeholder="123-456-789"
+                  autoFocus
+                />
               </div>
               <div className="space-y-2">
-                <label htmlFor="acc-alias" className="text-sm font-medium">닉네임</label>
-                <input id="acc-alias" ref={aliasRef} className="w-full rounded-md border bg-surface-inset px-3 py-2 text-sm" placeholder="내 메인 계좌" />
+                <label htmlFor="acc-alias" className="text-sm font-medium">
+                  닉네임
+                </label>
+                <input
+                  id="acc-alias"
+                  ref={aliasRef}
+                  className="w-full rounded-md border bg-surface-inset px-3 py-2 text-sm"
+                  placeholder="내 메인 계좌"
+                />
               </div>
               <div className="space-y-2">
-                <label htmlFor="acc-key" className="text-sm font-medium">키</label>
-                <input id="acc-key" ref={keyRef} className="w-full rounded-md border bg-surface-inset px-3 py-2 text-sm" placeholder="API KEY" />
+                <label htmlFor="acc-key" className="text-sm font-medium">
+                  키
+                </label>
+                <input
+                  id="acc-key"
+                  ref={keyRef}
+                  className="w-full rounded-md border bg-surface-inset px-3 py-2 text-sm"
+                  placeholder="API KEY"
+                />
               </div>
               <div className="space-y-2">
-                <label htmlFor="acc-secret" className="text-sm font-medium">비밀키</label>
-                <input id="acc-secret" ref={secretRef} className="w-full rounded-md border bg-surface-inset px-3 py-2 text-sm" placeholder="SECRET" type="password" />
+                <label htmlFor="acc-secret" className="text-sm font-medium">
+                  비밀키
+                </label>
+                <input
+                  id="acc-secret"
+                  ref={secretRef}
+                  className="w-full rounded-md border bg-surface-inset px-3 py-2 text-sm"
+                  placeholder="SECRET"
+                  type="password"
+                />
               </div>
               {error && <p className="text-xs text-red-500">{error}</p>}
               <DialogFooter className="gap-2 sm:justify-end">
                 <DialogClose asChild>
-                  <Button type="button" variant="outline" disabled={loading}>취소</Button>
+                  <Button type="button" variant="outline" disabled={loading}>
+                    취소
+                  </Button>
                 </DialogClose>
-                <Button type="submit" disabled={loading}>{loading ? '저장 중...' : '저장'}</Button>
+                <Button type="submit" disabled={loading}>
+                  {loading ? '저장 중...' : '저장'}
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
       </div>
       <div className="max-h-40 overflow-auto px-2 pb-1">
+        {!activeId && (
+          <p className="text-[10px] text-red-500 mb-1">
+            계좌 로그인이 되어야 계좌정보 조회가 가능합니다. 계좌 옆 로그인
+            버튼을 눌러주세요.
+          </p>
+        )}
         {fetching ? (
           <p className="text-xs text-muted-foreground">불러오는 중...</p>
         ) : accounts.length === 0 ? (
           <p className="text-xs text-muted-foreground">등록된 계좌 없음</p>
         ) : (
           <ul className="space-y-1">
-            {accounts.map(a => {
+            {accounts.map((a) => {
               const date = a.created_at ? new Date(a.created_at) : null;
               const dateStr = date ? date.toLocaleDateString() : '';
               return (
-                <li key={a.id} className="rounded-md border bg-surface-inset px-2 py-1 text-[11px] leading-tight">
+                <li
+                  key={a.id}
+                  className="rounded-md border bg-surface-inset px-2 py-1 text-[11px] leading-tight"
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-1 min-w-0">
                       <button
@@ -217,14 +292,30 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
                           <LogIn className="h-3 w-3" />
                         )}
                       </button>
-                      <div className="font-medium truncate" title={a.alias || '(무닉네임)'}>{a.alias || '(무닉네임)'}</div>
+                      <div
+                        className="font-medium truncate"
+                        title={a.alias || '(무닉네임)'}
+                      >
+                        {a.alias || '(무닉네임)'}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] text-muted-foreground">{dateStr}</span>
-                      <button onClick={() => handleDelete(a.id)} className="text-muted-foreground hover:text-destructive transition-colors" aria-label="삭제" title="삭제">×</button>
+                      <span className="text-[10px] text-muted-foreground">
+                        {dateStr}
+                      </span>
+                      <button
+                        onClick={() => handleDelete(a.id)}
+                        className="text-muted-foreground hover:text-destructive transition-colors"
+                        aria-label="삭제"
+                        title="삭제"
+                      >
+                        ×
+                      </button>
                     </div>
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5 break-all">{a.account_number}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5 break-all">
+                    {a.account_number}
+                  </div>
                 </li>
               );
             })}
