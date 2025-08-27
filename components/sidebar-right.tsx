@@ -6,6 +6,7 @@ import { DatePicker } from '@/components/date-picker';
 import { NavUser } from '@/components/nav-user';
 import { NavAuthLoggedOut } from '@/components/nav-auth-logged-out';
 import { AccountsSection } from '@/components/accounts-section';
+import { TokenSection } from '@/components/token-section';
 import { supabase } from '@/lib/supabaseClient';
 import {
   Sidebar,
@@ -118,7 +119,8 @@ export function SidebarRight(
         )}
       </SidebarHeader>
       <SidebarContent>
-        <AccountsSection disabled={!auth.loggedIn} />
+  <AccountsSection disabled={!auth.loggedIn} />
+  <TokenSection />
         <div className="pt-2">
           <DatePicker />
         </div>

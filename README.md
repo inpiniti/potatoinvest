@@ -558,6 +558,36 @@ ACCOUNT_SECRET_ENC_KEY=your-32-byte-key
 }
 ```
 
+### 토큰 섹션 (Token Section)
+
+`/studio` 우측 패널에서 계좌 섹션 바로 아래에 활성(로그인 성공) 계좌의 토큰 정보를 한 줄로 요약 표시하는 `TokenSection` 을 추가했습니다.
+
+구현:
+- 파일: `components/token-section.tsx`
+- 사이드바 통합: `components/sidebar-right.tsx` 내부 `AccountsSection` 아래 `<TokenSection />` 렌더
+- 상태: `store/accountTokenStore` 의 `activeAccountId` 및 `tokens[activeAccountId]` 사용
+
+표시 내용:
+- 계좌 ID (`#<id>`) 와 남은 만료 시간(초 → 시간 단위 변환, `expires_in` 존재 시)
+- `access_token` 전체 문자열을 monospace 한 줄로 출력 (CSS: `overflow-hidden text-ellipsis whitespace-nowrap`) → 화면에는 앞부분만 보이고 나머지는 `...`
+- 전체 토큰은 요소 hover 시 title tooltip 으로만 확인 가능 (우발적 노출 최소화)
+- 토큰 없으면 ShieldOff 아이콘 + "로그인된 계좌 없음" 메시지
+- 토큰 있으면 ShieldCheck 아이콘
+
+보안 고려:
+- 토큰 전문이 UI에 그대로 길게 노출되지 않음 (시각적 shoulder surfing 감소)
+- Copy 기능 미구현 (원치 않는 유출 방지). 필요 시 명시적 버튼 + 추가 확인절차로 추후 확장 가능
+
+추가 개선 아이디어:
+- 만료 임박(예: < 10분) 시 배경 색상 경고
+- 자동 새로고침/재발급 버튼
+- 다중 계좌 동시 토큰 목록 (현재는 active 계좌만)
+
+관련 변경 사항:
+- README 본 섹션 추가
+- `sidebar-right.tsx` 에 `<TokenSection />` 삽입
+- 신규 컴포넌트 `token-section.tsx` 생성
+
 ### 계좌 암호화 문제 해결 (Secret not stored encrypted)
 
 계좌 추가 후 `/api/accounts/login` 호출 시 `Secret not stored encrypted` 오류가 발생한다면 암호화 키 설정 문제일 가능성이 높습니다.
