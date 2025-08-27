@@ -3,11 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 
 interface PersonRow { no: number; name: string; totalValue?: string | null }
 interface StockRow { stock: string; person_count: number; sum_ratio: string }
 
 export default function StudioHomePage() {
+  const router = useRouter();
   const { data, isLoading, error } = useQuery<{ based_on_person: PersonRow[]; based_on_stock: StockRow[] }>({
     queryKey: ['dataroma-base'],
     queryFn: async () => {
@@ -45,7 +47,11 @@ export default function StudioHomePage() {
                 </TableHeader>
                 <TableBody>
                   {data.based_on_person.map((r) => (
-                    <TableRow key={r.no}>
+                    <TableRow
+                      key={r.no}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => router.push(`/studio/portfolio/${encodeURIComponent(r.name)}`)}
+                    >
                       <TableCell>{r.no}</TableCell>
                       <TableCell className="font-medium">{r.name}</TableCell>
                       <TableCell>{r.totalValue || '-'}</TableCell>

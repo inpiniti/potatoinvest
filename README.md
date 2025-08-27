@@ -346,6 +346,34 @@ Page (app/studio/page.jsx)
 7. `components/nav-workspaces.tsx` (NavWorkspaces)
   - 워크스페이스별 Collapsible + 하위 페이지(Sub) 구조, 펼침/추가 액션.
 8. `components/nav-user.tsx` (NavUser)
+
+### Dataroma Portfolio Detail (/studio/portfolio/[name])
+
+Studio Home (`/studio/home`)의 "Based on Person" 탭에서 특정 로우를 클릭하면 해당 투자자 상세 포트폴리오 페이지로 이동합니다.
+
+경로: `/studio/portfolio/{name}` (URL 인코딩된 이름)
+
+구성:
+1. 상단 헤더: 투자자 이름, 총 포트폴리오 가치(totalValue)
+2. 파이 차트: 상위 12개 비중 + 나머지 합산 Other (shadcn + recharts PieChart, `ChartContainer` 활용)
+3. 하단 테이블: 전체 보유 종목 코드와 비중(ratio)
+
+데이터 소스:
+- API: `GET /api/dataroma/person?name=...`
+  - 응답: `{ name, totalValue, portfolio: [{ code, ratio }] }`
+  - 내부적으로 `generateDataromaBase`를 lookup 기반 호출 후 가장 일치하는 투자자 선택.
+
+차트 색상:
+- `--chart-1`~`--chart-12` 커스텀 CSS 변수 순환, 초과분은 Other로 묶음.
+
+캐싱:
+- person API는 `no-store` 헤더 (실시간/반복 탐색 고려). 페이지 단에서 React Query 1시간(`staleTime`) 캐시.
+
+확장 아이디어:
+- 비중 슬라이더 리밸런싱 시뮬레이터
+- 종목 클릭 → 시세/세부 정보 드로어
+- Recommended 포트폴리오 비교 오버레이
+
   - 사용자 아바타/계정 메뉴(Upgrade, Account, Billing, Notifications, Logout 등) 드롭다운.
 9. `components/calendars.tsx` (Calendars)
   - 다중 카테고리 캘린더 그룹(접기/펼치기), 항목 선택 상태(체크 아이콘) 표시.
