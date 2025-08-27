@@ -692,3 +692,68 @@ Base64 키 생성 예시:
 - 키 회전 필요 시: (1) 새 키 주입 (2) 기존 레코드 순회 복호화/재암호화 마이그레이션 스크립트 실행 (3) 구 키 폐기
 
 
+## Dataroma Base 집계 API & Studio UI
+
+슈퍼 투자자(“gurus”)들의 포트폴리오를 스크래핑 후 구조화한 기본 집계(base) 데이터를 제공하는 API 및 Studio 홈 탭 UI를 추가했습니다.
+
+### 1. API: `GET /api/dataroma/base`
+
+Query Parameters (optional):
+- `lookup`: 특정 투자자 식별자/이름 일부로 필터링
+
+Response 예시:
+```json
+{
+  "based_on_person": [
+    { "no": 1, "name": "Warren Buffett", "totalValue": "$257,521,771,000" }
+  ],
+  "based_on_stock": [
+    { "stock": "AAPL", "person_count": 34, "sum_ratio": "220.71%" }
+  ]
+}
+```
+설명:
+- `based_on_person`: 투자자 목록 (내부 포트폴리오 상세는 제거, 필요한 메타만 노출)
+- `based_on_stock`: 종목별 보유 투자자 수 및 합산 비중 (sum_ratio), 평균 비중은 내부 계산 후 필요 시 확장 예정
+
+캐싱:
+- 서버는 현재 `no-store` 헤더 (항상 최신 스크래핑) – 추후 SSR/ISR 고려 가능
+
+### 2. Studio Home 탭 UI
+
+경로: `/studio/home`
+
+구현:
+- 진입 시 React Query 키 `dataroma-base` 로 1회 호출
+- `staleTime: Infinity`, `gcTime: Infinity` → 세션 내 재방문 시 재요청 없음
+- Tabs (shadcn):
+  - Based on Person: 컬럼 (No, Name, Total Value)
+  - Based on Stock: 컬럼 (Stock, Person Count, Sum Ratio)
+
+### 3. 내부 스크래핑 로직
+
+- 파일: `dataroma_portfolio.js`
+- `generateDataromaBase()` 호출 → 투자자 페이지 병렬 수집(batch) → 종목 집계
+- 향후 추천 포트폴리오(`/api/dataroma/recommended`) 분리 예정
+
+### 4. 확장 아이디어
+
+- 컬럼 정렬 & 필터 (예: person_count 상위만 보기)
+- 평균 비중(avg_ratio) 컬럼 노출 토글
+- 추천 포트폴리오 탭 (현 `generateRecommendedPortfolio` 활용)
+- 다운로드 (CSV/JSON) 버튼
+- 주기적 서버 사이드 사전 크롤링 + KV/Edge 캐시 사용
+
+### 5. 간단 사용 예 (클라이언트)
+
+```ts
+const { data } = useQuery({
+  queryKey: ['dataroma-base'],
+  queryFn: () => fetch('/api/dataroma/base').then(r => r.json()),
+  staleTime: Infinity,
+});
+```
+
+---
+
+
