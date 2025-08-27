@@ -588,6 +588,76 @@ ACCOUNT_SECRET_ENC_KEY=your-32-byte-key
 - `sidebar-right.tsx` 에 `<TokenSection />` 삽입
 - 신규 컴포넌트 `token-section.tsx` 생성
 
+### 계좌 잔고 요약 (Account Balance Section)
+
+한국투자 `inquire-present-balance` API 의 `output2`(통화별) / `output3`(총계) 를 이용해 활성 계좌의 핵심 지표를 `/studio` 우측 패널 토큰 섹션 아래 요약 표시하는 컴포넌트 추가.
+
+구현:
+- 훅: `hooks/usePresentBalance.ts` (`@tanstack/react-query` 사용)
+  - queryKey: `['presentBalance', activeAccountId, token, params]`
+  - 5분 간격 자동 재조회(`refetchInterval`)
+  - 성공(rt_cd==='0') 아닌 경우 오류 throw
+- 컴포넌트: `components/account-balance-section.tsx`
+  - 총자산, 총예수금, 평가금액, 평가손익, 수익률, 출금가능, 외화평가총액, 미결제매수 등 `output3` 주요 필드 그리드 표시
+  - `output2` 통화별 예수/잔고 관련 금액을 스크롤 가능한 리스트로 표시 (현재 `frcr_dncl_amt_2` 중심)
+  - 활성 계좌 없으면 빨간 안내, 로딩/에러/데이터 없음 상태 처리
+- 사이드바 통합: `sidebar-right.tsx` 에 `<AccountBalanceSection />` 추가 (TokenSection 아래)
+
+API 개선:
+- 새로운 백엔드 라우트 `POST /api/accounts/presentBalance` 추가: 클라이언트는 더 이상 암호화 키/앱키를 직접 전달하지 않고, `accountId`, `kiAccessToken`(한국투자 발급 토큰), 선택 파라미터만 전송.
+- 서버가 Supabase 서비스 롤로 해당 계좌의 `api_key` + 암호화된 `secret_key_enc` 복호화 후 한국투자 `inquire-present-balance` 호출.
+
+요청 바디 예시:
+```json
+{
+  "accountId": 123,
+  "kiAccessToken": "<KI_ACCESS_TOKEN>",
+  "isVts": true
+}
+```
+선택 필드(CANO 등)를 지정하지 않으면 서버가 계좌 DB 값 또는 기본값(ACNT_PRDT_CD=01 등)을 채움.
+
+응답 구조 (원문 요약):
+- rt_cd, msg_cd, msg1
+- output1: 체결기준 종목별 잔고 배열 (주요 필드: prdt_name, cblc_qty13, ord_psbl_qty1, frcr_pchs_amt, frcr_evlu_amt2, evlu_pfls_amt2, evlu_pfls_rt1, pdno, avg_unpr3, ovrs_now_pric1 등)
+- output2: 통화별 합계 (crcy_cd, frcr_dncl_amt_2 외 다수)
+- output3: 총계 (tot_asst_amt, evlu_amt_smtl, evlu_pfls_amt_smtl, evlu_erng_rt1, wdrw_psbl_tot_amt 등)
+
+클라이언트 변경:
+- `AccountBalanceSection` props 단순화(계좌 ID/토큰 내부 조회) → 보안 표면 축소.
+- `usePresentBalance` 훅이 새 라우트 사용.
+
+확장 아이디어:
+- output2 금액 컬럼 다중(매수합계/예수금 등) 토글
+- 통화 환율 적용 원화 환산 추가
+- 리프레시 버튼 스켈레톤/회전 아이콘 개선
+- 에러 재시도 버튼 & toast 연동
+
+React Query 캐싱 질문:
+- 동일 queryKey 로 다른 섹션에서 `usePresentBalance` 호출하면 캐시 공유 → 네트워크 재요청 없이 상태 동기화 가능 (staleTime 내)
+- 파라미터/activeAccountId/토큰이 바뀌면 key 변경되어 새 조회 수행
+
+업데이트 (즉시 조회 & UX 개선):
+- 계좌 토큰 발급(로그인) 직후 5분 주기 대기 없이 바로 현재 잔고를 조회하도록 `accounts-section.tsx` 에서 `account-token-issued` CustomEvent 를 디스패치하고, `AccountBalanceSection` 이 이를 수신해 즉시 `refetch()` 수행.
+- 새로고침 버튼 아이콘이 요청 중일 때 회전(`animate-spin`), 하단 상태 메시지에 `갱신 중...` 표시 추가.
+- `usePresentBalance` 훅은 `refetchOnMount: true`, `refetchOnReconnect: true` 로 초기 진입 시 즉시 1회 호출하도록 조정.
+- (추가 아이디어 반영) 토큰 로그인 후 첫 조회 실패 시에도 사용자가 바로 재시도 가능 (에러 메시지 유지 + 새로고침 버튼).
+
+확장 아이디어 구현 현황:
+- [x] 토큰 발급 직후 즉시 조회
+- [x] 수동 새로고침 시 로딩 회전 아이콘/상태 메시지
+- [ ] 금액 포맷팅(천단위, 통화기호)
+- [ ] 평가손익 색상(양수/음수) 강조
+- [ ] output2 다중 필드 토글 & 환산표시
+- [ ] 주문/체결 이벤트 후 캐시 무효화 유틸 (invalidatePresentBalanceCache) 활용 예시 문서화
+
+프로그래매틱 무효화:
+```ts
+// 주문 체결 후 등 비동기 사이드이펙트 지점에서 호출 가능
+import { invalidatePresentBalanceCache } from '@/hooks/usePresentBalance';
+invalidatePresentBalanceCache();
+```
+
 ### 계좌 암호화 문제 해결 (Secret not stored encrypted)
 
 계좌 추가 후 `/api/accounts/login` 호출 시 `Secret not stored encrypted` 오류가 발생한다면 암호화 키 설정 문제일 가능성이 높습니다.

@@ -159,6 +159,8 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
         fetched_at: Date.now(),
       });
       setActiveId(id);
+  // Dispatch custom event so dependent sections (e.g., AccountBalanceSection) can refetch immediately
+  window.dispatchEvent(new CustomEvent('account-token-issued', { detail: { accountId: id } }));
     } catch (e) {
       setActiveId(null);
       alert(e instanceof Error ? e.message : '로그인 실패');

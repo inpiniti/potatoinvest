@@ -7,6 +7,7 @@ import { NavUser } from '@/components/nav-user';
 import { NavAuthLoggedOut } from '@/components/nav-auth-logged-out';
 import { AccountsSection } from '@/components/accounts-section';
 import { TokenSection } from '@/components/token-section';
+import { AccountBalanceSection } from '@/components/account-balance-section';
 import { supabase } from '@/lib/supabaseClient';
 import {
   Sidebar,
@@ -42,12 +43,13 @@ const data = {
   ],
 };
 
-export function SidebarRight(
-  props: React.ComponentProps<typeof Sidebar>
-) {
-  const [auth, setAuth] = React.useState<{ loggedIn: boolean; user?: typeof data.user | { name?: string; email?: string; avatar?: string } }>(
-    { loggedIn: false }
-  );
+export function SidebarRight(props: React.ComponentProps<typeof Sidebar>) {
+  const [auth, setAuth] = React.useState<{
+    loggedIn: boolean;
+    user?:
+      | typeof data.user
+      | { name?: string; email?: string; avatar?: string };
+  }>({ loggedIn: false });
 
   // Listen to Supabase auth state changes (Kakao OAuth result)
   React.useEffect(() => {
@@ -119,8 +121,10 @@ export function SidebarRight(
         )}
       </SidebarHeader>
       <SidebarContent>
-  <AccountsSection disabled={!auth.loggedIn} />
-  <TokenSection />
+        <AccountsSection disabled={!auth.loggedIn} />
+        <TokenSection />
+        {/* Account balance summary (requires encrypted creds & params) */}
+        {auth.loggedIn && <AccountBalanceSection isVts={false} />}
         <div className="pt-2">
           <DatePicker />
         </div>
@@ -130,7 +134,10 @@ export function SidebarRight(
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton disabled={!auth.loggedIn} title={!auth.loggedIn ? '로그인 후 사용 가능' : undefined}>
+            <SidebarMenuButton
+              disabled={!auth.loggedIn}
+              title={!auth.loggedIn ? '로그인 후 사용 가능' : undefined}
+            >
               <Plus />
               <span>New Calendar</span>
             </SidebarMenuButton>
