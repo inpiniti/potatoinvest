@@ -811,4 +811,73 @@ const { data } = useQuery({
 
 ---
 
+### 계좌 설정 섹션 (Account Settings Section)
+
+우측 패널 계좌 잔고 요약 아래 개별 계좌별 전략 파라미터(보유종목수, 현금비중)를 슬라이더로 조정/저장하는 섹션을 추가했습니다.
+
+구현 파일:
+- `components/account-settings-section.tsx`
+- API 업데이트: `app/api/accounts/route.ts` (GET 응답 및 신규 기본값), 신규 `PATCH /api/accounts/settings` 라우트 (`app/api/accounts/settings/route.ts`)
+
+DB 스키마 추가 필드 (`brokerage_accounts` 테이블):
+- `max_positions integer` (NULL 가능, 기본 초기값 20) – 목표 최대 보유 종목 수 (1~50 사이)
+- `target_cash_ratio integer` (NULL 가능, 기본 초기값 10) – 목표 현금 비중 % (0~100 사이)
+
+초기값: 새 계좌 등록 시 `max_positions=20`, `target_cash_ratio=10` 으로 삽입.
+
+UI 동작:
+1. 활성 계좌 로그인 시 `/api/accounts` GET 재호출 → 해당 계좌 행에서 `max_positions`, `target_cash_ratio` 값을 로드
+2. 값 미존재(NULL) 시 기본 20 / 10 으로 표시
+3. 슬라이더 조작 → 우측 현재값 라벨 실시간 갱신 (보유종목수: `현재 / 50`, 현금비중: `현재% / 100%`)
+4. 변경 발생 시 "미저장" 배지 표시
+5. 저장 버튼 클릭 → `PATCH /api/accounts/settings` body `{ accountId, max_positions, target_cash_ratio }`
+6. 서버 검증 및 1~50 / 0~100 범위 클램프 후 업데이트. 성공 시 미저장 상태 해제
+
+API 계약:
+`PATCH /api/accounts/settings`
+Request JSON:
+```json
+{ "accountId": 123, "max_positions": 35, "target_cash_ratio": 25 }
+```
+Response (성공):
+```json
+{ "success": true, "settings": { "id": 123, "max_positions": 35, "target_cash_ratio": 25 } }
+```
+에러 코드:
+- 400: accountId 누락 / 업데이트 필드 없음 / 범위 벗어난 값(서버에서 자동 클램프 후 저장 또는 필드 미포함)
+- 401: 인증 실패
+- 500: 서버 내부 오류
+
+범위 규칙 (서버):
+- `max_positions`: floor → 1~50 로 클램프
+- `target_cash_ratio`: round → 0~100 로 클램프
+
+확장 아이디어:
+- 각 설정 변경시 실시간 리밸런싱 시뮬레이터 트리거
+- 계좌별 프리셋(보수/중립/공격) 버튼
+- 설정 변경 히스토리 로그 테이블
+- `target_cash_ratio` 편차 경고 배지 (실제 vs 목표)
+
+테이블 마이그레이션 예시(SQL):
+```sql
+alter table public.brokerage_accounts
+  add column if not exists max_positions integer,
+  add column if not exists target_cash_ratio integer;
+```
+기존 레코드 초기화(옵션):
+```sql
+update public.brokerage_accounts
+  set max_positions = coalesce(max_positions, 20),
+      target_cash_ratio = coalesce(target_cash_ratio, 10);
+```
+
+주의:
+- 새 필드 추가 후 서버 재배포 필요
+- RLS 정책이 `select/update` 모두 허용(소유자 행 한정)인지 확인. 기본 RLS 정책에 두 필드 자동 포함됨
+
+프론트엔드 캐싱:
+- 설정 저장 후 별도 전역 캐시 없음 (즉시 반영 위해 local state 유지). 다른 컴포넌트에서 필요 시 React Query 키 도입 고려
+
+---
+
 

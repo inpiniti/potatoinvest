@@ -32,12 +32,12 @@ export async function GET(req: NextRequest) {
     const admin = getAdmin();
     const { data, error } = await admin
       .from('brokerage_accounts')
-      .select('id, account_no, created_at, alias')
+      .select('id, account_no, created_at, alias, max_positions, target_cash_ratio')
       .eq('user_id', auth.user.id)
       .order('id', { ascending: false });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     // alias account_no -> account_number for UI
-    return NextResponse.json({ accounts: (data || []).map(r => ({ id: r.id, account_number: r.account_no, created_at: r.created_at, alias: r.alias })) });
+    return NextResponse.json({ accounts: (data || []).map(r => ({ id: r.id, account_number: r.account_no, created_at: r.created_at, alias: r.alias, max_positions: r.max_positions, target_cash_ratio: r.target_cash_ratio })) });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Server error';
     return NextResponse.json({ error: msg }, { status: 500 });
@@ -81,6 +81,9 @@ export async function POST(req: NextRequest) {
   secret_key_hash: secretHash,
   secret_key_enc: secretEnc,
         alias,
+    // initialize settings defaults
+    max_positions: 20,
+    target_cash_ratio: 10,
       })
       .select('id')
       .single();

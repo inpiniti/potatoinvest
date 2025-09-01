@@ -8,6 +8,7 @@ import { NavAuthLoggedOut } from '@/components/nav-auth-logged-out';
 import { AccountsSection } from '@/components/accounts-section';
 import { TokenSection } from '@/components/token-section';
 import { AccountBalanceSection } from '@/components/account-balance-section';
+import { AccountSettingsSection } from '@/components/account-settings-section';
 import { supabase } from '@/lib/supabaseClient';
 import {
   Sidebar,
@@ -124,7 +125,8 @@ export function SidebarRight(props: React.ComponentProps<typeof Sidebar>) {
         <AccountsSection disabled={!auth.loggedIn} />
         <TokenSection />
         {/* Account balance summary (requires encrypted creds & params) */}
-        {auth.loggedIn && <AccountBalanceSection isVts={false} />}
+  {auth.loggedIn && <AccountBalanceSection isVts={false} />}
+  {auth.loggedIn && <AccountSettingsSection />}
         <div className="pt-2">
           <DatePicker />
         </div>
