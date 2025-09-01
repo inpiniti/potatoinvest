@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Home, Sparkles, Inbox, Folder } from 'lucide-react';
+import { Home, Sparkles, Inbox, Folder, PieChart } from 'lucide-react';
 import { NavFavorites } from '@/components/nav-favorites';
 import { NavMain } from '@/components/nav-main';
 import { NavSecondary } from '@/components/nav-secondary';
@@ -30,6 +30,7 @@ const data = {
 
 const mainNav = [
   { title: 'Home', url: '/studio/home', icon: Home },
+  { title: '포트폴리오 시뮬레이션', url: '/studio/simulation', icon: PieChart },
   { title: 'Ask AI', url: '/studio/ask-ai', icon: Sparkles },
   { title: 'Inbox', url: '/studio/inbox', icon: Inbox },
   { title: 'Projects', url: '/studio/projects', icon: Folder },

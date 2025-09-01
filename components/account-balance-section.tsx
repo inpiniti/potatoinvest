@@ -51,6 +51,23 @@ export function AccountBalanceSection(p: Props) {
     ? data?.output3?.[0]
     : (data?.output3 as Output3Item | undefined);
 
+  // Broadcast total asset changes for simulation page (avoid duplicate API calls there)
+  React.useEffect(() => {
+    if (!activeAccountId) return;
+    if (output3?.tot_asst_amt) {
+      try {
+        window.dispatchEvent(
+          new CustomEvent('present-balance-updated', {
+            detail: {
+              accountId: activeAccountId,
+              tot_asst_amt: output3.tot_asst_amt,
+            },
+          })
+        );
+      } catch {}
+    }
+  }, [activeAccountId, output3?.tot_asst_amt]);
+
   const fmt = React.useCallback((v: string | number | undefined | null) => {
     if (v === undefined || v === null) return '-';
     const s = String(v).trim();

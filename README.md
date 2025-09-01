@@ -880,4 +880,65 @@ update public.brokerage_accounts
 
 ---
 
+### 포트폴리오 시뮬레이션 (Portfolio Simulation)
+
+경로: `/studio/simulation`
+
+목적: 계좌 전략 파라미터(보유종목수=Top N, 현금비중 %)를 실시간 조정하며 Dataroma 집계(`based_on_stock`) 기반 추천 포트폴리오를 즉각 시각화.
+
+구성:
+- 네비게이션: SidebarLeft `포트폴리오 시뮬레이션` 메뉴 추가
+- 페이지: `app/studio/simulation/page.tsx`
+- 소스 데이터: `GET /api/dataroma/base` (React Query 30분 캐시)
+- 이벤트 연동:
+  - `account-settings-changed` (설정 슬라이더 변경 / 서버 fetch 완료)
+  - `present-balance-updated` (계좌 요약이 output3 수신 시 총자산 브로드캐스트)
+
+알고리즘(클라이언트 계산):
+1. 상위 N 종목(slice 0..N) 취득
+2. 각 종목 `sum_ratio` 합산 → 투자 비중 (100 - 현금비중) 을 비례 배분
+3. 소수 둘째 반올림 후 총합 보정(diff) 첫 종목에 반영
+4. 현금비중 > 0 이면 CASH 행 추가 (금액 = USD 총자산 * 현금비중)
+
+총자산/환율:
+- `present-balance-updated` 로 전달된 `tot_asst_amt` (KRW)를 수신
+- `/api/exchangeRate` (usd-krw-rate 캐시) 로 USD 환산 → CASH 금액 계산
+- 설정 변경 시 presentBalance API 재호출 없이 기존 값 재사용
+
+차트:
+- Recharts Pie, 투자자 상세 페이지와 동일 팔레트 (`--chart-1`~`--chart-12`), CASH 는 `--chart-other`
+
+테이블 컬럼:
+- Code / Ratio(%) / Persons(person_count) / Cash(USD 추정, 없으면 '-')
+
+커스텀 이벤트 계약:
+```ts
+// 설정 변경
+dispatchEvent(new CustomEvent('account-settings-changed', { detail: { accountId, max_positions, target_cash_ratio, dirty, source } }))
+// 잔고 업데이트
+dispatchEvent(new CustomEvent('present-balance-updated', { detail: { accountId, tot_asst_amt } }))
+```
+
+확장 아이디어:
+- 서버 `/api/dataroma/recommended` 정식 엔드포인트 (동일 로직 + 검증)
+- avg_ratio 기반 모드 전환, 듀얼 비교
+- 백테스트 / 변동성 추정 및 효율적 프론티어 근사
+- CSV / 이미지 다운로드
+- N, 현금비중 프리셋 버튼 (10/20/30, 0/10/20%)
+
+주의:
+- Dataroma 데이터는 스냅샷이므로 최신화 스케줄 필요
+- USD 총자산은 단순 환산으로 실제 외화 구성 차이 반영 안 됨
+
+테스트 체크리스트:
+1. 계좌 로그인 후 Simulation 페이지에서 차트 로드
+2. 설정 슬라이더 이동 → Pie/표 즉시 업데이트
+3. 현금비중 0% → CASH 행 제거
+4. 보유종목수 감소 → 상위 N 종목만 남음
+5. 환율 요청 실패 시 CASH 금액 '-' 표시
+
+관련 파일: `account-settings-section.tsx`, `account-balance-section.tsx`, `app/studio/simulation/page.tsx`
+
+---
+
 
