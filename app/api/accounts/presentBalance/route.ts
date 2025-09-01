@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
           ACNT_PRDT_CD: body.ACNT_PRDT_CD || prdtDerived,
         };
       })(),
-      WCRC_FRCR_DVSN_CD: body.WCRC_FRCR_DVSN_CD || '01', // 01: 원화, 02: 외화 (caller may override)
+  WCRC_FRCR_DVSN_CD: body.WCRC_FRCR_DVSN_CD || '02', // 프로젝트 기준: 02=원화, 01=외화 (요청 사항에 따라 기본 02 고정)
       NATN_CD: normalizeNationCode(body.NATN_CD),
       TR_MKET_CD: body.TR_MKET_CD || '00',
       INQR_DVSN_CD: body.INQR_DVSN_CD || '00',

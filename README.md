@@ -679,6 +679,33 @@ React Query 캐싱 질문:
 - [ ] output2 다중 필드 토글 & 환산표시
 - [ ] 주문/체결 이벤트 후 캐시 무효화 유틸 (invalidatePresentBalanceCache) 활용 예시 문서화
 
+#### (UPDATED) KRW / USD 통화 탭 전환 (서버 고정 + 클라이언트 환산 하이브리드)
+
+요구 변경에 따라 present balance API 호출은 기본 파라미터 `WCRC_FRCR_DVSN_CD=02`(프로젝트 기준: 원화) 로 고정하고, 탭 전환 시 **서버 재조회 없이** USD 탭에서만 클라이언트 환율(`/api/exchangeRate`) 을 적용해 금액을 달러로 환산 표시하는 하이브리드 방식으로 수정했습니다.
+
+현재 동작:
+- 서버: 항상 02 로 조회 (일관된 KRW 기준 총계 확보)
+- 탭: KRW → 원본 그대로, USD → KRW 금액 ÷ usdToKrw (소수 둘째 반올림) 표시
+- React Query: 환율은 별도 키 `usd-krw-rate` 로 1시간 stale 캐시
+- Re-fetch 버튼: 잔고만 재조회 (환율은 그대로, 필요 시 새로고침 후 자동 만료되면 갱신)
+
+대상 필드 (환산 적용):
+`tot_asst_amt`, `tot_dncl_amt`, `evlu_amt_smtl`, `evlu_pfls_amt_smtl`, `wdrw_psbl_tot_amt`, `frcr_evlu_tota`, `ustl_buy_amt_smtl`
+
+장점:
+- 서버 파라미터 변동 없이 안정적 캐싱 (queryKey 간소화)
+- USD 표시 전환 즉시/무지연 (네트워크 왕복 없음)
+- 환율 API 장애 시 KRW 표시 영향 없음 (USD 탭만 '-')
+
+주의 / 한계:
+- 실제 KI API 가 USD 코드(01) 로 제공하는 외화기준 세부 값과 차이가 있을 수 있음 (환산 오차, 반올림). 필요 시 다시 서버 재조회 모드로 토글 가능하도록 옵션화 예정.
+- 서버 기본값 02 의미(원화 vs 외화)는 내부 규칙에 맞게 주석 유지; 외부 문서 공유 시 KI 공식 스펙 표기를 재확인 권장.
+
+향후 개선 아이디어:
+- 설정에서 "서버 USD 재조회" 모드 선택 → 탭 전환 시 params 변경 & refetch
+- 환율 timestamp / 갱신 버튼 표시
+- KRW↔USD 동시 2열 비교 레이아웃
+
 프로그래매틱 무효화:
 ```ts
 // 주문 체결 후 등 비동기 사이드이펙트 지점에서 호출 가능
