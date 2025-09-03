@@ -6,6 +6,7 @@ import { PieChart, Pie, LabelList } from 'recharts';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
+import Link from 'next/link';
 
 interface PortfolioItem { code: string; ratio: string }
 interface PersonDetail { name: string; totalValue: string | null; portfolio: PortfolioItem[] }
@@ -91,7 +92,11 @@ export default function PortfolioDetailPage() {
               <TableBody>
                 {data.portfolio.map(p => (
                   <TableRow key={p.code + p.ratio}>
-                    <TableCell className="font-medium">{p.code}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link href={`/studio/stock/${encodeURIComponent(String(p.code).toUpperCase())}`} className="text-primary">
+                        {p.code}
+                      </Link>
+                    </TableCell>
                     <TableCell>{p.ratio}</TableCell>
                   </TableRow>
                 ))}

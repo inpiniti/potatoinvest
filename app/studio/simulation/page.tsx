@@ -23,6 +23,7 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
+import Link from 'next/link';
 import { accountTokenStore } from '@/store/accountTokenStore';
 
 interface RecommendedItem {
@@ -317,7 +318,15 @@ export default function PortfolioSimulationPage() {
               <TableBody>
                 {recommended.map((r) => (
                   <TableRow key={r.stock}>
-                    <TableCell className="font-medium">{r.stock}</TableCell>
+                    <TableCell className="font-medium">
+                      {r.stock === 'CASH' ? (
+                        'CASH'
+                      ) : (
+                        <Link href={`/studio/stock/${encodeURIComponent(String(r.stock).toUpperCase())}`} className="text-primary">
+                          {r.stock}
+                        </Link>
+                      )}
+                    </TableCell>
                     <TableCell>{r.ratio}</TableCell>
                     <TableCell>{r.person_count}</TableCell>
                     <TableCell>

@@ -17,44 +17,53 @@ export async function GET(request: Request) {
     console.log("Query Parameter:", query);
 
     // Step 1: Get product code using the query
-    const screenerResponse = await fetch(
-      `${BASE_URL}/v3/search-all/wts-auto-complete`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query,
-          sections: [
-            { type: "SCREENER" },
-            { type: "NEWS" },
-            { type: "PRODUCT", option: { addIntegratedSearchResult: true } },
-            { type: "TICS" },
-          ],
-        }),
-      }
-    );
+    const screenerResponse = await fetch(`${BASE_URL}/v3/search-all/wts-auto-complete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query,
+        sections: [
+          { type: "SCREENER" },
+          { type: "NEWS" },
+          { type: "PRODUCT", option: { addIntegratedSearchResult: true } },
+          { type: "TICS" },
+        ],
+      }),
+    });
 
-    interface SearchSection {
-      type: string;
-      data?: {
-        items?: Array<{
-          productCode?: string;
-        }>;
-      };
+    if (!screenerResponse.ok) {
+      const bodyText = await screenerResponse.text().catch(() => "");
+      console.error("Screener API returned non-OK", screenerResponse.status, bodyText);
+      return NextResponse.json({ error: `Screener API returned ${screenerResponse.status}` }, { status: 502 });
     }
 
-    const screenerData = await screenerResponse.json();
-    console.log("Screener Data:", screenerData);
-    const productCode = screenerData?.result?.find(
-      (section: SearchSection) => section.type === "PRODUCT"
-    )?.data?.items?.[0]?.productCode;
-    console.log("Product Code:", productCode);
+    const screenerData = await screenerResponse.json().catch((e) => {
+      console.error("Failed to parse screener JSON", e);
+      return null;
+    });
+
+    // Try to find a productCode in several possible shapes
+    let productCode: string | undefined;
+    try {
+      if (Array.isArray(screenerData?.result)) {
+        // result is an array of sections
+        for (const section of screenerData.result) {
+          if (section?.type === 'PRODUCT' && section?.data?.items?.length) {
+            productCode = section.data.items[0]?.productCode;
+            if (productCode) break;
+          }
+        }
+      } else if (screenerData?.result?.data?.items?.length) {
+        // sometimes result is a single object with data.items
+        productCode = screenerData.result.data.items[0]?.productCode;
+      }
+    } catch (e) {
+      console.error('Error extracting productCode from screenerData', e, screenerData);
+    }
 
     if (!productCode) {
-      return NextResponse.json(
-        { error: "Product code not found for the given query" },
-        { status: 404 }
-      );
+      console.error('Product code not found in screenerData', screenerData);
+      return NextResponse.json({ error: 'Product code not found for the given query' }, { status: 404 });
     }
 
     // Step 2: Get community comments using the product code
@@ -68,8 +77,33 @@ export async function GET(request: Request) {
       }),
     });
 
-    const communityData = await communityResponse.json();
-    const comments = communityData?.result?.comments?.body || [];
+    if (!communityResponse.ok) {
+      const bodyText = await communityResponse.text().catch(() => "");
+      console.error('Community API returned non-OK', communityResponse.status, bodyText);
+      return NextResponse.json({ error: `Community API returned ${communityResponse.status}` }, { status: 502 });
+    }
+
+    const communityData = await communityResponse.json().catch((e) => {
+      console.error('Failed to parse community JSON', e);
+      return null;
+    });
+
+  // Normalize comments: support different shapes
+  type CommentShape = { user?: { displayName?: string; name?: string }; body?: string };
+  let comments: CommentShape[] = [];
+    try {
+      if (Array.isArray(communityData?.result?.comments)) {
+        comments = communityData.result.comments;
+      } else if (Array.isArray(communityData?.result?.comments?.body)) {
+        comments = communityData.result.comments.body;
+      } else if (Array.isArray(communityData?.comments)) {
+        comments = communityData.comments;
+      } else if (Array.isArray(communityData)) {
+        comments = communityData;
+      }
+    } catch (e) {
+      console.error('Error extracting comments', e, communityData);
+    }
 
     // Step 3: Get company code using the product code
     // const companyResponse = await fetch(

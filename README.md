@@ -785,6 +785,25 @@ Response 예시:
   - Based on Person: 컬럼 (No, Name, Total Value)
   - Based on Stock: 컬럼 (Stock, Person Count, Sum Ratio)
 
+### Stock detail page (studio/stock/[code])
+
+- Navigation: portfolio and simulation lists link to `/studio/stock/{CODE}` when a stock code is clicked.
+- Tabs: 투자자 리스트, 종목 차트, 종목 상세, 종목 분석, 종목 토론, 종목 뉴스 (shadcn Tabs).
+- Investor lookup logic:
+  - Primary: `based_on_person` is searched for portfolios containing the stock code (case-insensitive match of `code` or `pdno`).
+  - Fallback: if no persons are found, `based_on_stock` is checked and a summary (person_count, sum_ratio) is shown if available.
+  - Matching normalizes codes by trimming and uppercasing to avoid casing/whitespace mismatches.
+
+- News / Discussion:
+  - The client calls `/api/newsCommunity?query={CODE}`.
+  - The server route attempts to resolve a Toss Invest `productCode` via the auto-complete endpoint and then requests comments.
+  - The API route now handles non-200 responses and multiple response shapes; errors returned from the route include HTTP status to aid debugging.
+
+Troubleshooting tips:
+- If the investor list is empty: verify `/api/dataroma/base` returns `based_on_person` with `portfolio` entries; run `console.log` in the Studio home to inspect the cache.
+- If the news/discussion tab shows an error, check server logs for `Screener API returned` or `Community API returned` messages; these indicate upstream non-200 responses.
+- To add shadcn components used by the new page, run `npx shadcn@latest add tabs card badge` and follow the prompts.
+
 ### 3. 내부 스크래핑 로직
 
 - 파일: `dataroma_portfolio.js`
