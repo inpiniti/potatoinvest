@@ -1,6 +1,7 @@
 'use client';
 import * as React from 'react';
 import Link from 'next/link';
+import useDataromaBase from '@/hooks/useDataromaBase';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -10,12 +11,11 @@ type PortfolioEntry = { code?: string; pdno?: string };
 type Person = { name?: string; no?: number; portfolio?: PortfolioEntry[] };
 type Comment = { user?: { displayName?: string; name?: string }; body?: string };
 type StockSummary = { stock?: string; person_count?: number; sum_ratio?: string };
-type DataromaBase = { based_on_person?: Person[]; based_on_stock?: StockSummary[] };
 type NewsResp = { productCode?: string; comments?: Comment[] } | null;
 
 export default function StockPage({ params }: { params: { code: string } }) {
   const code = (params.code || '').toString().toUpperCase();
-  const { data: base } = useQuery<DataromaBase>({ queryKey: ['dataroma-base'], queryFn: async () => (await fetch('/api/dataroma/base')).json(), staleTime: Infinity });
+  const { data: base } = useDataromaBase();
   const { data: news } = useQuery<NewsResp>({ queryKey: ['newsCommunity', code], queryFn: async () => (await fetch(`/api/newsCommunity?query=${encodeURIComponent(code)}`)).json(), enabled: !!code });
 
   const normalizedCode = React.useMemo(() => (String(code || '').trim().toUpperCase()), [code]);

@@ -1,6 +1,7 @@
 'use client';
 import * as React from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
+import useDataromaBase from '@/hooks/useDataromaBase';
 import { PieChart, Pie, LabelList } from 'recharts';
 import {
   Card,
@@ -33,14 +34,6 @@ interface RecommendedItem {
   cash: number | null;
   avg_ratio?: string | null;
   sum_ratio?: string | null;
-}
-interface StockAgg {
-  stock: string;
-  person_count: number;
-  sum_ratio: string;
-}
-interface ApiData {
-  based_on_stock: StockAgg[];
 }
 
 function parseRatioNum(ratio: string) {
@@ -148,19 +141,7 @@ export default function PortfolioSimulationPage() {
   }, [totAsstKrw, usdKrw]);
 
   // Base + recommended fetch (serverless route to implement) fallback client composition for now using existing /api/dataroma/base then recompute client side weights
-  const {
-    data: baseData,
-    isLoading,
-    error,
-  } = useQuery<ApiData>({
-    queryKey: ['dataroma-sim-base'],
-    queryFn: async () => {
-      const res = await fetch('/api/dataroma/base');
-      if (!res.ok) throw new Error('base 로드 실패');
-      return res.json();
-    },
-    staleTime: 1000 * 60 * 30,
-  });
+  const { data: baseData, isLoading, error } = useDataromaBase();
 
   // Recompute recommended on the fly using baseData + settings
   const recommended: RecommendedItem[] = React.useMemo(() => {

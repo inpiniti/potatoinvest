@@ -1,25 +1,15 @@
 "use client";
-import { useQuery } from '@tanstack/react-query';
+import useDataromaBase from '@/hooks/useDataromaBase';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 
-interface PersonRow { no: number; name: string; totalValue?: string | null }
-interface StockRow { stock: string; person_count: number; sum_ratio: string }
+// data shapes are inferred at runtime from the dataroma base API
 
 export default function StudioHomePage() {
   const router = useRouter();
-  const { data, isLoading, error } = useQuery<{ based_on_person: PersonRow[]; based_on_stock: StockRow[] }>({
-    queryKey: ['dataroma-base'],
-    queryFn: async () => {
-      const res = await fetch('/api/dataroma/base');
-      if (!res.ok) throw new Error('데이터 로드 실패');
-      return res.json();
-    },
-    staleTime: Infinity,
-    gcTime: Infinity,
-  });
+  const { data, isLoading, error } = useDataromaBase();
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-4">
@@ -32,8 +22,8 @@ export default function StudioHomePage() {
       {data && (
         <Tabs defaultValue="person" className="w-full">
           <TabsList>
-            <TabsTrigger value="person">Based on Person ({data.based_on_person.length})</TabsTrigger>
-            <TabsTrigger value="stock">Based on Stock ({data.based_on_stock.length})</TabsTrigger>
+            <TabsTrigger value="person">Based on Person ({(data.based_on_person ?? []).length})</TabsTrigger>
+            <TabsTrigger value="stock">Based on Stock ({(data.based_on_stock ?? []).length})</TabsTrigger>
           </TabsList>
           <TabsContent value="person" className="mt-2">
             <div className="border rounded-md overflow-hidden">
@@ -46,17 +36,20 @@ export default function StudioHomePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.based_on_person.map((r) => (
+                  {(data.based_on_person ?? []).map((r: unknown) => {
+                    const row = r as { no: number; name: string; totalValue?: string | null };
+                    return (
                     <TableRow
-                      key={r.no}
+                      key={row.no}
                       className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => router.push(`/studio/portfolio/${encodeURIComponent(r.name)}`)}
+                      onClick={() => router.push(`/studio/portfolio/${encodeURIComponent(row.name)}`)}
                     >
-                      <TableCell>{r.no}</TableCell>
-                      <TableCell className="font-medium">{r.name}</TableCell>
-                      <TableCell>{r.totalValue || '-'}</TableCell>
+                      <TableCell>{row.no}</TableCell>
+                      <TableCell className="font-medium">{row.name}</TableCell>
+                      <TableCell>{row.totalValue || '-'}</TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -72,13 +65,16 @@ export default function StudioHomePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.based_on_stock.map((r) => (
-                    <TableRow key={r.stock}>
-                      <TableCell className="font-medium">{r.stock}</TableCell>
-                      <TableCell>{r.person_count}</TableCell>
-                      <TableCell>{r.sum_ratio}</TableCell>
-                    </TableRow>
-                  ))}
+                  {(data.based_on_stock ?? []).map((r: unknown) => {
+                    const row = r as { stock: string; person_count: number; sum_ratio: string };
+                    return (
+                      <TableRow key={row.stock}>
+                        <TableCell className="font-medium">{row.stock}</TableCell>
+                        <TableCell>{row.person_count}</TableCell>
+                        <TableCell>{row.sum_ratio}</TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

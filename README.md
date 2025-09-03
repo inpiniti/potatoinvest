@@ -756,23 +756,56 @@ Base64 키 생성 예시:
 Query Parameters (optional):
 - `lookup`: 특정 투자자 식별자/이름 일부로 필터링
 
-Response 예시:
+Response 예시 (2025-09 업데이트: person 포트폴리오/stock 투자자 상세 확장 + 서버 캐시):
 ```json
 {
   "based_on_person": [
-    { "no": 1, "name": "Warren Buffett", "totalValue": "$257,521,771,000" }
+    {
+      "no": 1,
+      "name": "Warren Buffett - Berkshire Hathaway",
+      "totalValue": "$257,521,771,000",
+      "totalValueNum": 257521771000,
+      "portfolio": [
+        { "code": "AAPL", "ratio": "22.31%" },
+        { "code": "AXP", "ratio": "8.45%" }
+      ]
+    }
   ],
   "based_on_stock": [
-    { "stock": "AAPL", "person_count": 34, "sum_ratio": "220.71%" }
-  ]
+    {
+      "stock": "AAPL",
+      "person": [
+        { "no": 15, "name": "Duan Yongping - H&H International Investment", "ratio": "62.47%" },
+        { "no": 1, "name": "Warren Buffett - Berkshire Hathaway", "ratio": "22.31%" }
+      ],
+      "person_count": 20,
+      "avg_ratio": "5.69%",
+      "sum_ratio": "113.77%"
+    }
+  ],
+  "meta": { "investors_count": 80, "generated_at": "2025-09-03T00:00:00.000Z" }
 }
 ```
-설명:
-- `based_on_person`: 투자자 목록 (내부 포트폴리오 상세는 제거, 필요한 메타만 노출)
-- `based_on_stock`: 종목별 보유 투자자 수 및 합산 비중 (sum_ratio), 평균 비중은 내부 계산 후 필요 시 확장 예정
+설명 (갱신 후):
+- `based_on_person`: 이제 각 투자자 별 `portfolio` 전체 보유 목록과 `totalValueNum` (숫자형) 포함
+- `portfolio[].ratio`: 소수 둘째 자리 고정 (% 기호 포함 문자열)
+- `based_on_stock[].person`: 각 종목을 보유한 투자자 리스트(비중 내림차순)
+- `person_count`, `avg_ratio`, `sum_ratio`: 각각 보유 투자자 수 / 평균 비중 / 합산 비중
 
-캐싱:
-- 서버는 현재 `no-store` 헤더 (항상 최신 스크래핑) – 추후 SSR/ISR 고려 가능
+서버 캐싱 (2025-09 신규):
+- 기본(lookup 없음) 호출은 서버 인메모리 30분 TTL 캐시 적용 → 동일 프로세스 내 반복 스크래핑 방지
+- `refresh=1` 쿼리 파라미터로 강제 재생성: `/api/dataroma/base?refresh=1`
+- `lookup` 파라미터 사용 시(부분 필터) 캐시 미사용 (항상 새로 계산)
+- 응답 헤더 `X-Cache: HIT|MISS` 로 캐시 여부 확인 가능
+
+클라이언트 캐싱:
+- `useDataromaBase` 훅: `staleTime: Infinity`, `gcTime: Infinity`, refetchOn* 비활성화 → SPA 세션 내 1회 네트워크
+- 강제 갱신: `queryClient.invalidateQueries(['dataroma-base'])` → 이후 훅 재사용 시 서버(캐시 또는 재생성) 호출
+
+변경 이유:
+1. 화면 이동 시 잦은 `/api/dataroma/base` 재호출 제거 (네트워크/스크래핑 부담 감소)
+2. 종목 상세와 시뮬레이션/포트폴리오 UI 에서 동일한 구조(투자자별 상세 + 종목별 보유자) 필요
+3. 서버/클라이언트 이중 캐시로 응답 지연 최소화 및 명시적 무효화 경로 제공
 
 ### 2. Studio Home 탭 UI
 
@@ -794,10 +827,14 @@ Response 예시:
   - Fallback: if no persons are found, `based_on_stock` is checked and a summary (person_count, sum_ratio) is shown if available.
   - Matching normalizes codes by trimming and uppercasing to avoid casing/whitespace mismatches.
 
-- News / Discussion:
-  - The client calls `/api/newsCommunity?query={CODE}`.
-  - The server route attempts to resolve a Toss Invest `productCode` via the auto-complete endpoint and then requests comments.
-  - The API route now handles non-200 responses and multiple response shapes; errors returned from the route include HTTP status to aid debugging.
+- News / Discussion (2025-09 개선):
+  - 호출: `/api/newsCommunity?query={CODE}`
+  - 다중 variant 검색: 원문, trim, 대문자, 공백제거, 특수문자 제거 문자열로 Screener API 순차 시도
+  - productCode 미탐색 시 subjectId 직접 시도: 원문 / 대문자 / 숫자만 추출 값으로 `/v3/comments` 호출
+  - 성공 시: `{ productCode, comments: [...] }`
+  - 실패 시: 404 `{ error: 'PRODUCT_CODE_NOT_FOUND', message, attempts: [{ query, status, resultTypes }] }`
+  - `debug=1` 추가 시 응답에 `_debug.attempts` 포함 (문제 재현/분석 용)
+  - 캐시 헤더: 10분 CDN (`s-maxage=600`) + stale-while-revalidate=60
 
 Troubleshooting tips:
 - If the investor list is empty: verify `/api/dataroma/base` returns `based_on_person` with `portfolio` entries; run `console.log` in the Studio home to inspect the cache.
@@ -827,6 +864,27 @@ const { data } = useQuery({
   staleTime: Infinity,
 });
 ```
+
+### Dataroma base 공유 캐시 (`useDataromaBase`)
+
+새로 추가된 `hooks/useDataromaBase.ts`는 클라이언트 전역에서 `dataroma-base` 데이터를 한 번만 호출하고, 같은 세션(브라우저 탭이 닫히거나 새로고침 되지 않은 동안)에서는 재사용합니다. (서버 위치에서 30분 TTL 인메모리 캐시로 2차 최적화)
+
+- 동작 방식:
+  - 내부적으로 React Query를 사용하며 `queryKey: ['dataroma-base']`와 `staleTime: Infinity` 로 설정되어 있습니다.
+  - 따라서 페이지 간 이동 중 같은 SPA 세션에서는 최초 호출 결과를 재사용하여 네트워크 호출을 방지합니다.
+  - 브라우저 새로고침 또는 탭/브라우저 종료 후 재접속 시에는 다시 로드됩니다 (메모리 캐시 특성).
+
+- 사용 방법 (컴포넌트):
+```tsx
+import useDataromaBase from '@/hooks/useDataromaBase';
+
+function MyComponent() {
+  const { data, isLoading, error } = useDataromaBase();
+  // data?.based_on_person, data?.based_on_stock 사용
+}
+```
+
+이 변경으로 `/api/dataroma/base` 가 화면 이동마다 중복 호출되는 문제를 해결했습니다. 만약 브라우저를 닫지 않고도 데이터 만료를 강제로 원하면(예: 새 스크래핑을 바로 반영해야 할 경우) `queryClient.invalidateQueries(['dataroma-base'])` 를 호출하여 재요청할 수 있습니다.
 
 ---
 
