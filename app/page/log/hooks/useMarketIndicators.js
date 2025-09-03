@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import useApi from "@/hooks/useApi";
 import useAccount from "@/hooks/useAccount";
 
@@ -42,7 +42,8 @@ const useMarketIndicators = () => {
   const [error, setError] = useState(null);
 
   // 모든 지표 데이터 새로고침
-  const refreshAllIndicators = async () => {
+  // Stable callback to satisfy exhaustive-deps lint rule
+  const refreshAllIndicators = useCallback(async () => {
     if (!CANO || !ACNT_PRDT_CD) return;
 
     setLoading(true);
@@ -136,13 +137,13 @@ const useMarketIndicators = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [CANO, ACNT_PRDT_CD, api, indicators]);
 
   // 컴포넌트 마운트 시 API 호출
   useEffect(() => {
-    // 초기 로드
+    // 초기 로드 (dependencies intentionally limited to stable callback)
     refreshAllIndicators();
-  }, [CANO, ACNT_PRDT_CD]);
+  }, [refreshAllIndicators]);
 
   return {
     indicators,

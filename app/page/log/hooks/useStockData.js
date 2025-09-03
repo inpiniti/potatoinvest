@@ -220,11 +220,9 @@ const useStockData = () => {
 
   // 컴포넌트 마운트 시 데이터 로드
   useEffect(() => {
-    const loadInitialData = async () => {
-      console.log("loadInitialData");
-      await fetch분석데이터();
-    };
-    loadInitialData();
+    // initial load
+    fetch분석데이터();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount; fetch분석데이터 internal deps manage logic
   }, []);
 
   useEffect(() => {
@@ -233,7 +231,7 @@ const useStockData = () => {
       fetch체결데이터();
       fetch구매데이터();
     }
-  }, [분석데이터]);
+  }, [분석데이터, fetch체결데이터, fetch구매데이터]);
 
   // 특정 데이터 타입의 로딩 상태 확인
   const isLoading = useCallback(

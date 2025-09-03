@@ -1,6 +1,7 @@
 'use client';
 import * as React from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import useDataromaBase from '@/hooks/useDataromaBase';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -13,8 +14,11 @@ type Comment = { user?: { displayName?: string; name?: string }; body?: string }
 type StockSummary = { stock?: string; person_count?: number; sum_ratio?: string };
 type NewsResp = { productCode?: string; comments?: Comment[] } | null;
 
-export default function StockPage({ params }: { params: { code: string } }) {
-  const code = (params.code || '').toString().toUpperCase();
+export default function StockPage() {
+  // In a Client Component under app/studio/stock/[code], Next.js does not inject params as props.
+  // Instead, use the useParams hook to access the dynamic segment.
+  const params = useParams<{ code?: string }>();
+  const code = (params?.code || '').toString().toUpperCase();
   const { data: base } = useDataromaBase();
   const { data: news } = useQuery<NewsResp>({ queryKey: ['newsCommunity', code], queryFn: async () => (await fetch(`/api/newsCommunity?query=${encodeURIComponent(code)}`)).json(), enabled: !!code });
 

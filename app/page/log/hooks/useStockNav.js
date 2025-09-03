@@ -16,7 +16,6 @@ const useStockNav = ({
   필터링된분석데이터,
   체결데이터,
   구매데이터,
-  refreshAnalysisData,
   autoPlay,
   autoBuy,
   autoSell,
@@ -56,15 +55,7 @@ const useStockNav = ({
       fetchStockDetail(stockCode, options);
       refreshIndicators();
     },
-    [
-      activeTabRef,
-      autoBuy,
-      autoSell,
-      buyStock,
-      sellStock,
-      체결데이터,
-      fetchStockDetail,
-    ]
+  [activeTabRef, autoBuy, autoSell, buyStock, sellStock, 체결데이터, fetchStockDetail, refreshIndicators]
   );
 
   // 탭별 데이터 가져오기 함수
@@ -184,14 +175,7 @@ const useStockNav = ({
         }, interval);
       }
     }
-  }, [
-    필터링된분석데이터,
-    setActiveTab,
-    refreshAnalysisData,
-    handleSelectStock,
-    getDataForTab,
-    getNextTab,
-  ]);
+  }, [필터링된분석데이터, setActiveTab, handleSelectStock, getDataForTab, getNextTab, autoPlay, fetch분석데이터, moveToNextStock]);
 
   // moveToNextStock 함수 - 객체 기반으로 수정
   const moveToNextStock = useCallback(async () => {
@@ -286,15 +270,7 @@ const useStockNav = ({
 
     // 다음 종목 선택
     if (currentData[nextIndex]) handleSelectStock(currentData[nextIndex]);
-  }, [
-    activeTab,
-    getDataForTab,
-    getNextTab,
-    handleSelectStock,
-    loadAnalysisAndSelectFirst,
-    selectedStock,
-    setActiveTab,
-  ]);
+  }, [activeTab, getDataForTab, getNextTab, handleSelectStock, loadAnalysisAndSelectFirst, selectedStock, setActiveTab]);
 
   // moveToPrevStock 함수도 유사하게 수정
   const moveToPrevStock = useCallback(() => {
@@ -370,14 +346,7 @@ const useStockNav = ({
 
     // 이전 종목 선택
     if (currentData[prevIndex]) handleSelectStock(currentData[prevIndex]);
-  }, [
-    activeTab,
-    getDataForTab,
-    getPrevTab,
-    handleSelectStock,
-    selectedStock,
-    setActiveTab,
-  ]);
+  }, [activeTab, getDataForTab, getPrevTab, handleSelectStock, selectedStock, setActiveTab]);
 
   // 자동 순환 효과
   useEffect(() => {
