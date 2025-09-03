@@ -942,3 +942,71 @@ dispatchEvent(new CustomEvent('present-balance-updated', { detail: { accountId, 
 ---
 
 
+### (NEW) 계좌 로그인 상태 지속 & Hydration Flash 제거
+
+문제: 페이지 이동(App Router 경로 전환) 직후 우측 사이드바 "계좌" 섹션이 이미 로그인된 계좌가 있음에도 잠시 동안
+"계좌 로그인이 되어야 ..." 경고 문구를 표시한 뒤 체크 아이콘으로 전환되는 시각적 플래시가 발생했습니다.
+
+원인:
+- `accountTokenStore` 가 비휘발(persist) 되지 않아 기본값(`activeAccountId=null`) 으로 초기 렌더 → 이후 로그인/토큰 설정.
+- 혹은 persist 적용 후에도 rehydrate 비동기 과정 전에 컴포넌트가 `activeAccountId` 를 0/ null 로 본 상태에서 경고 문구 렌더.
+
+해결:
+1. `accountTokenStore` 에 zustand `persist` 미들웨어 적용 (storage key: `account-token-store`).
+2. 스토어 상태에 `hasHydrated` 플래그 추가, `onRehydrateStorage` 콜백에서 `setHasHydrated()` 실행.
+3. 재수화 완료 시 글로벌 커스텀 이벤트 `account-token-hydrated` 디스패치 (선택적 의존 컴포넌트 확장 용도).
+4. `components/accounts-section.tsx` 에서 경고 문구 렌더 조건을 `hasHydrated && !activeAccountId` 로 변경 → 재수화 이전엔 경고 미표시.
+5. 기존 로컬 `activeId` 중복 상태 제거 → 단일 소스(스토어)로 활성 계좌 표시 일관성 확보.
+
+핵심 코드 요약:
+```ts
+// store/accountTokenStore.ts
+export const accountTokenStore = create<State>()(persist((set) => ({
+  activeAccountId: null,
+  tokens: {},
+  hasHydrated: false,
+  setToken: (t) => set((s) => ({ tokens: { ...s.tokens, [t.accountId]: t }, activeAccountId: t.accountId })),
+  setHasHydrated: () => set({ hasHydrated: true }),
+}), {
+  name: 'account-token-store',
+  partialize: (s) => ({ activeAccountId: s.activeAccountId, tokens: s.tokens }),
+  onRehydrateStorage: () => (state) => {
+    state?.setHasHydrated();
+    window.dispatchEvent(new CustomEvent('account-token-hydrated'));
+  },
+}));
+
+// components/accounts-section.tsx (발췌)
+const { activeAccountId, hasHydrated } = accountTokenStore();
+{hasHydrated && !activeAccountId && (
+  <p className="text-[10px] text-red-500 mb-1">계좌 로그인이 되어야 ...</p>
+)}
+```
+
+효과:
+- 라우트 전환 후 즉시 이전 활성 계좌 체크 아이콘 유지 (무플래시 UX).
+- 다중 탭/새 창에서도 동일 localStorage 기반 활성 상태 동기 (브라우저 기본 storage sync 규칙 적용).
+
+추가 고려(미구현):
+- 토큰 만료(`expires_in`) 자동 검사 및 만료 시 activeAccountId 해제 / 재발급 플로우.
+- 세션 분리(사용자 로그아웃 시 localStorage 계좌 토큰 폐기) → Supabase auth state 변화 훅 연동.
+- 이벤트 기반(`account-token-hydrated`) 으로 잔고 섹션 초기 즉시 refetch 트리거 (현재는 로그인 후 발급 이벤트 `account-token-issued` 중심).
+
+테스트 체크리스트:
+1. 계좌 로그인 후 다른 /studio/* 경로로 이동 → 경고 플래시 없음 확인.
+2. 새 탭 열기 → 즉시 활성 계좌 체크 표시 (재로그인 요구 없음).
+3. localStorage `account-token-store` 삭제 후 새로고침 → 경고 문구 정상 등장.
+4. 다중 계좌 로그인/전환 후 브라우저 재시작 → 마지막 active 계좌가 복원되는지 확인.
+
+관련 파일 변경:
+- `store/accountTokenStore.ts` : persist + hydration flag + 이벤트 디스패치 추가.
+- `components/accounts-section.tsx` : hasHydrated 활용, 로컬 activeId 상태 제거.
+
+확장 아이디어:
+- 토큰 만료 10분 전 배지/색상 경고.
+- Background refresh (silent renew) 후 `account-token-refreshed` 이벤트로 다른 패널(잔고/시뮬레이션) 자동 최신화.
+- 암호화된 IndexedDB(Storage) 전환 (고안된 threat model 필요 시).
+
+---
+
+

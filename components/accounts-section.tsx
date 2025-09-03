@@ -26,7 +26,7 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [accounts, setAccounts] = React.useState<AccountItem[]>([]);
-  const [activeId, setActiveId] = React.useState<number | null>(null);
+  const { activeAccountId, hasHydrated } = accountTokenStore();
   const [loggingInId, setLoggingInId] = React.useState<number | null>(null);
   const [fetching, setFetching] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -158,11 +158,11 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
         access_token_token_expired: json.access_token_token_expired,
         fetched_at: Date.now(),
       });
-      setActiveId(id);
+  // active account is set via store.setToken already
   // Dispatch custom event so dependent sections (e.g., AccountBalanceSection) can refetch immediately
   window.dispatchEvent(new CustomEvent('account-token-issued', { detail: { accountId: id } }));
     } catch (e) {
-      setActiveId(null);
+  // keep previous active id if login failed, do nothing
       alert(e instanceof Error ? e.message : '로그인 실패');
     } finally {
       setLoggingInId(null);
@@ -257,10 +257,9 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
         </Dialog>
       </div>
       <div className="max-h-40 overflow-auto px-2 pb-1">
-        {!activeId && (
+        {hasHydrated && !activeAccountId && (
           <p className="text-[10px] text-red-500 mb-1">
-            계좌 로그인이 되어야 계좌정보 조회가 가능합니다. 계좌 옆 로그인
-            버튼을 눌러주세요.
+            계좌 로그인이 되어야 계좌정보 조회가 가능합니다. 계좌 옆 로그인 버튼을 눌러주세요.
           </p>
         )}
         {fetching ? (
@@ -283,12 +282,12 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
                         onClick={() => handleLogin(a.id)}
                         disabled={loggingInId === a.id}
                         className="h-4 w-4 flex items-center justify-center rounded border text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
-                        title={activeId === a.id ? '로그인됨' : '로그인'}
-                        aria-label={activeId === a.id ? '로그인됨' : '로그인'}
+                        title={activeAccountId === a.id ? '로그인됨' : '로그인'}
+                        aria-label={activeAccountId === a.id ? '로그인됨' : '로그인'}
                       >
                         {loggingInId === a.id ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : activeId === a.id ? (
+                        ) : activeAccountId === a.id ? (
                           <Check className="h-3 w-3 text-green-500" />
                         ) : (
                           <LogIn className="h-3 w-3" />
