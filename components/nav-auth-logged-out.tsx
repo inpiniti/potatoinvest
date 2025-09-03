@@ -54,13 +54,15 @@ export function NavAuthLoggedOut({ onLogin }: NavAuthLoggedOutProps) {
   const handleKakao = async () => {
     setError(null);
     try {
+      // Allow override via environment variable (e.g. NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT)
+      // Fallback to /studio/home if not provided.
+      const envRedirect = process.env.NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT;
+      const base = typeof window !== 'undefined' ? window.location.origin : '';
+      const redirectUrl = envRedirect ? (envRedirect.startsWith('http') ? envRedirect : base + envRedirect) : base + '/studio/home';
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'kakao',
         options: {
-          redirectTo:
-            typeof window !== 'undefined'
-              ? window.location.origin + '/studio/home'
-              : undefined,
+          redirectTo: redirectUrl,
         },
       });
       if (oauthError) setError(oauthError.message);

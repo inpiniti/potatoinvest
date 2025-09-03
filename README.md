@@ -474,7 +474,7 @@ Supabase 설정 절차:
 
 동작 흐름:
 1. 사용자 `카카오로 로그인` 버튼 클릭
-2. `supabase.auth.signInWithOAuth({ provider: 'kakao', redirectTo: <origin>/studio/home })` 실행
+2. `supabase.auth.signInWithOAuth({ provider: 'kakao', redirectTo: <origin>/studio/home })` 실행 (이 기본 경로는 `NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT` 환경 변수로 재정의 가능)
 3. Kakao 인증 → Supabase callback → 세션 저장
 4. 복귀 후 `sidebar-right.tsx` 의 `getSession` & `onAuthStateChange` 로 세션 감지 → `NavUser` 렌더
 5. Log out 시 `supabase.auth.signOut()` → 상태 초기화
@@ -496,6 +496,17 @@ Supabase 설정 절차:
 - 환경 변수 설정 후 dev: `/studio` → 로그인 → Kakao → redirect → 사용자 표시
 - 새 탭 열어도 세션 유지 여부 확인
 - Log out 후 즉시 NavAuthLoggedOut 로 전환 확인
+- `NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT` 변경 후 dev 재시작 → 해당 경로로 이동 확인
+
+환경 변수(추가):
+```env
+# Kakao 로그인 성공 후 이동 (절대 URL 또는 / 로 시작). 미설정 시 /studio/home
+NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT=/studio/home
+```
+구현 세부:
+- `components/nav-auth-logged-out.tsx` 에서 `process.env.NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT` 값을 읽어 redirectTo 구성
+- 값이 `http` 로 시작하지 않으면 `window.location.origin + 값` 으로 절대 경로화
+- 미설정 또는 빈 문자열이면 기본 `/studio/home`
 
 HOTFIX 기록:
 - 초기 Kakao 버튼 통합 중 JSX 구조 손상 → `nav-auth-logged-out.tsx` 재작성 및 lint 통과
