@@ -97,9 +97,7 @@ interface StudioDataContextValue {
   hasHydrated: boolean;
   mutations: StudioMutations;
   // price detail cache & helpers
-  getPriceDetail: (
-    symb: string
-  ) => Promise<{
+  getPriceDetail: (symb: string) => Promise<{
     last: number;
     perx?: number;
     pbrx?: number;
@@ -157,6 +155,10 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
   };
   const priceCacheRef = useRef<
     Record<string, { t: number; v: PriceDetailLite }>
+  >({});
+  // Deduplicate concurrent fetches per canonical key
+  const priceInflightRef = useRef<
+    Record<string, Promise<PriceDetailLite | null> | undefined>
   >({});
   const openOrdersRef = useRef<{
     t: number;
@@ -289,36 +291,46 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       const accountId = activeAccountId;
       const token = accountId ? tokens[accountId]?.access_token : undefined;
       if (!accountId || !token) return null;
-      const key = String(symb).toUpperCase();
+      const keyRaw = String(symb).toUpperCase();
+      const key = keyRaw.replace(/[.,]/g, "/"); // canonicalize (BRK.B, BRK,B -> BRK/B)
       const now = Date.now();
       const cached = priceCacheRef.current[key];
       if (cached && now - cached.t < 15_000) {
         return cached.v;
       }
-      const currentSession = requireSession(session);
-      const res = await fetch("/api/accounts/priceDetail", {
-        method: "POST",
-        headers: buildHeaders(currentSession),
-        body: JSON.stringify({ accountId, kiAccessToken: token, symb: key }),
-      });
-      if (!res.ok) {
-        return null;
+      if (priceInflightRef.current[key]) {
+        return priceInflightRef.current[key];
       }
-      const json = await res.json();
-      if (json?.rt_cd !== "0" || !json?.output) return null;
-      const out = json.output;
-      const lastNum = Number(out?.last);
-      if (!isFinite(lastNum)) return null;
-      const value: PriceDetailLite = {
-        last: lastNum,
-        perx: out?.perx != null ? Number(out.perx) : undefined,
-        pbrx: out?.pbrx != null ? Number(out.pbrx) : undefined,
-        epsx: out?.epsx != null ? Number(out.epsx) : undefined,
-        bpsx: out?.bpsx != null ? Number(out.bpsx) : undefined,
-        excd_used: (json.excd_used as "NAS" | "NYS" | undefined) ?? undefined,
-      };
-      priceCacheRef.current[key] = { t: now, v: value };
-      return value;
+      const currentSession = requireSession(session);
+      const p = (async (): Promise<PriceDetailLite | null> => {
+        const res = await fetch("/api/accounts/priceDetail", {
+          method: "POST",
+          headers: buildHeaders(currentSession),
+          body: JSON.stringify({ accountId, kiAccessToken: token, symb: key }),
+        });
+        if (!res.ok) {
+          return null;
+        }
+        const json = await res.json();
+        if (json?.rt_cd !== "0" || !json?.output) return null;
+        const out = json.output;
+        const lastNum = Number(out?.last);
+        if (!isFinite(lastNum) || lastNum <= 0) return null;
+        const value: PriceDetailLite = {
+          last: lastNum,
+          perx: out?.perx != null ? Number(out.perx) : undefined,
+          pbrx: out?.pbrx != null ? Number(out.pbrx) : undefined,
+          epsx: out?.epsx != null ? Number(out.epsx) : undefined,
+          bpsx: out?.bpsx != null ? Number(out.bpsx) : undefined,
+          excd_used: (json.excd_used as "NAS" | "NYS" | undefined) ?? undefined,
+        };
+        priceCacheRef.current[key] = { t: now, v: value };
+        return value;
+      })().finally(() => {
+        delete priceInflightRef.current[key];
+      });
+      priceInflightRef.current[key] = p;
+      return p;
     },
     [activeAccountId, session, tokens]
   );
