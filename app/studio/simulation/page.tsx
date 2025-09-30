@@ -26,6 +26,7 @@ import Link from "next/link";
 import { useStudioData } from "@/hooks/useStudioData";
 import type { Output1Item } from "@/hooks/usePresentBalance";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface RecommendedItem {
   stock: string;
@@ -453,6 +454,94 @@ export default function PortfolioSimulationPage() {
                     })()}
                   </TableRow>
                 ))}
+                {(() => {
+                  // 추가: 시뮬레이션 목록에 포함되지 않은 보유 종목도 표에 표시
+                  // 비교용 표준화: KIS 형식(대문자 + . , -> /)으로 맞춰 중복 방지 (예: BRK.B vs BRK/B)
+                  const toKis = (c: string) =>
+                    c.toUpperCase().replace(/[.,]/g, "/");
+                  const recSet = new Set(
+                    recommended
+                      .filter((r) => r.stock !== "CASH")
+                      .map((r) => toKis(String(r.stock)))
+                  );
+                  const holdingOnlyCodes = Object.keys(holdingsMap)
+                    .filter((code) => !recSet.has(toKis(code)))
+                    .filter((code) => (holdingsMap[code] ?? 0) > 0)
+                    .sort(
+                      (a, b) => (holdingsMap[b] ?? 0) - (holdingsMap[a] ?? 0)
+                    );
+
+                  if (holdingOnlyCodes.length === 0) return null;
+                  return (
+                    <>
+                      <TableRow>
+                        <TableCell
+                          colSpan={12}
+                          className="bg-muted/40 text-xs text-muted-foreground"
+                        >
+                          내 보유 (시뮬레이션 외)
+                        </TableCell>
+                      </TableRow>
+                      {holdingOnlyCodes.map((code) => (
+                        <TableRow key={`hold-${code}`}>
+                          {/* Code */}
+                          <TableCell className="font-medium">
+                            <Link
+                              href={`/studio/stock/${encodeURIComponent(code)}`}
+                              className="text-primary"
+                            >
+                              {code}
+                            </Link>
+                          </TableCell>
+                          {/* Ratio */}
+                          <TableCell>-</TableCell>
+                          {/* Persons */}
+                          <TableCell>-</TableCell>
+                          {/* Cash */}
+                          <TableCell>-</TableCell>
+                          {/* 현재가격 */}
+                          <TableCell>
+                            <PriceCell
+                              code={code}
+                              ensurePrice={ensurePrice}
+                              priceRows={priceRows}
+                            />
+                          </TableCell>
+                          {/* 가능수량 */}
+                          <TableCell>-</TableCell>
+                          {/* 보유수량 */}
+                          <TableCell>{holdingsMap[code]}</TableCell>
+                          {/* 차이수량 */}
+                          <TableCell>-</TableCell>
+                          {/* 매매수량: 보유수량 그대로 */}
+                          <TableCell>{holdingsMap[code]}</TableCell>
+                          {/* 버튼 */}
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() =>
+                                toast("판매 주문 기능은 곧 제공됩니다.")
+                              }
+                            >
+                              판매
+                            </Button>
+                          </TableCell>
+                          {/* 체결중 */}
+                          <TableCell>
+                            {openOrdersMap[code] ? (
+                              <span className="text-amber-600">체결중</span>
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                          {/* 시장 */}
+                          <TableCell>{priceRows[code]?.excd ?? "-"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </>
+                  );
+                })()}
               </TableBody>
             </Table>
           </div>
