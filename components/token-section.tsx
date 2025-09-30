@@ -1,10 +1,10 @@
 'use client';
 import * as React from 'react';
 import { ShieldCheck, ShieldOff } from 'lucide-react';
-import { accountTokenStore } from '@/store/accountTokenStore';
+import { useStudioData } from '@/hooks/useStudioData';
 
 export function TokenSection() {
-  const { activeAccountId, tokens } = accountTokenStore();
+  const { activeAccountId, tokens } = useStudioData();
   const token = activeAccountId ? tokens[activeAccountId] : undefined;
 
   // derive remaining hours if expires_in is numeric

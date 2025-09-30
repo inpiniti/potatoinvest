@@ -1,8 +1,6 @@
 'use client';
 import * as React from 'react';
 import { Plus, LogIn, Check, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
-import { accountTokenStore } from '@/store/accountTokenStore';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -14,160 +12,104 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
+import { useStudioData } from '@/hooks/useStudioData';
 
 interface AccountItem {
   id: number;
   account_number: string;
   created_at?: string;
   alias?: string | null;
+  max_positions?: number | null;
+  target_cash_ratio?: number | null;
 }
 
 export function AccountsSection({ disabled }: { disabled?: boolean }) {
+  const {
+    session,
+    accounts,
+    accountsLoading,
+    accountsError,
+    activeAccountId,
+    hasHydrated,
+    mutations,
+  } = useStudioData();
   const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const [accounts, setAccounts] = React.useState<AccountItem[]>([]);
-  const { activeAccountId, hasHydrated } = accountTokenStore();
+  const [saving, setSaving] = React.useState(false);
   const [loggingInId, setLoggingInId] = React.useState<number | null>(null);
-  const [fetching, setFetching] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [formError, setFormError] = React.useState<string | null>(null);
   const accountRef = React.useRef<HTMLInputElement | null>(null);
   const keyRef = React.useRef<HTMLInputElement | null>(null);
   const secretRef = React.useRef<HTMLInputElement | null>(null);
   const aliasRef = React.useRef<HTMLInputElement | null>(null);
 
-  const loadAccounts = React.useCallback(async () => {
-    setFetching(true);
-    setError(null);
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) return;
-      const res = await fetch('/api/accounts', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-        cache: 'no-store',
-      });
-      if (!res.ok) throw new Error('계좌 조회 실패');
-      const json = await res.json();
-      setAccounts(json.accounts || []);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '알 수 없는 오류');
-    } finally {
-      setFetching(false);
-    }
+  const handleResetForm = React.useCallback(() => {
+    if (accountRef.current) accountRef.current.value = '';
+    if (keyRef.current) keyRef.current.value = '';
+    if (secretRef.current) secretRef.current.value = '';
+    if (aliasRef.current) aliasRef.current.value = '';
   }, []);
-
-  React.useEffect(() => {
-    if (!disabled) loadAccounts();
-  }, [disabled, loadAccounts]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading) return;
-    const account = accountRef.current?.value.trim();
+    if (saving) return;
+    const accountNumber = accountRef.current?.value.trim();
     const apiKey = keyRef.current?.value.trim();
     const apiSecret = secretRef.current?.value.trim();
     const alias = aliasRef.current?.value.trim();
-    if (!account || !apiKey || !apiSecret) {
-      setError('모든 필드를 입력하세요');
+    if (!accountNumber || !apiKey || !apiSecret) {
+      setFormError('모든 필드를 입력하세요');
       return;
     }
-    setLoading(true);
-    setError(null);
+    setSaving(true);
+    setFormError(null);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) throw new Error('세션 만료');
-      const res = await fetch('/api/accounts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          accountNumber: account,
-          apiKey,
-          apiSecret,
-          alias,
-        }),
+      await mutations.addAccount({
+        accountNumber,
+        apiKey,
+        apiSecret,
+        alias,
       });
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || '저장 실패');
-      }
+      handleResetForm();
       setOpen(false);
-      if (accountRef.current) accountRef.current.value = '';
-      if (keyRef.current) keyRef.current.value = '';
-      if (secretRef.current) secretRef.current.value = '';
-      if (aliasRef.current) aliasRef.current.value = '';
-      await loadAccounts();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '저장 중 오류');
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : '계좌 추가 중 오류'
+      );
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'))
+    if (
+      !window.confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')
+    ) {
       return;
+    }
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) throw new Error('세션 만료');
-      const res = await fetch('/api/accounts', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ id }),
-      });
-      if (!res.ok) throw new Error('삭제 실패');
-      await loadAccounts();
-    } catch (e) {
-      alert(e instanceof Error ? e.message : '삭제 중 오류');
+      await mutations.deleteAccount(id);
+    } catch (error) {
+      // 이미 토스트로 처리되지만, 필요시 콘솔 로깅 유지
+      console.error(error);
     }
   };
 
   const handleLogin = async (id: number) => {
+    if (disabled) return;
     setLoggingInId(id);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) throw new Error('세션 만료');
-      const res = await fetch('/api/accounts/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ id }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || '로그인 실패');
-      // store token
-      accountTokenStore.getState().setToken({
-        accountId: id,
-        access_token: json.access_token,
-        token_type: json.token_type,
-        expires_in: json.expires_in,
-        access_token_token_expired: json.access_token_token_expired,
-        fetched_at: Date.now(),
-      });
-  // active account is set via store.setToken already
-  // Dispatch custom event so dependent sections (e.g., AccountBalanceSection) can refetch immediately
-  window.dispatchEvent(new CustomEvent('account-token-issued', { detail: { accountId: id } }));
-    } catch (e) {
-  // keep previous active id if login failed, do nothing
-      alert(e instanceof Error ? e.message : '로그인 실패');
+      await mutations.loginAccount(id);
+    } catch (error) {
+      console.error(error);
     } finally {
-      setLoggingInId(null);
+      setLoggingInId((current) => (current === id ? null : current));
     }
   };
+
+  const accountsList: AccountItem[] = accounts;
+  const listEmpty = accountsList.length === 0;
+  const loading = accountsLoading;
+  const requestErrored = accountsError;
 
   return (
     <div className="mt-2 space-y-2 pb-2 border-b">
@@ -241,15 +183,15 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
                   type="password"
                 />
               </div>
-              {error && <p className="text-xs text-red-500">{error}</p>}
+              {formError && <p className="text-xs text-red-500">{formError}</p>}
               <DialogFooter className="gap-2 sm:justify-end">
                 <DialogClose asChild>
-                  <Button type="button" variant="outline" disabled={loading}>
+                  <Button type="button" variant="outline" disabled={saving}>
                     취소
                   </Button>
                 </DialogClose>
-                <Button type="submit" disabled={loading}>
-                  {loading ? '저장 중...' : '저장'}
+                <Button type="submit" disabled={saving}>
+                  {saving ? '저장 중...' : '저장'}
                 </Button>
               </DialogFooter>
             </form>
@@ -257,18 +199,35 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
         </Dialog>
       </div>
       <div className="max-h-40 overflow-auto px-2 pb-1">
-        {hasHydrated && !activeAccountId && (
-          <p className="text-[10px] text-red-500 mb-1">
-            계좌 로그인이 되어야 계좌정보 조회가 가능합니다. 계좌 옆 로그인 버튼을 눌러주세요.
+        {disabled && !session && (
+          <p className="text-[10px] text-muted-foreground">
+            로그인 후 계좌를 관리할 수 있습니다.
           </p>
         )}
-        {fetching ? (
+        {hasHydrated && !activeAccountId && !disabled && (
+          <p className="text-[10px] text-red-500 mb-1">
+            계좌 로그인이 되어야 계좌정보 조회가 가능합니다. 계좌 옆 로그인
+            버튼을 눌러주세요.
+          </p>
+        )}
+        {!!requestErrored && (
+          <p className="text-xs text-destructive">
+            {requestErrored instanceof Error
+              ? requestErrored.message
+              : '계좌 정보를 불러오지 못했습니다.'}
+          </p>
+        )}
+        {!session || disabled ? (
+          <p className="text-xs text-muted-foreground">
+            로그인 후 계좌 목록을 확인할 수 있습니다.
+          </p>
+        ) : loading ? (
           <p className="text-xs text-muted-foreground">불러오는 중...</p>
-        ) : accounts.length === 0 ? (
+        ) : listEmpty ? (
           <p className="text-xs text-muted-foreground">등록된 계좌 없음</p>
         ) : (
           <ul className="space-y-1">
-            {accounts.map((a) => {
+            {accountsList.map((a) => {
               const date = a.created_at ? new Date(a.created_at) : null;
               const dateStr = date ? date.toLocaleDateString() : '';
               return (
@@ -280,10 +239,12 @@ export function AccountsSection({ disabled }: { disabled?: boolean }) {
                     <div className="flex items-center gap-1 min-w-0">
                       <button
                         onClick={() => handleLogin(a.id)}
-                        disabled={loggingInId === a.id}
+                        disabled={disabled || loggingInId === a.id}
                         className="h-4 w-4 flex items-center justify-center rounded border text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
                         title={activeAccountId === a.id ? '로그인됨' : '로그인'}
-                        aria-label={activeAccountId === a.id ? '로그인됨' : '로그인'}
+                        aria-label={
+                          activeAccountId === a.id ? '로그인됨' : '로그인'
+                        }
                       >
                         {loggingInId === a.id ? (
                           <Loader2 className="h-3 w-3 animate-spin" />

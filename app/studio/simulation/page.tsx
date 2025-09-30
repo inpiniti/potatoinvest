@@ -1,7 +1,5 @@
 'use client';
 import * as React from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import useDataromaBase from '@/hooks/useDataromaBase';
 import { PieChart, Pie, LabelList } from 'recharts';
 import {
   Card,
@@ -25,7 +23,7 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import Link from 'next/link';
-import { accountTokenStore } from '@/store/accountTokenStore';
+import { useStudioData } from '@/hooks/useStudioData';
 
 interface RecommendedItem {
   stock: string;
@@ -42,7 +40,14 @@ function parseRatioNum(ratio: string) {
 }
 
 export default function PortfolioSimulationPage() {
-  const { activeAccountId } = accountTokenStore();
+  const {
+    activeAccountId,
+    exchangeRate,
+    presentBalance,
+    dataromaBasedOnStock,
+    dataromaLoading,
+    dataromaError,
+  } = useStudioData();
   const [settings, setSettings] = React.useState({
     max_positions: 20,
     target_cash_ratio: 10,
@@ -50,7 +55,6 @@ export default function PortfolioSimulationPage() {
   const [usdKrw, setUsdKrw] = React.useState<number | null>(null);
   const [totalAssetUsd, setTotalAssetUsd] = React.useState<number | null>(null);
   const [totAsstKrw, setTotAsstKrw] = React.useState<number | null>(null);
-  const queryClient = useQueryClient();
 
   // Listen to settings change events
   React.useEffect(() => {
@@ -68,17 +72,13 @@ export default function PortfolioSimulationPage() {
       window.removeEventListener('account-settings-changed', handler);
   }, [activeAccountId]);
 
-  // Fetch usd/krw rate (for future total asset conversion if needed)
   React.useEffect(() => {
-    fetch('/api/exchangeRate?from=USD&to=KRW')
-      .then((r) => r.json())
-      .then((j) => {
-        console.log('j', j);
-        console.log('j.usdToKrw', j.usdToKrw);
-        if (j && j.usdToKrw) setUsdKrw(j.usdToKrw);
-      })
-      .catch(() => {});
-  }, []);
+    if (typeof exchangeRate === 'number') {
+      setUsdKrw(exchangeRate);
+    } else {
+      setUsdKrw(null);
+    }
+  }, [exchangeRate]);
 
   // Listen to account balance broadcast instead of refetching API
   React.useEffect(() => {
@@ -98,41 +98,27 @@ export default function PortfolioSimulationPage() {
       window.removeEventListener('present-balance-updated', handleBalance);
   }, [activeAccountId]);
 
-  // Also attempt to read cached query (if already fetched) once on mount / account change
   React.useEffect(() => {
     if (!activeAccountId) {
       setTotAsstKrw(null);
       return;
     }
-    const tokens = accountTokenStore.getState().tokens;
-    const kiAccessToken = tokens[activeAccountId]?.access_token;
-    if (!kiAccessToken) return;
-    // We can't know the exact params object reference used in the key; search keys manually.
-    const queries = queryClient.getQueriesData({
-      queryKey: ['presentBalance', activeAccountId, kiAccessToken],
-    });
-    if (queries.length) {
-      const [, cache] = queries[0];
-      interface CachedPB {
-        output3?: { tot_asst_amt?: string } | Array<{ tot_asst_amt?: string }>;
-      }
-      const maybe = cache as CachedPB | undefined;
-      if (maybe && maybe.output3) {
-        const rawO3 = Array.isArray(maybe.output3)
-          ? maybe.output3[0]
-          : maybe.output3;
-        if (rawO3?.tot_asst_amt) {
-          const n = parseFloat(String(rawO3.tot_asst_amt).replace(/,/g, ''));
-          if (!isNaN(n)) setTotAsstKrw(n);
-        }
+    if (!presentBalance) return;
+    const output3Raw = presentBalance.output3;
+    const output3 = Array.isArray(output3Raw) ? output3Raw[0] : output3Raw;
+    const raw = output3?.tot_asst_amt;
+    if (raw) {
+      const n = parseFloat(String(raw).replace(/,/g, ''));
+      if (!isNaN(n)) {
+        setTotAsstKrw(n);
+        return;
       }
     }
-  }, [activeAccountId, queryClient]);
+    setTotAsstKrw(null);
+  }, [activeAccountId, presentBalance]);
 
   // Derive USD total when KRW + rate available
   React.useEffect(() => {
-    console.log('totAsstKrw', totAsstKrw);
-    console.log('usdKrw', usdKrw);
     if (totAsstKrw && usdKrw) {
       setTotalAssetUsd(parseFloat((totAsstKrw / usdKrw).toFixed(2)));
     } else {
@@ -140,16 +126,13 @@ export default function PortfolioSimulationPage() {
     }
   }, [totAsstKrw, usdKrw]);
 
-  // Base + recommended fetch (serverless route to implement) fallback client composition for now using existing /api/dataroma/base then recompute client side weights
-  const { data: baseData, isLoading, error } = useDataromaBase();
-
-  // Recompute recommended on the fly using baseData + settings
+  // Recompute recommended on the fly using dataroma dataset + settings
   const recommended: RecommendedItem[] = React.useMemo(() => {
-    if (!baseData) return [];
+    if (!dataromaBasedOnStock.length) return [];
     const top = settings.max_positions;
     const cashPercent = settings.target_cash_ratio;
     const investAlloc = 100 - cashPercent; // percent allocated to stocks
-    const stockArr = (baseData.based_on_stock || []) as Array<{
+    const stockArr = dataromaBasedOnStock as Array<{
       stock: string;
       person_count: number;
       sum_ratio: string;
@@ -173,7 +156,6 @@ export default function PortfolioSimulationPage() {
       provisional[0].allocPct += drift;
     }
     const totalUsd = totalAssetUsd; // may be null until populated
-    console.log('totalUsd', totalUsd);
     const items: RecommendedItem[] = provisional.map((p) => {
       const ratioStr = p.allocPct.toFixed(2) + '%';
       const cashAlloc = totalUsd
@@ -199,7 +181,7 @@ export default function PortfolioSimulationPage() {
       });
     }
     return items;
-  }, [baseData, settings, totalAssetUsd]);
+  }, [dataromaBasedOnStock, settings, totalAssetUsd]);
 
   const chartData = React.useMemo(() => {
     const palette = [
@@ -244,13 +226,17 @@ export default function PortfolioSimulationPage() {
           계좌 설정 (보유종목수 / 현금비중) 실시간 반영
         </p>
       </div>
-      {isLoading && (
+      {dataromaLoading && (
         <p className="text-sm text-muted-foreground">불러오는 중...</p>
       )}
-      {error && (
-        <p className="text-sm text-destructive">{(error as Error).message}</p>
+      {!!dataromaError && (
+        <p className="text-sm text-destructive">
+          {dataromaError instanceof Error
+            ? dataromaError.message
+            : '데이터를 불러오는 중 오류가 발생했습니다.'}
+        </p>
       )}
-      {recommended.length > 0 && (
+      {!dataromaLoading && !dataromaError && recommended.length > 0 && (
         <>
           <Card className="flex flex-col">
             <CardHeader className="items-center pb-0">
@@ -303,7 +289,12 @@ export default function PortfolioSimulationPage() {
                       {r.stock === 'CASH' ? (
                         'CASH'
                       ) : (
-                        <Link href={`/studio/stock/${encodeURIComponent(String(r.stock).toUpperCase())}`} className="text-primary">
+                        <Link
+                          href={`/studio/stock/${encodeURIComponent(
+                            String(r.stock).toUpperCase()
+                          )}`}
+                          className="text-primary"
+                        >
                           {r.stock}
                         </Link>
                       )}

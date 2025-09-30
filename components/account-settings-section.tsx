@@ -1,7 +1,6 @@
 'use client';
 import * as React from 'react';
-import { accountTokenStore } from '@/store/accountTokenStore';
-import { supabase } from '@/lib/supabaseClient';
+import { useStudioData } from '@/hooks/useStudioData';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 
@@ -12,108 +11,86 @@ interface AccountMetaSettings {
 }
 
 export function AccountSettingsSection() {
-  const { activeAccountId } = accountTokenStore();
-  const [loading, setLoading] = React.useState(false);
+  const {
+    activeAccountId,
+    accounts,
+    accountsLoading,
+    accountsError,
+    mutations,
+  } = useStudioData();
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [values, setValues] = React.useState<{
-    max_positions: number;
-    target_cash_ratio: number;
-  }>({ max_positions: 20, target_cash_ratio: 10 });
+  const [values, setValues] = React.useState({
+    max_positions: 20,
+    target_cash_ratio: 10,
+  });
   const [dirty, setDirty] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
 
-  // Centralized fetch function (discard local unsaved changes when reloading from server)
-  const fetchSettings = React.useCallback(
-    async (opts?: { silent?: boolean }) => {
-      if (!activeAccountId) return;
-      const silent = opts?.silent;
-      if (!silent) setLoading(true);
-      setError(null);
+  const activeAccount = React.useMemo<AccountMetaSettings | undefined>(() => {
+    if (!activeAccountId) return undefined;
+    return accounts.find((a) => a.id === activeAccountId);
+  }, [accounts, activeAccountId]);
+
+  const syncFromAccount = React.useCallback(
+    (source: 'fetch' | 'change') => {
+      if (!activeAccountId || !activeAccount) return;
+      const maxPositions =
+        typeof activeAccount.max_positions === 'number'
+          ? activeAccount.max_positions
+          : 20;
+      const targetCashRatio =
+        typeof activeAccount.target_cash_ratio === 'number'
+          ? activeAccount.target_cash_ratio
+          : 10;
+      setValues({
+        max_positions: maxPositions,
+        target_cash_ratio: targetCashRatio,
+      });
+      setDirty(false);
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (!session) throw new Error('세션 만료');
-        const res = await fetch('/api/accounts', {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-          cache: 'no-store',
-        });
-        if (!res.ok) throw new Error('계좌 조회 실패');
-        const json = await res.json();
-        const target: AccountMetaSettings | undefined = (
-          json.accounts || []
-        ).find((a: AccountMetaSettings) => a.id === activeAccountId);
-        if (target) {
-          setValues({
-            max_positions:
-              typeof target.max_positions === 'number'
-                ? target.max_positions
-                : 20,
-            target_cash_ratio:
-              typeof target.target_cash_ratio === 'number'
-                ? target.target_cash_ratio
-                : 10,
-          });
-          // Treat freshly loaded server values as saved state
-          setDirty(false);
-          try {
-            const mp =
-              typeof target.max_positions === 'number'
-                ? target.max_positions
-                : 20;
-            const tc =
-              typeof target.target_cash_ratio === 'number'
-                ? target.target_cash_ratio
-                : 10;
-            window.dispatchEvent(
-              new CustomEvent('account-settings-changed', {
-                detail: {
-                  accountId: activeAccountId,
-                  max_positions: mp,
-                  target_cash_ratio: tc,
-                  dirty: false,
-                  source: 'fetch',
-                },
-              })
-            );
-          } catch {}
-        }
-      } catch (e) {
-        setError(e instanceof Error ? e.message : '불러오기 오류');
-      } finally {
-        if (!silent) setLoading(false);
-      }
+        window.dispatchEvent(
+          new CustomEvent('account-settings-changed', {
+            detail: {
+              accountId: activeAccountId,
+              max_positions: maxPositions,
+              target_cash_ratio: targetCashRatio,
+              dirty: false,
+              source,
+            },
+          })
+        );
+      } catch {}
     },
-    [activeAccountId]
+    [activeAccountId, activeAccount]
   );
 
-  // Initial load & when active account changes
   React.useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
+    syncFromAccount('fetch');
+  }, [syncFromAccount]);
 
-  // Listen for account-token-issued to refresh settings even if same account re-logged
   React.useEffect(() => {
     function handleTokenIssued(ev: Event) {
       const detail = (ev as CustomEvent).detail;
-      if (!detail) return;
-      if (detail.accountId === activeAccountId) {
-        // Force refresh (silent to avoid flicker) and clear dirty
-        fetchSettings({ silent: true });
+      if (detail?.accountId === activeAccountId) {
+        setRefreshing(true);
+        mutations
+          .refreshAccounts()
+          .catch((err) => console.error(err))
+          .finally(() => setRefreshing(false));
       }
     }
     window.addEventListener('account-token-issued', handleTokenIssued);
     return () =>
       window.removeEventListener('account-token-issued', handleTokenIssued);
-  }, [activeAccountId, fetchSettings]);
+  }, [activeAccountId, mutations]);
 
   const updateField = (
     key: 'max_positions' | 'target_cash_ratio',
     val: number
   ) => {
-    setValues((v) => {
-      const next = { ...v, [key]: val };
-      // fire event for live simulation updates
+    setValues((prev) => {
+      const next = { ...prev, [key]: val };
       try {
         window.dispatchEvent(
           new CustomEvent('account-settings-changed', {
@@ -133,36 +110,49 @@ export function AccountSettingsSection() {
     setDirty(true);
   };
 
+  const handleRefresh = async () => {
+    if (!activeAccountId) return;
+    setRefreshing(true);
+    setError(null);
+    try {
+      await mutations.refreshAccounts();
+      syncFromAccount('fetch');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : '설정을 불러오지 못했습니다.'
+      );
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!activeAccountId) return;
     setSaving(true);
     setError(null);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) throw new Error('세션 만료');
-      const res = await fetch('/api/accounts/settings', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          accountId: activeAccountId,
-          max_positions: values.max_positions,
-          target_cash_ratio: values.target_cash_ratio,
-        }),
+      await mutations.updateAccountSettings({
+        accountId: activeAccountId,
+        max_positions: values.max_positions,
+        target_cash_ratio: values.target_cash_ratio,
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || '저장 실패');
       setDirty(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '저장 오류');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : '설정을 저장하지 못했습니다.'
+      );
     } finally {
       setSaving(false);
     }
   };
+
+  const showLoading = accountsLoading || refreshing;
+  const accountsLoadError =
+    accountsError instanceof Error
+      ? accountsError.message
+      : accountsError
+      ? '계좌 정보를 불러오는 중 오류가 발생했습니다.'
+      : null;
 
   return (
     <div className="mt-2 space-y-2 pb-2 border-b">
@@ -176,11 +166,15 @@ export function AccountSettingsSection() {
         {!activeAccountId && (
           <p className="text-[10px] text-muted-foreground">계좌 로그인 필요</p>
         )}
-        {activeAccountId && loading && (
+        {activeAccountId && showLoading && (
           <p className="text-[10px] text-muted-foreground">불러오는 중...</p>
         )}
-        {error && <p className="text-[10px] text-red-500">{error}</p>}
-        {activeAccountId && !loading && (
+        {(accountsLoadError || error) && (
+          <p className="text-[10px] text-red-500">
+            {error || accountsLoadError}
+          </p>
+        )}
+        {activeAccountId && !showLoading && !accountsLoadError && (
           <>
             <div>
               <div className="flex items-center justify-between text-[10px] mb-1">
@@ -216,7 +210,16 @@ export function AccountSettingsSection() {
                 disabled={saving}
               />
             </div>
-            <div className="flex justify-end pt-1">
+            <div className="flex justify-between pt-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-[10px]"
+                onClick={handleRefresh}
+                disabled={saving || refreshing}
+              >
+                새로고침
+              </Button>
               <Button
                 variant="outline"
                 disabled={!dirty || saving}

@@ -9,7 +9,7 @@ import { AccountsSection } from '@/components/accounts-section';
 import { TokenSection } from '@/components/token-section';
 import { AccountBalanceSection } from '@/components/account-balance-section';
 import { AccountSettingsSection } from '@/components/account-settings-section';
-import { supabase } from '@/lib/supabaseClient';
+import { useStudioData } from '@/hooks/useStudioData';
 import {
   Sidebar,
   SidebarContent,
@@ -45,51 +45,17 @@ const data = {
 };
 
 export function SidebarRight(props: React.ComponentProps<typeof Sidebar>) {
-  const [auth, setAuth] = React.useState<{
-    loggedIn: boolean;
-    user?:
-      | typeof data.user
-      | { name?: string; email?: string; avatar?: string };
-  }>({ loggedIn: false });
+  const { user, session, loadingSession, mutations } = useStudioData();
+  const loggedIn = Boolean(session);
 
-  // Listen to Supabase auth state changes (Kakao OAuth result)
-  React.useEffect(() => {
-    let isMounted = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!isMounted) return;
-      if (data.session) {
-        const user = data.session.user;
-        setAuth({
-          loggedIn: true,
-          user: {
-            name: user.user_metadata?.name || user.email || 'User',
-            email: user.email || '',
-            avatar: user.user_metadata?.avatar_url || '/avatars/shadcn.jpg',
-          },
-        });
-      }
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!isMounted) return;
-      if (session) {
-        const user = session.user;
-        setAuth({
-          loggedIn: true,
-          user: {
-            name: user.user_metadata?.name || user.email || 'User',
-            email: user.email || '',
-            avatar: user.user_metadata?.avatar_url || '/avatars/shadcn.jpg',
-          },
-        });
-      } else {
-        setAuth({ loggedIn: false });
-      }
-    });
-    return () => {
-      isMounted = false;
-      sub.subscription.unsubscribe();
+  const displayUser = React.useMemo(() => {
+    if (!user) return null;
+    return {
+      name: user.user_metadata?.name || user.email || data.user.name,
+      email: user.email || data.user.email,
+      avatar: user.user_metadata?.avatar_url || data.user.avatar,
     };
-  }, []);
+  }, [user]);
 
   return (
     <Sidebar
@@ -98,35 +64,22 @@ export function SidebarRight(props: React.ComponentProps<typeof Sidebar>) {
       {...props}
     >
       <SidebarHeader className="border-sidebar-border h-16 border-b">
-        {auth.loggedIn && auth.user ? (
+        {loggedIn && displayUser ? (
           <NavUser
-            user={{
-              name: auth.user.name || 'User',
-              email: auth.user.email || '',
-              avatar: auth.user.avatar || '/avatars/shadcn.jpg',
-            }}
+            user={displayUser}
             onLogout={async () => {
-              await supabase.auth.signOut();
-              setAuth({ loggedIn: false });
+              await mutations.logout();
             }}
           />
         ) : (
-          <NavAuthLoggedOut
-            onLogin={async ({ id, password }) => {
-              // Placeholder: manual email login disabled; keep for future.
-              if (id && password) {
-                setAuth({ loggedIn: true, user: data.user });
-              }
-            }}
-          />
+          <NavAuthLoggedOut loading={loadingSession} />
         )}
       </SidebarHeader>
       <SidebarContent>
-        <AccountsSection disabled={!auth.loggedIn} />
+        <AccountsSection disabled={!loggedIn} />
         <TokenSection />
-        {/* Account balance summary (requires encrypted creds & params) */}
-  {auth.loggedIn && <AccountBalanceSection isVts={false} />}
-  {auth.loggedIn && <AccountSettingsSection />}
+        {loggedIn && <AccountBalanceSection isVts={false} />}
+        {loggedIn && <AccountSettingsSection />}
         <div className="pt-2">
           <DatePicker />
         </div>
@@ -137,8 +90,8 @@ export function SidebarRight(props: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              disabled={!auth.loggedIn}
-              title={!auth.loggedIn ? '로그인 후 사용 가능' : undefined}
+              disabled={!loggedIn}
+              title={!loggedIn ? '로그인 후 사용 가능' : undefined}
             >
               <Plus />
               <span>New Calendar</span>

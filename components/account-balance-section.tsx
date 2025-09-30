@@ -1,57 +1,57 @@
 'use client';
 import * as React from 'react';
-import {
-  usePresentBalance,
-  Output1Item,
-  Output2Item,
-  Output3Item,
-} from '@/hooks/usePresentBalance';
-import { accountTokenStore } from '@/store/accountTokenStore';
 import { RefreshCcw } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useQuery } from '@tanstack/react-query';
+import { useStudioData } from '@/hooks/useStudioData';
 
 interface Props {
   isVts?: boolean;
 }
 
-export function AccountBalanceSection(p: Props) {
-  const { activeAccountId } = accountTokenStore();
-  // Currency tab (KRW base from server; USD is client-side converted)
+type OutputEntry = Record<string, unknown>;
+
+type PresentBalanceSummary = Record<string, string | undefined>;
+
+export function AccountBalanceSection({ isVts }: Props) {
+  const {
+    activeAccountId,
+    presentBalance,
+    presentBalanceLoading,
+    presentBalanceFetching,
+    presentBalanceError,
+    setPresentBalanceOptions,
+    exchangeRate,
+    mutations,
+  } = useStudioData();
   const [ccy, setCcy] = React.useState<'KRW' | 'USD'>('KRW');
-  const params = activeAccountId
-    ? {
-        accountId: activeAccountId,
-        kiAccessToken:
-          accountTokenStore.getState().tokens[activeAccountId]?.access_token,
-        isVts: p.isVts,
-        // Always request base in 02 (KRW) per updated spec; USD tab performs derived conversion
-        WCRC_FRCR_DVSN_CD: '02',
-      }
-    : null;
-  const { data, isLoading, error, refetch, isFetching } = usePresentBalance(
-    params
-  );
 
-  // When token just issued (custom event from AccountsSection), trigger immediate refetch ignoring stale
   React.useEffect(() => {
-    function handleImmediate() {
-      if (activeAccountId) {
-        refetch({ cancelRefetch: false });
+    setPresentBalanceOptions((prev) => {
+      const prevOptions = prev as typeof prev & { isVts?: boolean };
+      if (typeof isVts === 'boolean') {
+        if (prevOptions.isVts === isVts) return prev;
+        return { ...prev, isVts };
       }
-    }
-    window.addEventListener('account-token-issued', handleImmediate);
-    return () =>
-      window.removeEventListener('account-token-issued', handleImmediate);
-  }, [activeAccountId, refetch]);
+      if (typeof prevOptions.isVts !== 'undefined') {
+        const rest = { ...prevOptions } as typeof prevOptions;
+        delete rest.isVts;
+        return rest;
+      }
+      return prev;
+    });
+  }, [isVts, setPresentBalanceOptions]);
 
-  const output1: Output1Item[] = data?.output1 || [];
-  const output2: Output2Item[] = data?.output2 || [];
-  const output3: Output3Item | undefined = Array.isArray(data?.output3)
-    ? data?.output3?.[0]
-    : (data?.output3 as Output3Item | undefined);
+  const output1 = Array.isArray(presentBalance?.output1)
+    ? (presentBalance?.output1 as OutputEntry[])
+    : [];
+  const output2 = Array.isArray(presentBalance?.output2)
+    ? (presentBalance?.output2 as OutputEntry[])
+    : [];
+  const output3Raw = presentBalance?.output3;
+  const output3: PresentBalanceSummary | undefined = Array.isArray(output3Raw)
+    ? (output3Raw[0] as PresentBalanceSummary | undefined)
+    : (output3Raw as PresentBalanceSummary | undefined);
 
-  // Broadcast total asset changes for simulation page (avoid duplicate API calls there)
   React.useEffect(() => {
     if (!activeAccountId) return;
     if (output3?.tot_asst_amt) {
@@ -68,9 +68,24 @@ export function AccountBalanceSection(p: Props) {
     }
   }, [activeAccountId, output3?.tot_asst_amt]);
 
-  const fmt = React.useCallback((v: string | number | undefined | null) => {
-    if (v === undefined || v === null) return '-';
-    const s = String(v).trim();
+  React.useEffect(() => {
+    function handleImmediate(ev: Event) {
+      const detail = (ev as CustomEvent).detail;
+      if (!detail?.accountId) return;
+      if (detail.accountId === activeAccountId) {
+        mutations.refreshPresentBalance().catch((error) => {
+          console.error('잔고 새로고침 실패', error);
+        });
+      }
+    }
+    window.addEventListener('account-token-issued', handleImmediate);
+    return () =>
+      window.removeEventListener('account-token-issued', handleImmediate);
+  }, [activeAccountId, mutations]);
+
+  const fmt = React.useCallback((value: string | number | undefined | null) => {
+    if (value === undefined || value === null) return '-';
+    const s = String(value).trim();
     if (s === '') return '-';
     if (!/^-?\d+(\.\d+)?$/.test(s)) return s;
     const [intPart, decPart] = s.split('.');
@@ -81,39 +96,20 @@ export function AccountBalanceSection(p: Props) {
   const plColor = (val?: string) => {
     if (!val) return '';
     const n = Number(val);
-    if (isNaN(n) || n === 0) return '';
+    if (Number.isNaN(n) || n === 0) return '';
     return n > 0
       ? 'text-green-600 dark:text-green-500'
       : 'text-red-600 dark:text-red-400';
   };
 
-  // Format percentage (평가수익률) to 2 decimal places with rounding
   const fmtPercent2 = (raw?: string) => {
     if (!raw) return '-';
     const n = Number(raw);
-    if (isNaN(n)) return raw;
+    if (Number.isNaN(n)) return raw;
     return n.toFixed(2);
   };
 
-  // Exchange rate fetch for USD conversion (usdToKrw)
-  const { data: rateData } = useQuery<{ usdToKrw: number } | { error: string }>({
-    queryKey: ['usd-krw-rate'],
-    queryFn: async () => {
-      const res = await fetch('/api/exchangeRate');
-      return res.json();
-    },
-    staleTime: 60 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
-  function hasUsdToKrw(v: unknown): v is { usdToKrw: number } {
-    return (
-      typeof v === 'object' &&
-      v !== null &&
-      'usdToKrw' in v &&
-      typeof (v as { usdToKrw: unknown }).usdToKrw === 'number'
-    );
-  }
-  const usdToKrw = hasUsdToKrw(rateData) ? rateData.usdToKrw : undefined;
+  const usdToKrw = typeof exchangeRate === 'number' ? exchangeRate : undefined;
 
   const convertIfNeeded = (raw?: string) => {
     if (!raw) return '-';
@@ -121,8 +117,24 @@ export function AccountBalanceSection(p: Props) {
     if (!usdToKrw) return '-';
     if (!/^\-?\d+(\.\d+)?$/.test(raw)) return '-';
     const val = Number(raw) / usdToKrw;
-    return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return val.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   };
+
+  const refresh = React.useCallback(() => {
+    return mutations.refreshPresentBalance().catch((error) => {
+      console.error(error);
+    });
+  }, [mutations]);
+
+  const errorMessage =
+    presentBalanceError instanceof Error
+      ? presentBalanceError.message
+      : presentBalanceError
+      ? '잔고 정보를 불러오는 중 오류가 발생했습니다.'
+      : null;
 
   return (
     <div className="mt-2 space-y-2 pb-2 border-b">
@@ -133,31 +145,38 @@ export function AccountBalanceSection(p: Props) {
           </h4>
           <Tabs
             value={ccy}
-            onValueChange={(v) => setCcy(v as 'KRW' | 'USD')}
+            onValueChange={(value) => setCcy(value as 'KRW' | 'USD')}
             className="h-5"
           >
             <TabsList className="h-5 p-[2px] rounded-md bg-transparent border text-[9px]">
               <TabsTrigger value="KRW" className="px-1 py-0 h-4 text-[9px]">
                 원화
               </TabsTrigger>
-              <TabsTrigger value="USD" className="px-1 py-0 h-4 text-[9px]">달러</TabsTrigger>
+              <TabsTrigger value="USD" className="px-1 py-0 h-4 text-[9px]">
+                달러
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
         <div className="flex items-center gap-1">
           {ccy === 'USD' && (
-            <span className="text-[8px] text-muted-foreground" title="USD→KRW 환율">
+            <span
+              className="text-[8px] text-muted-foreground"
+              title="USD→KRW 환율"
+            >
               {usdToKrw ? `₩${usdToKrw.toLocaleString()}` : '환율...'}
             </span>
           )}
           <button
-            onClick={() => refetch()}
-            disabled={!activeAccountId || isFetching}
+            onClick={() => refresh()}
+            disabled={!activeAccountId || presentBalanceFetching}
             className="h-5 w-5 inline-flex items-center justify-center rounded border text-muted-foreground hover:text-foreground hover:border-foreground disabled:opacity-40"
             title="새로고침"
           >
             <RefreshCcw
-              className={'h-3 w-3 ' + (isFetching ? 'animate-spin' : '')}
+              className={`h-3 w-3 ${
+                presentBalanceFetching ? 'animate-spin' : ''
+              }`}
             />
           </button>
         </div>
@@ -168,35 +187,64 @@ export function AccountBalanceSection(p: Props) {
             활성 계좌 로그인 후 조회 가능
           </p>
         )}
-        {activeAccountId && isLoading && (
+        {activeAccountId && presentBalanceLoading && (
           <p className="text-[10px] text-muted-foreground">불러오는 중...</p>
         )}
-        {activeAccountId && !isLoading && isFetching && (
-          <p className="text-[10px] text-muted-foreground">갱신 중...</p>
+        {activeAccountId &&
+          !presentBalanceLoading &&
+          presentBalanceFetching && (
+            <p className="text-[10px] text-muted-foreground">갱신 중...</p>
+          )}
+        {activeAccountId && errorMessage && (
+          <p className="text-[10px] text-destructive">{errorMessage}</p>
         )}
-        {activeAccountId && error && (
-          <p className="text-[10px] text-destructive">
-            {(error as Error).message}
-          </p>
-        )}
-        {activeAccountId && !isLoading && !error && (
+        {activeAccountId && !presentBalanceLoading && !errorMessage && (
           <>
             {output3 && (
               <div className="rounded-md border bg-surface-inset p-2">
                 <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px] leading-tight">
-                  <LabelValue label="총자산" value={convertIfNeeded(output3.tot_asst_amt)} unit={ccy === 'KRW' ? '원' : 'USD'} />
-                  <LabelValue label="총예수금" value={convertIfNeeded(output3.tot_dncl_amt)} unit={ccy === 'KRW' ? '원' : 'USD'} />
-                  <LabelValue label="평가금액" value={convertIfNeeded(output3.evlu_amt_smtl)} unit={ccy === 'KRW' ? '원' : 'USD'} />
-                  <LabelValue label="평가손익" value={convertIfNeeded(output3.evlu_pfls_amt_smtl)} unit={ccy === 'KRW' ? '원' : 'USD'} valueClass={plColor(output3.evlu_pfls_amt_smtl)} />
+                  <LabelValue
+                    label="총자산"
+                    value={convertIfNeeded(output3.tot_asst_amt)}
+                    unit={ccy === 'KRW' ? '원' : 'USD'}
+                  />
+                  <LabelValue
+                    label="총예수금"
+                    value={convertIfNeeded(output3.tot_dncl_amt)}
+                    unit={ccy === 'KRW' ? '원' : 'USD'}
+                  />
+                  <LabelValue
+                    label="평가금액"
+                    value={convertIfNeeded(output3.evlu_amt_smtl)}
+                    unit={ccy === 'KRW' ? '원' : 'USD'}
+                  />
+                  <LabelValue
+                    label="평가손익"
+                    value={convertIfNeeded(output3.evlu_pfls_amt_smtl)}
+                    unit={ccy === 'KRW' ? '원' : 'USD'}
+                    valueClass={plColor(output3.evlu_pfls_amt_smtl)}
+                  />
                   <LabelValue
                     label="평가수익률"
                     value={fmtPercent2(output3.evlu_erng_rt1)}
                     unit={output3.evlu_erng_rt1 ? '%' : undefined}
                     valueClass={plColor(output3.evlu_erng_rt1)}
                   />
-                  <LabelValue label="출금가능" value={convertIfNeeded(output3.wdrw_psbl_tot_amt)} unit={ccy === 'KRW' ? '원' : 'USD'} />
-                  <LabelValue label="외화평가총액" value={convertIfNeeded(output3.frcr_evlu_tota)} unit={ccy === 'KRW' ? '원' : 'USD'} />
-                  <LabelValue label="미결제매수" value={convertIfNeeded(output3.ustl_buy_amt_smtl)} unit={ccy === 'KRW' ? '원' : 'USD'} />
+                  <LabelValue
+                    label="출금가능"
+                    value={convertIfNeeded(output3.wdrw_psbl_tot_amt)}
+                    unit={ccy === 'KRW' ? '원' : 'USD'}
+                  />
+                  <LabelValue
+                    label="외화평가총액"
+                    value={convertIfNeeded(output3.frcr_evlu_tota)}
+                    unit={ccy === 'KRW' ? '원' : 'USD'}
+                  />
+                  <LabelValue
+                    label="미결제매수"
+                    value={convertIfNeeded(output3.ustl_buy_amt_smtl)}
+                    unit={ccy === 'KRW' ? '원' : 'USD'}
+                  />
                 </div>
               </div>
             )}

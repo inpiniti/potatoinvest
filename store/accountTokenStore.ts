@@ -13,9 +13,11 @@ export interface AccountTokenData {
 interface State {
   activeAccountId: number | null;
   tokens: Record<number, AccountTokenData>;
+  exchangeRate?: number;
   hasHydrated: boolean;
   setActive: (id: number | null) => void;
   setToken: (t: AccountTokenData) => void;
+  setExchangeRate: (rate: number | undefined) => void;
   clear: () => void;
   setHasHydrated: () => void;
 }
@@ -32,12 +34,18 @@ export const accountTokenStore = create<State>()(
           tokens: { ...s.tokens, [t.accountId]: t },
           activeAccountId: t.accountId,
         })),
-      clear: () => set({ activeAccountId: null, tokens: {} }),
+      setExchangeRate: (rate) => set({ exchangeRate: rate }),
+      clear: () =>
+        set({ activeAccountId: null, tokens: {}, exchangeRate: undefined }),
       setHasHydrated: () => set({ hasHydrated: true }),
     }),
     {
       name: 'account-token-store',
-      partialize: (s) => ({ activeAccountId: s.activeAccountId, tokens: s.tokens }),
+      partialize: (s) => ({
+        activeAccountId: s.activeAccountId,
+        tokens: s.tokens,
+        exchangeRate: s.exchangeRate,
+      }),
       onRehydrateStorage: () => (state) => {
         // after rehydration mark flag
         state?.setHasHydrated();

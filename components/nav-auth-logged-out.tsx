@@ -1,7 +1,6 @@
 'use client';
 import * as React from 'react';
 import { LogIn } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
 import {
   Dialog,
   DialogContent,
@@ -18,58 +17,32 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { useStudioData } from '@/hooks/useStudioData';
 
 interface NavAuthLoggedOutProps {
-  onLogin: (credentials: {
-    id: string;
-    password: string;
-  }) => Promise<void> | void;
+  loading?: boolean;
 }
 
-export function NavAuthLoggedOut({ onLogin }: NavAuthLoggedOutProps) {
+export function NavAuthLoggedOut({ loading }: NavAuthLoggedOutProps) {
+  const { mutations } = useStudioData();
   const [open, setOpen] = React.useState(false);
   const idRef = React.useRef<HTMLInputElement | null>(null);
   const pwRef = React.useRef<HTMLInputElement | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (submitting) return;
+    // 이메일 로그인은 비활성화 상태 유지
     const id = idRef.current?.value?.trim() || '';
     const password = pwRef.current?.value || '';
-    setSubmitting(true);
-    setError(null);
-    try {
-      await onLogin({ id, password });
-      setOpen(false);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : '로그인 실패';
-      setError(msg);
-    } finally {
-      setSubmitting(false);
-    }
+    console.info('Email login requested (disabled)', { id, password });
   };
 
   const handleKakao = async () => {
-    setError(null);
-    try {
-      // Allow override via environment variable (e.g. NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT)
-      // Fallback to /studio/home if not provided.
-      const envRedirect = process.env.NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT;
-      const base = typeof window !== 'undefined' ? window.location.origin : '';
-      const redirectUrl = envRedirect ? (envRedirect.startsWith('http') ? envRedirect : base + envRedirect) : base + '/studio/home';
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: 'kakao',
-        options: {
-          redirectTo: redirectUrl,
-        },
-      });
-      if (oauthError) setError(oauthError.message);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : '카카오 로그인 실패';
-      setError(msg);
-    }
+    setSubmitting(true);
+    await mutations.loginWithKakao();
+    setSubmitting(false);
+    setOpen(false);
   };
 
   return (
@@ -77,7 +50,11 @@ export function NavAuthLoggedOut({ onLogin }: NavAuthLoggedOutProps) {
       <SidebarMenuItem>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <SidebarMenuButton size="lg" className="justify-start">
+            <SidebarMenuButton
+              size="lg"
+              className="justify-start"
+              disabled={loading}
+            >
               <LogIn className="mr-2 h-4 w-4" />
               <span>로그인</span>
             </SidebarMenuButton>
@@ -94,10 +71,10 @@ export function NavAuthLoggedOut({ onLogin }: NavAuthLoggedOutProps) {
                 type="button"
                 onClick={handleKakao}
                 className="w-full !bg-[#FEE500] text-black hover:bg-[#FDD835]"
+                disabled={submitting}
               >
                 카카오로 로그인
               </Button>
-              {error && <p className="text-xs text-red-500">{error}</p>}
               <div className="h-px w-full bg-border" />
               <form
                 onSubmit={handleSubmit}
