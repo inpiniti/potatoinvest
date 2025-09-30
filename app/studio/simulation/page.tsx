@@ -1,19 +1,19 @@
-'use client';
-import * as React from 'react';
-import { PieChart, Pie, LabelList } from 'recharts';
+"use client";
+import * as React from "react";
+import { PieChart, Pie, LabelList } from "recharts";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   ChartConfig,
-} from '@/components/ui/chart';
+} from "@/components/ui/chart";
 import {
   Table,
   TableHeader,
@@ -21,9 +21,11 @@ import {
   TableHead,
   TableBody,
   TableCell,
-} from '@/components/ui/table';
-import Link from 'next/link';
-import { useStudioData } from '@/hooks/useStudioData';
+} from "@/components/ui/table";
+import Link from "next/link";
+import { useStudioData } from "@/hooks/useStudioData";
+import type { Output1Item } from "@/hooks/usePresentBalance";
+import { Button } from "@/components/ui/button";
 
 interface RecommendedItem {
   stock: string;
@@ -35,7 +37,7 @@ interface RecommendedItem {
 }
 
 function parseRatioNum(ratio: string) {
-  const n = parseFloat((ratio || '').replace(/%/g, ''));
+  const n = parseFloat((ratio || "").replace(/%/g, ""));
   return isNaN(n) ? 0 : n;
 }
 
@@ -47,6 +49,8 @@ export default function PortfolioSimulationPage() {
     dataromaBasedOnStock,
     dataromaLoading,
     dataromaError,
+    getPriceDetail,
+    getOpenOrdersMap,
   } = useStudioData();
   const [settings, setSettings] = React.useState({
     max_positions: 20,
@@ -55,6 +59,22 @@ export default function PortfolioSimulationPage() {
   const [usdKrw, setUsdKrw] = React.useState<number | null>(null);
   const [totalAssetUsd, setTotalAssetUsd] = React.useState<number | null>(null);
   const [totAsstKrw, setTotAsstKrw] = React.useState<number | null>(null);
+  const [openOrdersMap, setOpenOrdersMap] = React.useState<
+    Record<string, boolean>
+  >({});
+
+  // Preload open orders map (체결중)
+  React.useEffect(() => {
+    getOpenOrdersMap()
+      .then((m) => setOpenOrdersMap(m))
+      .catch(() => setOpenOrdersMap({}));
+    const id = setInterval(() => {
+      getOpenOrdersMap()
+        .then((m) => setOpenOrdersMap(m))
+        .catch(() => {});
+    }, 10_000);
+    return () => clearInterval(id);
+  }, [getOpenOrdersMap]);
 
   // Listen to settings change events
   React.useEffect(() => {
@@ -67,13 +87,13 @@ export default function PortfolioSimulationPage() {
         target_cash_ratio: detail.target_cash_ratio,
       });
     }
-    window.addEventListener('account-settings-changed', handler);
+    window.addEventListener("account-settings-changed", handler);
     return () =>
-      window.removeEventListener('account-settings-changed', handler);
+      window.removeEventListener("account-settings-changed", handler);
   }, [activeAccountId]);
 
   React.useEffect(() => {
-    if (typeof exchangeRate === 'number') {
+    if (typeof exchangeRate === "number") {
       setUsdKrw(exchangeRate);
     } else {
       setUsdKrw(null);
@@ -88,14 +108,14 @@ export default function PortfolioSimulationPage() {
       if (detail.accountId !== activeAccountId) return;
       const raw = detail.tot_asst_amt as string | undefined;
       if (raw) {
-        const n = parseFloat(raw.replace(/,/g, ''));
+        const n = parseFloat(raw.replace(/,/g, ""));
         if (!isNaN(n)) setTotAsstKrw(n);
         else setTotAsstKrw(null);
       }
     }
-    window.addEventListener('present-balance-updated', handleBalance);
+    window.addEventListener("present-balance-updated", handleBalance);
     return () =>
-      window.removeEventListener('present-balance-updated', handleBalance);
+      window.removeEventListener("present-balance-updated", handleBalance);
   }, [activeAccountId]);
 
   React.useEffect(() => {
@@ -108,7 +128,7 @@ export default function PortfolioSimulationPage() {
     const output3 = Array.isArray(output3Raw) ? output3Raw[0] : output3Raw;
     const raw = output3?.tot_asst_amt;
     if (raw) {
-      const n = parseFloat(String(raw).replace(/,/g, ''));
+      const n = parseFloat(String(raw).replace(/,/g, ""));
       if (!isNaN(n)) {
         setTotAsstKrw(n);
         return;
@@ -157,7 +177,7 @@ export default function PortfolioSimulationPage() {
     }
     const totalUsd = totalAssetUsd; // may be null until populated
     const items: RecommendedItem[] = provisional.map((p) => {
-      const ratioStr = p.allocPct.toFixed(2) + '%';
+      const ratioStr = p.allocPct.toFixed(2) + "%";
       const cashAlloc = totalUsd
         ? Math.round((p.allocPct / 100) * totalUsd)
         : null;
@@ -172,8 +192,8 @@ export default function PortfolioSimulationPage() {
     });
     if (cashPercent > 0) {
       items.push({
-        stock: 'CASH',
-        ratio: cashPercent.toFixed(2) + '%',
+        stock: "CASH",
+        ratio: cashPercent.toFixed(2) + "%",
         person_count: 0,
         cash: totalUsd ? Math.round((cashPercent / 100) * totalUsd) : null,
         avg_ratio: null,
@@ -185,36 +205,73 @@ export default function PortfolioSimulationPage() {
 
   const chartData = React.useMemo(() => {
     const palette = [
-      'var(--chart-1)',
-      'var(--chart-2)',
-      'var(--chart-3)',
-      'var(--chart-4)',
-      'var(--chart-5)',
-      'var(--chart-6, hsl(var(--primary)))',
-      'var(--chart-7, hsl(var(--secondary)))',
-      'var(--chart-8, hsl(var(--muted)))',
-      'var(--chart-9, #4ade80)',
-      'var(--chart-10, #fbbf24)',
-      'var(--chart-11, #60a5fa)',
-      'var(--chart-12, #f87171)',
+      "var(--chart-1)",
+      "var(--chart-2)",
+      "var(--chart-3)",
+      "var(--chart-4)",
+      "var(--chart-5)",
+      "var(--chart-6, hsl(var(--primary)))",
+      "var(--chart-7, hsl(var(--secondary)))",
+      "var(--chart-8, hsl(var(--muted)))",
+      "var(--chart-9, #4ade80)",
+      "var(--chart-10, #fbbf24)",
+      "var(--chart-11, #60a5fa)",
+      "var(--chart-12, #f87171)",
     ];
     return recommended.map((r, idx) => ({
       code: r.stock,
       value: parseRatioNum(r.ratio),
       fill:
-        r.stock === 'CASH'
-          ? 'var(--chart-other,#a1a1aa)'
+        r.stock === "CASH"
+          ? "var(--chart-other,#a1a1aa)"
           : palette[idx % palette.length],
     }));
   }, [recommended]);
 
   const chartConfig: ChartConfig = React.useMemo(() => {
-    const base: ChartConfig = { value: { label: '비중(%)' } };
+    const base: ChartConfig = { value: { label: "비중(%)" } };
     chartData.forEach((d) => {
       (base as Record<string, { label: string }>)[d.code] = { label: d.code };
     });
     return base;
   }, [chartData]);
+
+  // Derive holdings map from presentBalance.output1
+  const holdingsMap = React.useMemo(() => {
+    const map: Record<string, number> = {};
+    const list: Output1Item[] = Array.isArray(presentBalance?.output1)
+      ? (presentBalance?.output1 as Output1Item[])
+      : [];
+    for (const it of list) {
+      const code = String(it?.pdno || it?.ovrs_pdno || "").toUpperCase();
+      const qty = Number(
+        (it?.ccld_qty_smtl1 || it?.cblc_qty13 || "0")
+          .toString()
+          .replace(/,/g, "")
+      );
+      if (code) map[code] = isFinite(qty) ? qty : 0;
+    }
+    return map;
+  }, [presentBalance]);
+
+  // Local async cache for price detail lookups per row
+  const [priceRows, setPriceRows] = React.useState<
+    Record<string, { last: number; excd?: string }>
+  >({});
+  const ensurePrice = React.useCallback(
+    async (code: string) => {
+      const key = code.toUpperCase();
+      if (priceRows[key]) return;
+      const d = await getPriceDetail(key);
+      if (d && d.last) {
+        setPriceRows((prev) => ({
+          ...prev,
+          [key]: { last: d.last, excd: d.excd_used },
+        }));
+      }
+    },
+    [getPriceDetail, priceRows]
+  );
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
@@ -233,7 +290,7 @@ export default function PortfolioSimulationPage() {
         <p className="text-sm text-destructive">
           {dataromaError instanceof Error
             ? dataromaError.message
-            : '데이터를 불러오는 중 오류가 발생했습니다.'}
+            : "데이터를 불러오는 중 오류가 발생했습니다."}
         </p>
       )}
       {!dataromaLoading && !dataromaError && recommended.length > 0 && (
@@ -276,18 +333,26 @@ export default function PortfolioSimulationPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-28">Code</TableHead>
-                  <TableHead className="w-28">Ratio</TableHead>
-                  <TableHead className="w-28">Persons</TableHead>
-                  <TableHead className="w-32">Cash</TableHead>
+                  <TableHead className="w-24">Code</TableHead>
+                  <TableHead className="w-20">Ratio</TableHead>
+                  <TableHead className="w-20">Persons</TableHead>
+                  <TableHead className="w-24">Cash</TableHead>
+                  <TableHead className="w-24">현재가격</TableHead>
+                  <TableHead className="w-20">가능수량</TableHead>
+                  <TableHead className="w-20">보유수량</TableHead>
+                  <TableHead className="w-20">차이수량</TableHead>
+                  <TableHead className="w-20">매매수량</TableHead>
+                  <TableHead className="w-20">버튼</TableHead>
+                  <TableHead className="w-16">체결중</TableHead>
+                  <TableHead className="w-16">시장</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {recommended.map((r) => (
                   <TableRow key={r.stock}>
                     <TableCell className="font-medium">
-                      {r.stock === 'CASH' ? (
-                        'CASH'
+                      {r.stock === "CASH" ? (
+                        "CASH"
                       ) : (
                         <Link
                           href={`/studio/stock/${encodeURIComponent(
@@ -302,8 +367,90 @@ export default function PortfolioSimulationPage() {
                     <TableCell>{r.ratio}</TableCell>
                     <TableCell>{r.person_count}</TableCell>
                     <TableCell>
-                      {r.cash != null ? r.cash.toLocaleString() : '-'}
+                      {r.cash != null ? r.cash.toLocaleString() : "-"}
                     </TableCell>
+                    {/* 현재가격 */}
+                    <TableCell>
+                      {r.stock === "CASH" ? (
+                        "-"
+                      ) : (
+                        <PriceCell
+                          code={String(r.stock)}
+                          ensurePrice={ensurePrice}
+                          priceRows={priceRows}
+                        />
+                      )}
+                    </TableCell>
+                    {/* 가능/보유/차이/매매 */}
+                    {(() => {
+                      if (r.stock === "CASH") {
+                        return (
+                          <>
+                            <TableCell>-</TableCell>
+                            <TableCell>-</TableCell>
+                            <TableCell>-</TableCell>
+                            <TableCell>-</TableCell>
+                            <TableCell>-</TableCell>
+                            <TableCell>-</TableCell>
+                            <TableCell>-</TableCell>
+                          </>
+                        );
+                      }
+                      const code = String(r.stock).toUpperCase();
+                      const last = priceRows[code]?.last ?? null;
+                      const possibleQty =
+                        last && r.cash != null
+                          ? Math.floor(r.cash / last)
+                          : null;
+                      const holdQty = holdingsMap[code] ?? 0;
+                      const diffQty =
+                        possibleQty != null ? possibleQty - holdQty : null;
+                      const tradeQty =
+                        diffQty != null ? Math.floor(Math.abs(diffQty)) : null;
+                      const action =
+                        diffQty != null && diffQty > 0
+                          ? "구매"
+                          : diffQty != null && diffQty < 0
+                          ? "판매"
+                          : "-";
+                      return (
+                        <>
+                          <TableCell>
+                            {possibleQty != null ? possibleQty : "-"}
+                          </TableCell>
+                          <TableCell>{holdQty}</TableCell>
+                          <TableCell>
+                            {diffQty != null ? diffQty : "-"}
+                          </TableCell>
+                          <TableCell>
+                            {tradeQty != null ? tradeQty : "-"}
+                          </TableCell>
+                          <TableCell>
+                            {action === "-" ? (
+                              "-"
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant={
+                                  action === "구매" ? "default" : "secondary"
+                                }
+                                disabled
+                              >
+                                {action}
+                              </Button>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {openOrdersMap[code] ? (
+                              <span className="text-amber-600">체결중</span>
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                          <TableCell>{priceRows[code]?.excd ?? "-"}</TableCell>
+                        </>
+                      );
+                    })()}
                   </TableRow>
                 ))}
               </TableBody>
@@ -313,4 +460,20 @@ export default function PortfolioSimulationPage() {
       )}
     </div>
   );
+}
+
+function PriceCell({
+  code,
+  ensurePrice,
+  priceRows,
+}: {
+  code: string;
+  ensurePrice: (code: string) => Promise<void>;
+  priceRows: Record<string, { last: number; excd?: string }>;
+}) {
+  React.useEffect(() => {
+    ensurePrice(code);
+  }, [code, ensurePrice]);
+  const last = priceRows[code.toUpperCase()]?.last;
+  return <span>{last != null ? last.toLocaleString() : "..."}</span>;
 }

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   createContext,
@@ -7,27 +7,28 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
   type ReactNode,
   type SetStateAction,
-} from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabaseClient';
+} from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Session, User } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabaseClient";
 import {
   accountTokenStore,
   type AccountTokenData,
-} from '@/store/accountTokenStore';
-import { toast } from 'sonner';
+} from "@/store/accountTokenStore";
+import { toast } from "sonner";
 import type {
   PresentBalanceParams,
   PresentBalanceResponseRaw,
-} from '@/hooks/usePresentBalance';
+} from "@/hooks/usePresentBalance";
 
 type PresentBalanceOptions = Omit<
   PresentBalanceParams,
-  'accountId' | 'kiAccessToken'
+  "accountId" | "kiAccessToken"
 >;
 
 interface AccountRecord {
@@ -95,6 +96,18 @@ interface StudioDataContextValue {
   tokens: Record<number, AccountTokenData>;
   hasHydrated: boolean;
   mutations: StudioMutations;
+  // price detail cache & helpers
+  getPriceDetail: (
+    symb: string
+  ) => Promise<{
+    last: number;
+    perx?: number;
+    pbrx?: number;
+    epsx?: number;
+    bpsx?: number;
+    excd_used?: "NAS" | "NYS";
+  } | null>;
+  getOpenOrdersMap: () => Promise<Record<string, boolean>>; // symbol -> 체결중 여부
 }
 
 const StudioDataContext = createContext<StudioDataContextValue | undefined>(
@@ -103,14 +116,14 @@ const StudioDataContext = createContext<StudioDataContextValue | undefined>(
 
 function requireSession(session: Session | null): Session {
   if (!session) {
-    throw new Error('로그인이 필요합니다.');
+    throw new Error("로그인이 필요합니다.");
   }
   return session;
 }
 
 function buildHeaders(session: Session): HeadersInit {
   return {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     Authorization: `Bearer ${session.access_token}`,
   } satisfies HeadersInit;
 }
@@ -131,8 +144,24 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
   const [loadingSession, setLoadingSession] = useState(true);
   const [presentBalanceOptions, setPresentBalanceOptions] =
     useState<PresentBalanceOptions>({
-      WCRC_FRCR_DVSN_CD: '02',
+      WCRC_FRCR_DVSN_CD: "02",
     });
+  // ephemeral caches (per session)
+  type PriceDetailLite = {
+    last: number;
+    perx?: number;
+    pbrx?: number;
+    epsx?: number;
+    bpsx?: number;
+    excd_used?: "NAS" | "NYS";
+  };
+  const priceCacheRef = useRef<
+    Record<string, { t: number; v: PriceDetailLite }>
+  >({});
+  const openOrdersRef = useRef<{
+    t: number;
+    map: Record<string, boolean>;
+  } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -158,17 +187,17 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const accountsQuery = useQuery<AccountsResponse>({
-    queryKey: ['studio', 'accounts', session?.user?.id ?? 'anon'],
+    queryKey: ["studio", "accounts", session?.user?.id ?? "anon"],
     enabled: Boolean(session),
     queryFn: async () => {
       const currentSession = requireSession(session);
-      const res = await fetch('/api/accounts', {
+      const res = await fetch("/api/accounts", {
         headers: buildHeaders(currentSession),
-        cache: 'no-store',
+        cache: "no-store",
       });
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(text || '계좌 조회에 실패했습니다.');
+        throw new Error(text || "계좌 조회에 실패했습니다.");
       }
       const json = (await res.json()) as AccountsResponse;
       return { accounts: json.accounts ?? [] };
@@ -178,12 +207,12 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
   });
 
   const dataromaQuery = useQuery<DataromaBaseResponse>({
-    queryKey: ['studio', 'dataroma-base'],
+    queryKey: ["studio", "dataroma-base"],
     queryFn: async () => {
-      const res = await fetch('/api/dataroma/base', { cache: 'no-store' });
+      const res = await fetch("/api/dataroma/base", { cache: "no-store" });
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(text || 'Dataroma 데이터를 불러오지 못했습니다.');
+        throw new Error(text || "Dataroma 데이터를 불러오지 못했습니다.");
       }
       return (await res.json()) as DataromaBaseResponse;
     },
@@ -193,8 +222,8 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
 
   const presentBalanceQuery = useQuery<PresentBalanceResponseRaw>({
     queryKey: [
-      'studio',
-      'present-balance',
+      "studio",
+      "present-balance",
       activeAccountId,
       tokens[activeAccountId ?? -1]?.access_token,
       presentBalanceOptions,
@@ -205,11 +234,11 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
     queryFn: async () => {
       const accountId = activeAccountId;
       if (!accountId) {
-        throw new Error('활성 계좌가 없습니다.');
+        throw new Error("활성 계좌가 없습니다.");
       }
       const token = tokens[accountId];
       if (!token?.access_token) {
-        throw new Error('토큰이 없습니다.');
+        throw new Error("토큰이 없습니다.");
       }
       const currentSession = requireSession(session);
       const params: PresentBalanceParams = {
@@ -217,14 +246,14 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
         kiAccessToken: token.access_token,
         ...presentBalanceOptions,
       };
-      const res = await fetch('/api/accounts/presentBalance', {
-        method: 'POST',
+      const res = await fetch("/api/accounts/presentBalance", {
+        method: "POST",
         headers: buildHeaders(currentSession),
         body: JSON.stringify(params),
       });
       const json = (await res.json()) as PresentBalanceResponseRaw;
-      if (!res.ok || json.rt_cd !== '0') {
-        throw new Error(json.msg1 || '잔고 조회에 실패했습니다.');
+      if (!res.ok || json.rt_cd !== "0") {
+        throw new Error(json.msg1 || "잔고 조회에 실패했습니다.");
       }
       return json;
     },
@@ -234,12 +263,12 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
   });
 
   const exchangeRateQuery = useQuery<{ usdToKrw: number } | { error: string }>({
-    queryKey: ['studio', 'exchange-rate'],
+    queryKey: ["studio", "exchange-rate"],
     queryFn: async () => {
-      const res = await fetch('/api/exchangeRate', { cache: 'no-store' });
+      const res = await fetch("/api/exchangeRate", { cache: "no-store" });
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(text || '환율 조회에 실패했습니다.');
+        throw new Error(text || "환율 조회에 실패했습니다.");
       }
       return (await res.json()) as { usdToKrw: number } | { error: string };
     },
@@ -249,17 +278,80 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const data = exchangeRateQuery.data;
-    if (data && 'usdToKrw' in data && typeof data.usdToKrw === 'number') {
+    if (data && "usdToKrw" in data && typeof data.usdToKrw === "number") {
       setExchangeRate(data.usdToKrw);
     }
   }, [exchangeRateQuery.data, setExchangeRate]);
+
+  // Helpers: Price detail (per symbol) with short TTL cache (15s)
+  const getPriceDetail = useCallback<StudioDataContextValue["getPriceDetail"]>(
+    async (symb) => {
+      const accountId = activeAccountId;
+      const token = accountId ? tokens[accountId]?.access_token : undefined;
+      if (!accountId || !token) return null;
+      const key = String(symb).toUpperCase();
+      const now = Date.now();
+      const cached = priceCacheRef.current[key];
+      if (cached && now - cached.t < 15_000) {
+        return cached.v;
+      }
+      const currentSession = requireSession(session);
+      const res = await fetch("/api/accounts/priceDetail", {
+        method: "POST",
+        headers: buildHeaders(currentSession),
+        body: JSON.stringify({ accountId, kiAccessToken: token, symb: key }),
+      });
+      if (!res.ok) {
+        return null;
+      }
+      const json = await res.json();
+      if (json?.rt_cd !== "0" || !json?.output) return null;
+      const out = json.output;
+      const lastNum = Number(out?.last);
+      if (!isFinite(lastNum)) return null;
+      const value: PriceDetailLite = {
+        last: lastNum,
+        perx: out?.perx != null ? Number(out.perx) : undefined,
+        pbrx: out?.pbrx != null ? Number(out.pbrx) : undefined,
+        epsx: out?.epsx != null ? Number(out.epsx) : undefined,
+        bpsx: out?.bpsx != null ? Number(out.bpsx) : undefined,
+        excd_used: (json.excd_used as "NAS" | "NYS" | undefined) ?? undefined,
+      };
+      priceCacheRef.current[key] = { t: now, v: value };
+      return value;
+    },
+    [activeAccountId, session, tokens]
+  );
+
+  // Helpers: Open orders map with short TTL (10s)
+  const getOpenOrdersMap = useCallback<
+    StudioDataContextValue["getOpenOrdersMap"]
+  >(async () => {
+    const accountId = activeAccountId;
+    const token = accountId ? tokens[accountId]?.access_token : undefined;
+    if (!accountId || !token) return {};
+    const now = Date.now();
+    const cached = openOrdersRef.current;
+    if (cached && now - cached.t < 10_000) return cached.map;
+    const currentSession = requireSession(session);
+    const res = await fetch("/api/accounts/openOrders", {
+      method: "POST",
+      headers: buildHeaders(currentSession),
+      body: JSON.stringify({ accountId, kiAccessToken: token }),
+    });
+    if (!res.ok) return {};
+    const json = await res.json();
+    const map: Record<string, boolean> = json?.symbols || {};
+    openOrdersRef.current = { t: now, map };
+    return map;
+  }, [activeAccountId, session, tokens]);
 
   useEffect(() => {
     if (accountsQuery.error) {
       toast.error(
         accountsQuery.error instanceof Error
           ? accountsQuery.error.message
-          : '계좌 정보를 불러오는 중 오류가 발생했습니다.'
+          : "계좌 정보를 불러오는 중 오류가 발생했습니다."
       );
     }
   }, [accountsQuery.error]);
@@ -269,7 +361,7 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       toast.error(
         dataromaQuery.error instanceof Error
           ? dataromaQuery.error.message
-          : '데이터로마 정보를 불러오는 중 오류가 발생했습니다.'
+          : "데이터로마 정보를 불러오는 중 오류가 발생했습니다."
       );
     }
   }, [dataromaQuery.error]);
@@ -279,7 +371,7 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       toast.error(
         presentBalanceQuery.error instanceof Error
           ? presentBalanceQuery.error.message
-          : '잔고 정보를 불러오는 중 오류가 발생했습니다.'
+          : "잔고 정보를 불러오는 중 오류가 발생했습니다."
       );
     }
   }, [presentBalanceQuery.error]);
@@ -289,7 +381,7 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       toast.error(
         exchangeRateQuery.error instanceof Error
           ? exchangeRateQuery.error.message
-          : '환율 정보를 불러오는 중 오류가 발생했습니다.'
+          : "환율 정보를 불러오는 중 오류가 발생했습니다."
       );
     }
   }, [exchangeRateQuery.error]);
@@ -302,23 +394,23 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       apiSecret: string;
     }) => {
       const currentSession = requireSession(session);
-      const res = await fetch('/api/accounts', {
-        method: 'POST',
+      const res = await fetch("/api/accounts", {
+        method: "POST",
         headers: buildHeaders(currentSession),
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(text || '계좌 저장에 실패했습니다.');
+        throw new Error(text || "계좌 저장에 실패했습니다.");
       }
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['studio', 'accounts'] });
-      toast.success('계좌가 추가되었습니다.');
+      await queryClient.invalidateQueries({ queryKey: ["studio", "accounts"] });
+      toast.success("계좌가 추가되었습니다.");
     },
     onError: (error) => {
       const message =
-        error instanceof Error ? error.message : '계좌 추가에 실패했습니다.';
+        error instanceof Error ? error.message : "계좌 추가에 실패했습니다.";
       toast.error(message);
     },
   });
@@ -326,14 +418,14 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
   const deleteAccountMutation = useMutation({
     mutationFn: async (id: number) => {
       const currentSession = requireSession(session);
-      const res = await fetch('/api/accounts', {
-        method: 'DELETE',
+      const res = await fetch("/api/accounts", {
+        method: "DELETE",
         headers: buildHeaders(currentSession),
         body: JSON.stringify({ id }),
       });
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(text || '계좌 삭제에 실패했습니다.');
+        throw new Error(text || "계좌 삭제에 실패했습니다.");
       }
 
       const { tokens: currentTokens, activeAccountId: currentActive } =
@@ -348,12 +440,12 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       }
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['studio', 'accounts'] });
-      toast.success('계좌가 삭제되었습니다.');
+      await queryClient.invalidateQueries({ queryKey: ["studio", "accounts"] });
+      toast.success("계좌가 삭제되었습니다.");
     },
     onError: (error) => {
       const message =
-        error instanceof Error ? error.message : '계좌 삭제에 실패했습니다.';
+        error instanceof Error ? error.message : "계좌 삭제에 실패했습니다.";
       toast.error(message);
     },
   });
@@ -361,14 +453,14 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
   const loginAccountMutation = useMutation({
     mutationFn: async (id: number) => {
       const currentSession = requireSession(session);
-      const res = await fetch('/api/accounts/login', {
-        method: 'POST',
+      const res = await fetch("/api/accounts/login", {
+        method: "POST",
         headers: buildHeaders(currentSession),
         body: JSON.stringify({ id }),
       });
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(json?.error || '토큰 발급에 실패했습니다.');
+        throw new Error(json?.error || "토큰 발급에 실패했습니다.");
       }
 
       const tokenData: AccountTokenData = {
@@ -384,7 +476,7 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
 
       try {
         window.dispatchEvent(
-          new CustomEvent('account-token-issued', { detail: { accountId: id } })
+          new CustomEvent("account-token-issued", { detail: { accountId: id } })
         );
       } catch {
         /* noop */
@@ -392,14 +484,14 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
 
       await presentBalanceQuery.refetch();
       await exchangeRateQuery.refetch();
-      await queryClient.invalidateQueries({ queryKey: ['studio', 'accounts'] });
+      await queryClient.invalidateQueries({ queryKey: ["studio", "accounts"] });
     },
     onSuccess: () => {
-      toast.success('토큰이 발급되었습니다.');
+      toast.success("토큰이 발급되었습니다.");
     },
     onError: (error) => {
       const message =
-        error instanceof Error ? error.message : '토큰 발급에 실패했습니다.';
+        error instanceof Error ? error.message : "토큰 발급에 실패했습니다.";
       toast.error(message);
     },
   });
@@ -411,25 +503,25 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       target_cash_ratio: number;
     }) => {
       const currentSession = requireSession(session);
-      const res = await fetch('/api/accounts/settings', {
-        method: 'PATCH',
+      const res = await fetch("/api/accounts/settings", {
+        method: "PATCH",
         headers: buildHeaders(currentSession),
         body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(json?.error || '설정 저장에 실패했습니다.');
+        throw new Error(json?.error || "설정 저장에 실패했습니다.");
       }
 
       try {
         window.dispatchEvent(
-          new CustomEvent('account-settings-changed', {
+          new CustomEvent("account-settings-changed", {
             detail: {
               accountId: payload.accountId,
               max_positions: payload.max_positions,
               target_cash_ratio: payload.target_cash_ratio,
               dirty: false,
-              source: 'save',
+              source: "save",
             },
           })
         );
@@ -438,27 +530,27 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       }
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['studio', 'accounts'] });
-      toast.success('설정이 저장되었습니다.');
+      await queryClient.invalidateQueries({ queryKey: ["studio", "accounts"] });
+      toast.success("설정이 저장되었습니다.");
     },
     onError: (error) => {
       const message =
-        error instanceof Error ? error.message : '설정을 저장하지 못했습니다.';
+        error instanceof Error ? error.message : "설정을 저장하지 못했습니다.";
       toast.error(message);
     },
   });
 
   const startKakaoOAuth = useCallback(async () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
     const envRedirect = process.env.NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT;
     const redirectTo = envRedirect
-      ? envRedirect.startsWith('http')
+      ? envRedirect.startsWith("http")
         ? envRedirect
         : `${origin}${envRedirect}`
       : `${origin}/studio/home`;
 
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'kakao',
+      provider: "kakao",
       options: { redirectTo },
     });
 
@@ -470,7 +562,7 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     clear();
-    toast.success('로그아웃되었습니다.');
+    toast.success("로그아웃되었습니다.");
   }, [clear]);
 
   const mutations = useMemo<StudioMutations>(
@@ -502,12 +594,12 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       loginWithKakao: async () => {
         try {
           await startKakaoOAuth();
-          toast.success('카카오 로그인 페이지로 이동합니다.');
+          toast.success("카카오 로그인 페이지로 이동합니다.");
         } catch (error) {
           const message =
             error instanceof Error
               ? error.message
-              : '카카오 로그인에 실패했습니다.';
+              : "카카오 로그인에 실패했습니다.";
           toast.error(message);
         }
       },
@@ -555,6 +647,8 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       tokens,
       hasHydrated,
       mutations,
+      getPriceDetail,
+      getOpenOrdersMap,
     }),
     [
       session,
@@ -579,6 +673,8 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       tokens,
       hasHydrated,
       mutations,
+      getPriceDetail,
+      getOpenOrdersMap,
     ]
   );
 
@@ -589,7 +685,7 @@ export function useStudioData() {
   const context = useContext(StudioDataContext);
   if (!context) {
     throw new Error(
-      'StudioDataProvider 내부에서만 useStudioData를 사용할 수 있습니다.'
+      "StudioDataProvider 내부에서만 useStudioData를 사용할 수 있습니다."
     );
   }
   return context;
