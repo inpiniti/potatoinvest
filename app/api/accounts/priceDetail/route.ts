@@ -44,6 +44,9 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    // KIS expects class tickers like BRK.B as BRK/B, sometimes data providers send ',' too.
+    // Normalize by replacing '.' or ',' with '/' for KIS queries.
+    const symbKis = symb.replace(/[.,]/g, "/");
 
     const admin = getAdmin();
     const { data: account, error } = await admin
@@ -74,7 +77,7 @@ export async function POST(req: NextRequest) {
     const trId = "HHDFS76200200";
 
     async function callWithExcd(excd: "NAS" | "NYS") {
-      const qs = new URLSearchParams({ AUTH: "", EXCD: excd, SYMB: symb });
+      const qs = new URLSearchParams({ AUTH: "", EXCD: excd, SYMB: symbKis });
       const res = await fetch(`${baseUrl}?${qs.toString()}`, {
         method: "GET",
         headers: {
