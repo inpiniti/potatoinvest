@@ -124,7 +124,9 @@ export default function PortfolioSimulationPage() {
     Record<string, { last: number; excd?: string }>
   >({});
   // Deduplicate concurrent requests per canonical symbol (e.g., BRK.B/BRK/B)
-  const inFlightPriceRef = React.useRef<Record<string, Promise<void>>>({});
+  const inFlightPriceRef = React.useRef<Partial<Record<string, Promise<void>>>>(
+    {}
+  );
   const ensurePrice = React.useCallback(
     async (code: string) => {
       const rawKey = code.toUpperCase();
@@ -156,6 +158,7 @@ export default function PortfolioSimulationPage() {
   const openOrderSheet = React.useCallback(
     async (side: "BUY" | "SELL", code: string, defaultQty?: number) => {
       const key = code.toUpperCase();
+      const kisKey = key.replace(/[.,]/g, "/");
       setOrderSide(side);
       setOrderCode(key);
       // 1) 테이블에 표시된 값 우선 채우기
@@ -173,7 +176,7 @@ export default function PortfolioSimulationPage() {
         }
       }
       // 기본 수량 설정: SELL인 경우 보유수량, BUY인 경우 추천 계산치가 있으면 그 값 전달자에서 설정
-      const hold = holdingsMap[key] ?? 0;
+      const hold = holdingsMap[key] ?? holdingsMap[kisKey] ?? 0;
       setOrderQty(
         side === "SELL" ? hold : defaultQty && defaultQty > 0 ? defaultQty : 0
       );
@@ -561,14 +564,20 @@ export default function PortfolioSimulationPage() {
                           );
                         }
                         const code = String(r.stock).toUpperCase();
-                        const last = priceRows[code]?.last ?? null;
+                        const kisCode = code.replace(/[.,]/g, "/");
+                        const last =
+                          priceRows[code]?.last ??
+                          priceRows[kisCode]?.last ??
+                          null;
+                        const round2 = (x: number) => Math.round(x * 100) / 100;
                         const possibleQty =
-                          last && r.cash != null
-                            ? Math.floor(r.cash / last)
-                            : null;
-                        const holdQty = holdingsMap[code] ?? 0;
+                          last && r.cash != null ? round2(r.cash / last) : null;
+                        const holdQty =
+                          holdingsMap[code] ?? holdingsMap[kisCode] ?? 0;
                         const diffQty =
-                          possibleQty != null ? possibleQty - holdQty : null;
+                          possibleQty != null
+                            ? round2(possibleQty - holdQty)
+                            : null;
                         const tradeQty =
                           diffQty != null
                             ? Math.floor(Math.abs(diffQty))
@@ -582,11 +591,13 @@ export default function PortfolioSimulationPage() {
                         return (
                           <>
                             <TableCell>
-                              {possibleQty != null ? possibleQty : "-"}
+                              {possibleQty != null
+                                ? possibleQty.toFixed(2)
+                                : "-"}
                             </TableCell>
                             <TableCell>{holdQty}</TableCell>
                             <TableCell>
-                              {diffQty != null ? diffQty : "-"}
+                              {diffQty != null ? diffQty.toFixed(2) : "-"}
                             </TableCell>
                             <TableCell>
                               {tradeQty != null ? tradeQty : "-"}
@@ -613,14 +624,16 @@ export default function PortfolioSimulationPage() {
                               )}
                             </TableCell>
                             <TableCell>
-                              {openOrdersMap[code] ? (
+                              {openOrdersMap[code] || openOrdersMap[kisCode] ? (
                                 <span className="text-amber-600">체결중</span>
                               ) : (
                                 "-"
                               )}
                             </TableCell>
                             <TableCell>
-                              {priceRows[code]?.excd ?? "-"}
+                              {priceRows[code]?.excd ??
+                                priceRows[kisCode]?.excd ??
+                                "-"}
                             </TableCell>
                           </>
                         );
@@ -757,9 +770,13 @@ export default function PortfolioSimulationPage() {
                 type="number"
                 value={orderQty}
                 min={0}
-                onChange={(e) =>
-                  setOrderQty(Math.max(0, Number(e.target.value) || 0))
-                }
+                step={0.01}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  const n = isNaN(v) ? 0 : v;
+                  const rounded = Math.round(n * 100) / 100;
+                  setOrderQty(Math.max(0, rounded));
+                }}
               />
             </div>
             <div className="grid grid-cols-3 items-center gap-2">
@@ -769,9 +786,13 @@ export default function PortfolioSimulationPage() {
                 type="number"
                 value={orderPrice}
                 min={0}
-                onChange={(e) =>
-                  setOrderPrice(Math.max(0, Number(e.target.value) || 0))
-                }
+                step={0.01}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  const n = isNaN(v) ? 0 : v;
+                  const rounded = Math.round(n * 100) / 100;
+                  setOrderPrice(Math.max(0, rounded));
+                }}
               />
               <p className="col-span-3 text-xs text-muted-foreground">
                 단가는 현재가 상세를 실시간으로 불러와 채웁니다. 필요 시 수정
