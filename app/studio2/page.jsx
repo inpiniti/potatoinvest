@@ -1,8 +1,11 @@
 "use client";
+import { useEffect } from "react";
 import Section from "./components/Section";
 import LoginSection from "./components/LoginSection";
 import AccountsSectionLite from "./components/AccountsSectionLite";
 import AccountAuthStatus from "./components/AccountAuthStatus";
+import InvestorListSection from "./components/InvestorListSection";
+import StockListSection from "./components/StockListSection";
 import MobileS from "./components/MobileS";
 import MobileM from "./components/MobileM";
 import MobileL from "./components/MobileL";
@@ -10,6 +13,7 @@ import Tablet from "./components/Tablet";
 import Laptop from "./components/Laptop";
 import LaptopL from "./components/LaptopL";
 import FourK from "./components/4K";
+import usePortfolio from "@/hooks/usePortfolio";
 
 // 재사용할 Section 데이터 (타이틀/설명/본문)
 const sections = [
@@ -24,6 +28,16 @@ const sections = [
   {
     key: "accountAuth",
     accountAuth: true,
+  },
+  {
+    key: "investors",
+    investors: true,
+    fullWidth: true, // 가로 전체 차지
+  },
+  {
+    key: "stocks",
+    stocks: true,
+    rowSpan: 2, // 세로 2칸 차지
   },
   {
     key: "revenue",
@@ -116,6 +130,7 @@ function renderSections({ columns, stackedOnMobile = false }) {
       }`}
     >
       {sections.map((s) => {
+        // 특수 섹션 처리
         if (s.login) {
           return <LoginSection key={s.key} />;
         }
@@ -125,21 +140,38 @@ function renderSections({ columns, stackedOnMobile = false }) {
         if (s.accountAuth) {
           return <AccountAuthStatus key={s.key} />;
         }
-        const className =
-          s.wide && columns >= 3
-            ? columns === 3
-              ? "col-span-2"
-              : columns >= 4
-              ? "col-span-2"
-              : ""
-            : "";
+        if (s.investors) {
+          return <InvestorListSection key={s.key} />;
+        }
+        if (s.stocks) {
+          return <StockListSection key={s.key} />;
+        }
+
+        // 일반 섹션 className 생성
+        let className = "";
+
+        // 가로 전체 차지 (fullWidth)
+        if (s.fullWidth) {
+          className += " col-span-full";
+        }
+        // wide 속성 (기존 로직)
+        else if (s.wide && columns >= 3) {
+          className +=
+            columns === 3 ? " col-span-2" : columns >= 4 ? " col-span-2" : "";
+        }
+
+        // 세로 2칸 차지 (rowSpan)
+        if (s.rowSpan === 2) {
+          className += " row-span-2";
+        }
+
         return (
           <Section
             key={s.key}
             title={s.title}
             description={s.description}
             action={s.action}
-            className={className}
+            className={className.trim()}
           >
             {s.body}
           </Section>
@@ -150,6 +182,15 @@ function renderSections({ columns, stackedOnMobile = false }) {
 }
 
 export default function Page() {
+  const { refetch, isLoading, allInvestors, allStocks } = usePortfolio();
+
+  // 페이지 진입 시 데이터가 없으면 refetch (캐시 있으면 스킵)
+  useEffect(() => {
+    if (!isLoading && allInvestors.length === 0 && allStocks.length === 0) {
+      refetch();
+    }
+  }, [isLoading, allInvestors.length, allStocks.length, refetch]);
+
   return (
     <div className="flex w-full justify-center">
       {/* Mobile Small: 단일 컬럼 */}
