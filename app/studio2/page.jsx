@@ -6,6 +6,8 @@ import AccountsSectionLite from "./components/AccountsSectionLite";
 import AccountAuthStatus from "./components/AccountAuthStatus";
 import InvestorListSection from "./components/InvestorListSection";
 import StockListSection from "./components/StockListSection";
+import AssetInfoSection from "./components/AssetInfoSection";
+import HoldingsSection from "./components/HoldingsSection";
 import MobileS from "./components/MobileS";
 import MobileM from "./components/MobileM";
 import MobileL from "./components/MobileL";
@@ -14,6 +16,7 @@ import Laptop from "./components/Laptop";
 import LaptopL from "./components/LaptopL";
 import FourK from "./components/4K";
 import usePortfolio from "@/hooks/usePortfolio";
+import useAssets from "@/hooks/useAssets";
 
 // 재사용할 Section 데이터 (타이틀/설명/본문)
 const sections = [
@@ -37,6 +40,15 @@ const sections = [
   {
     key: "stocks",
     stocks: true,
+    rowSpan: 2, // 세로 2칸 차지
+  },
+  {
+    key: "assetInfo",
+    assetInfo: true,
+  },
+  {
+    key: "holdings",
+    holdings: true,
     rowSpan: 2, // 세로 2칸 차지
   },
   {
@@ -146,6 +158,12 @@ function renderSections({ columns, stackedOnMobile = false }) {
         if (s.stocks) {
           return <StockListSection key={s.key} />;
         }
+        if (s.assetInfo) {
+          return <AssetInfoSection key={s.key} />;
+        }
+        if (s.holdings) {
+          return <HoldingsSection key={s.key} />;
+        }
 
         // 일반 섹션 className 생성
         let className = "";
@@ -183,6 +201,7 @@ function renderSections({ columns, stackedOnMobile = false }) {
 
 export default function Page() {
   const { refetch, isLoading, allInvestors, allStocks } = usePortfolio();
+  const { refetch: refetchAssets, isLoading: assetsLoading } = useAssets();
 
   // 페이지 진입 시 데이터가 없으면 refetch (캐시 있으면 스킵)
   useEffect(() => {

@@ -77,6 +77,17 @@ export function useAccountAuth(accountId: number | null | undefined) {
     onSuccess: () => {
       toast.success("계좌 인증 완료");
       query.refetch();
+
+      // 계좌 인증 성공 시 자산 조회 트리거
+      try {
+        window.dispatchEvent(
+          new CustomEvent("account-auth-success", {
+            detail: { accountId },
+          })
+        );
+      } catch {
+        /* noop */
+      }
     },
     onError: (e: unknown) => {
       toast.error(e instanceof Error ? e.message : "계좌 인증 실패");
