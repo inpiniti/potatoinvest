@@ -1,8 +1,7 @@
 "use client";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabaseClient";
 import { accountTokenStore } from "@/store/accountTokenStore";
 import useKakao from "./useKakao";
 import useAssets from "./useAssets";
@@ -29,14 +28,33 @@ export function useAccountAuth(accountId: number | null | undefined) {
   const now = Date.now();
   const shaped: AccountAuthData | null = useMemo(() => {
     if (!accountId || !raw?.access_token) return null;
-    const remainingMs = (raw.access_token_token_expired ?? 0) - Date.now();
+    // Ensure access_token_token_expired is a number
+    let expiredValue: number =
+      raw.access_token_token_expired as unknown as number;
+    if (typeof expiredValue === "string") {
+      expiredValue = Number(expiredValue);
+      if (isNaN(expiredValue)) expiredValue = 0;
+    }
+    if (typeof expiredValue !== "number") expiredValue = 0;
+
+    // Ensure expires_in is a number or undefined
+    let expiresInValue: number | undefined = undefined;
+    if (raw.expires_in !== undefined) {
+      expiresInValue =
+        typeof raw.expires_in === "number"
+          ? raw.expires_in
+          : Number(raw.expires_in);
+      if (isNaN(expiresInValue)) expiresInValue = undefined;
+    }
+
+    const remainingMs = expiredValue - Date.now();
     return {
       accountId,
       access_token: raw.access_token,
-      access_token_token_expired: raw.access_token_token_expired,
-      token_type: (raw as any).token_type,
-      expires_in: (raw as any).expires_in,
-      fetched_at: (raw as any).fetched_at,
+      access_token_token_expired: expiredValue,
+      token_type: raw.token_type,
+      expires_in: expiresInValue,
+      fetched_at: raw.fetched_at,
       remainingMs,
       expired: remainingMs <= 0,
     };
