@@ -41,7 +41,12 @@ export function useKakao(): UseKakaoReturn {
 
   const login = useCallback(async () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const redirectTo = `${origin}/studio2`;
+    const envRedirect = process.env.NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT;
+    const redirectTo = envRedirect
+      ? envRedirect.startsWith("http")
+        ? envRedirect
+        : `${origin}${envRedirect}`
+      : `${origin}/studio2`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "kakao",
       options: { redirectTo },
