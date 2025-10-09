@@ -49,7 +49,6 @@ const sections = [
   {
     key: "holdings",
     holdings: true,
-    rowSpan: 2, // 세로 2칸 차지
   },
   {
     key: "revenue",

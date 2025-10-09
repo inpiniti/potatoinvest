@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
 import { accountTokenStore } from "@/store/accountTokenStore";
 import useKakao from "./useKakao";
+import useAssets from "./useAssets";
 
 interface AccountAuthData {
   accountId: number;
@@ -21,6 +22,8 @@ export function useAccountAuth(accountId: number | null | undefined) {
   const { tokens, setToken } = accountTokenStore();
   const { data: kakao } = useKakao();
   const session = kakao.session;
+
+  const { refetch: assetsRefetch } = useAssets();
 
   const raw = accountId ? tokens[accountId] : undefined;
   const now = Date.now();
@@ -80,11 +83,12 @@ export function useAccountAuth(accountId: number | null | undefined) {
 
       // 계좌 인증 성공 시 자산 조회 트리거
       try {
-        window.dispatchEvent(
-          new CustomEvent("account-auth-success", {
-            detail: { accountId },
-          })
-        );
+        // window.dispatchEvent(
+        //   new CustomEvent("account-auth-success", {
+        //     detail: { accountId },
+        //   })
+        // );
+        assetsRefetch();
       } catch {
         /* noop */
       }

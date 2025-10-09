@@ -15,6 +15,8 @@ import useAssets from "@/hooks/useAssets";
 export default function AssetInfoSection() {
   const { assetInfo, isLoading, isFetching, error, refetch } = useAssets();
 
+  console.log("assetInfo", assetInfo);
+
   // 숫자 포맷팅 함수
   const formatNumber = (value) => {
     if (!value) return "-";
@@ -69,7 +71,7 @@ export default function AssetInfoSection() {
 
         {!isLoading && !error && !assetInfo && (
           <div className="text-sm text-muted-foreground">
-            자산 정보가 없습니다
+            자산 정보가 없습니다. 계좌를 선택하고 인증해주세요.
           </div>
         )}
 
@@ -93,24 +95,24 @@ export default function AssetInfoSection() {
               </div>
             </div>
 
-            {/* 평가금액 */}
+            {/* 평가금액합계 */}
             <div className="space-y-1">
               <div className="text-xs text-muted-foreground">평가금액</div>
               <div className="text-base font-semibold">
-                {formatNumber(assetInfo.evlu_amt_smtl)}
+                {formatNumber(assetInfo.evlu_amt_smtl_amt)}
                 <span className="text-xs text-muted-foreground ml-1">원</span>
               </div>
             </div>
 
-            {/* 평가손익 */}
+            {/* 평가손익금액합계 */}
             <div className="space-y-1">
               <div className="text-xs text-muted-foreground">평가손익</div>
               <div
                 className={`text-base font-semibold ${getProfitColor(
-                  assetInfo.evlu_pfls_amt_smtl
+                  assetInfo.tot_evlu_pfls_amt
                 )}`}
               >
-                {formatNumber(assetInfo.evlu_pfls_amt_smtl)}
+                {formatNumber(assetInfo.tot_evlu_pfls_amt)}
                 <span className="text-xs text-muted-foreground ml-1">원</span>
               </div>
             </div>
@@ -129,7 +131,7 @@ export default function AssetInfoSection() {
               </div>
             </div>
 
-            {/* 출금가능 */}
+            {/* 출금가능금액 */}
             <div className="space-y-1">
               <div className="text-xs text-muted-foreground">출금가능</div>
               <div className="text-base font-semibold">
@@ -147,7 +149,7 @@ export default function AssetInfoSection() {
               </div>
             </div>
 
-            {/* 미결제매수 */}
+            {/* 미결제매수금액합계 */}
             <div className="space-y-1">
               <div className="text-xs text-muted-foreground">미결제매수</div>
               <div className="text-base font-semibold">
