@@ -646,7 +646,7 @@ const crawling = async (countryCode) => {
             {
               left: "exchange",
               operation: "in_range",
-              right: ["NASDAQ"],
+              right: ["NASDAQ", "NYSE"],
             },
           ],
           filter2: {
