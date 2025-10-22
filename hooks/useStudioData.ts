@@ -211,7 +211,9 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
   const dataromaQuery = useQuery<DataromaBaseResponse>({
     queryKey: ["studio", "dataroma-base"],
     queryFn: async () => {
-      const res = await fetch("/api/dataroma/base", { cache: "no-store" });
+      const res = await fetch("/api/dataroma/base?withDetails=true", {
+        cache: "no-store",
+      });
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || "Dataroma 데이터를 불러오지 못했습니다.");
