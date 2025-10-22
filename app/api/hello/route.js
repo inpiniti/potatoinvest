@@ -196,8 +196,8 @@ const processServerPredictions = async (rawData) => {
       type: "분석",
       processedAt: new Date().toISOString(),
     }));
-  } catch (error) {
-    console.error("서버사이드 예측 처리 오류:", error);
+  } catch {
+    console.error("서버사이드 예측 처리 오류: unknown error");
     // 예측 실패 시 기본값으로 진행
     return rawData.map((item) => ({
       ...item,
@@ -249,7 +249,112 @@ export async function GET(req) {
       }));
     }
 
-    return NextResponse.json(processedData, {
+    // --- DCF 계산 보조 함수 ---
+    const toNum = (v) => {
+      if (v == null) return NaN;
+      if (typeof v === "number") return v;
+      const s = String(v).replace(/,/g, "").replace(/\s+/g, "");
+      const n = Number(s);
+      return isFinite(n) ? n : NaN;
+    };
+
+    const normalizeRate = (r) => {
+      if (r == null) return NaN;
+      const n = toNum(r);
+      if (!isFinite(n)) return NaN;
+      // If value looks like percent (>1 and <1000) treat as percent
+      if (Math.abs(n) > 1 && Math.abs(n) < 1000) return n / 100;
+      return n; // already fraction
+    };
+
+    const computeDCF = (item, opts = {}) => {
+      // opts: years, discountRate, terminalGrowth
+      const years = Number(opts.years ?? 5);
+      const terminalGrowth = typeof opts.terminalGrowth === "number" ? opts.terminalGrowth : 0.02;
+      const defaultDiscount = typeof opts.discountRate === "number" ? opts.discountRate : 0.10;
+
+      // estimate current Free Cash Flow
+      let fcf = toNum(item.free_cash_flow_ttm);
+      if (!isFinite(fcf)) {
+        const op = toNum(item.cash_f_operating_activities_ttm);
+        const capex = toNum(item.capital_expenditures_ttm);
+        if (isFinite(op) && isFinite(capex)) {
+          // capex often negative in source; use op - abs(capex)
+          fcf = op - Math.abs(capex);
+        }
+      }
+      if (!isFinite(fcf) || fcf <= 0) return { intrinsic: null, inputs: null };
+
+      // growth estimate from revenue yoy
+      let g = normalizeRate(item.total_revenue_yoy_growth_ttm);
+      if (!isFinite(g)) {
+        const eg = normalizeRate(item.earnings_per_share_diluted_yoy_growth_ttm);
+        g = isFinite(eg) ? eg : 0.05; // fallback 5%
+      }
+
+      // discount rate (simple fallback)
+      let r = normalizeRate(item.required_return || item.discount_rate || null);
+      if (!isFinite(r)) {
+        // try to infer from price_to_cash_ratio or enterprise_value_to_ebit_ttm
+        const ptc = toNum(item.price_to_cash_ratio);
+        const ev_ebit = toNum(item.enterprise_value_to_ebit_ttm);
+        if (isFinite(ptc) && ptc > 0) {
+          // higher price-to-cash -> lower discount (simplified)
+          r = Math.min(0.25, Math.max(0.03, 0.15 - (ptc - 5) * 0.005));
+        } else if (isFinite(ev_ebit) && ev_ebit > 0) {
+          r = Math.min(0.25, Math.max(0.04, 0.12 - (ev_ebit - 10) * 0.002));
+        } else {
+          r = defaultDiscount;
+        }
+      }
+
+      // Ensure sensible bounds
+      if (r <= 0) r = defaultDiscount;
+      if (g < -0.5) g = -0.5;
+
+      // Project and discount
+      let pvSum = 0;
+      for (let t = 1; t <= years; t++) {
+        const futureFcf = fcf * Math.pow(1 + g, t);
+        pvSum += futureFcf / Math.pow(1 + r, t);
+      }
+
+      // terminal value using Gordon Growth
+      const fcfAtN = fcf * Math.pow(1 + g, years);
+      const tv = (fcfAtN * (1 + terminalGrowth)) / (r - terminalGrowth);
+      const discountedTV = tv / Math.pow(1 + r, years);
+
+      const intrinsic = pvSum + discountedTV;
+      return {
+        intrinsic: isFinite(intrinsic) ? intrinsic : null,
+        inputs: {
+          fcf: fcf,
+          growth: g,
+          discountRate: r,
+          years,
+          terminalGrowth,
+        },
+      };
+    };
+
+    // Attach DCF results to each processed item
+    const enriched = processedData.map((it) => {
+      try {
+        const { intrinsic, inputs } = computeDCF(it);
+        const marketCap = toNum(it.market_cap_basic);
+        const dcf_vs_market = intrinsic && isFinite(marketCap) && marketCap > 0 ? (intrinsic / marketCap) * 100 : null;
+        return {
+          ...it,
+          dcf_intrinsic_value: intrinsic != null ? Math.round(intrinsic) : null,
+          dcf_vs_market_cap_pct: dcf_vs_market != null ? Number(dcf_vs_market.toFixed(2)) : null,
+          dcf_inputs: inputs,
+        };
+      } catch {
+        return { ...it, dcf_intrinsic_value: null, dcf_vs_market_cap_pct: null, dcf_inputs: null };
+      }
+    });
+
+    return NextResponse.json(enriched, {
       status: 200,
       headers,
     });
@@ -483,7 +588,7 @@ const crawling = async (countryCode) => {
       //   "logoid", // 로고 ID
       //   "update_mode", // 업데이트 모드
       //   "type", // 유형
-      //   "market_cap_basic", // 기본 시장 규모
+      "market_cap_basic", // 기본 시장 규모
       //   "fundamental_currency_code", // 기본 통화 코드
       //   "Perf.1Y.MarketCap", // 1년 시장 규모 성과
       "price_earnings_ttm", // 시가 총액 대비 이익(TTM)
