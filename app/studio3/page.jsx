@@ -11,87 +11,90 @@ import { selectedStockStore } from "@/store/selectedStockStore";
 
 export default function Page() {
   const { selectedStock } = selectedStockStore();
+  // normalize selectedStock to derive exchange and stock codes safely
+  let exchangeCode = "NASDAQ";
+  let stockCode = "AAPL";
+  if (selectedStock) {
+    if (typeof selectedStock === "string") {
+      const parts = selectedStock.split(":");
+      if (parts.length === 2) {
+        exchangeCode = parts[0] || exchangeCode;
+        stockCode = parts[1] || stockCode;
+      } else {
+        stockCode = selectedStock || stockCode;
+      }
+    } else {
+      exchangeCode = selectedStock.exchange || exchangeCode;
+      stockCode = selectedStock.stock || stockCode;
+    }
+  }
+
   return (
     <div className="w-full flex flex-col">
       <TickerTab />
       <div className="w-full p-4 gap-4 flex flex-col">
         <div className="w-full flex gap-4">
           <div className="shrink-0 flex flex-col gap-4">
-            <TradingViewWidget
-              symbol={
-                selectedStock
-                  ? `${selectedStock.exchange}:${selectedStock.stock}`
-                  : "NASDAQ:AAPL"
-              }
-            />
-            <CompanyProfile
-              symbol={selectedStock.stock || "AAPL"}
-              market={selectedStock.exchange || "NASDAQ"}
-            />
+            <TradingViewWidget symbol={`${exchangeCode}:${stockCode}`} />
+            <CompanyProfile symbol={stockCode} market={exchangeCode} />
           </div>
           <div className="w-full">
-            <TradingViewWidgetChart
-              symbol={selectedStock.stock || "AAPL"}
-              market={selectedStock.exchange || "NASDAQ"}
-            />
+            <TradingViewWidgetChart symbol={stockCode} market={exchangeCode} />
           </div>
         </div>
         <div className="flex gap-4 h-full">
           <div className="w-full h-[918px]">
-            <Fundamental
-              symbol={selectedStock.stock || "AAPL"}
-              market={selectedStock.exchange || "NASDAQ"}
-            />
+            <Fundamental symbol={stockCode} market={exchangeCode} />
           </div>
           <div className="flex flex-col gap-4 shrink-0">
             <div className="flex gap-4">
               <TechnicalAnalysis
-                symbol={selectedStock.stock || "AAPL"}
-                market={selectedStock.exchange || "NASDAQ"}
+                symbol={stockCode}
+                market={exchangeCode}
                 interval="1m"
               />
               <TechnicalAnalysis
-                symbol={selectedStock.stock || "AAPL"}
-                market={selectedStock.exchange || "NASDAQ"}
+                symbol={stockCode}
+                market={exchangeCode}
                 interval="5m"
               />
               <TechnicalAnalysis
-                symbol={selectedStock.stock || "AAPL"}
-                market={selectedStock.exchange || "NASDAQ"}
+                symbol={stockCode}
+                market={exchangeCode}
                 interval="15m"
               />
             </div>
             <div className="flex gap-4">
               <TechnicalAnalysis
-                symbol={selectedStock.stock || "AAPL"}
-                market={selectedStock.exchange || "NASDAQ"}
+                symbol={stockCode}
+                market={exchangeCode}
                 interval="30m"
               />
               <TechnicalAnalysis
-                symbol={selectedStock.stock || "AAPL"}
-                market={selectedStock.exchange || "NASDAQ"}
+                symbol={stockCode}
+                market={exchangeCode}
                 interval="1h"
               />
               <TechnicalAnalysis
-                symbol={selectedStock.stock || "AAPL"}
-                market={selectedStock.exchange || "NASDAQ"}
+                symbol={stockCode}
+                market={exchangeCode}
                 interval="2h"
               />
             </div>
             <div className="flex gap-4">
               <TechnicalAnalysis
-                symbol={selectedStock.stock || "AAPL"}
-                market={selectedStock.exchange || "NASDAQ"}
+                symbol={stockCode}
+                market={exchangeCode}
                 interval="1D"
               />
               <TechnicalAnalysis
-                symbol={selectedStock.stock || "AAPL"}
-                market={selectedStock.exchange || "NASDAQ"}
+                symbol={stockCode}
+                market={exchangeCode}
                 interval="1W"
               />
               <TechnicalAnalysis
-                symbol={selectedStock.stock || "AAPL"}
-                market={selectedStock.exchange || "NASDAQ"}
+                symbol={stockCode}
+                market={exchangeCode}
                 interval="1M"
               />
             </div>
