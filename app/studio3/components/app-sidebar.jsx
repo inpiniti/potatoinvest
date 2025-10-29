@@ -71,7 +71,11 @@ export function AppSidebar() {
                 })
               }
               className={`cursor-pointer hover:bg-neutral-100 ${
-                selectedStock === item.stock ? "bg-neutral-200" : ""
+                (typeof selectedStock === "string"
+                  ? selectedStock
+                  : selectedStock?.stock) === item.stock
+                  ? "bg-neutral-200"
+                  : ""
               }`}
             >
               <ItemMedia>
@@ -91,7 +95,11 @@ export function AppSidebar() {
           );
         })}
       </SidebarContent>
-      <SidebarFooter className="border-t">{selectedStock.stock}</SidebarFooter>
+      <SidebarFooter className="border-t">
+        {typeof selectedStock === "string"
+          ? selectedStock
+          : selectedStock?.stock || ""}
+      </SidebarFooter>
     </Sidebar>
   );
 }

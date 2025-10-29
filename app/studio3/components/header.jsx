@@ -8,7 +8,13 @@ const Header = () => {
   return (
     <header className="h-12 flex overflow-hidden">
       <SidebarTrigger />
-      {selectedStock.market}:{selectedStock.exchange}:{selectedStock.stock}
+      {selectedStock
+        ? typeof selectedStock === "string"
+          ? selectedStock
+          : `${selectedStock.market ?? ""}:${selectedStock.exchange ?? ""}:${
+              selectedStock.stock ?? ""
+            }`
+        : null}
     </header>
   );
 };
