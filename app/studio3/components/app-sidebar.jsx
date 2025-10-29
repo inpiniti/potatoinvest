@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { getLogoUrl } from '@/app/page/log/utils/logoUtils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { getLogoUrl } from "@/app/page/log/utils/logoUtils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Item,
   ItemActions,
@@ -10,34 +10,30 @@ import {
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from '@/components/ui/item';
+} from "@/components/ui/item";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenu,
-} from '@/components/ui/sidebar';
-import { useQuery } from '@tanstack/react-query';
-import { BadgeCheckIcon, ChevronRightIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+} from "@/components/ui/sidebar";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { selectedStockStore } from "@/store/selectedStockStore";
 
 export function AppSidebar() {
   const [dataromaBasedOnStock, setDataromaBasedOnStock] = useState([]);
-  const [selectedStock, setSelectedStock] = useState(null);
+  const { selectedStock, setSelectedStock } = selectedStockStore();
 
   const dataromaQuery = useQuery({
-    queryKey: ['studio', 'dataroma-base'],
+    queryKey: ["studio", "dataroma-base"],
     queryFn: async () => {
-      const res = await fetch('/api/dataroma/base?withDetails=true', {
-        cache: 'no-store',
+      const res = await fetch("/api/dataroma/base?withDetails=true", {
+        cache: "no-store",
       });
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(text || 'Dataroma 데이터를 불러오지 못했습니다.');
+        throw new Error(text || "Dataroma 데이터를 불러오지 못했습니다.");
       }
       return await res.json();
     },
@@ -67,9 +63,15 @@ export function AppSidebar() {
           return (
             <Item
               key={index}
-              onClick={() => setSelectedStock(item.stock)}
+              onClick={() =>
+                setSelectedStock({
+                  stock: item.stock,
+                  market: item.market,
+                  exchange: item.exchange,
+                })
+              }
               className={`cursor-pointer hover:bg-neutral-100 ${
-                selectedStock === item.stock ? 'bg-neutral-200' : ''
+                selectedStock === item.stock ? "bg-neutral-200" : ""
               }`}
             >
               <ItemMedia>
@@ -89,7 +91,7 @@ export function AppSidebar() {
           );
         })}
       </SidebarContent>
-      <SidebarFooter className="border-t">{selectedStock}</SidebarFooter>
+      <SidebarFooter className="border-t">{selectedStock.stock}</SidebarFooter>
     </Sidebar>
   );
 }

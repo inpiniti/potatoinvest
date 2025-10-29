@@ -36,7 +36,8 @@
     "app/page/sell/page.jsx",
     "app/dashboard/page.jsx",
     "app/api/hello/route.js",
-    "app/studio3/components/app-sidebar.jsx"
+    "app/studio3/components/app-sidebar.jsx",
+    "app/studio3/layout.jsx"
   ],
   "exclude": ["node_modules"]
 }

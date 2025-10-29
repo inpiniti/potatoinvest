@@ -11,6 +11,7 @@ import {
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useStudioData } from "@/hooks/useStudioData";
+import TradingViewWidget from "@/components/TradingViewWidget";
 
 // data shapes are inferred at runtime from the dataroma base API
 
@@ -88,6 +89,7 @@ export default function StudioHomePage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-4">
+      <TradingViewWidget />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Dataroma Base</h1>
         <p className="text-muted-foreground text-sm">

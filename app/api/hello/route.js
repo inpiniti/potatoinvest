@@ -270,8 +270,10 @@ export async function GET(req) {
     const computeDCF = (item, opts = {}) => {
       // opts: years, discountRate, terminalGrowth
       const years = Number(opts.years ?? 5);
-      const terminalGrowth = typeof opts.terminalGrowth === "number" ? opts.terminalGrowth : 0.02;
-      const defaultDiscount = typeof opts.discountRate === "number" ? opts.discountRate : 0.10;
+      const terminalGrowth =
+        typeof opts.terminalGrowth === "number" ? opts.terminalGrowth : 0.02;
+      const defaultDiscount =
+        typeof opts.discountRate === "number" ? opts.discountRate : 0.1;
 
       // estimate current Free Cash Flow
       let fcf = toNum(item.free_cash_flow_ttm);
@@ -288,7 +290,9 @@ export async function GET(req) {
       // growth estimate from revenue yoy
       let g = normalizeRate(item.total_revenue_yoy_growth_ttm);
       if (!isFinite(g)) {
-        const eg = normalizeRate(item.earnings_per_share_diluted_yoy_growth_ttm);
+        const eg = normalizeRate(
+          item.earnings_per_share_diluted_yoy_growth_ttm
+        );
         g = isFinite(eg) ? eg : 0.05; // fallback 5%
       }
 
@@ -342,15 +346,24 @@ export async function GET(req) {
       try {
         const { intrinsic, inputs } = computeDCF(it);
         const marketCap = toNum(it.market_cap_basic);
-        const dcf_vs_market = intrinsic && isFinite(marketCap) && marketCap > 0 ? (intrinsic / marketCap) * 100 : null;
+        const dcf_vs_market =
+          intrinsic && isFinite(marketCap) && marketCap > 0
+            ? (intrinsic / marketCap) * 100
+            : null;
         return {
           ...it,
           dcf_intrinsic_value: intrinsic != null ? Math.round(intrinsic) : null,
-          dcf_vs_market_cap_pct: dcf_vs_market != null ? Number(dcf_vs_market.toFixed(2)) : null,
+          dcf_vs_market_cap_pct:
+            dcf_vs_market != null ? Number(dcf_vs_market.toFixed(2)) : null,
           dcf_inputs: inputs,
         };
       } catch {
-        return { ...it, dcf_intrinsic_value: null, dcf_vs_market_cap_pct: null, dcf_inputs: null };
+        return {
+          ...it,
+          dcf_intrinsic_value: null,
+          dcf_vs_market_cap_pct: null,
+          dcf_inputs: null,
+        };
       }
     });
 
@@ -535,7 +548,7 @@ const crawling = async (countryCode) => {
       //   "sector", // 섹터
       "recommendation_mark", // 추천 마크
       "price_target_1y_delta",
-      //   "exchange", // 거래소
+      "exchange", // 거래소
     ];
     // const 성과 = [
     //   "name", // 이름
