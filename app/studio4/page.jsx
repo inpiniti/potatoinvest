@@ -1,23 +1,23 @@
-import { Button } from '@/components/ui/button';
-import { HiOutlineBanknotes } from 'react-icons/hi2';
-import { IoPersonCircleOutline } from 'react-icons/io5';
-import { MdOutlineRecommend } from 'react-icons/md';
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { HiOutlineBanknotes } from "react-icons/hi2";
+import { IoPersonCircleOutline } from "react-icons/io5";
+import { MdOutlineRecommend } from "react-icons/md";
 
 const Studio4 = () => {
   return (
-    <>
-      <Button variant="outline" size="sm">
-        <HiOutlineBanknotes /> 계좌
+    <div className="flex gap-2">
+      <Button asChild variant="outline" size="sm" disabled>
+        <Link href="/studio4/held">
+          <IoPersonCircleOutline /> 보유종목
+        </Link>
       </Button>
-      <Button variant="outline" size="sm">
-        <IoPersonCircleOutline />
-        보유종목
+      <Button asChild variant="outline" size="sm">
+        <Link href="/studio4/recommend">
+          <MdOutlineRecommend /> 추천종목
+        </Link>
       </Button>
-      <Button variant="outline" size="sm">
-        <MdOutlineRecommend />
-        추천종목
-      </Button>
-    </>
+    </div>
   );
 };
 

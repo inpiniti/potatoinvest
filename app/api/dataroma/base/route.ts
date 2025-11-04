@@ -147,6 +147,8 @@ export async function GET(req: NextRequest) {
                 let bbLower: number | undefined = undefined;
                 let bbMiddle: number | undefined = undefined;
                 let bbUpper: number | undefined = undefined;
+                let close: number | undefined = undefined;
+                let ai: number | undefined = undefined;
                 if (item) {
                   const raw = item["dcf_vs_market_cap_pct"];
                   logoid =
@@ -173,6 +175,15 @@ export async function GET(req: NextRequest) {
                     typeof item["b_b_upper"] === "number"
                       ? item["b_b_upper"]
                       : undefined;
+                  close =
+                    typeof item["close"] === "number"
+                      ? item["close"]
+                      : undefined;
+                  ai =
+                    typeof item["예측결과"] === "number"
+                      ? item["예측결과"]
+                      : undefined;
+
                   if (typeof raw === "number") dcf = raw;
                   else if (typeof raw === "string") {
                     const n = Number(raw);
@@ -188,6 +199,8 @@ export async function GET(req: NextRequest) {
                   bbLower,
                   bbMiddle,
                   bbUpper,
+                  close,
+                  ai,
                 };
               });
             }
