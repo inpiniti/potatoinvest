@@ -725,6 +725,9 @@ const crawling = async (countryCode) => {
       //   "Stoch.K", // 스토캐스틱 K
       //   "Stoch.D", // 스토캐스틱 D
       //   "exchange", // 거래소
+      "BB.upper", // 볼린저 밴드 상단
+      "BB.basis", // 볼린저 밴드 중간
+      "BB.lower", // 볼린저 밴드 하단
     ];
 
     const columns = Array.from(

@@ -144,6 +144,9 @@ export async function GET(req: NextRequest) {
                 let logoid: string | undefined = undefined;
                 let market: string | undefined = undefined;
                 let exchange: string | undefined = undefined;
+                let bbLower: number | undefined = undefined;
+                let bbMiddle: number | undefined = undefined;
+                let bbUpper: number | undefined = undefined;
                 if (item) {
                   const raw = item["dcf_vs_market_cap_pct"];
                   logoid =
@@ -158,6 +161,18 @@ export async function GET(req: NextRequest) {
                     typeof item["exchange"] === "string"
                       ? item["exchange"]
                       : undefined;
+                  bbLower =
+                    typeof item["b_b_lower"] === "number"
+                      ? item["b_b_lower"]
+                      : undefined;
+                  bbMiddle =
+                    typeof item["b_b_basis"] === "number"
+                      ? item["b_b_basis"]
+                      : undefined;
+                  bbUpper =
+                    typeof item["b_b_upper"] === "number"
+                      ? item["b_b_upper"]
+                      : undefined;
                   if (typeof raw === "number") dcf = raw;
                   else if (typeof raw === "string") {
                     const n = Number(raw);
@@ -170,6 +185,9 @@ export async function GET(req: NextRequest) {
                   logoid,
                   market,
                   exchange,
+                  bbLower,
+                  bbMiddle,
+                  bbUpper,
                 };
               });
             }
