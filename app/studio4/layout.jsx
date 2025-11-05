@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { HiOutlineBanknotes } from "react-icons/hi2";
+import { CiLogin } from "react-icons/ci";
 
 const PAGE_TITLES = {
   "/studio4": "Potato Invest",
@@ -13,6 +14,7 @@ const PAGE_TITLES = {
   "/studio4/held": "보유종목",
   "/studio4/recommend": "추천종목",
   "/studio4/settings": "설정",
+  "/studio4/login": "로그인",
   // 필요한 경로 추가
 };
 
@@ -78,11 +80,18 @@ const Header = () => {
         <div className="font-semibold" suppressHydrationWarning>
           {title}
         </div>
-        <Link href="/studio4/account">
-          <div className="flex items-center gap-1">
-            <HiOutlineBanknotes /> 계좌
-          </div>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/studio4/account">
+            <Button variant="outline" size="sm">
+              <HiOutlineBanknotes /> 계좌
+            </Button>
+          </Link>
+          <Link href="/studio4/login">
+            <Button variant="outline" size="sm">
+              <CiLogin /> 로그인
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
