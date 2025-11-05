@@ -1,16 +1,33 @@
-import { Button } from "@/components/ui/button";
+'use client';
+
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from "@/components/ui/card";
-import Link from "next/link";
-import { IoPersonCircleOutline } from "react-icons/io5";
-import { MdOutlineRecommend } from "react-icons/md";
+} from '@/components/ui/card';
+import Link from 'next/link';
+import { AiFillIdcard } from 'react-icons/ai';
+import { IoPersonCircleOutline } from 'react-icons/io5';
+import { MdOutlineRecommend } from 'react-icons/md';
+import { headerStore } from '@/store/headerStore';
+import { useEffect } from 'react';
 
 const Studio4 = () => {
+  const { setLeft } = headerStore();
+
+  useEffect(() => {
+    setLeft(
+      <Link href="/studio4/other/created">
+        <Button variant="outline" size="sm">
+          <AiFillIdcard /> 만든사람
+        </Button>
+      </Link>
+    );
+  }, []);
+
   return (
     <div className="flex flex-col gap-4 items-center p-4">
       <Card className="w-full flex flex-col gap-4">

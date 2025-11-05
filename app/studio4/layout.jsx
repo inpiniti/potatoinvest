@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { HiOutlineBanknotes } from 'react-icons/hi2';
 import { CiLogin } from 'react-icons/ci';
+import { headerStore } from '@/store/headerStore';
 
 const PAGE_TITLES = {
   '/studio4': 'Potato Invest',
@@ -36,6 +37,8 @@ const Header = () => {
   const [title, setTitle] = useState(DEFAULT_TITLE);
   // 스크롤 방향에 따라 헤더 자동 숨김/표시
   const [show, setShow] = useState(true); // 디폴트로 내려온 상태(표시)
+
+  const { left, right } = headerStore();
   const lastYRef = useRef(0);
 
   useEffect(() => {
@@ -69,29 +72,37 @@ const Header = () => {
       style={{ transform: show ? 'translateY(0)' : 'translateY(-100%)' }}
     >
       <div className="flex justify-between items-center h-12 px-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => window.history.back()}
-        >
-          <IoIosArrowBack />
-        </Button>
+        {left ? (
+          left
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.history.back()}
+          >
+            <IoIosArrowBack />
+          </Button>
+        )}
         {/* suppressHydrationWarning: 서버/클라이언트 초기 텍스트 차이를 안전하게 무시 */}
         <div className="font-semibold" suppressHydrationWarning>
           {title}
         </div>
-        <div className="flex gap-2">
-          <Link href="/studio4/account">
-            <Button variant="outline" size="sm">
-              <HiOutlineBanknotes /> 계좌
-            </Button>
-          </Link>
-          <Link href="/studio4/login">
-            <Button variant="outline" size="sm">
-              <CiLogin /> 로그인
-            </Button>
-          </Link>
-        </div>
+        {right ? (
+          right
+        ) : (
+          <div className="flex gap-2">
+            <Link href="/studio4/account">
+              <Button variant="outline" size="sm">
+                <HiOutlineBanknotes /> 계좌
+              </Button>
+            </Link>
+            <Link href="/studio4/login">
+              <Button variant="outline" size="sm">
+                <CiLogin /> 로그인
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
