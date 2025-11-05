@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from '@/components/ui/card';
-import Link from 'next/link';
-import { AiFillIdcard } from 'react-icons/ai';
-import { IoPersonCircleOutline } from 'react-icons/io5';
-import { MdOutlineRecommend } from 'react-icons/md';
-import { headerStore } from '@/store/headerStore';
-import { useEffect } from 'react';
+} from "@/components/ui/card";
+import Link from "next/link";
+import { AiFillIdcard } from "react-icons/ai";
+import { IoPersonCircleOutline } from "react-icons/io5";
+import { MdOutlineRecommend } from "react-icons/md";
+import { headerStore } from "@/store/headerStore";
+import { useEffect } from "react";
 
 const Studio4 = () => {
   const { setLeft } = headerStore();
@@ -26,6 +26,10 @@ const Studio4 = () => {
         </Button>
       </Link>
     );
+    return () => {
+      // 페이지 이탈 시 헤더 왼쪽 영역 초기화
+      setLeft(null);
+    };
   }, []);
 
   return (

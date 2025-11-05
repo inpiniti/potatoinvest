@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
@@ -7,9 +7,9 @@ import {
   FieldLegend,
   FieldSeparator,
   FieldSet,
-} from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const created = () => {
   return (
@@ -27,7 +27,7 @@ const created = () => {
                 <Input
                   id="checkout-7j9-card-name-43j"
                   value="GRM (서울도시가스그룹)"
-                  readonly
+                  readOnly
                 />
               </Field>
               <Field>
@@ -37,7 +37,7 @@ const created = () => {
                 <Input
                   id="checkout-7j9-card-number-uw1"
                   value="React 개발자"
-                  readonly
+                  readOnly
                 />
               </Field>
             </FieldGroup>

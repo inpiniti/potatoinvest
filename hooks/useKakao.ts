@@ -1,7 +1,7 @@
-'use client';
-import { useEffect, useState, useCallback } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabaseClient';
+"use client";
+import { useEffect, useState, useCallback } from "react";
+import type { Session, User } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabaseClient";
 
 export interface KakaoAuthData {
   session: Session | null;
@@ -22,40 +22,43 @@ export function useKakao(): UseKakaoReturn {
 
   useEffect(() => {
     let mounted = true;
-    supabase.auth
-      .getSession()
-      .then(({ data }) => {
+    supabase?.auth
+      ?.getSession()
+      ?.then(({ data }) => {
         if (!mounted) return;
-        setSession(data.session);
+        setSession(data?.session);
       })
-      .finally(() => mounted && setLoading(false));
+      ?.finally(() => mounted && setLoading(false));
 
-    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-    });
+    const { data } = supabase?.auth?.onAuthStateChange(
+      (_event, nextSession) => {
+        setSession(nextSession);
+      }
+    );
     return () => {
       mounted = false;
-      data.subscription.unsubscribe();
+      data?.subscription?.unsubscribe();
     };
   }, []);
 
   const login = useCallback(async () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const envRedirect = process.env.NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT;
+    const origin =
+      typeof window !== "undefined" ? window?.location?.origin : "";
+    const envRedirect = process?.env?.NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT;
     const redirectTo = envRedirect
-      ? envRedirect.startsWith('http')
+      ? envRedirect?.startsWith("http")
         ? envRedirect
         : `${origin}${envRedirect}`
       : `${origin}/studio4/login`;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'kakao',
+    const { error } = await supabase?.auth?.signInWithOAuth({
+      provider: "kakao",
       options: { redirectTo },
     });
     if (error) throw error;
   }, []);
 
   const logout = useCallback(async () => {
-    await supabase.auth.signOut();
+    await supabase?.auth?.signOut();
   }, []);
 
   return {
