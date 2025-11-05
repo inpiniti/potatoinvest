@@ -1,21 +1,40 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 
-import useKakao from '@/hooks/useKakao';
+import useKakao from "@/hooks/useKakao";
+import { headerStore } from "@/store/headerStore";
+import Link from "next/link";
+import { useEffect } from "react";
+import { IoHome } from "react-icons/io5";
 
 const login = () => {
   const { data, login, logout } = useKakao();
+  const { setLeft } = headerStore();
+
+  useEffect(() => {
+    setLeft(
+      <Link href="/studio4">
+        <Button variant="outline" size="sm">
+          <IoHome />
+        </Button>
+      </Link>
+    );
+    return () => {
+      // 페이지 이탈 시 헤더 왼쪽 영역 초기화
+      setLeft(null);
+    };
+  }, []);
 
   return (
-    <div className="flex flex-col items-center pt-4">
+    <div className="flex flex-col items-center p-4">
       {data.isLoggedIn ? (
         <Card className="w-96 flex flex-col gap-4">
           <CardHeader>
@@ -31,7 +50,7 @@ const login = () => {
           </CardContent>
         </Card>
       ) : (
-        <Card className="w-96 flex flex-col gap-4">
+        <Card className="w-full max-w-96 flex flex-col gap-4">
           <CardHeader>
             <CardTitle>Potato Invest 로그인</CardTitle>
             <CardDescription>
