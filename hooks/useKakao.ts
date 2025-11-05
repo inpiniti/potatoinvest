@@ -1,7 +1,7 @@
-"use client";
-import { useEffect, useState, useCallback } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabaseClient";
+'use client';
+import { useEffect, useState, useCallback } from 'react';
+import type { Session, User } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 
 export interface KakaoAuthData {
   session: Session | null;
@@ -40,15 +40,15 @@ export function useKakao(): UseKakaoReturn {
   }, []);
 
   const login = useCallback(async () => {
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const envRedirect = process.env.NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT;
     const redirectTo = envRedirect
-      ? envRedirect.startsWith("http")
+      ? envRedirect.startsWith('http')
         ? envRedirect
         : `${origin}${envRedirect}`
-      : `${origin}/studio2`;
+      : `${origin}/studio4/login`;
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: "kakao",
+      provider: 'kakao',
       options: { redirectTo },
     });
     if (error) throw error;
