@@ -1,5 +1,5 @@
 // /api/dataroma/base?withDetails=true 호출
-'use client';
+"use client";
 
 import {
   Table,
@@ -8,13 +8,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 
-import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from "@/components/ui/skeleton";
 
-import { useEffect, useState } from 'react';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 const recommend = () => {
   const [data, setData] = useState([]);
@@ -23,7 +26,7 @@ const recommend = () => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const response = await fetch('/api/dataroma/base?withDetails=true');
+      const response = await fetch("/api/dataroma/base?withDetails=true");
       const data = await response.json();
       setData(data?.based_on_stock);
       setLoading(false);
@@ -33,9 +36,9 @@ const recommend = () => {
 
   // 현재가격이 상한선 보다 크면 빨간색, 하한선 보다 작으면 파란색
   const getPriceColor = (price, lower, upper) => {
-    if (price >= upper) return 'text-red-400';
-    if (price <= lower) return 'text-blue-400';
-    return '';
+    if (price >= upper) return "text-red-400";
+    if (price <= lower) return "text-blue-400";
+    return "";
   };
 
   // 미래가치가 100% 이하인 종목은 text-red-50
@@ -46,13 +49,13 @@ const recommend = () => {
   // 미래가치가 700% 이상인 종목은 text-red-500
   // 미래가치가 1000% 이상인 종목은 text-red-600
   const getFutureValueColor = (value) => {
-    if (value >= 1000) return 'text-red-600';
-    if (value >= 700) return 'text-red-500';
-    if (value >= 500) return 'text-red-400';
-    if (value >= 300) return 'text-red-300';
-    if (value >= 200) return 'text-red-200';
-    if (value >= 100) return 'text-red-100';
-    return 'text-red-50';
+    if (value >= 1000) return "text-red-600";
+    if (value >= 700) return "text-red-500";
+    if (value >= 500) return "text-red-400";
+    if (value >= 300) return "text-red-300";
+    if (value >= 200) return "text-red-200";
+    if (value >= 100) return "text-red-100";
+    return "text-red-50";
   };
 
   // 단기 예측이 50이하는 text-red-50
@@ -63,76 +66,154 @@ const recommend = () => {
   // 단기 예측이 61~65 text-red-500
   // 단기 예측이 66 이상 text-red-600
   const getAIPredictionColor = (value) => {
-    if (value * 100 >= 66) return 'text-red-600';
-    if (value * 100 >= 61) return 'text-red-500';
-    if (value * 100 >= 58) return 'text-red-400';
-    if (value * 100 >= 55) return 'text-red-300';
-    if (value * 100 >= 53) return 'text-red-200';
-    if (value * 100 >= 51) return 'text-red-100';
-    return 'text-red-50';
+    if (value * 100 >= 66) return "text-red-600";
+    if (value * 100 >= 61) return "text-red-500";
+    if (value * 100 >= 58) return "text-red-400";
+    if (value * 100 >= 55) return "text-red-300";
+    if (value * 100 >= 53) return "text-red-200";
+    if (value * 100 >= 51) return "text-red-100";
+    return "text-red-50";
   };
 
+  const [selectedTab, setSelectedTab] = useState("all");
+
+  const filteredData = useMemo(() => {
+    return data?.filter((item) => {
+      if (selectedTab === "buy") {
+        return (
+          item.ai >= 0.5 &&
+          item.dcf_vs_market_cap_pct >= 300 &&
+          item.close <= item.bbLower
+        );
+      }
+      if (selectedTab === "sell") {
+        return item.ai < 0.5 && item.close > item.bbUpper;
+      }
+      return true;
+    });
+  }, [data, selectedTab]);
+
+  // Virtualization setup
+  const parentRef = useRef(null);
+  const rowVirtualizer = useVirtualizer({
+    count: filteredData?.length ?? 0,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 44, // px per row (adjust if row height changes)
+    overscan: 8,
+  });
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+  const paddingTop = virtualItems.length > 0 ? virtualItems[0].start : 0;
+  const paddingBottom =
+    virtualItems.length > 0
+      ? totalSize - virtualItems[virtualItems.length - 1].end
+      : 0;
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>로고</TableHead>
-          <TableHead>종목</TableHead>
-          <TableHead>투자자 수</TableHead>
-          <TableHead>미래 내재가치</TableHead>
-          <TableHead>상한선</TableHead>
-          <TableHead>현재가격</TableHead>
-          <TableHead>하한선</TableHead>
-          <TableHead>AI단기예측</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {loading
-          ? [...Array(20)].map(() => (
-              <TableRow>
-                {[...Array(8)].map(() => (
-                  <TableCell>
-                    <Skeleton className="h-4 w-10" />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          : data.map((item) => (
-              <TableRow key={item.stock}>
-                <TableCell>
-                  <Avatar className="border w-6 h-6">
-                    <AvatarImage
-                      src={`https://s3-symbol-logo.tradingview.com/${item.logoid}--big.svg`}
-                      alt={item.stock}
-                    />
-                    <AvatarFallback>{item.stock}</AvatarFallback>
-                  </Avatar>
-                </TableCell>
-                <TableCell>{item.stock}</TableCell>
-                <TableCell>{item.person_count}</TableCell>
-                <TableCell
-                  className={getFutureValueColor(item.dcf_vs_market_cap_pct)}
-                >
-                  {Math.floor(item.dcf_vs_market_cap_pct || 0)}%
-                </TableCell>
-                <TableCell>${Math.floor(item.bbUpper)}</TableCell>
-                <TableCell
-                  className={getPriceColor(
-                    item.close,
-                    item.bbLower,
-                    item.bbUpper
-                  )}
-                >
-                  ${Math.floor(item.close)}
-                </TableCell>
-                <TableCell>${Math.floor(item.bbLower)}</TableCell>
-                <TableCell className={getAIPredictionColor(item.ai)}>
-                  {(item.ai * 100).toFixed(2)}%
-                </TableCell>
-              </TableRow>
-            ))}
-      </TableBody>
-    </Table>
+    <div>
+      <Tabs
+        value={selectedTab}
+        onValueChange={(e) => {
+          console.log(e);
+          setSelectedTab(e);
+        }}
+        className="m-2"
+      >
+        <TabsList>
+          <TabsTrigger value="all">전체</TabsTrigger>
+          <TabsTrigger value="sell">매도추천</TabsTrigger>
+          <TabsTrigger value="buy">매수추천</TabsTrigger>
+        </TabsList>
+      </Tabs>
+      <div
+        ref={parentRef}
+        className="h-[calc(100vh-100px)] overflow-auto border-t"
+      >
+        <Table>
+          <TableHeader className="sticky top-0 bg-background z-10">
+            <TableRow>
+              <TableHead>로고</TableHead>
+              <TableHead>종목</TableHead>
+              <TableHead>투자자 수</TableHead>
+              <TableHead>미래 내재가치</TableHead>
+              <TableHead>상한선</TableHead>
+              <TableHead>현재가격</TableHead>
+              <TableHead>하한선</TableHead>
+              <TableHead>AI단기예측</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              [...Array(20)].map((_, index) => (
+                <TableRow key={index}>
+                  {[...Array(8)].map((_, index) => (
+                    <TableCell key={index}>
+                      <Skeleton className="h-4 w-10" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <>
+                {paddingTop > 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8}>
+                      <div style={{ height: paddingTop }} />
+                    </TableCell>
+                  </TableRow>
+                )}
+                {virtualItems.map((vi) => {
+                  const item = filteredData[vi.index];
+                  return (
+                    <TableRow key={item.stock} data-index={vi.index}>
+                      <TableCell>
+                        <Avatar className="border w-6 h-6">
+                          <AvatarImage
+                            src={`https://s3-symbol-logo.tradingview.com/${item.logoid}.svg`}
+                            alt={item.stock}
+                          />
+                          <AvatarFallback>{item.stock}</AvatarFallback>
+                        </Avatar>
+                      </TableCell>
+                      <TableCell>{item.stock}</TableCell>
+                      <TableCell>{item.person_count}</TableCell>
+                      <TableCell
+                        className={getFutureValueColor(
+                          item.dcf_vs_market_cap_pct
+                        )}
+                      >
+                        {Math.floor(item.dcf_vs_market_cap_pct || 0)}%
+                      </TableCell>
+                      <TableCell>${Math.floor(item.bbUpper)}</TableCell>
+                      <TableCell
+                        className={getPriceColor(
+                          item.close,
+                          item.bbLower,
+                          item.bbUpper
+                        )}
+                      >
+                        ${Math.floor(item.close)}
+                      </TableCell>
+                      <TableCell>${Math.floor(item.bbLower)}</TableCell>
+                      <TableCell className={getAIPredictionColor(item.ai)}>
+                        {(item.ai * 100).toFixed(2)}%
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {paddingBottom > 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8}>
+                      <div style={{ height: paddingBottom }} />
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   );
 };
 
