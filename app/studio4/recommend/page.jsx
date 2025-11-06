@@ -10,6 +10,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+
+import { Button } from "@/components/ui/button";
+// NOTE: ScrollArea는 부모 높이를 고정해야만 스크롤이 작동합니다.
+// 본 시트 목록은 "최대 높이 제한 + 내용이 넘칠 때만 스크롤" 요구라서
+// 단순 div + overflow-auto로 구현해 빈 공간 없이 동작하도록 합니다.
+
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemMedia,
+  ItemTitle,
+  ItemDescription,
+} from "@/components/ui/item";
+
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,6 +41,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { BadgeCheckIcon, ChevronRightIcon } from "lucide-react";
 
 const recommend = () => {
   const [data, setData] = useState([]);
@@ -135,11 +159,19 @@ const recommend = () => {
               <TableHead>로고</TableHead>
               <TableHead>종목</TableHead>
               <TableHead>투자자 수</TableHead>
-              <TableHead>미래 내재가치</TableHead>
+              <TableHead>
+                <Button variant="outline" size="sm">
+                  미래 내재가치
+                </Button>
+              </TableHead>
               <TableHead>상한선</TableHead>
               <TableHead>현재가격</TableHead>
               <TableHead>하한선</TableHead>
-              <TableHead>AI단기예측</TableHead>
+              <TableHead>
+                <Button variant="outline" size="sm">
+                  AI단기예측
+                </Button>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -176,7 +208,37 @@ const recommend = () => {
                         </Avatar>
                       </TableCell>
                       <TableCell>{item.stock}</TableCell>
-                      <TableCell>{item.person_count}</TableCell>
+                      <TableCell>
+                        <Sheet>
+                          <SheetTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              {item.person_count}명
+                            </Button>
+                          </SheetTrigger>
+                          <SheetContent side="bottom">
+                            <SheetHeader>
+                              <SheetTitle>{item.stock} 투자자</SheetTitle>
+                              <SheetDescription>
+                                {item.person_count}명의 투자자가 이 종목을
+                                보유하고 있습니다.
+                              </SheetDescription>
+                            </SheetHeader>
+                            <div className="max-h-[70vh] overflow-auto px-4 flex flex-col gap-2 pb-4">
+                              {item.person
+                                .sort((a, b) => a.no - b.no)
+                                .map((p) => (
+                                  <div
+                                    key={p.no}
+                                    className="flex justify-between"
+                                  >
+                                    <div>{p.name}</div>
+                                    <div>{p.ratio}</div>
+                                  </div>
+                                ))}
+                            </div>
+                          </SheetContent>
+                        </Sheet>
+                      </TableCell>
                       <TableCell
                         className={getFutureValueColor(
                           item.dcf_vs_market_cap_pct
