@@ -1,88 +1,139 @@
+'use client';
+
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 
-const invoices = [
-  {
-    invoice: "INV001",
-    paymentStatus: "Paid",
-    totalAmount: "$250.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV002",
-    paymentStatus: "Pending",
-    totalAmount: "$150.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV003",
-    paymentStatus: "Unpaid",
-    totalAmount: "$350.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV004",
-    paymentStatus: "Paid",
-    totalAmount: "$450.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV005",
-    paymentStatus: "Paid",
-    totalAmount: "$550.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV006",
-    paymentStatus: "Pending",
-    totalAmount: "$200.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV007",
-    paymentStatus: "Unpaid",
-    totalAmount: "$300.00",
-    paymentMethod: "Credit Card",
-  },
-];
+import { useStudioData } from '@/hooks/useStudioData';
+import useKakao from '@/hooks/useKakao';
+import dayjs from 'dayjs';
+import { headerStore } from '@/store/headerStore';
+import { useEffect } from 'react';
+import { HiOutlineBanknotes } from 'react-icons/hi2';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircleIcon } from 'lucide-react';
+import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
+import { Spinner } from '@/components/ui/spinner';
+import { useState } from 'react';
 
 const account = () => {
+  const { setRight } = headerStore();
+
+  useEffect(() => {
+    setRight(
+      <Link href="/studio4/other/created">
+        <Button variant="outline" size="sm">
+          <HiOutlineBanknotes /> 계좌추가
+        </Button>
+      </Link>
+    );
+    return () => {
+      // 페이지 이탈 시 헤더 오른쪽 영역 초기화
+      setRight(null);
+    };
+  }, []);
+
+  const { mutations } = useStudioData();
+  const [selectedId, setSelectedId] = useState(null);
+  const [isLogging, setIsLogging] = useState(false);
+  const [completed, setCompleted] = useState(false);
+
+  const handleRowClick = async (id) => {
+    if (!id) return;
+    setSelectedId(id);
+    setIsLogging(true);
+    setCompleted(false);
+    try {
+      await mutations.loginAccount(id);
+      setCompleted(true);
+    } catch (err) {
+      // 로그인 실패는 기존 toast 로 처리되므로 로컬 상태만 업데이트
+      setCompleted(false);
+    } finally {
+      setIsLogging(false);
+    }
+  };
+
+  const { data } = useKakao();
+  const {
+    accounts, // 계좌 목록
+  } = useStudioData();
+
+  if (!data.isLoggedIn) {
+    return <>로그인이 필요합니다.</>;
+  }
+
   return (
-    <Table>
-      <TableCaption>A list of your recent invoices.</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[100px]">Invoice</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Method</TableHead>
-          <TableHead className="text-right">Amount</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {invoices.map((invoice) => (
-          <TableRow key={invoice.invoice}>
-            <TableCell className="font-medium">{invoice.invoice}</TableCell>
-            <TableCell>{invoice.paymentStatus}</TableCell>
-            <TableCell>{invoice.paymentMethod}</TableCell>
-            <TableCell className="text-right">{invoice.totalAmount}</TableCell>
+    <>
+      <div className="p-2">
+        {isLogging ? (
+          <div className="w-full">
+            <Item variant="muted">
+              <ItemMedia>
+                <Spinner />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle className="line-clamp-1">
+                  계좌 로그인 중...
+                </ItemTitle>
+              </ItemContent>
+            </Item>
+          </div>
+        ) : completed ? (
+          <Alert className="w-full">
+            <AlertTitle>완료</AlertTitle>
+          </Alert>
+        ) : (
+          <Alert
+            variant="destructive"
+            className="text-red-500 w-full bg-red-50 border-red-200"
+          >
+            <AlertCircleIcon />
+            <AlertTitle>계좌를 선택해주세요.</AlertTitle>
+            <AlertDescription>
+              <p>아직 계좌를 선택하지 않았습니다.</p>
+              <ul className="list-inside list-disc text-sm">
+                <li>선택한 계좌의 정보를 볼 수 있습니다.</li>
+                <li>보유한 종목을 확인할 수 있습니다.</li>
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+      <Table className="border-y">
+        <TableHeader>
+          <TableRow>
+            <TableHead>계좌이름</TableHead>
+            <TableHead>계좌번호</TableHead>
+            <TableHead>생성일</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-      <TableFooter>
-        <TableRow>
-          <TableCell colSpan={3}>Total</TableCell>
-          <TableCell className="text-right">$2,500.00</TableCell>
-        </TableRow>
-      </TableFooter>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {accounts.map((account) => (
+            <TableRow
+              key={account.id}
+              className={`cursor-pointer hover:bg-gray-50 ${
+                selectedId === account.id ? 'bg-gray-100' : ''
+              }`}
+              onClick={() => handleRowClick(account.id)}
+            >
+              <TableCell>{account.alias}</TableCell>
+              <TableCell>{account.account_number}</TableCell>
+              <TableCell>
+                {dayjs(account.created_at).format('YYYY-MM-DD')}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </>
   );
 };
 
