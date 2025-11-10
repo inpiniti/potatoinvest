@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Table,
@@ -7,21 +7,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 
-import { useStudioData } from '@/hooks/useStudioData';
-import useKakao from '@/hooks/useKakao';
-import dayjs from 'dayjs';
-import { headerStore } from '@/store/headerStore';
-import { useEffect } from 'react';
-import { HiOutlineBanknotes } from 'react-icons/hi2';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircleIcon } from 'lucide-react';
-import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
-import { Spinner } from '@/components/ui/spinner';
-import { useState } from 'react';
+import { useStudioData } from "@/hooks/useStudioData";
+import useKakao from "@/hooks/useKakao";
+import dayjs from "dayjs";
+import { headerStore } from "@/store/headerStore";
+import { useEffect, useMemo } from "react";
+import { HiOutlineBanknotes } from "react-icons/hi2";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircleIcon } from "lucide-react";
+import { Item, ItemContent, ItemMedia, ItemTitle } from "@/components/ui/item";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
+import { Card } from "@/components/ui/card";
+import { accountUiStore } from "@/store/accountUiStore";
 
 const account = () => {
   const { setRight } = headerStore();
@@ -41,9 +44,15 @@ const account = () => {
   }, []);
 
   const { mutations } = useStudioData();
-  const [selectedId, setSelectedId] = useState(null);
-  const [isLogging, setIsLogging] = useState(false);
-  const [completed, setCompleted] = useState(false);
+  // Persisted UI state from zustand
+  const {
+    selectedId,
+    isLogging,
+    completed,
+    setSelectedId,
+    setIsLogging,
+    setCompleted,
+  } = accountUiStore();
 
   const handleRowClick = async (id) => {
     if (!id) return;
@@ -63,8 +72,23 @@ const account = () => {
 
   const { data } = useKakao();
   const {
+    presentBalance, // 계좌 데이터
     accounts, // 계좌 목록
+    activeAccountId,
   } = useStudioData();
+
+  // If there's an already active account, reflect it as selected on first mount
+  useEffect(() => {
+    if (!selectedId && activeAccountId) {
+      setSelectedId(activeAccountId);
+    }
+    // only run when active changes from null and no selection present
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeAccountId]);
+
+  const output3 = useMemo(() => {
+    return presentBalance?.output3;
+  }, [presentBalance]);
 
   if (!data.isLoggedIn) {
     return <>로그인이 필요합니다.</>;
@@ -87,8 +111,51 @@ const account = () => {
             </Item>
           </div>
         ) : completed ? (
-          <Alert className="w-full">
-            <AlertTitle>완료</AlertTitle>
+          <Alert className="w-full grid grid-cols-2 px-4 gap-4">
+            <div className="flex flex-col gap-1">
+              <Label>평가손익</Label>
+              <Input
+                className="text-blue-500 font-bold"
+                value={Number(output3?.tot_evlu_pfls_amt).toLocaleString()}
+                readOnly
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label>평가수익률(%)</Label>
+              <Input
+                className="text-blue-500 font-bold"
+                value={Number(output3?.evlu_erng_rt1).toFixed(2)}
+                readOnly
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label>평가금액</Label>
+              <Input
+                value={Number(output3?.evlu_amt_smtl_amt).toLocaleString()}
+                readOnly
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label>매입금액</Label>
+              <Input
+                value={Number(output3?.pchs_amt_smtl_amt).toLocaleString()}
+                readOnly
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label>총자산</Label>
+              <Input
+                value={Number(output3?.tot_asst_amt).toLocaleString()}
+                readOnly
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label>예수금</Label>
+              <Input
+                value={Number(output3?.tot_frcr_cblc_smtl).toLocaleString()}
+                readOnly
+              />
+            </div>
           </Alert>
         ) : (
           <Alert
@@ -120,14 +187,14 @@ const account = () => {
             <TableRow
               key={account.id}
               className={`cursor-pointer hover:bg-gray-50 ${
-                selectedId === account.id ? 'bg-gray-100' : ''
+                selectedId === account.id ? "bg-gray-100" : ""
               }`}
               onClick={() => handleRowClick(account.id)}
             >
               <TableCell>{account.alias}</TableCell>
               <TableCell>{account.account_number}</TableCell>
               <TableCell>
-                {dayjs(account.created_at).format('YYYY-MM-DD')}
+                {dayjs(account.created_at).format("YYYY-MM-DD")}
               </TableCell>
             </TableRow>
           ))}

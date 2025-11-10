@@ -20,6 +20,7 @@ import {
   accountTokenStore,
   type AccountTokenData,
 } from "@/store/accountTokenStore";
+import { accountDataStore } from "@/store/accountDataStore";
 import { toast } from "sonner";
 import type {
   PresentBalanceParams,
@@ -138,6 +139,7 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
     clear,
     hasHydrated,
   } = accountTokenStore();
+  const { presentBalanceByAccount, setPresentBalance } = accountDataStore();
   const [session, setSession] = useState<Session | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [presentBalanceOptions, setPresentBalanceOptions] =
@@ -265,6 +267,13 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
     refetchOnMount: true,
     refetchOnReconnect: true,
   });
+
+  // Persist the last successful presentBalance per account to zustand
+  useEffect(() => {
+    if (activeAccountId && presentBalanceQuery.data) {
+      setPresentBalance(activeAccountId, presentBalanceQuery.data);
+    }
+  }, [activeAccountId, presentBalanceQuery.data, setPresentBalance]);
 
   const exchangeRateQuery = useQuery<{ usdToKrw: number } | { error: string }>({
     queryKey: ["studio", "exchange-rate"],
@@ -452,6 +461,10 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
           accountTokenStore.getState().setActive(null);
         }
       }
+      // Clear persisted presentBalance snapshot for this account
+      try {
+        accountDataStore.getState().clearAccount(id);
+      } catch {}
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["studio", "accounts"] });
@@ -576,6 +589,9 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     clear();
+    try {
+      accountDataStore.getState().clearAll();
+    } catch {}
     toast.success("로그아웃되었습니다.");
   }, [clear]);
 
@@ -647,7 +663,12 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       dataromaBasedOnStock: dataromaQuery.data?.based_on_stock ?? [],
       dataromaLoading: dataromaQuery.isPending,
       dataromaError: dataromaQuery.error,
-      presentBalance: presentBalanceQuery.data,
+      // Provide a non-empty fallback from persisted snapshot to avoid UI flicker on navigation
+      presentBalance:
+        presentBalanceQuery.data ??
+        (activeAccountId
+          ? presentBalanceByAccount[activeAccountId]?.data
+          : undefined),
       presentBalanceLoading: presentBalanceQuery.isPending,
       presentBalanceFetching: presentBalanceQuery.isFetching,
       presentBalanceError: presentBalanceQuery.error,
@@ -677,6 +698,7 @@ export function StudioDataProvider({ children }: { children: ReactNode }) {
       presentBalanceQuery.isPending,
       presentBalanceQuery.isFetching,
       presentBalanceQuery.error,
+      presentBalanceByAccount,
       presentBalanceOptions,
       setPresentBalanceOptions,
       storedExchangeRate,
