@@ -42,14 +42,27 @@ export function useKakao(): UseKakaoReturn {
   }, []);
 
   const login = useCallback(async () => {
-    const origin =
-      typeof window !== "undefined" ? window?.location?.origin : "";
-    const envRedirect = process?.env?.NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT;
-    const redirectTo = envRedirect
-      ? envRedirect?.startsWith("http")
-        ? envRedirect
-        : `${origin}${envRedirect}`
-      : `${origin}/studio4/login`;
+    // 환경 변수가 설정되어 있으면 우선 사용
+    let redirectTo = process?.env?.NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT;
+
+    // 환경 변수가 없으면 현재 origin 사용 (폴백)
+    if (!redirectTo) {
+      const origin =
+        typeof window !== "undefined" ? window?.location?.origin : "";
+      redirectTo = `${origin}/login`;
+      console.warn(
+        "⚠️ NEXT_PUBLIC_STUDIO_LOGIN_REDIRECT not set, using fallback:",
+        redirectTo
+      );
+    }
+
+    // 상대 경로인 경우 절대 경로로 변환
+    if (redirectTo && !redirectTo.startsWith("http")) {
+      const origin =
+        typeof window !== "undefined" ? window?.location?.origin : "";
+      redirectTo = `${origin}${redirectTo}`;
+    }
+
     const { error } = await supabase?.auth?.signInWithOAuth({
       provider: "kakao",
       options: { redirectTo },
