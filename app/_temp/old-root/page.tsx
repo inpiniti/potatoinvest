@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { LandingPage } from '@/components/LandingPage';
-import { DownloadPage } from '@/components/DownloadPage';
-import { TermsPage } from '@/components/TermsPage';
-import { PrivacyPage } from '@/components/PrivacyPage';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { LandingPage } from "@/components/LandingPage";
+import { DownloadPage } from "@/components/DownloadPage";
+import { TermsPage } from "@/components/TermsPage";
+import { PrivacyPage } from "@/components/PrivacyPage";
+import { useRouter } from "next/navigation";
 
-type ViewType = 'landing' | 'login' | 'app' | 'download' | 'terms' | 'privacy';
+type ViewType = "landing" | "login" | "app" | "download" | "terms" | "privacy";
 export default function Home() {
-  const [currentView, setCurrentView] = useState<ViewType>('landing');
+  const [currentView, setCurrentView] = useState<ViewType>("landing");
   const router = useRouter();
 
   const handleGetStarted = () => {
-    router.push('/start/account');
+    router.push("/start/account");
   };
 
   const handleNavigateTo = (view: ViewType) => {
@@ -21,23 +21,23 @@ export default function Home() {
   };
 
   const handleBackToLanding = () => {
-    setCurrentView('landing');
+    setCurrentView("landing");
   };
 
   const renderCurrentView = () => {
     switch (currentView) {
-      case 'landing':
+      case "landing":
         return (
           <LandingPage
             onGetStarted={handleGetStarted}
             onNavigateTo={handleNavigateTo}
           />
         );
-      case 'download':
+      case "download":
         return <DownloadPage onBack={handleBackToLanding} />;
-      case 'terms':
+      case "terms":
         return <TermsPage onBack={handleBackToLanding} />;
-      case 'privacy':
+      case "privacy":
         return <PrivacyPage onBack={handleBackToLanding} />;
       default:
         return (

@@ -75,7 +75,11 @@ function Header() {
         {left ? (
           left
         ) : (
-          <Button variant="outline" size="sm" onClick={() => window.history.back()}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.history.back()}
+          >
             <IoIosArrowBack />
           </Button>
         )}
