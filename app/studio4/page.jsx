@@ -20,7 +20,7 @@ const Studio4 = () => {
 
   useEffect(() => {
     setLeft(
-      <Link href="/studio4/other/created">
+      <Link href="/other/created">
         <Button variant="outline" size="sm">
           <AiFillIdcard /> 만든사람
         </Button>
@@ -45,7 +45,7 @@ const Studio4 = () => {
         </CardHeader>
         <CardContent>
           <Button asChild variant="outline" size="sm" disabled>
-            <Link href="/studio4/held">
+            <Link href="/held">
               <IoPersonCircleOutline /> 보유종목
             </Link>
           </Button>
@@ -61,7 +61,7 @@ const Studio4 = () => {
         </CardHeader>
         <CardContent>
           <Button asChild variant="outline" size="sm">
-            <Link href="/studio4/recommend">
+            <Link href="/recommend">
               <MdOutlineRecommend /> 투자자 종목
             </Link>
           </Button>

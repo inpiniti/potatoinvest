@@ -21,7 +21,7 @@ const login = () => {
 
   useEffect(() => {
     setLeft(
-      <Link href="/studio4">
+      <Link href="/">
         <Button variant="outline" size="sm">
           <IoHome />
         </Button>

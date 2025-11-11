@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Providers } from "./providers";
-import "./globals.css";
-import StudioRootShell from "./studio-root-shell";
+import { Providers } from "../providers";
+import "../globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,21 +14,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Potato Invest",
-  description: "Potato Invest",
+  title: "Create Next App (backup)",
+  description: "Backup of previous root layout",
 };
 
-export default function RootLayout({
+export default function RootLayoutBackup({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>
-          <StudioRootShell>{children}</StudioRootShell>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

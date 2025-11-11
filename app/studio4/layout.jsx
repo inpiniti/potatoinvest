@@ -12,28 +12,23 @@ import { StrictMode } from 'react';
 import { StudioDataProvider } from '@/hooks/useStudioData';
 
 const PAGE_TITLES = {
-  '/studio4': 'Potato Invest',
-  '/studio4/account': '계좌',
-  '/studio4/held': '보유종목',
-  '/studio4/recommend': '추천종목',
-  '/studio4/settings': '설정',
-  '/studio4/login': '로그인',
-  // 필요한 경로 추가
+  '/': 'Potato Invest',
+  '/account': '계좌',
+  '/held': '보유종목',
+  '/recommend': '추천종목',
+  '/settings': '설정',
+  '/login': '로그인',
 };
 
 const DEFAULT_TITLE = 'Potato Invest';
 
 export default function Layout({ children }) {
   return (
-    <StudioDataProvider>
-      <StrictMode>
-        <div className="flex flex-col">
-          <Header />
-          {/* 헤더가 fixed라서 컨텐츠에 상단 여백을 부여 */}
-          <div className="pt-12">{children}</div>
-        </div>
-      </StrictMode>
-    </StudioDataProvider>
+    <div className="flex flex-col">
+      <Header />
+      {/* 헤더가 fixed라서 컨텐츠에 상단 여백을 부여 */}
+      <div className="pt-12">{children}</div>
+    </div>
   );
 }
 
@@ -97,12 +92,12 @@ const Header = () => {
           right
         ) : (
           <div className="flex gap-2">
-            <Link href="/studio4/account">
+            <Link href="/account">
               <Button variant="outline" size="sm">
                 <HiOutlineBanknotes /> 계좌
               </Button>
             </Link>
-            <Link href="/studio4/login">
+            <Link href="/login">
               <Button variant="outline" size="sm">
                 <CiLogin /> 로그인
               </Button>

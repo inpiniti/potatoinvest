@@ -31,7 +31,7 @@ const account = () => {
 
   useEffect(() => {
     setRight(
-      <Link href="/studio4/other/created">
+      <Link href="/other/created">
         <Button variant="outline" size="sm">
           <HiOutlineBanknotes /> 계좌추가
         </Button>
