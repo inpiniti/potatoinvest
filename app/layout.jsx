@@ -73,7 +73,7 @@ const Header = () => {
   // 스크롤 방향에 따라 헤더 자동 숨김/표시
   const [show, setShow] = useState(true); // 디폴트로 내려온 상태(표시)
 
-  const { left, right } = headerStore();
+  const { left, right, title: storeTitle } = headerStore();
   const lastYRef = useRef(0);
 
   useEffect(() => {
@@ -81,6 +81,16 @@ const Header = () => {
     const next = PAGE_TITLES[pathname] || DEFAULT_TITLE;
     setTitle(next);
   }, [pathname]);
+
+  // headerStore의 title이 설정되면 우선 사용
+  useEffect(() => {
+    if (storeTitle) {
+      setTitle(storeTitle);
+    } else if (pathname) {
+      const next = PAGE_TITLES[pathname] || DEFAULT_TITLE;
+      setTitle(next);
+    }
+  }, [pathname, storeTitle]);
 
   useEffect(() => {
     const onScroll = () => {

@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
 export const headerStore = create(
   devtools(
@@ -8,7 +8,9 @@ export const headerStore = create(
       setLeft: (left) => set({ left }),
       right: null,
       setRight: (right) => set({ right }),
+      title: null,
+      setTitle: (title) => set({ title }),
     }),
-    { name: 'headerStore' }
+    { name: "headerStore" }
   )
 );

@@ -1,10 +1,12 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useEffect } from "react";
 import TradingViewWidgetChart from "@/components/TradingViewWidgetChart";
 import useBollingerBand from "@/hooks/useBollingerBand";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { headerStore } from "@/store/headerStore";
 
 export default function DetailPage() {
   const params = useParams();
@@ -13,6 +15,15 @@ export default function DetailPage() {
   const stock = String(stockParam);
   const exchange = String(exchangeParam);
 
+  const { setTitle } = headerStore();
+
+  // 페이지 진입 시 타이틀 설정
+  useEffect(() => {
+    setTitle(`${exchange}:${stock}`);
+    // 페이지 떠날 때 타이틀 초기화
+    return () => setTitle(null);
+  }, [exchange, stock, setTitle]);
+
   const { upper, middle, lower, currentPrice, isLoading } = useBollingerBand({
     exchange,
     symbol: stock,
@@ -20,16 +31,12 @@ export default function DetailPage() {
   });
 
   return (
-    <div className="h-[calc(100vh-3rem)] w-full flex flex-col">
+    <div className="h-[calc(100svh-4rem)] w-full flex flex-col">
       {/* 볼린저밴드 정보 */}
       <div className="p-4 border-b bg-background">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold">
-            {exchange}:{stock}
-          </h1>
           {isLoading ? (
             <div className="flex gap-2">
-              <Skeleton className="h-6 w-24" />
               <Skeleton className="h-6 w-24" />
               <Skeleton className="h-6 w-24" />
               <Skeleton className="h-6 w-24" />
@@ -43,23 +50,7 @@ export default function DetailPage() {
                   현재가: ${currentPrice.toFixed(2)}
                 </Badge>
                 <Badge variant="destructive">상한: ${upper.toFixed(2)}</Badge>
-                <Badge variant="secondary">중심: ${middle.toFixed(2)}</Badge>
                 <Badge variant="default">하한: ${lower.toFixed(2)}</Badge>
-                <Badge
-                  variant={
-                    currentPrice >= upper
-                      ? "destructive"
-                      : currentPrice <= lower
-                      ? "default"
-                      : "outline"
-                  }
-                >
-                  {currentPrice >= upper
-                    ? "과매수"
-                    : currentPrice <= lower
-                    ? "과매도"
-                    : "중립"}
-                </Badge>
               </div>
             )
           )}
