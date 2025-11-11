@@ -1,4 +1,3 @@
-// /api/dataroma/base?withDetails=true 호출
 "use client";
 
 import {
@@ -24,39 +23,19 @@ import { Button } from "@/components/ui/button";
 // 본 시트 목록은 "최대 높이 제한 + 내용이 넘칠 때만 스크롤" 요구라서
 // 단순 div + overflow-auto로 구현해 빈 공간 없이 동작하도록 합니다.
 
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemMedia,
-  ItemTitle,
-  ItemDescription,
-} from "@/components/ui/item";
-
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { BadgeCheckIcon, ChevronRightIcon } from "lucide-react";
+import { useInvestor } from "@/hooks/useInvestor";
 
 const recommend = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const response = await fetch("/api/dataroma/base?withDetails=true");
-      const data = await response.json();
-      setData(data?.based_on_stock);
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
+  // 투자자 데이터는 루트에서 선조회되며, 여기서는 캐시를 재사용
+  const { stocks: data, isLoading } = useInvestor({ enabled: true });
 
   // 현재가격이 상한선 보다 크면 빨간색, 하한선 보다 작으면 파란색
   const getPriceColor = (price, lower, upper) => {
@@ -133,6 +112,12 @@ const recommend = () => {
       ? totalSize - virtualItems[virtualItems.length - 1].end
       : 0;
 
+  // 로우 클릭시 해당 종목의 상세 화면으로 이동
+  // /detail/[stock]
+  const onRowClick = (stock) => {
+    window.location.href = `/detail/${stock}`;
+  };
+
   return (
     <div>
       <Tabs
@@ -175,7 +160,7 @@ const recommend = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isLoading ? (
               [...Array(20)].map((_, index) => (
                 <TableRow key={index}>
                   {[...Array(8)].map((_, index) => (
@@ -197,7 +182,12 @@ const recommend = () => {
                 {virtualItems.map((vi) => {
                   const item = filteredData[vi.index];
                   return (
-                    <TableRow key={item.stock} data-index={vi.index}>
+                    <TableRow
+                      key={item.stock}
+                      data-index={vi.index}
+                      onClick={() => onRowClick(item.stock)}
+                      className="cursor-pointer hover:bg-gray-50"
+                    >
                       <TableCell>
                         <Avatar className="border w-6 h-6">
                           <AvatarImage

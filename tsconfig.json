@@ -30,14 +30,14 @@
     "store/useKey.js",
     "utils/api.ts",
     "hooks/useApi.js",
-    "app/page/buy/page.js",
-    "app/page/log/page.jsx",
+    "app/_temp/page/buy/page.js",
+    "app/_temp/page/log/page.jsx",
     "hooks/useAi.js",
-    "app/page/sell/page.jsx",
+    "app/_temp/page/sell/page.jsx",
     "app/dashboard/page.jsx",
     "app/api/hello/route.js",
-    "app/studio3/components/app-sidebar.jsx",
-    "app/studio3/layout.jsx"
+    "app/_temp/studio3/components/app-sidebar.jsx",
+    "app/_temp/studio3/layout.jsx"
   ],
   "exclude": ["node_modules"]
 }

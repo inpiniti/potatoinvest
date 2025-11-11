@@ -39,7 +39,9 @@ function TradingViewWidgetChart({ symbol = "AAPL", market = "NASDAQ" }) {
           "watchlist": [],
           "withdateranges": false,
           "compareSymbols": [],
-          "studies": [],
+          "studies": [
+            "STD;Bollinger_Bands"
+          ],
           "autosize": true
         }`;
     container.current.appendChild(script);

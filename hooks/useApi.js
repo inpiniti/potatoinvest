@@ -79,6 +79,12 @@ const useApi = () => {
           payload,
           _isVts: false,
         }),
+      // 분봉조회
+      inquireTimeItemchartprice: ({ excd, symb }) =>
+        _fetch({
+          url: "/api/koreainvestment/quotations/inquireTimeItemchartprice",
+          payload: { excd, symb },
+        }),
     },
     trading: {
       order: (payload) =>
