@@ -7,6 +7,8 @@ import useBollingerBand from "@/hooks/useBollingerBand";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { headerStore } from "@/store/headerStore";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function DetailPage() {
   const params = useParams();
@@ -33,8 +35,8 @@ export default function DetailPage() {
   return (
     <div className="h-[calc(100svh-4rem)] w-full flex flex-col">
       {/* 볼린저밴드 정보 */}
-      <div className="p-4 border-b bg-background">
-        <div className="flex items-center gap-4">
+      <div className="border-b bg-background flex flex-col divide-y">
+        <div className="flex items-center gap-4 p-4">
           {isLoading ? (
             <div className="flex gap-2">
               <Skeleton className="h-6 w-24" />
@@ -54,6 +56,20 @@ export default function DetailPage() {
               </div>
             )
           )}
+        </div>
+        <div className="flex gap-2 p-4">
+          <Link
+            href="/detail/[exchange]/[stock]/sell"
+            as={`/detail/${exchange}/${stock}/sell`}
+          >
+            <Button className="bg-blue-500">매도</Button>
+          </Link>
+          <Link
+            href="/detail/[exchange]/[stock]/buy"
+            as={`/detail/${exchange}/${stock}/buy`}
+          >
+            <Button className="bg-red-500">매수</Button>
+          </Link>
         </div>
       </div>
 

@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 const created = () => {
   return (
-    <div className="w-full max-w-md p-4">
+    <div className="w-full p-4">
       <form>
         <FieldGroup>
           <FieldSet>
@@ -25,6 +25,7 @@ const created = () => {
                   현재 일하고 있는 곳
                 </FieldLabel>
                 <Input
+                  className="w-full"
                   id="checkout-7j9-card-name-43j"
                   value="GRM (서울도시가스그룹)"
                   readOnly
