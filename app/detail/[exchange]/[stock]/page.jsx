@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { headerStore } from "@/store/headerStore";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import useNcss from "@/hooks/useNcss";
 
 export default function DetailPage() {
   const params = useParams();
@@ -32,6 +33,11 @@ export default function DetailPage() {
     enabled: true,
   });
 
+  const { items } = useNcss();
+  // 매도 또는 매수중인지
+  const pdnos = items?.map((item) => item.pdno);
+  const isNcss = pdnos.some((pdno) => pdno === stock);
+
   return (
     <div className="h-[calc(100svh-4rem)] w-full flex flex-col">
       {/* 볼린저밴드 정보 */}
@@ -53,6 +59,7 @@ export default function DetailPage() {
                 </Badge>
                 <Badge variant="destructive">상한: ${upper.toFixed(2)}</Badge>
                 <Badge variant="default">하한: ${lower.toFixed(2)}</Badge>
+                {isNcss && <Badge variant="outline">매매 진행중</Badge>}
               </div>
             )
           )}
