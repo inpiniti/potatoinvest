@@ -69,7 +69,7 @@ export default function buy() {
     if (unpr <= 0) {
       return;
     }
-    
+
     try {
       await order({
         exchange,
@@ -182,8 +182,8 @@ export default function buy() {
           </FieldGroup>
         </FieldSet>
         <Field orientation="horizontal">
-          <Button 
-            className="bg-red-500 w-full" 
+          <Button
+            className="bg-red-500 w-full"
             onClick={handleBuyOrder}
             disabled={isOrdering || qty <= 0 || unpr <= 0}
           >
