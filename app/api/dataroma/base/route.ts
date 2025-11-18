@@ -271,99 +271,224 @@ export async function GET(req: NextRequest) {
               .filter(Boolean)
           )
         );
+
         if (codes.length > 0) {
-          const q = codes.join(",");
-          const host = req.headers.get("host") || "";
-          const proto = req.headers.get("x-forwarded-proto") || "http";
-          const res = await fetch(
-            `${proto}://${host}/api/hello?codes=${encodeURIComponent(q)}`
-          );
-          if (res.ok) {
-            const arr = await res.json();
+          let helloData: unknown[] = [];
 
-            console.log(dayjs().format("HH:mm:ss"), "/api/hello");
-            if (Array.isArray(arr)) {
-              const map = new Map(
-                arr.map((it: unknown) => {
-                  const obj = it as Record<string, unknown>;
-                  const key = String(
-                    obj.name || obj.symbol || ""
-                  ).toUpperCase();
-                  return [key, obj] as [string, Record<string, unknown>];
-                })
+          // 1. DB에서 hello 캐시 데이터 조회 (id=2)
+          try {
+            const admin = getAdmin();
+            const { data: helloRow, error: helloError } = await admin
+              .from("base")
+              .select("json, updated_at")
+              .eq("id", 2)
+              .single();
+
+            console.log(
+              dayjs().format("HH:mm:ss"),
+              "[DEBUG] Hello DB 조회 결과:",
+              {
+                hasData: !!helloRow,
+                hasJson: helloRow && "json" in helloRow,
+                error: helloError,
+              }
+            );
+
+            if (helloRow && helloRow.json) {
+              console.log(
+                dayjs().format("HH:mm:ss"),
+                "DB에서 hello 데이터 조회 성공",
+                `(updated_at: ${helloRow.updated_at})`
               );
-              enrichedStocks = based_on_stock.map((s) => {
-                const key = String(s.stock || "").toUpperCase();
-                const item = map.get(key) as
-                  | Record<string, unknown>
-                  | undefined;
-                let dcf: number | null = null;
-                let logoid: string | undefined = undefined;
-                let market: string | undefined = undefined;
-                let exchange: string | undefined = undefined;
-                let bbLower: number | undefined = undefined;
-                let bbMiddle: number | undefined = undefined;
-                let bbUpper: number | undefined = undefined;
-                let close: number | undefined = undefined;
-                let ai: number | undefined = undefined;
-                if (item) {
-                  const raw = item["dcf_vs_market_cap_pct"];
-                  logoid =
-                    typeof item["logoid"] === "string"
-                      ? item["logoid"]
-                      : undefined;
-                  market =
-                    typeof item["market"] === "string"
-                      ? item["market"]
-                      : undefined;
-                  exchange =
-                    typeof item["exchange"] === "string"
-                      ? item["exchange"]
-                      : undefined;
-                  bbLower =
-                    typeof item["b_b_lower"] === "number"
-                      ? item["b_b_lower"]
-                      : undefined;
-                  bbMiddle =
-                    typeof item["b_b_basis"] === "number"
-                      ? item["b_b_basis"]
-                      : undefined;
-                  bbUpper =
-                    typeof item["b_b_upper"] === "number"
-                      ? item["b_b_upper"]
-                      : undefined;
-                  close =
-                    typeof item["close"] === "number"
-                      ? item["close"]
-                      : undefined;
-                  ai =
-                    typeof item["예측결과"] === "number"
-                      ? item["예측결과"]
-                      : undefined;
+              helloData = Array.isArray(helloRow.json) ? helloRow.json : [];
 
-                  if (typeof raw === "number") dcf = raw;
-                  else if (typeof raw === "string") {
-                    const n = Number(raw);
-                    if (!Number.isNaN(n)) dcf = n;
+              // 백그라운드에서 hello API 조회 및 DB 업데이트
+              Promise.resolve().then(async () => {
+                try {
+                  console.log(
+                    dayjs().format("HH:mm:ss"),
+                    "[백그라운드] Hello API 조회 시작"
+                  );
+                  const q = codes.join(",");
+                  const host = req.headers.get("host") || "";
+                  const proto = req.headers.get("x-forwarded-proto") || "http";
+                  const res = await fetch(
+                    `${proto}://${host}/api/hello?codes=${encodeURIComponent(
+                      q
+                    )}`
+                  );
+
+                  if (res.ok) {
+                    const freshHelloData = await res.json();
+                    console.log(
+                      dayjs().format("HH:mm:ss"),
+                      "[백그라운드] Hello API 조회 완료"
+                    );
+
+                    // DB 업데이트 (id=2)
+                    const admin = getAdmin();
+                    await admin.from("base").delete().eq("id", 2);
+                    const { error: insertError } = await admin
+                      .from("base")
+                      .insert({
+                        id: 2,
+                        json: freshHelloData,
+                        updated_at: new Date().toISOString(),
+                      });
+
+                    if (insertError) {
+                      console.error(
+                        dayjs().format("HH:mm:ss"),
+                        "[백그라운드] Hello DB 저장 에러:",
+                        insertError
+                      );
+                    } else {
+                      console.log(
+                        dayjs().format("HH:mm:ss"),
+                        "[백그라운드] Hello DB 업데이트 완료"
+                      );
+                    }
                   }
+                } catch (bgError) {
+                  console.error(
+                    dayjs().format("HH:mm:ss"),
+                    "[백그라운드] Hello API 에러:",
+                    bgError
+                  );
                 }
-                return {
-                  ...s,
-                  dcf_vs_market_cap_pct: dcf,
-                  logoid,
-                  market,
-                  exchange,
-                  bbLower,
-                  bbMiddle,
-                  bbUpper,
-                  close,
-                  ai,
-                };
               });
+            } else {
+              // DB에 데이터 없으면 즉시 조회
+              console.log(
+                dayjs().format("HH:mm:ss"),
+                "Hello DB 데이터 없음, 즉시 조회 시작"
+              );
+              const q = codes.join(",");
+              const host = req.headers.get("host") || "";
+              const proto = req.headers.get("x-forwarded-proto") || "http";
+              const res = await fetch(
+                `${proto}://${host}/api/hello?codes=${encodeURIComponent(q)}`
+              );
+
+              if (res.ok) {
+                helloData = await res.json();
+                console.log(dayjs().format("HH:mm:ss"), "Hello API 조회 완료");
+
+                // DB 저장
+                const admin = getAdmin();
+                await admin.from("base").delete().eq("id", 2);
+                await admin.from("base").insert({
+                  id: 2,
+                  json: helloData,
+                  updated_at: new Date().toISOString(),
+                });
+                console.log(dayjs().format("HH:mm:ss"), "Hello DB 저장 완료");
+              }
+            }
+          } catch (dbError) {
+            console.error(
+              dayjs().format("HH:mm:ss"),
+              "Hello DB 조회 실패, API로 fallback:",
+              dbError
+            );
+
+            // Fallback: API 직접 조회
+            const q = codes.join(",");
+            const host = req.headers.get("host") || "";
+            const proto = req.headers.get("x-forwarded-proto") || "http";
+            const res = await fetch(
+              `${proto}://${host}/api/hello?codes=${encodeURIComponent(q)}`
+            );
+            if (res.ok) {
+              helloData = await res.json();
             }
           }
+
+          // 2. Hello 데이터로 enrichment 수행
+          if (Array.isArray(helloData) && helloData.length > 0) {
+            console.log(
+              dayjs().format("HH:mm:ss"),
+              "Hello 데이터로 enrichment 시작"
+            );
+            const map = new Map(
+              helloData.map((it: unknown) => {
+                const obj = it as Record<string, unknown>;
+                const key = String(obj.name || obj.symbol || "").toUpperCase();
+                return [key, obj] as [string, Record<string, unknown>];
+              })
+            );
+            enrichedStocks = based_on_stock.map((s) => {
+              const key = String(s.stock || "").toUpperCase();
+              const item = map.get(key) as Record<string, unknown> | undefined;
+              let dcf: number | null = null;
+              let logoid: string | undefined = undefined;
+              let market: string | undefined = undefined;
+              let exchange: string | undefined = undefined;
+              let bbLower: number | undefined = undefined;
+              let bbMiddle: number | undefined = undefined;
+              let bbUpper: number | undefined = undefined;
+              let close: number | undefined = undefined;
+              let ai: number | undefined = undefined;
+              if (item) {
+                const raw = item["dcf_vs_market_cap_pct"];
+                logoid =
+                  typeof item["logoid"] === "string"
+                    ? item["logoid"]
+                    : undefined;
+                market =
+                  typeof item["market"] === "string"
+                    ? item["market"]
+                    : undefined;
+                exchange =
+                  typeof item["exchange"] === "string"
+                    ? item["exchange"]
+                    : undefined;
+                bbLower =
+                  typeof item["b_b_lower"] === "number"
+                    ? item["b_b_lower"]
+                    : undefined;
+                bbMiddle =
+                  typeof item["b_b_basis"] === "number"
+                    ? item["b_b_basis"]
+                    : undefined;
+                bbUpper =
+                  typeof item["b_b_upper"] === "number"
+                    ? item["b_b_upper"]
+                    : undefined;
+                close =
+                  typeof item["close"] === "number" ? item["close"] : undefined;
+                ai =
+                  typeof item["예측결과"] === "number"
+                    ? item["예측결과"]
+                    : undefined;
+
+                if (typeof raw === "number") dcf = raw;
+                else if (typeof raw === "string") {
+                  const n = Number(raw);
+                  if (!Number.isNaN(n)) dcf = n;
+                }
+              }
+              return {
+                ...s,
+                dcf_vs_market_cap_pct: dcf,
+                logoid,
+                market,
+                exchange,
+                bbLower,
+                bbMiddle,
+                bbUpper,
+                close,
+                ai,
+              };
+            });
+          }
         }
-      } catch {
+      } catch (enrichError) {
+        console.error(
+          dayjs().format("HH:mm:ss"),
+          "Enrichment 에러:",
+          enrichError
+        );
         // ignore enrichment errors and fall back to base
       }
     }
