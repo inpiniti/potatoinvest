@@ -34,7 +34,8 @@ export async function GET(req: NextRequest) {
         const admin = getAdmin();
         const { data: dbRow, error: dbError } = await admin
           .from("base")
-          .select("json")
+          .select("json, updated_at")
+          .eq("id", 1)
           .single();
 
         console.log(dayjs().format("HH:mm:ss"), "[DEBUG] DB 조회 결과:", {
@@ -55,7 +56,8 @@ export async function GET(req: NextRequest) {
         if (dbRow && dbRow.json) {
           console.log(
             dayjs().format("HH:mm:ss"),
-            "DB에서 base 데이터 조회 성공"
+            "DB에서 base 데이터 조회 성공",
+            `(updated_at: ${dbRow.updated_at})`
           );
           base = dbRow.json;
 
@@ -75,29 +77,36 @@ export async function GET(req: NextRequest) {
                 "[백그라운드] 크롤링 완료"
               );
 
-              // DB에 upsert
+              // DB에 upsert (기존 데이터 삭제 후 새 데이터 저장)
               const admin = getAdmin();
               console.log(
                 dayjs().format("HH:mm:ss"),
-                "[백그라운드] DB upsert 시작"
+                "[백그라운드] DB 업데이트 시작 (기존 데이터 삭제 후 저장)"
               );
-              const { data: upsertData, error: upsertError } = await admin
+
+              // 1. 기존 데이터 삭제
+              await admin.from("base").delete().eq("id", 1);
+
+              // 2. 새 데이터 삽입
+              const { data: insertData, error: insertError } = await admin
                 .from("base")
-                .upsert({
+                .insert({
+                  id: 1,
                   json: freshBase,
+                  updated_at: new Date().toISOString(),
                 });
 
-              if (upsertError) {
+              if (insertError) {
                 console.error(
                   dayjs().format("HH:mm:ss"),
-                  "[백그라운드] DB upsert 에러:",
-                  upsertError
+                  "[백그라운드] DB insert 에러:",
+                  insertError
                 );
               } else {
                 console.log(
                   dayjs().format("HH:mm:ss"),
                   "[백그라운드] DB 업데이트 완료",
-                  { upsertData }
+                  { insertData }
                 );
               }
             } catch (bgError) {
@@ -136,12 +145,21 @@ export async function GET(req: NextRequest) {
         try {
           console.log(
             dayjs().format("HH:mm:ss"),
-            "[DEBUG] 크롤링 완료 후 DB 저장 시작"
+            "[DEBUG] 크롤링 완료 후 DB 저장 시작 (기존 데이터 삭제 후 저장)"
           );
           const admin = getAdmin();
+
+          // 1. 기존 데이터 삭제
+          await admin.from("base").delete().eq("id", 1);
+
+          // 2. 새 데이터 삽입
           const { data: saveData, error: saveError } = await admin
             .from("base")
-            .upsert({ json: base });
+            .insert({
+              id: 1,
+              json: base,
+              updated_at: new Date().toISOString(),
+            });
 
           if (saveError) {
             console.error(
