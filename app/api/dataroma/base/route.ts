@@ -26,20 +26,38 @@ export async function GET(req: NextRequest) {
     // 1. DB에서 캐시된 base 데이터 조회 (lookup 없고, forceRefresh 아닐 때)
     let base: unknown = null;
     if (useCache && !forceRefresh) {
+      console.log(
+        dayjs().format("HH:mm:ss"),
+        "[DEBUG] useCache=true, forceRefresh=false, DB 조회 시작"
+      );
       try {
         const admin = getAdmin();
-        const { data: dbRow } = await admin
+        const { data: dbRow, error: dbError } = await admin
           .from("base")
-          .select("data, updated_at")
-          .eq("id", 1)
+          .select("json")
           .single();
 
-        if (dbRow && dbRow.data) {
+        console.log(dayjs().format("HH:mm:ss"), "[DEBUG] DB 조회 결과:", {
+          hasData: !!dbRow,
+          hasJson: dbRow && "json" in dbRow,
+          error: dbError,
+          rowData: dbRow,
+        });
+
+        if (dbError) {
+          console.error(
+            dayjs().format("HH:mm:ss"),
+            "[DEBUG] DB 조회 에러:",
+            dbError
+          );
+        }
+
+        if (dbRow && dbRow.json) {
           console.log(
             dayjs().format("HH:mm:ss"),
             "DB에서 base 데이터 조회 성공"
           );
-          base = dbRow.data;
+          base = dbRow.json;
 
           // 백그라운드에서 크롤링 및 DB 업데이트 (응답 반환 후 실행)
           // 비동기 실행 후 바로 리턴
@@ -59,20 +77,29 @@ export async function GET(req: NextRequest) {
 
               // DB에 upsert
               const admin = getAdmin();
-              await admin
-                .from("base")
-                .upsert(
-                  {
-                    id: 1,
-                    data: freshBase,
-                    updated_at: new Date().toISOString(),
-                  },
-                  { onConflict: "id" }
-                );
               console.log(
                 dayjs().format("HH:mm:ss"),
-                "[백그라운드] DB 업데이트 완료"
+                "[백그라운드] DB upsert 시작"
               );
+              const { data: upsertData, error: upsertError } = await admin
+                .from("base")
+                .upsert({
+                  json: freshBase,
+                });
+
+              if (upsertError) {
+                console.error(
+                  dayjs().format("HH:mm:ss"),
+                  "[백그라운드] DB upsert 에러:",
+                  upsertError
+                );
+              } else {
+                console.log(
+                  dayjs().format("HH:mm:ss"),
+                  "[백그라운드] DB 업데이트 완료",
+                  { upsertData }
+                );
+              }
             } catch (bgError) {
               console.error(
                 dayjs().format("HH:mm:ss"),
@@ -93,24 +120,54 @@ export async function GET(req: NextRequest) {
 
     // 2. DB에 데이터 없거나, lookup 있거나, forceRefresh인 경우 크롤링
     if (!base) {
-      console.log(dayjs().format("HH:mm:ss"), "크롤링 시작");
+      console.log(
+        dayjs().format("HH:mm:ss"),
+        "크롤링 시작 (이유: base 없음, lookup:",
+        lookup,
+        ", forceRefresh:",
+        forceRefresh,
+        ")"
+      );
       base = await generateDataromaBase({ lookup });
       console.log(dayjs().format("HH:mm:ss"), "크롤링 완료");
 
       // lookup 없고 useCache인 경우만 DB에 저장
       if (useCache && !lookup) {
         try {
+          console.log(
+            dayjs().format("HH:mm:ss"),
+            "[DEBUG] 크롤링 완료 후 DB 저장 시작"
+          );
           const admin = getAdmin();
-          await admin
+          const { data: saveData, error: saveError } = await admin
             .from("base")
-            .upsert(
-              { id: 1, data: base, updated_at: new Date().toISOString() },
-              { onConflict: "id" }
+            .upsert({ json: base });
+
+          if (saveError) {
+            console.error(
+              dayjs().format("HH:mm:ss"),
+              "[DEBUG] DB 저장 에러:",
+              saveError
             );
-          console.log(dayjs().format("HH:mm:ss"), "DB에 base 데이터 저장 완료");
+          } else {
+            console.log(
+              dayjs().format("HH:mm:ss"),
+              "DB에 base 데이터 저장 완료",
+              { saveData }
+            );
+          }
         } catch (saveError) {
           console.error(dayjs().format("HH:mm:ss"), "DB 저장 실패:", saveError);
         }
+      } else {
+        console.log(
+          dayjs().format("HH:mm:ss"),
+          "[DEBUG] DB 저장 스킵 (useCache:",
+          useCache,
+          ", lookup:",
+          lookup,
+          ")"
+        );
       }
     }
 
