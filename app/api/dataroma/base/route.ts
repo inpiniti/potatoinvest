@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDataromaBase } from "../../../../dataroma_portfolio";
+import dayjs from "dayjs";
+import { createClient } from "@supabase/supabase-js";
 
-// In-memory cache (per server process). Resets on redeploy / cold start.
-interface CacheEntry<T> {
-  data: T;
-  ts: number;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+function getAdmin() {
+  if (!SERVICE_ROLE)
+    throw new Error("Server misconfigured: missing service role key");
+  return createClient(SUPABASE_URL, SERVICE_ROLE, {
+    auth: { persistSession: false },
+  });
 }
-const CACHE_TTL_MS = 1000 * 60 * 30; // 30분
-let cachedBase: CacheEntry<unknown> | null = null;
 
 // GET /api/dataroma/base?lookup=keyword
 // Returns: { based_on_person: [{ no, name, totalValue }], based_on_stock: [{ stock, person_count, sum_ratio }] }
@@ -18,19 +23,96 @@ export async function GET(req: NextRequest) {
     const forceRefresh = searchParams.get("refresh") === "1";
     const useCache = !lookup; // lookup 있을 때는 캐시 사용 안함 (부분 필터는 매번 생성)
 
-    if (useCache && !forceRefresh && cachedBase) {
-      const age = Date.now() - cachedBase.ts;
-      if (age < CACHE_TTL_MS) {
-        return NextResponse.json(cachedBase.data, {
-          status: 200,
-          headers: { "Cache-Control": "no-store", "X-Cache": "HIT" },
-        });
+    // 1. DB에서 캐시된 base 데이터 조회 (lookup 없고, forceRefresh 아닐 때)
+    let base: unknown = null;
+    if (useCache && !forceRefresh) {
+      try {
+        const admin = getAdmin();
+        const { data: dbRow } = await admin
+          .from("base")
+          .select("data, updated_at")
+          .eq("id", 1)
+          .single();
+
+        if (dbRow && dbRow.data) {
+          console.log(
+            dayjs().format("HH:mm:ss"),
+            "DB에서 base 데이터 조회 성공"
+          );
+          base = dbRow.data;
+
+          // 백그라운드에서 크롤링 및 DB 업데이트 (응답 반환 후 실행)
+          // 비동기 실행 후 바로 리턴
+          Promise.resolve().then(async () => {
+            try {
+              console.log(
+                dayjs().format("HH:mm:ss"),
+                "[백그라운드] 크롤링 시작"
+              );
+              const freshBase = await generateDataromaBase({
+                lookup: undefined,
+              });
+              console.log(
+                dayjs().format("HH:mm:ss"),
+                "[백그라운드] 크롤링 완료"
+              );
+
+              // DB에 upsert
+              const admin = getAdmin();
+              await admin
+                .from("base")
+                .upsert(
+                  {
+                    id: 1,
+                    data: freshBase,
+                    updated_at: new Date().toISOString(),
+                  },
+                  { onConflict: "id" }
+                );
+              console.log(
+                dayjs().format("HH:mm:ss"),
+                "[백그라운드] DB 업데이트 완료"
+              );
+            } catch (bgError) {
+              console.error(
+                dayjs().format("HH:mm:ss"),
+                "[백그라운드] 에러:",
+                bgError
+              );
+            }
+          });
+        }
+      } catch (dbError) {
+        console.error(
+          dayjs().format("HH:mm:ss"),
+          "DB 조회 실패, 크롤링으로 fallback:",
+          dbError
+        );
       }
     }
 
-    const base = await generateDataromaBase({ lookup });
+    // 2. DB에 데이터 없거나, lookup 있거나, forceRefresh인 경우 크롤링
+    if (!base) {
+      console.log(dayjs().format("HH:mm:ss"), "크롤링 시작");
+      base = await generateDataromaBase({ lookup });
+      console.log(dayjs().format("HH:mm:ss"), "크롤링 완료");
 
-    console.log("base", base);
+      // lookup 없고 useCache인 경우만 DB에 저장
+      if (useCache && !lookup) {
+        try {
+          const admin = getAdmin();
+          await admin
+            .from("base")
+            .upsert(
+              { id: 1, data: base, updated_at: new Date().toISOString() },
+              { onConflict: "id" }
+            );
+          console.log(dayjs().format("HH:mm:ss"), "DB에 base 데이터 저장 완료");
+        } catch (saveError) {
+          console.error(dayjs().format("HH:mm:ss"), "DB 저장 실패:", saveError);
+        }
+      }
+    }
 
     // base is produced by dataroma_portfolio.generateDataromaBase()
     type RawPerson = {
@@ -53,7 +135,7 @@ export async function GET(req: NextRequest) {
       meta?: Record<string, unknown>;
     };
 
-    console.log("b", b);
+    console.log(dayjs().format("HH:mm:ss"), "base");
 
     // Normalize based_on_person: ensure totalValueNum and portfolio[] exist
     const based_on_person = (
@@ -75,7 +157,7 @@ export async function GET(req: NextRequest) {
         : [],
     }));
 
-    console.log("based_on_person", based_on_person);
+    console.log(dayjs().format("HH:mm:ss"), "based_on_person");
 
     // Normalize based_on_stock: ensure each item has person[] (dataroma_portfolio already builds this)
     const based_on_stock = (
@@ -101,7 +183,8 @@ export async function GET(req: NextRequest) {
     const withDetails =
       searchParams.get("withDetails") === "1" ||
       searchParams.get("withDetails") === "true";
-    console.log("withDetails", withDetails);
+
+    console.log(dayjs().format("HH:mm:ss"), "withDetails");
 
     let enrichedStocks = based_on_stock;
     if (withDetails && based_on_stock.length > 0) {
@@ -123,8 +206,7 @@ export async function GET(req: NextRequest) {
           if (res.ok) {
             const arr = await res.json();
 
-            console.log("arr.length", arr.length);
-            console.log("arr[0]", arr[0]);
+            console.log(dayjs().format("HH:mm:ss"), "/api/hello");
             if (Array.isArray(arr)) {
               const map = new Map(
                 arr.map((it: unknown) => {
@@ -216,12 +298,11 @@ export async function GET(req: NextRequest) {
       based_on_stock: enrichedStocks,
       meta: b.meta || {},
     };
-    if (useCache) cachedBase = { data: payload, ts: Date.now() };
     return NextResponse.json(payload, {
       status: 200,
       headers: {
         "Cache-Control": "no-store",
-        "X-Cache": "MISS",
+        "X-Cache": base ? "DB-HIT" : "MISS",
       },
     });
   } catch (e) {

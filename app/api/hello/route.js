@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { NextResponse } from "next/server";
 
 // TensorFlow.js 서버사이드 임포트
@@ -225,8 +226,12 @@ export async function GET(req) {
       "Access-Control-Allow-Headers": "Content-Type",
     };
 
+    console.log(dayjs().format("HH:mm:ss"), "crawling");
+
     // 크롤링 데이터 가져오기
     const rawData = await crawling(country);
+
+    console.log(dayjs().format("HH:mm:ss"), "crawling");
 
     // codes가 제공된 경우, 해당 종목만 선별하여 분석 범위를 축소
     const targetData =
@@ -237,9 +242,12 @@ export async function GET(req) {
     // 예측 처리 여부에 따라 분기
     let processedData;
     if (includePredictions) {
-      console.log("서버사이드 예측 처리 시작...");
+      console.log(dayjs().format("HH:mm:ss"), "서버사이드 예측 처리 시작...");
       processedData = await processServerPredictions(targetData);
-      console.log(`서버사이드 예측 처리 완료: ${processedData.length}개 항목`);
+      console.log(
+        dayjs().format("HH:mm:ss"),
+        `서버사이드 예측 처리 완료: ${processedData.length}개 항목`
+      );
     } else {
       // 예측 없이 기본 데이터만 반환
       processedData = targetData.map((item) => ({
