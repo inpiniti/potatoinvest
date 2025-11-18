@@ -1,38 +1,101 @@
 "use client";
 import { useMutation } from "@tanstack/react-query";
-import useApi from "./useApi";
+import { accountTokenStore } from "@/store/accountTokenStore";
+import useKakao from "./useKakao";
 import { toast } from "sonner";
 
-interface OrderPayload {
-  // 한국투자증권 해외주식 주문 형식에 맞춰 확장
-  CANO?: string;
-  ACNT_PRDT_CD?: string;
-  OVRS_EXCG_CD?: string; // NASD / NYSE / AMEX 등
-  PDNO: string; // 종목코드
-  ORD_DVSN: string; // 주문구분
-  ORD_QTY: string; // 수량
-  ORD_UNPR: string; // 주문단가
-  CRNC_CD?: string; // 통화코드 (USD 등)
-  // ... 추가 필드
+interface OrderParams {
+  exchange: string;
+  stock: string;
+  qty: number;
+  unpr: number;
+  orderType: "buy" | "sell";
 }
 
-export function useOrder() {
-  const api = useApi();
+interface OrderResponse {
+  rt_cd?: string; // 응답코드 ("0": 성공)
+  msg_cd?: string; // 메시지코드
+  msg1?: string; // 메시지
+  output?: {
+    KRX_FWDG_ORD_ORGNO?: string; // 한국거래소전송주문조직번호
+    ODNO?: string; // 주문번호
+    ORD_TMD?: string; // 주문시각
+  };
+}
 
-  const mutation = useMutation<unknown, Error, OrderPayload>({
-    mutationFn: async (payload) => {
-      const res = await api.trading.order(payload);
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.msg1 || json?.error || "주문 실패");
-      return json;
+/**
+ * useOrder
+ * - 해외주식 주문 (매수/매도)
+ * - accountTokenStore에서 계좌 ID와 토큰 가져오기
+ * - exchange, stock, qty, unpr, orderType 전달
+ */
+export function useOrder() {
+  const { activeAccountId, tokens } = accountTokenStore();
+  const { data: kakao } = useKakao();
+  const session = kakao.session;
+
+  const mutation = useMutation<OrderResponse, Error, OrderParams>({
+    mutationFn: async ({ exchange, stock, qty, unpr, orderType }) => {
+      if (!activeAccountId) {
+        throw new Error("계좌가 선택되지 않았습니다");
+      }
+
+      if (!session) {
+        throw new Error("로그인이 필요합니다");
+      }
+
+      const accountId = activeAccountId;
+      const token = tokens[accountId];
+
+      if (!token?.access_token) {
+        throw new Error("계좌 인증이 필요합니다");
+      }
+
+      const res = await fetch("/api/overseas/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          accountId,
+          kiAccessToken: token.access_token,
+          exchange,
+          stock,
+          qty,
+          unpr,
+          orderType,
+        }),
+      });
+
+      const data = (await res.json()) as OrderResponse;
+
+      if (!res.ok || data.rt_cd !== "0") {
+        throw new Error(data.msg1 || "주문 실패");
+      }
+
+      return data;
     },
-    onSuccess: () => toast.success("주문 접수 완료"),
-    onError: (e) => toast.error(e.message),
+    onSuccess: (data, variables) => {
+      const orderTypeText = variables.orderType === "buy" ? "매수" : "매도";
+      toast.success(`${orderTypeText} 주문 성공`, {
+        description: `${variables.stock} ${variables.qty}주 ${orderTypeText} 주문이 접수되었습니다.`,
+      });
+    },
+    onError: (error) => {
+      toast.error("주문 실패", {
+        description: error.message,
+      });
+    },
   });
 
   return {
-    place: mutation.mutateAsync,
-    placing: mutation.isPending,
+    order: mutation.mutateAsync,
+    orderSync: mutation.mutate,
+    isOrdering: mutation.isPending,
+    error: mutation.error,
+    data: mutation.data,
+    reset: mutation.reset,
   };
 }
 
