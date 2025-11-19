@@ -1,21 +1,24 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from "@/components/ui/card";
-import Link from "next/link";
-import { AiFillIdcard } from "react-icons/ai";
-import { IoPersonCircleOutline } from "react-icons/io5";
-import { MdOutlineRecommend } from "react-icons/md";
-import { headerStore } from "@/store/headerStore";
-import { useEffect } from "react";
+} from '@/components/ui/card';
+import Link from 'next/link';
+import { AiFillIdcard } from 'react-icons/ai';
+import { IoPersonCircleOutline } from 'react-icons/io5';
+import { MdOutlineRecommend } from 'react-icons/md';
+import { headerStore } from '@/store/headerStore';
+import { useEffect } from 'react';
+
+import { useInvestor } from '@/hooks/useInvestor';
 
 const Studio4 = () => {
+  const { stocks } = useInvestor({ enabled: true });
   const { setLeft } = headerStore();
 
   useEffect(() => {

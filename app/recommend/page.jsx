@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Table,
@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 
 import {
   Sheet,
@@ -16,22 +16,24 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
+} from '@/components/ui/sheet';
 
-import { Button } from "@/components/ui/button";
+import { Input } from '@/components/ui/input';
+
+import { Button } from '@/components/ui/button';
 // NOTE: ScrollArea는 부모 높이를 고정해야만 스크롤이 작동합니다.
 // 본 시트 목록은 "최대 높이 제한 + 내용이 넘칠 때만 스크롤" 요구라서
 // 단순 div + overflow-auto로 구현해 빈 공간 없이 동작하도록 합니다.
 
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
-import { useMemo, useRef, useState } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { useInvestor } from "@/hooks/useInvestor";
+import { useMemo, useRef, useState } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { useInvestor } from '@/hooks/useInvestor';
 
 const recommend = () => {
   // 루트에서 선조회된 투자자 데이터를 재사용 (캐시에서 로드, 추가 네트워크 요청 없음)
@@ -39,9 +41,9 @@ const recommend = () => {
 
   // 현재가격이 상한선 보다 크면 빨간색, 하한선 보다 작으면 파란색
   const getPriceColor = (price, lower, upper) => {
-    if (price >= upper) return "text-red-400";
-    if (price <= lower) return "text-blue-400";
-    return "";
+    if (price >= upper) return 'text-red-400';
+    if (price <= lower) return 'text-blue-400';
+    return '';
   };
 
   // 미래가치가 100% 이하인 종목은 text-red-50
@@ -52,13 +54,13 @@ const recommend = () => {
   // 미래가치가 700% 이상인 종목은 text-red-500
   // 미래가치가 1000% 이상인 종목은 text-red-600
   const getFutureValueColor = (value) => {
-    if (value >= 1000) return "text-red-600";
-    if (value >= 700) return "text-red-500";
-    if (value >= 500) return "text-red-400";
-    if (value >= 300) return "text-red-300";
-    if (value >= 200) return "text-red-200";
-    if (value >= 100) return "text-red-100";
-    return "text-red-50";
+    if (value >= 1000) return 'text-red-600';
+    if (value >= 700) return 'text-red-500';
+    if (value >= 500) return 'text-red-400';
+    if (value >= 300) return 'text-red-300';
+    if (value >= 200) return 'text-red-200';
+    if (value >= 100) return 'text-red-100';
+    return 'text-red-50';
   };
 
   // 단기 예측이 50이하는 text-red-50
@@ -69,32 +71,36 @@ const recommend = () => {
   // 단기 예측이 61~65 text-red-500
   // 단기 예측이 66 이상 text-red-600
   const getAIPredictionColor = (value) => {
-    if (value * 100 >= 66) return "text-red-600";
-    if (value * 100 >= 61) return "text-red-500";
-    if (value * 100 >= 58) return "text-red-400";
-    if (value * 100 >= 55) return "text-red-300";
-    if (value * 100 >= 53) return "text-red-200";
-    if (value * 100 >= 51) return "text-red-100";
-    return "text-red-50";
+    if (value * 100 >= 66) return 'text-red-600';
+    if (value * 100 >= 61) return 'text-red-500';
+    if (value * 100 >= 58) return 'text-red-400';
+    if (value * 100 >= 55) return 'text-red-300';
+    if (value * 100 >= 53) return 'text-red-200';
+    if (value * 100 >= 51) return 'text-red-100';
+    return 'text-red-50';
   };
 
-  const [selectedTab, setSelectedTab] = useState("all");
+  const [selectedTab, setSelectedTab] = useState('all');
+  const [searchText, setSearchText] = useState('');
 
   const filteredData = useMemo(() => {
     return data?.filter((item) => {
-      if (selectedTab === "buy") {
+      if (selectedTab === 'buy') {
         return (
           item.ai >= 0.5 &&
           item.dcf_vs_market_cap_pct >= 300 &&
           item.close <= item.bbLower
         );
       }
-      if (selectedTab === "sell") {
+      if (selectedTab === 'sell') {
         return item.ai < 0.5 && item.close > item.bbUpper;
+      }
+      if (searchText) {
+        return item.stock.toLowerCase().includes(searchText.toLowerCase());
       }
       return true;
     });
-  }, [data, selectedTab]);
+  }, [data, selectedTab, searchText]);
 
   // Virtualization setup
   const parentRef = useRef(null);
@@ -120,20 +126,26 @@ const recommend = () => {
 
   return (
     <div>
-      <Tabs
-        value={selectedTab}
-        onValueChange={(e) => {
-          console.log(e);
-          setSelectedTab(e);
-        }}
-        className="m-2"
-      >
-        <TabsList>
-          <TabsTrigger value="all">전체</TabsTrigger>
-          <TabsTrigger value="sell">매도추천</TabsTrigger>
-          <TabsTrigger value="buy">매수추천</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex items-center p-2 gap-2">
+        <Tabs
+          value={selectedTab}
+          onValueChange={(e) => {
+            console.log(e);
+            setSelectedTab(e);
+          }}
+        >
+          <TabsList>
+            <TabsTrigger value="all">전체</TabsTrigger>
+            <TabsTrigger value="sell">매도추천</TabsTrigger>
+            <TabsTrigger value="buy">매수추천</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <Input
+          placeholder="검색"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+      </div>
       <div
         ref={parentRef}
         className="h-[calc(100vh-100px)] overflow-auto border-t"
