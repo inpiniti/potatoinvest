@@ -157,17 +157,131 @@ const recommend = () => {
               <TableHead>종목</TableHead>
               <TableHead>투자자 수</TableHead>
               <TableHead>
-                <Button variant="outline" size="sm">
-                  미래 내재가치
-                </Button>
+                <Sheet onClick={(e) => e.stopPropagation()}>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      미래 내재가치
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="bottom"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <SheetHeader>
+                      <SheetTitle>미래 내재가치</SheetTitle>
+                      <SheetDescription>
+                        미래에 발생할 현금 흐름을 현재 가치로 할인하여 계산한
+                        기업의 본질적인 가치
+                      </SheetDescription>
+                    </SheetHeader>
+                    <div className="max-h-[70vh] overflow-auto px-4 flex flex-col gap-2 pb-4">
+                      <p className="text-sm font-medium">
+                        미래 내재가치(Discounted Cash Flow - DCF) 계산 원리
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        이 값은 회사가 앞으로 벌어들일 것으로 예상되는
+                        현금흐름(Free Cash Flow)을 할인해 현재 가치로 환산한
+                        추정치입니다. 주요 단계는 다음과 같습니다:
+                      </p>
+                      <ul className="pl-4 text-xs list-disc text-muted-foreground">
+                        <li>
+                          과거 재무지표로부터 현재의 FCF(자유현금흐름)를
+                          추정합니다.
+                        </li>
+                        <li>
+                          연간 성장률(g)을 추정하여 향후 N년간의 FCF를
+                          예상합니다.
+                        </li>
+                        <li>
+                          할인율(r)을 적용해 각 연도의 현금흐름을 현재가치로
+                          할인합니다.
+                        </li>
+                        <li>
+                          N년 이후의 영구가치(terminal value)는 Gordon Growth
+                          등으로 계산해 할인합니다.
+                        </li>
+                        <li>
+                          모든 현재가치를 합산해 기업의 내재가치를 산출합니다.
+                          화면에는 이 값을 시가총액과 비교한
+                          비율(dcf_vs_market_cap_pct)을 함께 제공합니다.
+                        </li>
+                      </ul>
+                      <p className="text-xs text-muted-foreground">
+                        주의: 입력 가정(성장률, 할인율, FCF 추정 등)에
+                        민감하므로 절대적인 절대값으로 해석하기보다는 상대적
+                        비교(동종업종, 과거 값 대비 변화)를 권장합니다.
+                      </p>
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </TableHead>
               <TableHead>상한선</TableHead>
               <TableHead>현재가격</TableHead>
               <TableHead>하한선</TableHead>
               <TableHead>
-                <Button variant="outline" size="sm">
-                  AI단기예측
-                </Button>
+                <Sheet onClick={(e) => e.stopPropagation()}>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      AI단기예측
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="bottom"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <SheetHeader>
+                      <SheetTitle>AI단기예측</SheetTitle>
+                      <SheetDescription>
+                        deep learning 기반의 AI가 단기 주가 상승 확률을 예측한
+                        수치
+                      </SheetDescription>
+                    </SheetHeader>
+                    <div className="max-h-[70vh] overflow-auto px-4 flex flex-col gap-2 pb-4">
+                      <p className="text-sm font-medium">
+                        AI 단기예측(모델 개요 및 원리)
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        본 서비스의 단기 예측은 여러 개의 딥러닝( TensorFlow )
+                        모델을 앙상블하여, 각 종목의 단기(일수 기준) 주가 상승
+                        확률을 산출합니다. 핵심 사항은 다음과 같습니다:
+                      </p>
+                      <ul className="pl-4 text-xs list-disc text-muted-foreground">
+                        <li>
+                          입력 피처: 가격 관련 지표(종가, 변동성, 볼린저 등),
+                          퍼포먼스(주/월/분기/연간), 거래량 변화, 재무 지표 일부
+                          등을 사용합니다.
+                        </li>
+                        <li>
+                          전처리: 누락값 처리 및 수치형 표준화/정규화를
+                          수행합니다 (preprocessData 참조).
+                        </li>
+                        <li>
+                          모델: 여러 학습된 신경망 모델을 병렬로 로드하여 각
+                          모델의 예측을 평균(또는 가중평균)해 최종 확률을
+                          도출합니다.
+                        </li>
+                        <li>
+                          출력 해석: 출력값은 '상승 확률'을 의미하며 0~1 범위로
+                          표현됩니다. (예: 0.75 → 75% 확률로 단기 상승 가능성)
+                        </li>
+                      </ul>
+                      <p className="text-xs text-muted-foreground">
+                        한계 및 주의사항: 모델은 과거 데이터에 기반해 학습되므로
+                        과거와 다른 시장 환경(유동성, 뉴스, 이벤트)에서는 성능이
+                        저하될 수 있습니다. 또한 확률은 절대적 확신이 아닌
+                        참고용 지표로 활용하시기 바랍니다.
+                      </p>
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -216,13 +330,20 @@ const recommend = () => {
                       </TableCell>
                       <TableCell>{item.stock}</TableCell>
                       <TableCell>
-                        <Sheet>
+                        <Sheet onClick={(e) => e.stopPropagation()}>
                           <SheetTrigger asChild>
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               {item.person_count}명
                             </Button>
                           </SheetTrigger>
-                          <SheetContent side="bottom">
+                          <SheetContent
+                            side="bottom"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <SheetHeader>
                               <SheetTitle>{item.stock} 투자자</SheetTitle>
                               <SheetDescription>
