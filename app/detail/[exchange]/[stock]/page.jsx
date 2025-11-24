@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useParams } from "next/navigation";
-import { useEffect } from "react";
-import TradingViewWidgetChart from "@/components/TradingViewWidgetChart";
-import useBollingerBand from "@/hooks/useBollingerBand";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { headerStore } from "@/store/headerStore";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import useNcss from "@/hooks/useNcss";
+import { useParams } from 'next/navigation';
+import { useEffect } from 'react';
+import TradingViewWidgetChart from '@/components/TradingViewWidgetChart';
+import useBollingerBand from '@/hooks/useBollingerBand';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { headerStore } from '@/store/headerStore';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import useNcss from '@/hooks/useNcss';
 
 export default function DetailPage() {
   const params = useParams();
@@ -31,6 +31,7 @@ export default function DetailPage() {
     exchange,
     symbol: stock,
     enabled: true,
+    useDaily: true,
   });
 
   const { items } = useNcss();

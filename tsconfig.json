@@ -37,7 +37,8 @@
     "app/dashboard/page.jsx",
     "app/api/hello/route.js",
     "app/_temp/studio3/components/app-sidebar.jsx",
-    "app/_temp/studio3/layout.jsx"
+    "app/_temp/studio3/layout.jsx",
+    "hooks/useBollingerBand.js"
   ],
   "exclude": ["node_modules"]
 }
