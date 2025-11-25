@@ -5,57 +5,56 @@ const openapi = {
   info: {
     title: 'PotatoInvest API',
     description:
-      'Auto-generated minimal OpenAPI spec for PotatoInvest internal APIs. Add/extend paths as needed.',
+      'PotatoInvest 내부 API를 위한 자동 생성된 최소 OpenAPI 명세입니다. 필요에 따라 경로를 추가/확장하세요.',
     version: '0.1.0',
   },
   servers: [{ url: '/' }],
   paths: {
     '/api/hello': {
       get: {
-        summary: 'Crawl & analyze market data',
+        summary: '시장 데이터 크롤링 및 분석',
         parameters: [
           {
             name: 'country',
             in: 'query',
             schema: { type: 'string' },
-            description: 'country code (default us)',
+            description: '국가 코드 (기본값 us)',
           },
           {
             name: 'predictions',
             in: 'query',
             schema: { type: 'boolean' },
-            description: 'enable server-side predictions (default true)',
+            description: '서버 측 예측 활성화 (기본값 true)',
           },
           {
             name: 'limit',
             in: 'query',
             schema: { type: 'integer' },
-            description: 'preview limit for large responses (optional)',
+            description: '대용량 응답에 대한 미리보기 제한 (선택 사항)',
           },
           {
             name: 'offset',
             in: 'query',
             schema: { type: 'integer' },
-            description: 'preview offset for large responses (optional)',
+            description: '대용량 응답에 대한 미리보기 오프셋 (선택 사항)',
           },
         ],
         responses: {
           '200': {
-            description:
-              'Array of analyzed instruments or paginated { total, offset, limit, data }',
+            description: '분석된 상품 배열 또는 페이지네이션된 { total, offset, limit, data }'
           },
         },
       },
     },
     '/api/dataroma/base': {
       get: {
-        summary: 'Dataroma base portfolios (investors / stocks)',
-        responses: { '200': { description: 'Dataroma base data' } },
+        summary: 'Dataroma 기본 포트폴리오 (투자자 / 주식)',
+        responses: { '200': { description: 'Dataroma 기본 데이터' } },
       },
     },
     '/api/newsCommunity': {
       get: {
-        summary: 'Fetch TossInvest community comments for a query',
+        summary: '쿼리에 대한 토스증권 커뮤니티 댓글 가져오기',
         parameters: [
           {
             name: 'query',
@@ -64,247 +63,247 @@ const openapi = {
             required: true,
           },
         ],
-        responses: { '200': { description: 'comments + productCode' } },
+        responses: { '200': { description: '댓글 + 상품 코드' } },
       },
     },
     '/api/accounts': {
       get: {
-        summary: 'List user accounts',
-        responses: { '200': { description: 'accounts array' } },
+        summary: '사용자 계좌 목록 조회',
+        responses: { '200': { description: '계좌 배열' } },
       },
       post: {
-        summary: 'Create an account (protected)',
-        responses: { '200': { description: 'ok' } },
+        summary: '계좌 생성 (보호됨)',
+        responses: { '200': { description: '성공' } },
       },
     },
     '/api/accounts/login': {
       post: {
-        summary: 'Issue access token for account (protected)',
-        responses: { '200': { description: 'token data' } },
+        summary: '계좌 액세스 토큰 발급 (보호됨)',
+        responses: { '200': { description: '토큰 데이터' } },
       },
     },
     '/api/accounts/settings': {
       patch: {
-        summary: 'Update account settings (max positions, cash ratio)',
-        responses: { '200': { description: 'ok' } },
+        summary: '계좌 설정 업데이트 (최대 포지션, 현금 비율)',
+        responses: { '200': { description: '성공' } },
       },
     },
     '/api/accounts/presentBalance': {
       post: {
-        summary: 'Query present balance / holdings for an account',
+        summary: '계좌의 현재 잔고 / 보유 종목 조회',
         responses: {
           '200': {
-            description: 'present balance output (holdings + asset summary)',
+            description: '현재 잔고 출력 (보유 종목 + 자산 요약)',
           },
         },
       },
     },
     '/api/dataroma/person': {
       get: {
-        summary: 'Dataroma - investor list (alias)',
-        responses: { '200': { description: 'investor list' } },
+        summary: 'Dataroma - 투자자 목록 (별칭)',
+        responses: { '200': { description: '투자자 목록' } },
       },
     },
     '/api/dataroma/stock': {
       get: {
-        summary: 'Dataroma - stock list',
-        responses: { '200': { description: 'stock list' } },
+        summary: 'Dataroma - 주식 목록',
+        responses: { '200': { description: '주식 목록' } },
       },
     },
     '/api/gemini': {
       get: {
-        summary: 'Gemini endpoint (various)',
-        responses: { '200': { description: 'gemini api responses' } },
+        summary: 'Gemini 엔드포인트 (다양함)',
+        responses: { '200': { description: 'Gemini API 응답' } },
       },
     },
     '/api/gemini/orders': {
       get: {
-        summary: 'Fetch Gemini orders',
-        responses: { '200': { description: 'orders' } },
+        summary: 'Gemini 주문 가져오기',
+        responses: { '200': { description: '주문' } },
       },
     },
     '/api/yahoo': {
       get: {
-        summary: 'Yahoo finance proxy',
-        responses: { '200': { description: 'yahoo results' } },
+        summary: 'Yahoo Finance 프록시',
+        responses: { '200': { description: 'Yahoo 결과' } },
       },
     },
     '/api/detail': {
       get: {
-        summary: 'Generic detail endpoint',
-        responses: { '200': { description: 'detail' } },
+        summary: '일반 상세 엔드포인트',
+        responses: { '200': { description: '상세 정보' } },
       },
     },
     '/api/exchangeRate': {
       get: {
-        summary: 'Exchange rate lookup',
-        responses: { '200': { description: 'exchange rate' } },
+        summary: '환율 조회',
+        responses: { '200': { description: '환율' } },
       },
       post: {
-        summary: 'Exchange rate (POST)',
-        responses: { '200': { description: 'exchange rate' } },
+        summary: '환율 (POST)',
+        responses: { '200': { description: '환율' } },
       },
     },
     '/api/newsCommunity/search': {
       get: {
-        summary: 'Search community news',
-        responses: { '200': { description: 'search results' } },
+        summary: '커뮤니티 뉴스 검색',
+        responses: { '200': { description: '검색 결과' } },
       },
     },
     '/api/overseas/price': {
       get: {
-        summary: 'Overseas price list',
-        responses: { '200': { description: 'price data' } },
+        summary: '해외 시세 목록',
+        responses: { '200': { description: '시세 데이터' } },
       },
     },
     '/api/overseas/price-detail': {
       get: {
-        summary: 'Overseas price detail',
-        responses: { '200': { description: 'price detail' } },
+        summary: '해외 시세 상세',
+        responses: { '200': { description: '시세 상세' } },
       },
     },
     '/api/overseas/ohlc': {
       get: {
-        summary: 'OHLC data for overseas markets',
-        responses: { '200': { description: 'ohlc' } },
+        summary: '해외 시장 OHLC 데이터',
+        responses: { '200': { description: 'OHLC' } },
       },
     },
     '/api/koreainvestment/stock-search': {
       get: {
-        summary: 'KoreaInvestment stock search',
-        responses: { '200': { description: 'search results' } },
+        summary: '한국투자증권 주식 검색',
+        responses: { '200': { description: '검색 결과' } },
       },
     },
     '/api/koreainvestment/price': {
       get: {
-        summary: 'KoreaInvestment price endpoint',
-        responses: { '200': { description: 'price' } },
+        summary: '한국투자증권 시세 엔드포인트',
+        responses: { '200': { description: '시세' } },
       },
     },
     '/api/koreainvestment/order': {
       post: {
-        summary: 'KoreaInvestment order endpoint',
-        responses: { '200': { description: 'order result' } },
+        summary: '한국투자증권 주문 엔드포인트',
+        responses: { '200': { description: '주문 결과' } },
       },
     },
     '/api/openapi': {
       get: {
-        summary: 'OpenAPI JSON (this file)',
+        summary: 'OpenAPI JSON (이 파일)',
         responses: { '200': { description: 'OpenAPI JSON' } },
       },
     },
     '/api/dataroma/base/person': {
       get: {
-        summary: 'Dataroma - persons',
-        responses: { '200': { description: 'persons' } },
+        summary: 'Dataroma - 인물',
+        responses: { '200': { description: '인물' } },
       },
     },
     '/api/dataroma/base/stock': {
       get: {
-        summary: 'Dataroma - stocks',
-        responses: { '200': { description: 'stocks' } },
+        summary: 'Dataroma - 주식',
+        responses: { '200': { description: '주식' } },
       },
     },
     '/api/news': {
       get: {
-        summary: 'News aggregator',
-        responses: { '200': { description: 'news items' } },
+        summary: '뉴스 애그리게이터',
+        responses: { '200': { description: '뉴스 항목' } },
       },
     },
     '/api/detail/financials': {
       get: {
-        summary: 'Company financial details',
-        responses: { '200': { description: 'financials' } },
+        summary: '기업 재무 상세',
+        responses: { '200': { description: '재무 정보' } },
       },
     },
     '/api/recommend': {
       get: {
-        summary: 'Recommendation engine results',
-        responses: { '200': { description: 'recommendations' } },
+        summary: '추천 엔진 결과',
+        responses: { '200': { description: '추천' } },
       },
     },
     '/api/test': {
       get: {
-        summary: 'Test endpoints (various)',
-        responses: { '200': { description: 'test response' } },
+        summary: '테스트 엔드포인트 (다양함)',
+        responses: { '200': { description: '테스트 응답' } },
       },
     },
     '/api/hello/predict': {
       post: {
-        summary: 'Trigger server-side prediction for hello data',
-        responses: { '200': { description: 'prediction result' } },
+        summary: 'hello 데이터에 대한 서버 측 예측 트리거',
+        responses: { '200': { description: '예측 결과' } },
       },
     },
     '/api/ai/models': {
       get: {
-        summary: 'List available AI models (server-side)',
-        responses: { '200': { description: 'models' } },
+        summary: '사용 가능한 AI 모델 목록 (서버 측)',
+        responses: { '200': { description: '모델' } },
       },
     },
     '/api/ai/predict': {
       post: {
-        summary: 'Run AI prediction',
-        responses: { '200': { description: 'prediction results' } },
+        summary: 'AI 예측 실행',
+        responses: { '200': { description: '예측 결과' } },
       },
     },
     '/api/accounts/delete': {
       delete: {
-        summary: 'Delete an account',
-        responses: { '200': { description: 'ok' } },
+        summary: '계좌 삭제',
+        responses: { '200': { description: '성공' } },
       },
     },
     '/api/accounts/add': {
       post: {
-        summary: 'Add account (alias, apiKey, apiSecret)',
-        responses: { '200': { description: 'ok' } },
+        summary: '계좌 추가 (별칭, apiKey, apiSecret)',
+        responses: { '200': { description: '성공' } },
       },
     },
     '/api/quotations': {
       get: {
-        summary: 'Real time quotations proxy',
-        responses: { '200': { description: 'quotes' } },
+        summary: '실시간 호가 프록시',
+        responses: { '200': { description: '호가' } },
       },
     },
     '/api/presentBalance': {
       post: {
-        summary: 'Alias for present balance queries',
-        responses: { '200': { description: 'present balance' } },
+        summary: '현재 잔고 조회 별칭',
+        responses: { '200': { description: '현재 잔고' } },
       },
     },
     '/api/dataroma/export': {
       get: {
-        summary: 'Export dataroma data (csv/json)',
-        responses: { '200': { description: 'export file or json' } },
+        summary: 'Dataroma 데이터 내보내기 (csv/json)',
+        responses: { '200': { description: '내보내기 파일 또는 JSON' } },
       },
     },
     '/api/newsCommunity/latest': {
       get: {
-        summary: 'Latest community posts',
-        responses: { '200': { description: 'posts' } },
+        summary: '최신 커뮤니티 게시물',
+        responses: { '200': { description: '게시물' } },
       },
     },
     '/api/portfolio': {
       get: {
-        summary: 'User portfolio summary',
-        responses: { '200': { description: 'portfolio summary' } },
+        summary: '사용자 포트폴리오 요약',
+        responses: { '200': { description: '포트폴리오 요약' } },
       },
     },
     '/api/stock/detail': {
       get: {
-        summary: 'Stock detail proxy',
-        responses: { '200': { description: 'stock detail' } },
+        summary: '주식 상세 프록시',
+        responses: { '200': { description: '주식 상세' } },
       },
     },
     '/api/hello/health': {
       get: {
-        summary: 'Health check for hello endpoint',
-        responses: { '200': { description: 'ok' } },
+        summary: 'hello 엔드포인트 헬스 체크',
+        responses: { '200': { description: '성공' } },
       },
     },
     '/api/gemini/price': {
       get: {
-        summary: 'Gemini price feed',
-        responses: { '200': { description: 'price' } },
+        summary: 'Gemini 시세 피드',
+        responses: { '200': { description: '시세' } },
       },
     },
   },
