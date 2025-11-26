@@ -62,12 +62,6 @@ const TestPage = () => {
             <Section title="총자산">100만원</Section>
             <Section title="투자액수">80만원</Section>
           </div>
-          <section>
-            <Section title="200일 이평선">200</Section>
-            <Section title="RSI">30</Section>
-            <Section title="BB">하단</Section>
-            <Section title="f-score"></Section>
-          </section>
           <Section title="환율">1458원</Section>
         </aside>
         <main className="w-full bg-neutral-800 divide-y divide-neutral-700">
@@ -85,16 +79,38 @@ const TestPage = () => {
               <Stcok>AAPL</Stcok>
             </div>
           </section>
-          <section className="p-2 flex gap-2 items-center">
-            매도추천
-            <div className="flex gap-2">
-              <Stcok>MSIS</Stcok>
-              <Stcok>AAPL</Stcok>
-            </div>
-          </section>
           <section className="p-2 flex flex-col gap-2">
-            AAPL
-            <figure className="bg-neutral-900 h-48 rounded border border-neutral-950"></figure>
+            <div>종목</div>
+            <div>5분봉 BB 하단</div>
+            <div>5분봉 BB 상단</div>
+            <div>현재가</div>
+            <div>현재가가 BB 상단보다 높으므로 매도 진행</div>
+            <table>
+              <th>
+                <th>no</th>
+                <th>시간</th>
+                <th>주문</th>
+                <th>금액</th>
+                <th>수량</th>
+                <th>누적수량</th>
+              </th>
+              <td>
+                <td>1</td>
+                <td>10:05</td>
+                <td>매수</td>
+                <td>100,000</td>
+                <td>1</td>
+                <td>1</td>
+              </td>
+              <td>
+                <td>2</td>
+                <td>10:07</td>
+                <td>매수</td>
+                <td>120,000</td>
+                <td>2</td>
+                <td>3</td>
+              </td>
+            </table>
           </section>
         </main>
         <aside className="flex flex-col divide-y divide-neutral-800 w-48 shrink-0">
