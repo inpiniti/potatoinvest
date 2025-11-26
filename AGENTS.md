@@ -19,27 +19,58 @@
 1. 프로젝트 개요
 
 - 기술스택 : next.js, zustand, react-query, tailwind, shadcn
-+ 추가 변경 기술 스택 : next에서 react + electron
-- 프로젝트 설명 : 퀀트 투자
+- 프로젝트 설명 : 이 프로젝트는 퀀트 투자로 수익을 내기 위한 프로젝트임
 
 2. api
-- 기존에 직접 구현한 api를 사용했는데, react + electron에서는 대부분은 직접 호출
-- api 대신 electron의 자체 api 구현해야 하는건 ipcRenderer를 사용
-
-  a. scanner (기존 /api/hello)
+  a. tradingview API
+  - /api/tradingview/scanner (기존 /api/hello)
   - 주식 데이터를 스캐너함
   - ai 분석도 하고 있음
 
-  b. investor (기존 /api/dataroma/base)
+  b. dataroma API 
+  - /api/dataroma/base
+  - 내부적으로는 크롤링을 함
   - 투자자 정보를 가져옴
   - 내부적으로 scanner를 호출함
-  - 기본적으로 db 캐싱을 함
+  - 조회가 너무 오래 걸려 db 캐싱 전략을 사용하고 있음
 
-  c. 한투 API (한투 api는 직접조회한다.)
+  c. 한투 API
   - 도메인 : https://openapi.koreainvestment.com:9443
-    가. 주식 분봉 조회 (/uapi/overseas-price/v1/quotations/inquire-time-itemchartprice)
+    가. /api/korea-invest/bunbong
+      - 주식 분봉 조회 (/uapi/overseas-price/v1/quotations/inquire-time-itemchartprice)
       - method: GET
       - tr id: HHDFS76950200
+
+    나. /api/korea-invest/current-price
+      - 주식 현재가 조회 (/uapi/overseas-price/v1/quotations/price-detail)
+      - method: GET
+      - tr id: HHDFS76950100
+
+    다. /api/korea-invest/trade
+      - 주식 매매 (/uapi/overseas-stock/v1/trading/order)
+      - method: POST
+      - tr id: 매수(TTTT1002U), 매도(TTTT1006U)
+    
+    라. /api/korea-invest/balance
+      - 주식 잔고 조회 (/uapi/overseas-stock/v1/trading/inquire-present-balance)
+      - method: GET
+      - tr id: CTRP6504R
+    
+    바. /api/korea-invest/profit
+      - 기간손익 (/uapi/overseas-stock/v1/trading/inquire-period-profit)
+      - method: GET
+      - tr id: TTTS3039R
+  
+  - 인증도메인: https://openapi.koreainvestment.com:9443
+    가. 
+
+  d. 토스증권 API
+  - 커뮤니티 조회
+
+  e. 네이버증권 API
+  - 커뮤니티 조회
+
+  f. 
 
 3. database
 - @supabase/supabase-js 사용
@@ -50,8 +81,12 @@
   b. 구매이력
     - 이건 아직 만들어지지 않음
     - id, account_no, stock, 구매시간(yyyy-mm-dd hh:mm:ss), 구매가격, 구매수량, 판매시간(yyyy-mm-dd hh:mm:ss), 판매가격, 판매수량, 완료여부
+  c. brokerage_accounts
+    - id, user_id, account_no, account_no, api_key, secret_key, created_at, alias, secret_key_enc, max_positions, target_cash_ratio
+    - user_id는 supabase에서 발급? 또는 카카오에서 발급? 한 uuid 임 (왼지 카카오 발급인듯)
+    - 용도는 카카오 로그인하고나서 일치하는 id를 프론트에 리턴하고, 프론트에서는 id를 가지고 account_no, api_key, secret_key 를 조회해서 한투 API를 조회하게 됨
 
-4. 화면
+4. 화면, 하나의 화면에서 구현하고자 함
 - 시맨틱
   a. aside
     가. 계좌인증 섹션
@@ -86,5 +121,21 @@
 
   c. aside
     가. 종목정보 섹션
-    나. 뉴스 섹션
     다. 커뮤니티 섹션
+
+5. hook
+  a. useTradingView
+  b. useDataroma
+  c. useKoreaInvest
+    가. 로그인(account_no)
+    나. 주식 분봉 조회
+    다. 주식 현재가 조회
+    라. 주식 매매
+    바. 주식 잔고 조회
+    사. 기간손익 조회
+  d. useKakao
+    가. 로그인()
+  e. useSupabase
+    가. getBase
+    다. getBrokerageAccounts
+    다. getAssetInfo
