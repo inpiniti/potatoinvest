@@ -60,17 +60,12 @@
       - 기간손익 (/uapi/overseas-stock/v1/trading/inquire-period-profit)
       - method: GET
       - tr id: TTTS3039R
-  
-  - 인증도메인: https://openapi.koreainvestment.com:9443
-    가. 
 
   d. 토스증권 API
   - 커뮤니티 조회
 
   e. 네이버증권 API
   - 커뮤니티 조회
-
-  f. 
 
 3. database
 - @supabase/supabase-js 사용
@@ -127,15 +122,16 @@
   a. useTradingView
   b. useDataroma
   c. useKoreaInvest
-    가. 로그인(account_no)
-    나. 주식 분봉 조회
-    다. 주식 현재가 조회
-    라. 주식 매매
-    바. 주식 잔고 조회
-    사. 기간손익 조회
+    가. 로그인(account_no) : access_token
+    나. 웹소캣발급(account_no) : token
+    다. 주식 분봉 조회(EXCD, SYMB) : 
+    라. 주식 현재가 조회
+    바. 주식 매매
+    사. 주식 잔고 조회
+    아. 기간손익 조회
   d. useKakao
     가. 로그인()
   e. useSupabase
     가. getBase
     다. getBrokerageAccounts
-    다. getAssetInfo
+    다. getAssetInfo(account_no) : appkey, appsecret
