@@ -2,36 +2,38 @@
  * 분봉/일봉 데이터 타입 정의
  */
 export interface CandleData {
-    clos: string | number; // 종가
-    xymd: string; // 날짜 (YYYYMMDD)
-    xhms?: string; // 시간 (HHMMSS) - 분봉의 경우
-    [key: string]: any; // 기타 필드
+    clos: string | number;
+    xymd: string;
+    xhms?: string;
+    [key: string]: any;
 }
 
-/**
- * 추세 상태 타입
- */
 export type TrendStatus = '상승전환' | '하락전환' | '상승' | '하락' | '유지';
 
 /**
- * 이동평균선 기울기 변화를 분석하여 추세 전환을 감지하는 함수
- * 
- * @param candleData - 분봉 또는 일봉 데이터 배열 (최신순 정렬, 120개)
- * @param maPeriod - 이동평균 기간 (기본값: 20)
- * @param threshold - 기울기 임계값 (기본값: 0.01%)
- * @returns 추세 상태: '상승전환' | '하락전환' | '상승' | '하락' | '유지'
+ * 고정 샘플링 간격 반환
  */
+function getSamplingInterval(maPeriod: number): number {
+    if (maPeriod === 20) return 1;
+    if (maPeriod === 50) return 5;
+    if (maPeriod === 100) return 20;
+    if (maPeriod === 200) return 40;
+    return Math.max(1, Math.floor(maPeriod / 20));
+}
+
 export function detectTrendChange(
     candleData: CandleData[],
     maPeriod: number = 20,
     threshold: number = 0.01
 ): TrendStatus {
-    // 1. 입력 데이터 검증
-    if (!candleData || candleData.length < maPeriod + 5) {
-        throw new Error(`최소 ${maPeriod + 5}개 이상의 데이터가 필요합니다.`);
+    const samplingInterval = getSamplingInterval(maPeriod);
+    const sampleCount = 5;
+    const requiredDataCount = maPeriod + (sampleCount - 1) * samplingInterval;
+
+    if (!candleData || candleData.length < requiredDataCount) {
+        return '유지';
     }
 
-    // 2. 종가 데이터 추출 및 숫자 변환
     const closePrices = candleData.map(candle => {
         const price = typeof candle.clos === 'string' ? parseFloat(candle.clos) : candle.clos;
         if (isNaN(price)) {
@@ -40,23 +42,12 @@ export function detectTrendChange(
         return price;
     });
 
-    // 3. 이동평균 계산
     const movingAverages = calculateMovingAverages(closePrices, maPeriod);
-
-    // 4. 기울기 계산
     const slopes = calculateSlopes(movingAverages);
 
-    // 5. 추세 전환 감지
-    return detectTrend(slopes, threshold);
+    return detectTrend(slopes, threshold, maPeriod, samplingInterval);
 }
 
-/**
- * 이동평균 계산
- * 
- * @param prices - 종가 배열 (최신순)
- * @param period - 이동평균 기간
- * @returns 이동평균 배열
- */
 function calculateMovingAverages(prices: number[], period: number): number[] {
     const movingAverages: number[] = [];
 
@@ -69,20 +60,12 @@ function calculateMovingAverages(prices: number[], period: number): number[] {
     return movingAverages;
 }
 
-/**
- * 기울기 계산
- * 
- * @param movingAverages - 이동평균 배열
- * @returns 기울기 배열 (%)
- */
 function calculateSlopes(movingAverages: number[]): number[] {
     const slopes: number[] = [];
 
     for (let i = 0; i < movingAverages.length - 1; i++) {
         const current = movingAverages[i];
         const previous = movingAverages[i + 1];
-
-        // 기울기 = (현재 - 이전) / 이전 * 100 (%)
         const slope = ((current - previous) / previous) * 100;
         slopes.push(slope);
     }
@@ -90,77 +73,123 @@ function calculateSlopes(movingAverages: number[]): number[] {
     return slopes;
 }
 
-/**
- * 추세 감지
- * 
- * @param slopes - 기울기 배열 (최신순)
- * @param threshold - 기울기 임계값 (%)
- * @returns 추세 상태
- */
-function detectTrend(slopes: number[], threshold: number): TrendStatus {
-    if (slopes.length < 5) {
-        throw new Error('기울기 계산을 위해 최소 5개 이상의 데이터가 필요합니다.');
+function detectTrend(
+    slopes: number[],
+    threshold: number,
+    maPeriod: number,
+    samplingInterval: number
+): TrendStatus {
+    const sampleCount = 5;
+    const requiredSlopeCount = (sampleCount - 1) * samplingInterval + 1;
+
+    if (slopes.length < requiredSlopeCount) {
+        return '유지';
     }
 
-    const currentSlope = slopes[0]; // 현재 기울기
-    const pastSlopes = slopes.slice(1, 5); // 과거 1~4일 기울기
+    const sampledSlopes: number[] = [];
+    for (let i = 0; i < sampleCount; i++) {
+        const index = i * samplingInterval;
+        if (index < slopes.length) {
+            sampledSlopes.push(slopes[index]);
+        }
+    }
 
-    // 상승전환 조건: 현재 >= 0, 과거 모두 < 0
-    const isUpwardReversal =
-        currentSlope >= 0 &&
-        pastSlopes.every(slope => slope < 0);
+    console.log(`[MA${maPeriod}] 간격: ${samplingInterval}일, 샘플: [${sampledSlopes.map(s => s.toFixed(4)).join(', ')}], 임계값: ${threshold.toFixed(6)}%`);
 
-    // 하락전환 조건: 현재 <= 0, 과거 모두 > 0
-    const isDownwardReversal =
-        currentSlope <= 0 &&
-        pastSlopes.every(slope => slope > 0);
+    const currentSlope = sampledSlopes[0];
+    const pastSlopes = sampledSlopes.slice(1);
+
+    const isUpwardReversal = currentSlope >= 0 && pastSlopes.every(slope => slope < 0);
+    const isDownwardReversal = currentSlope <= 0 && pastSlopes.every(slope => slope > 0);
 
     if (isUpwardReversal) {
+        console.log(`[MA${maPeriod}] ✅ 상승전환 감지`);
         return '상승전환';
     }
 
     if (isDownwardReversal) {
+        console.log(`[MA${maPeriod}] ✅ 하락전환 감지`);
         return '하락전환';
     }
 
-    // 상승 조건: 현재 기울기 > 임계값
     if (currentSlope > threshold) {
+        console.log(`[MA${maPeriod}] ✅ 상승 (${currentSlope.toFixed(6)}% > ${threshold.toFixed(6)}%)`);
         return '상승';
     }
 
-    // 하락 조건: 현재 기울기 < -임계값
     if (currentSlope < -threshold) {
+        console.log(`[MA${maPeriod}] ✅ 하락 (${currentSlope.toFixed(6)}% < -${threshold.toFixed(6)}%)`);
         return '하락';
     }
 
-    // 유지 조건: 기울기가 임계값 범위 내
+    console.log(`[MA${maPeriod}] ⚪ 유지 (${currentSlope.toFixed(6)}% 범위 내)`);
     return '유지';
 }
 
-/**
- * 디버깅용: 이동평균과 기울기 상세 정보 반환
- * 
- * @param candleData - 분봉 또는 일봉 데이터 배열
- * @param maPeriod - 이동평균 기간
- * @returns 상세 분석 결과
- */
-export function analyzeTrendDetails(
-    candleData: CandleData[],
-    maPeriod: number = 20
-) {
-    const closePrices = candleData.map(candle =>
-        typeof candle.clos === 'string' ? parseFloat(candle.clos) : candle.clos
-    );
+export function analyzeMultipleMAs(candleData: CandleData[]): {
+    ma20: { status: TrendStatus; slope: number };
+    ma50: { status: TrendStatus; slope: number };
+    ma100: { status: TrendStatus; slope: number };
+    ma200: { status: TrendStatus; slope: number };
+} {
+    const analyze = (period: number) => {
+        const closePrices = candleData.map(candle => {
+            const price = typeof candle.clos === 'string' ? parseFloat(candle.clos) : candle.clos;
+            return price;
+        });
 
-    const movingAverages = calculateMovingAverages(closePrices, maPeriod);
-    const slopes = calculateSlopes(movingAverages);
+        const samplingInterval = getSamplingInterval(period);
+
+        console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+        console.log(`[MA${period}] 📊 원본 데이터: ${candleData.length}개, 샘플링 간격: ${samplingInterval}일`);
+
+        // 원본 종가 데이터 출력
+        const displayCount = period >= 100 ? 100 : 20;
+        console.log(`[MA${period}] 💰 원본 종가 (처음 ${displayCount}개):`, closePrices.slice(0, displayCount));
+
+        // 가격 통계
+        const priceStats = {
+            min: Math.min(...closePrices),
+            max: Math.max(...closePrices),
+            avg: closePrices.reduce((sum, p) => sum + p, 0) / closePrices.length,
+            first: closePrices[0],
+            last: closePrices[closePrices.length - 1],
+        };
+        console.log(`[MA${period}] 📊 가격 통계: 최소=${priceStats.min.toFixed(2)}, 최대=${priceStats.max.toFixed(2)}, 평균=${priceStats.avg.toFixed(2)}, 최신=${priceStats.first.toFixed(2)}, 최초=${priceStats.last.toFixed(2)}`);
+
+        const movingAverages = calculateMovingAverages(closePrices, period);
+        const slopes = calculateSlopes(movingAverages);
+
+        console.log(`[MA${period}] 📊 이평: ${movingAverages.length}개 → 기울기: ${slopes.length}개`);
+
+        // 샘플링된 이동평균 값 출력
+        const sampledMAIndices = [0, samplingInterval, samplingInterval * 2, samplingInterval * 3, samplingInterval * 4];
+        const sampledMAs = sampledMAIndices.map(i => i < movingAverages.length ? movingAverages[i] : null).filter(v => v !== null);
+        console.log(`[MA${period}] 📈 샘플링된 이동평균 (${samplingInterval}일 간격):`, sampledMAs);
+
+        if (slopes.length === 0) {
+            console.error(`[MA${period}] ❌ 기울기 계산 실패!`);
+            return { status: '유지' as TrendStatus, slope: 0 };
+        }
+
+        // 샘플링된 기울기 출력
+        const sampledSlopeIndices = [0, samplingInterval, samplingInterval * 2, samplingInterval * 3, samplingInterval * 4];
+        const sampledSlopes = sampledSlopeIndices.map(i => i < slopes.length ? slopes[i] : null).filter(v => v !== null);
+        console.log(`[MA${period}] 📉 샘플링된 기울기 (${samplingInterval}일 간격):`, sampledSlopes);
+
+        const currentSlope = slopes[0];
+        console.log(`[MA${period}] 🎯 현재 기울기: ${currentSlope.toFixed(8)}%`);
+
+        const threshold = 0.2 / period;
+        const status = detectTrendChange(candleData, period, threshold);
+
+        return { status, slope: currentSlope };
+    };
 
     return {
-        closePrices: closePrices.slice(0, 10), // 최근 10개만
-        movingAverages: movingAverages.slice(0, 10),
-        slopes: slopes.slice(0, 10),
-        currentSlope: slopes[0],
-        pastSlopes: slopes.slice(1, 5),
-        trend: detectTrendChange(candleData, maPeriod)
+        ma20: analyze(20),
+        ma50: analyze(50),
+        ma100: analyze(100),
+        ma200: analyze(200),
     };
 }

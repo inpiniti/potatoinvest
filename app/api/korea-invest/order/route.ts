@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { accountId, orderType, EXCD, SYMB, QTY, PRICE, ORD_DVSN, AUTH } = body;
+        const { accountId, orderType, EXCD, SYMB, QTY, PRICE, ORD_DVSN } = body;
 
         if (!accountId) {
             return NextResponse.json(
@@ -38,6 +38,14 @@ export async function POST(req: NextRequest) {
 
         const config = await getKoreaInvestConfig(user.id, accountId);
 
+        const koreaInvestToken = req.headers.get("x-korea-invest-token");
+        if (!koreaInvestToken) {
+            return NextResponse.json(
+                { error: "Missing KoreaInvest Access Token (x-korea-invest-token header)" },
+                { status: 400 }
+            );
+        }
+
         const trId = orderType === "BUY" ? "TTTT1002U" : "TTTT1006U";
 
         const url = `${config.baseUrl}/uapi/overseas-stock/v1/trading/order`;
@@ -46,7 +54,7 @@ export async function POST(req: NextRequest) {
             method: "POST",
             headers: {
                 "content-type": "application/json",
-                authorization: `Bearer ${AUTH || ""}`,
+                authorization: `Bearer ${koreaInvestToken}`,
                 appkey: config.appKey,
                 appsecret: config.appSecret,
                 tr_id: trId,

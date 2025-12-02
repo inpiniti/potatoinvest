@@ -28,8 +28,13 @@ export const tempKeyStore = create(
           expires_in: '', // 접근토큰 유효기간
           access_token_token_expired: '', // 접근토큰 유효기간(일시표시)
         },
+        selectedAccountId: undefined, // 선택된 계좌 ID
         setKey: (key) => set({ key }),
         setRealKey: (realKey) => set({ realKey }),
+        setSelectedAccountId: (selectedAccountId) => {
+          console.log('📝 tempKeyStore - setSelectedAccountId:', selectedAccountId);
+          set({ selectedAccountId });
+        },
       }),
       {
         name: 'tempKey',
@@ -39,6 +44,7 @@ export const tempKeyStore = create(
           if (state) {
             state.setHasHydrated(true);
             console.log('✅ tempKeyStore 하이드레이션 완료');
+            console.log('📌 복원된 selectedAccountId:', state.selectedAccountId);
           }
         },
       }

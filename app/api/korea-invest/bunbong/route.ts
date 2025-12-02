@@ -50,7 +50,6 @@ export async function GET(req: NextRequest) {
         const NEXT = searchParams.get("NEXT") || "";
         const NREC = searchParams.get("NREC") || "120";
         const KEYB = searchParams.get("KEYB") || "";
-        const AUTH = searchParams.get("AUTH") || "";
         const accountIdParam = searchParams.get("accountId");
 
         if (!EXCD || !SYMB) {
@@ -72,8 +71,15 @@ export async function GET(req: NextRequest) {
 
         const config = await getKoreaInvestConfig(user.id, accountId);
 
+        const koreaInvestToken = req.headers.get("x-korea-invest-token");
+        if (!koreaInvestToken) {
+            return NextResponse.json(
+                { error: "Missing KoreaInvest Access Token (x-korea-invest-token header)" },
+                { status: 400 }
+            );
+        }
+
         const queryParams = new URLSearchParams({
-            AUTH,
             EXCD,
             SYMB,
             NMIN,
@@ -85,12 +91,11 @@ export async function GET(req: NextRequest) {
 
         const url = `${config.baseUrl}/uapi/overseas-price/v1/quotations/inquire-time-itemchartprice?${queryParams}`;
         console.log("🔍 [bunbong] Calling KoreaInvest API:", url);
-        console.log("🔍 [bunbong] Using AUTH token:", AUTH ? AUTH.slice(0, 20) + "..." : "EMPTY");
 
         const res = await fetch(url, {
             headers: {
                 "content-type": "application/json",
-                authorization: `Bearer ${AUTH}`, // 클라이언트가 전달한 AUTH 토큰 사용
+                authorization: `Bearer ${koreaInvestToken}`,
                 appkey: config.appKey,
                 appsecret: config.appSecret,
                 tr_id: "HHDFS76950200",

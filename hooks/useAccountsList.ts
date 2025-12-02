@@ -146,13 +146,16 @@ export function useAccountsList() {
 
   // 계좌 목록이 변경되어 현재 선택된 id가 사라진 경우 선택 해제
   useEffect(() => {
+    // 로딩 중이거나 계좌 목록이 아직 로드되지 않았으면 검사하지 않음
+    if (query.isLoading || !query.data) return;
+
     if (
       selectedAccountId != null &&
       !accounts.find((a) => a.id === selectedAccountId)
     ) {
       setSelected(null);
     }
-  }, [accounts, selectedAccountId, setSelected]);
+  }, [accounts, selectedAccountId, setSelected, query.isLoading, query.data]);
 
   const selectAccount = (id: number | null) => setSelected(id);
   const selectedAccount =

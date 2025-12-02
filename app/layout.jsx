@@ -54,15 +54,28 @@ export default function Layout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryClientProvider client={queryClient}>
-          <div className="flex flex-col">
-            <Header />
-            {/* 헤더가 fixed라서 컨텐츠에 상단 여백을 부여 */}
-            <div className="pt-12">{children}</div>
-          </div>
+          <LayoutContent>{children}</LayoutContent>
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </body>
     </html>
+  );
+}
+
+function LayoutContent({ children }) {
+  const pathname = usePathname();
+  const isTestPage = pathname === "/test";
+
+  if (isTestPage) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div className="flex flex-col">
+      <Header />
+      {/* 헤더가 fixed라서 컨텐츠에 상단 여백을 부여 */}
+      <div className="pt-12">{children}</div>
+    </div>
   );
 }
 

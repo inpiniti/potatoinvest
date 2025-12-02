@@ -22,7 +22,6 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         const EXCD = searchParams.get("EXCD");
         const SYMB = searchParams.get("SYMB");
-        const AUTH = searchParams.get("AUTH") || "";
         const accountIdParam = searchParams.get("accountId");
 
         if (!EXCD || !SYMB) {
@@ -42,8 +41,15 @@ export async function GET(req: NextRequest) {
         const accountId = parseInt(accountIdParam);
         const config = await getKoreaInvestConfig(user.id, accountId);
 
+        const koreaInvestToken = req.headers.get("x-korea-invest-token");
+        if (!koreaInvestToken) {
+            return NextResponse.json(
+                { error: "Missing KoreaInvest Access Token (x-korea-invest-token header)" },
+                { status: 400 }
+            );
+        }
+
         const queryParams = new URLSearchParams({
-            AUTH,
             EXCD,
             SYMB,
         });
@@ -53,7 +59,7 @@ export async function GET(req: NextRequest) {
         const res = await fetch(url, {
             headers: {
                 "content-type": "application/json",
-                authorization: `Bearer ${AUTH}`,
+                authorization: `Bearer ${koreaInvestToken}`,
                 appkey: config.appKey,
                 appsecret: config.appSecret,
                 tr_id: "HHDFS76950100",

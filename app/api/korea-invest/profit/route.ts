@@ -28,7 +28,6 @@ export async function GET(req: NextRequest) {
         const CURRENCY_TYPE = searchParams.get("CURRENCY_TYPE") || "02";
         const CTX_AREA_FK200 = searchParams.get("CTX_AREA_FK200") || "";
         const CTX_AREA_NK200 = searchParams.get("CTX_AREA_NK200") || "";
-        const AUTH = searchParams.get("AUTH") || "";
         const accountIdParam = searchParams.get("accountId");
 
         if (!START_DATE || !END_DATE) {
@@ -48,6 +47,14 @@ export async function GET(req: NextRequest) {
         const accountId = parseInt(accountIdParam);
         const config = await getKoreaInvestConfig(user.id, accountId);
 
+        const koreaInvestToken = req.headers.get("x-korea-invest-token");
+        if (!koreaInvestToken) {
+            return NextResponse.json(
+                { error: "Missing KoreaInvest Access Token (x-korea-invest-token header)" },
+                { status: 400 }
+            );
+        }
+
         const queryParams = new URLSearchParams({
             CANO: config.cano,
             ACNT_PRDT_CD: config.acntPrdtCd,
@@ -66,7 +73,7 @@ export async function GET(req: NextRequest) {
         const res = await fetch(url, {
             headers: {
                 "content-type": "application/json",
-                authorization: `Bearer ${AUTH}`,
+                authorization: `Bearer ${koreaInvestToken}`,
                 appkey: config.appKey,
                 appsecret: config.appSecret,
                 tr_id: "TTTS3039R",

@@ -106,6 +106,10 @@ function parseMarkdownToOpenApi(markdown: string) {
         description: "네이버 증권 커뮤니티 API",
       },
       {
+        name: "MarketData",
+        description: "시장 데이터 API",
+      },
+      {
         name: "OpenAPI",
         description: "API 문서",
       },
@@ -243,6 +247,8 @@ function addPathToSpec(
     tag = "TossInvest";
   } else if (path.includes("/naverfinance/")) {
     tag = "NaverFinance";
+  } else if (path.includes("/sp500")) {
+    tag = "MarketData";
   } else if (path.includes("/openapi")) {
     tag = "OpenAPI";
   }

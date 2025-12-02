@@ -400,6 +400,61 @@
 ]
 ```
 
+### Market Data
+
+#### /api/sp500
+- **설명**: S&P 500 구성 종목 리스트 조회 API
+- **데이터 소스**: Wikipedia (List of S&P 500 companies)
+- **Method**: GET
+- **인증**: 불필요
+
+##### 요청 (Request)
+
+**Headers**: 없음
+
+**Query Parameters**: 없음
+
+##### 응답 (Response)
+
+**Body**
+```json
+{
+  "success": true,
+  "count": 503,
+  "data": [
+    {
+      "symbol": "AAPL",
+      "name": "Apple Inc.",
+      "exchange": "NASDAQ"
+    },
+    {
+      "symbol": "JPM",
+      "name": "JPMorgan Chase & Co.",
+      "exchange": "NYSE"
+    }
+  ]
+}
+```
+
+| 필드명 | 타입 | 설명 | 예시 |
+|--------|------|------|------|
+| `success` | Boolean | 성공 여부 | `true` |
+| `count` | Number | 종목 개수 | `503` |
+| `data` | Array | 종목 리스트 | 아래 참조 |
+
+**data 배열 항목**:
+| 필드명 | 타입 | 설명 | 예시 |
+|--------|------|------|------|
+| `symbol` | String | 종목 코드 (티커) | `AAPL` |
+| `name` | String | 회사명 | `Apple Inc.` |
+| `exchange` | String | 거래소 | `NASDAQ`, `NYSE` |
+
+**참고**:
+- Wikipedia에서 실시간으로 크롤링하므로 최신 S&P 500 구성 종목을 반환합니다.
+- 캐싱이 적용되지 않으므로, 필요시 클라이언트에서 캐싱을 구현하세요.
+
+---
+
 ### System
 
 #### /api/openapi
