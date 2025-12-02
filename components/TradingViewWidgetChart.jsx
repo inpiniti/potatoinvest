@@ -20,9 +20,9 @@ function TradingViewWidgetChart({ symbol = "AAPL", market = "NASDAQ" }) {
     script.async = true;
     script.innerHTML = `
         {
-          "allow_symbol_change": true,
+          "allow_symbol_change": false,
           "calendar": false,
-          "details": false,
+          "details": true,
           "hide_side_toolbar": true,
           "hide_top_toolbar": false,
           "hide_legend": false,
@@ -40,7 +40,8 @@ function TradingViewWidgetChart({ symbol = "AAPL", market = "NASDAQ" }) {
           "withdateranges": false,
           "compareSymbols": [],
           "studies": [
-            "STD;Bollinger_Bands"
+            "STD;Bollinger_Bands",
+            "STD;MA%Ribbon"
           ],
           "autosize": true
         }`;

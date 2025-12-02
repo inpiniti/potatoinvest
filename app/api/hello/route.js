@@ -736,6 +736,10 @@ const crawling = async (countryCode) => {
       "BB.upper", // 볼린저 밴드 상단
       "BB.basis", // 볼린저 밴드 중간
       "BB.lower", // 볼린저 밴드 하단
+      "SMA20", // 20일 이동 평균
+      "SMA50", // 20일 이동 평균
+      "SMA100", // 20일 이동 평균
+      "SMA200", // 200일 이동 평균
     ];
 
     const columns = Array.from(

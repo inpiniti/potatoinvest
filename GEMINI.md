@@ -1,3 +1,7 @@
+# Output Language
+All Output Language : Always respond in Korean (한국어). Even if the user asks in English or the context is technical, provide explanations in Korean unless explicitly requested otherwise.
+
+# Role
 당신은 소프트웨어 엔지니어, 프론트엔드 개발자, 백엔드 개발자, 웹 서비스 개발 팀 매니저입니다.
 
 한국어로 작업을 진행해주세요.
@@ -16,14 +20,15 @@
 
 추가적인 요청 사항이 발생했을 때도 동일한 프로세스를 진행하세요.
 
-1. 프로젝트 개요
+# 프로젝트 개요
 
 - 기술스택 : next.js, zustand, react-query, tailwind, shadcn
-- 프로젝트 설명 : 이 프로젝트는 퀀트 투자로 수익을 내기 위한 프로젝트임
+- 프로젝트 설명 : 이 프로젝트는 퀀트 투자로 수익을 내기 위한 프로젝트임입니다.
 
-2. api
+# api
   a. tradingview API
-  - /api/tradingview/scanner (기존 /api/hello)
+  - 현재 /api/hello 로 만들어 두었습니다.
+  - API 명칭을 /api/tradingview/scanner 로 변경하고 싶다. 
   - 주식 데이터를 스캐너함
   - ai 분석도 하고 있음
 
@@ -35,28 +40,43 @@
   - 조회가 너무 오래 걸려 db 캐싱 전략을 사용하고 있음
 
   c. 한투 API
-  - 도메인 : https://openapi.koreainvestment.com:9443
-    가. /api/korea-invest/bunbong
+  - 실전도메인만 사용해서 만들어 주세요.
+    가. 토큰발급
+      - 참조 웹 : https://apiportal.koreainvestment.com/apiservice-apiservice?/oauth2/tokenP
+      - API : /api/korea-invest/token
+      - method: POST
+      - body: grant_type("client_credentials"), appkey, appsecret
+
+    나. 웹소캣토큰발급
+      - 참조 웹 : https://apiportal.koreainvestment.com/apiservice-apiservice?/oauth2/Approval
+      - API : /api/korea-invest/web-socket-token
+      - method: POST
+      - body: grant_type("client_credentials"), appkey, appsecret
+
+    다. 잔고
+      - 참조 웹 : https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/overseas-stock/v1/trading/inquire-present-balance
+      - API : /api/korea-invest/balance
+      - method: GET
+      - tr id: CTRP6504R
+
+    다. /api/korea-invest/bunbong
       - 주식 분봉 조회 (/uapi/overseas-price/v1/quotations/inquire-time-itemchartprice)
       - method: GET
       - tr id: HHDFS76950200
 
-    나. /api/korea-invest/current-price
+    다. /api/korea-invest/current-price
       - 주식 현재가 조회 (/uapi/overseas-price/v1/quotations/price-detail)
       - method: GET
       - tr id: HHDFS76950100
 
-    다. /api/korea-invest/trade
+    라. /api/korea-invest/trade
       - 주식 매매 (/uapi/overseas-stock/v1/trading/order)
       - method: POST
       - tr id: 매수(TTTT1002U), 매도(TTTT1006U)
     
-    라. /api/korea-invest/balance
-      - 주식 잔고 조회 (/uapi/overseas-stock/v1/trading/inquire-present-balance)
-      - method: GET
-      - tr id: CTRP6504R
     
-    바. /api/korea-invest/profit
+    
+    사. /api/korea-invest/profit
       - 기간손익 (/uapi/overseas-stock/v1/trading/inquire-period-profit)
       - method: GET
       - tr id: TTTS3039R
@@ -67,7 +87,7 @@
   e. 네이버증권 API
   - 커뮤니티 조회
 
-3. database
+# database
 - @supabase/supabase-js 사용
 - url : process.env.NEXT_PUBLIC_SUPABASE_URL
 - key : process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -81,7 +101,7 @@
     - user_id는 supabase에서 발급? 또는 카카오에서 발급? 한 uuid 임 (왼지 카카오 발급인듯)
     - 용도는 카카오 로그인하고나서 일치하는 id를 프론트에 리턴하고, 프론트에서는 id를 가지고 account_no, api_key, secret_key 를 조회해서 한투 API를 조회하게 됨
 
-4. 화면, 하나의 화면에서 구현하고자 함
+# 화면, 하나의 화면에서 구현하고자 함
 - 시맨틱
   a. aside
     가. 계좌인증 섹션
@@ -118,7 +138,7 @@
     가. 종목정보 섹션
     다. 커뮤니티 섹션
 
-5. hook
+# hook
   a. useTradingView
   b. useDataroma
   c. useKoreaInvest

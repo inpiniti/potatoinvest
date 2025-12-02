@@ -87,9 +87,13 @@ const recommend = () => {
     return data?.filter((item) => {
       if (selectedTab === 'buy') {
         return (
-          item.ai >= 0.5 &&
-          item.dcf_vs_market_cap_pct >= 300 &&
-          item.close <= item.bbLower
+          //item.ai >= 0.5 &&
+          //item.dcf_vs_market_cap_pct >= 300 &&
+          item.close <= item.bbLower &&
+          item.rsi < 30 &&
+          item.sma20 > item.sma50 &&
+          item.sma50 > item.sma100 &&
+          item.sma100 > item.sma200
         );
       }
       if (selectedTab === 'sell') {
@@ -222,6 +226,8 @@ const recommend = () => {
               <TableHead>상한선</TableHead>
               <TableHead>현재가격</TableHead>
               <TableHead>하한선</TableHead>
+              <TableHead>RSI</TableHead>
+              <TableHead>이평선</TableHead>
               <TableHead>
                 <Sheet onClick={(e) => e.stopPropagation()}>
                   <SheetTrigger asChild>
@@ -385,6 +391,14 @@ const recommend = () => {
                         ${Math.floor(item.close)}
                       </TableCell>
                       <TableCell>${Math.floor(item.bbLower)}</TableCell>
+                      <TableCell>{Math.floor(item.rsi)}</TableCell>
+                      <TableCell>
+                        {item.sma20 > item.sma50 &&
+                          item.sma50 > item.sma100 &&
+                          item.sma100 > item.sma200
+                          ? '상승중'
+                          : '-'}
+                      </TableCell>
                       <TableCell className={getAIPredictionColor(item.ai)}>
                         {(item.ai * 100).toFixed(2)}%
                       </TableCell>

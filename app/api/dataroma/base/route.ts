@@ -226,9 +226,9 @@ export async function GET(req: NextRequest) {
       // ensure portfolio is an array of { code, ratio }
       portfolio: Array.isArray(p.portfolio)
         ? p.portfolio.map((h) => ({
-            code: h.code || "",
-            ratio: h.ratio || null,
-          }))
+          code: h.code || "",
+          ratio: h.ratio || null,
+        }))
         : [],
     }));
 
@@ -241,10 +241,10 @@ export async function GET(req: NextRequest) {
       stock: s.stock || "",
       person: Array.isArray(s.person)
         ? s.person.map((p) => ({
-            no: p.no || 0,
-            name: p.name || "Unknown",
-            ratio: p.ratio || null,
-          }))
+          no: p.no || 0,
+          name: p.name || "Unknown",
+          ratio: p.ratio || null,
+        }))
         : [],
       person_count:
         typeof s.person_count === "number"
@@ -429,6 +429,11 @@ export async function GET(req: NextRequest) {
               let bbUpper: number | undefined = undefined;
               let close: number | undefined = undefined;
               let ai: number | undefined = undefined;
+              let sma20: number | undefined = undefined;
+              let sma50: number | undefined = undefined;
+              let sma100: number | undefined = undefined;
+              let sma200: number | undefined = undefined;
+              let rsi: number | undefined = undefined;
               if (item) {
                 const raw = item["dcf_vs_market_cap_pct"];
                 logoid =
@@ -455,6 +460,20 @@ export async function GET(req: NextRequest) {
                   typeof item["b_b_upper"] === "number"
                     ? item["b_b_upper"]
                     : undefined;
+                sma20 =
+                  typeof item["s_m_a20"] === "number" ? item["s_m_a20"] : undefined;
+                sma50 =
+                  typeof item["s_m_a50"] === "number" ? item["s_m_a50"] : undefined;
+                sma100 =
+                  typeof item["s_m_a100"] === "number"
+                    ? item["s_m_a100"]
+                    : undefined;
+                sma200 =
+                  typeof item["s_m_a200"] === "number"
+                    ? item["s_m_a200"]
+                    : undefined;
+                rsi =
+                  typeof item["r_s_i"] === "number" ? item["r_s_i"] : undefined;
                 close =
                   typeof item["close"] === "number" ? item["close"] : undefined;
                 ai =
@@ -479,6 +498,11 @@ export async function GET(req: NextRequest) {
                 bbUpper,
                 close,
                 ai,
+                sma20,
+                sma50,
+                sma100,
+                sma200,
+                rsi,
               };
             });
           }
