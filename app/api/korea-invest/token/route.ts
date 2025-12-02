@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getKoreaInvestConfig, getAdminClient } from "@/lib/koreaInvest";
+import { getKoreaInvestConfig, getAdminClient, fetchAccessToken } from "@/lib/koreaInvest";
 
 async function getUser(req: NextRequest) {
     const auth = req.headers.get("authorization");
@@ -28,23 +28,48 @@ export async function POST(req: NextRequest) {
                 const body = JSON.parse(text);
                 accountId = body.accountId;
             }
-        } catch (e) {
+        } catch {
             // JSON 파싱 에러 무시 (Body가 없거나 형식이 잘못되어도 기본 계좌로 진행)
             console.warn("Body parsing failed or empty, using default account.");
         }
 
-        // 3. 한투 설정 가져오기 (내부적으로 토큰 발급 수행)
-        const config = await getKoreaInvestConfig(user.id, accountId);
+        // 3. 계좌 ID 결정
+        let targetAccountId: number | undefined = accountId ? parseInt(accountId) : undefined;
 
-        // 4. 토큰 반환
+        if (!targetAccountId || isNaN(targetAccountId)) {
+            const admin = getAdminClient();
+            const { data: accounts } = await admin
+                .from("brokerage_accounts")
+                .select("id")
+                .eq("user_id", user.id)
+                .limit(1);
+
+            if (accounts && accounts.length > 0) {
+                targetAccountId = accounts[0].id;
+            } else {
+                return NextResponse.json({ error: "No brokerage account found" }, { status: 404 });
+            }
+        }
+
+        // 4. 한투 설정 가져오기
+        if (targetAccountId === undefined) {
+            return NextResponse.json({ error: "No brokerage account found" }, { status: 404 });
+        }
+        const config = await getKoreaInvestConfig(user.id, targetAccountId);
+
+        // 5. 토큰 발급
+        const accessToken = await fetchAccessToken(config.appKey, config.appSecret);
+
+        // 6. 토큰 반환
         return NextResponse.json({
-            access_token: config.accessToken,
+            access_token: accessToken,
             token_type: "Bearer",
             expires_in: 86400, // 유효기간 (실제로는 한투 응답에서 가져와야 정확하지만, 여기선 24시간 가정)
             account_no: config.accountNo, // 편의를 위해 계좌번호도 함께 반환
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error in token API:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }

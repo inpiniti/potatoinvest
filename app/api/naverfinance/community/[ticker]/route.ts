@@ -60,7 +60,22 @@ export async function GET(
         }
 
         const $ = cheerio.load(html);
-        const comments: any[] = [];
+        const comments: {
+            id: string;
+            contents: string;
+            createdAt: string;
+            writer: {
+                name: string;
+                img: null;
+            };
+            stats: {
+                likes: number;
+                comments: number;
+                views: number;
+            };
+            source: string;
+            url: string | undefined;
+        }[] = [];
 
         // HTML 구조 분석용 로그
         console.log("🔍 Analyzing HTML structure...");
@@ -130,11 +145,12 @@ export async function GET(
         console.log(`✅ Parsed ${comments.length} comments from Naver (URL: ${successUrl})`);
 
         return NextResponse.json(comments);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("❌ Error in Naver Community API:", error);
-        console.error("❌ Error message:", error.message);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error("❌ Error message:", errorMessage);
         return NextResponse.json(
-            { error: "Internal Server Error", details: error.message },
+            { error: "Internal Server Error", details: errorMessage },
             { status: 500 }
         );
     }

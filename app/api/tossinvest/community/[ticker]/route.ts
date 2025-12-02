@@ -49,7 +49,7 @@ export async function POST(
         let screenerData;
         try {
             screenerData = JSON.parse(screenerText);
-        } catch (e) {
+        } catch {
             console.error("❌ Failed to parse screener response as JSON");
             return NextResponse.json(
                 { error: "Screener API returned non-JSON response", details: screenerText.substring(0, 200) },
@@ -96,7 +96,7 @@ export async function POST(
         }
 
         const communityData = await communityResponse.json();
-        let rawComments: any[] = [];
+        let rawComments: unknown[] = [];
 
         // Normalize comments structure
         if (Array.isArray(communityData?.result?.comments)) {
@@ -110,7 +110,19 @@ export async function POST(
         }
 
         // Map to Unified Schema
-        const comments = rawComments.map((item) => ({
+        interface TossComment {
+            id?: unknown;
+            body?: string;
+            createdAt?: string;
+            user?: {
+                displayName?: string;
+                profileImageUrl?: string;
+            };
+            likeCount?: number;
+            commentCount?: number;
+        }
+
+        const comments = (rawComments as TossComment[]).map((item) => ({
             id: String(item.id),
             contents: item.body || "",
             createdAt: item.createdAt,
@@ -127,12 +139,14 @@ export async function POST(
         }));
 
         return NextResponse.json(comments);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("❌ Error in Toss Community API:", error);
-        console.error("❌ Error message:", error.message);
-        console.error("❌ Error stack:", error.stack);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorStack = error instanceof Error ? error.stack : '';
+        console.error("❌ Error message:", errorMessage);
+        console.error("❌ Error stack:", errorStack);
         return NextResponse.json(
-            { error: "Internal Server Error", details: error.message },
+            { error: "Internal Server Error", details: errorMessage },
             { status: 500 }
         );
     }

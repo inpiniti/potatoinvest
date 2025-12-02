@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { detectTrendChange, analyzeTrendDetails } from '@/utils/trendAnalysis';
+import { detectTrendChange, analyzeTrendDetails, CandleData } from '@/utils/trendAnalysis';
 
 export async function POST(request: NextRequest) {
     try {
@@ -13,9 +13,10 @@ export async function POST(request: NextRequest) {
         }
 
         // clos 필드가 없으면 last 필드를 사용
-        const processedData = candleData.map((item: any) => ({
+        const processedData: CandleData[] = candleData.map((item: { clos?: string | number; last?: string | number; xymd?: string;[key: string]: unknown }) => ({
             ...item,
-            clos: item.clos || item.last
+            clos: item.clos || item.last || 0,
+            xymd: item.xymd || "00000000" // Ensure xymd exists
         }));
 
         const trendStatus = detectTrendChange(processedData);
@@ -32,9 +33,10 @@ export async function POST(request: NextRequest) {
                 slopes: details.slopes
             }
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
-            { error: error.message },
+            { error: errorMessage },
             { status: 500 }
         );
     }

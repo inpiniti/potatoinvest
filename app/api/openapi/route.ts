@@ -2,6 +2,50 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
+interface OpenApiParameter {
+  name: string;
+  in: string;
+  required: boolean;
+  schema: { type: string };
+  description?: string;
+}
+
+interface OpenApiOperation {
+  summary: string;
+  description: string;
+  tags: string[];
+  responses: Record<string, { description: string }>;
+  requestBody?: {
+    required: boolean;
+    content: Record<string, { schema: { type: string; example: unknown } }>;
+  };
+  parameters?: OpenApiParameter[];
+}
+
+interface OpenApiSpec {
+  openapi: string;
+  info: {
+    title: string;
+    version: string;
+    description: string;
+  };
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: string;
+        scheme: string;
+        bearerFormat: string;
+      };
+    };
+  };
+  security: Record<string, string[]>[];
+  tags: {
+    name: string;
+    description: string;
+  }[];
+  paths: Record<string, Record<string, OpenApiOperation>>;
+}
+
 export async function GET() {
   try {
     const filePath = path.join(process.cwd(), "app", "api", "GEMINI.md");
@@ -23,7 +67,7 @@ export async function GET() {
 }
 
 function parseMarkdownToOpenApi(markdown: string) {
-  const spec: any = {
+  const spec: OpenApiSpec = {
     openapi: "3.0.0",
     info: {
       title: "PotatoInvest API",
@@ -73,8 +117,8 @@ function parseMarkdownToOpenApi(markdown: string) {
   let currentPath: string | null = null;
   let currentMethod = "get";
   let currentDesc = "";
-  let currentBody: any = null;
-  let currentParams: any[] = [];
+  let currentBody: unknown = null;
+  let currentParams: OpenApiParameter[] = [];
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -131,7 +175,9 @@ function parseMarkdownToOpenApi(markdown: string) {
         try {
           const cleanJson = jsonBlock.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
           currentBody = JSON.parse(cleanJson);
-        } catch (e) { }
+        } catch {
+          // Ignore JSON parse errors
+        }
       }
     }
     // Query Parameters 테이블 감지
@@ -174,12 +220,12 @@ function parseMarkdownToOpenApi(markdown: string) {
 }
 
 function addPathToSpec(
-  spec: any,
+  spec: OpenApiSpec,
   path: string,
   method: string,
   desc: string,
-  body: any,
-  params: any[]
+  body: unknown,
+  params: OpenApiParameter[]
 ) {
   if (!spec.paths[path]) {
     spec.paths[path] = {};
@@ -201,7 +247,7 @@ function addPathToSpec(
     tag = "OpenAPI";
   }
 
-  const operation: any = {
+  const operation: OpenApiOperation = {
     summary: desc || path,
     description: desc,
     tags: [tag],

@@ -27,8 +27,9 @@ async function getUser(req: NextRequest) {
         }
 
         return user ?? null;
-    } catch (error: any) {
-        console.error("❌ [getUser] Supabase auth error:", error.message);
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error("❌ [getUser] Supabase auth error:", errorMessage);
         return null;
     }
 }
@@ -109,8 +110,9 @@ export async function GET(req: NextRequest) {
         const data = await res.json();
         console.log("✅ [bunbong] Success");
         return NextResponse.json(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("❌ [bunbong] Error:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }
