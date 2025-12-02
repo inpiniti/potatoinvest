@@ -1,0 +1,170 @@
+{
+    "nasdaq": {
+        "country": "us",
+        "countryName": "미국",
+        "marketName": "나스닥",
+        "tradingViewMarket": "america",
+        "exchanges": [
+            "NASDAQ"
+        ]
+    },
+    "nyse": {
+        "country": "us",
+        "countryName": "미국",
+        "marketName": "뉴욕증권거래소",
+        "tradingViewMarket": "america",
+        "exchanges": [
+            "NYSE"
+        ]
+    },
+    "kospi": {
+        "country": "kr",
+        "countryName": "한국",
+        "marketName": "코스피",
+        "tradingViewMarket": "korea",
+        "exchanges": [
+            "KRX"
+        ]
+    },
+    "kosdaq": {
+        "country": "kr",
+        "countryName": "한국",
+        "marketName": "코스닥",
+        "tradingViewMarket": "korea",
+        "exchanges": [
+            "KOSDAQ"
+        ]
+    },
+    "america": {
+        "country": "us",
+        "countryName": "미국",
+        "marketName": "미국 전체",
+        "tradingViewMarket": "america",
+        "exchanges": [
+            "NASDAQ",
+            "NYSE"
+        ]
+    },
+    "korea": {
+        "country": "kr",
+        "countryName": "한국",
+        "marketName": "한국 전체",
+        "tradingViewMarket": "korea",
+        "exchanges": [
+            "KRX",
+            "KOSDAQ"
+        ]
+    },
+    "japan": {
+        "country": "jp",
+        "countryName": "일본",
+        "marketName": "일본",
+        "tradingViewMarket": "japan",
+        "exchanges": [
+            "TSE",
+            "JPX"
+        ]
+    },
+    "china": {
+        "country": "cn",
+        "countryName": "중국",
+        "marketName": "중국",
+        "tradingViewMarket": "china",
+        "exchanges": [
+            "SSE",
+            "SZSE"
+        ]
+    },
+    "hongkong": {
+        "country": "hk",
+        "countryName": "홍콩",
+        "marketName": "홍콩",
+        "tradingViewMarket": "hong",
+        "exchanges": [
+            "HKEX"
+        ]
+    },
+    "germany": {
+        "country": "de",
+        "countryName": "독일",
+        "marketName": "독일",
+        "tradingViewMarket": "germany",
+        "exchanges": [
+            "XETRA",
+            "FWB"
+        ]
+    },
+    "uk": {
+        "country": "uk",
+        "countryName": "영국",
+        "marketName": "영국",
+        "tradingViewMarket": "united",
+        "exchanges": [
+            "LSE"
+        ]
+    },
+    "canada": {
+        "country": "ca",
+        "countryName": "캐나다",
+        "marketName": "캐나다",
+        "tradingViewMarket": "canada",
+        "exchanges": [
+            "TSX"
+        ]
+    },
+    "australia": {
+        "country": "au",
+        "countryName": "호주",
+        "marketName": "호주",
+        "tradingViewMarket": "australia",
+        "exchanges": [
+            "ASX"
+        ]
+    },
+    "brazil": {
+        "country": "br",
+        "countryName": "브라질",
+        "marketName": "브라질",
+        "tradingViewMarket": "brazil",
+        "exchanges": [
+            "BOVESPA"
+        ]
+    },
+    "india": {
+        "country": "in",
+        "countryName": "인도",
+        "marketName": "인도",
+        "tradingViewMarket": "india",
+        "exchanges": [
+            "NSE",
+            "BSE"
+        ]
+    },
+    "france": {
+        "country": "fr",
+        "countryName": "프랑스",
+        "marketName": "프랑스",
+        "tradingViewMarket": "france",
+        "exchanges": [
+            "EURONEXT"
+        ]
+    },
+    "singapore": {
+        "country": "sg",
+        "countryName": "싱가포르",
+        "marketName": "싱가포르",
+        "tradingViewMarket": "singapore",
+        "exchanges": [
+            "SGX"
+        ]
+    },
+    "taiwan": {
+        "country": "tw",
+        "countryName": "대만",
+        "marketName": "대만",
+        "tradingViewMarket": "taiwan",
+        "exchanges": [
+            "TWSE"
+        ]
+    }
+}
