@@ -34,7 +34,7 @@ type TradeSignal = "매수" | "매도" | "대기"
 export function TradingItem({ stock, onRemove }: TradingItemProps) {
     const [currentPrice, setCurrentPrice] = React.useState<number>(0)
     const [movingAverages, setMovingAverages] = React.useState<MovingAverage | null>(null)
-    const [tradeSignal, setTradeSignal] = React.useState<TradeSignal>("대기")
+    const [tradeSignal] = React.useState<TradeSignal>("대기")
     const [isLoading, setIsLoading] = React.useState(true)
 
     React.useEffect(() => {

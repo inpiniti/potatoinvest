@@ -28,7 +28,7 @@ interface SP500Stock {
 interface DailyData {
     xymd: string
     clos: string
-    [key: string]: any
+    [key: string]: string | number | boolean | null | undefined
 }
 
 interface TrendData {
@@ -77,13 +77,14 @@ export function RecommendationSection() {
                 const today = new Date().toISOString().split("T")[0]
                 const todayTrends: Record<string, TrendData> = {}
 
-                result.data.forEach((item: any) => {
+                result.data.forEach((item: Record<string, unknown>) => {
                     if (item.updated_at === today) {
-                        todayTrends[item.symbol] = {
-                            ma20: { status: item.ma20 as TrendStatus, slope: item.ma20_slope || 0 },
-                            ma50: { status: item.ma50 as TrendStatus, slope: item.ma50_slope || 0 },
-                            ma100: { status: item.ma100 as TrendStatus, slope: item.ma100_slope || 0 },
-                            ma200: { status: item.ma200 as TrendStatus, slope: item.ma200_slope || 0 },
+                        const symbol = String(item.symbol);
+                        todayTrends[symbol] = {
+                            ma20: { status: item.ma20 as TrendStatus, slope: (item.ma20_slope as number) || 0 },
+                            ma50: { status: item.ma50 as TrendStatus, slope: (item.ma50_slope as number) || 0 },
+                            ma100: { status: item.ma100 as TrendStatus, slope: (item.ma100_slope as number) || 0 },
+                            ma200: { status: item.ma200 as TrendStatus, slope: (item.ma200_slope as number) || 0 },
                         }
                     }
                 })
@@ -232,7 +233,7 @@ export function RecommendationSection() {
         return () => {
             cancelled = true
         }
-    }, [authData.user, selectedAccountId, realKey?.access_token, stocks, initialLoadComplete, trendMap])
+    }, [authData.user, selectedAccountId, realKey?.access_token, stocks, initialLoadComplete, trendMap, calculateAndSaveTrend])
 
     const getTrendIcon = (status: TrendStatus) => {
         switch (status) {

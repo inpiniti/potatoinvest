@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { detectTrendChange, analyzeTrendDetails, CandleData } from '@/utils/trendAnalysis';
+import { detectTrendChange, CandleData } from '@/utils/trendAnalysis';
 
 export async function POST(request: NextRequest) {
     try {
@@ -16,22 +16,14 @@ export async function POST(request: NextRequest) {
         const processedData: CandleData[] = candleData.map((item: { clos?: string | number; last?: string | number; xymd?: string;[key: string]: unknown }) => ({
             ...item,
             clos: item.clos || item.last || 0,
-            xymd: item.xymd || "00000000" // Ensure xymd exists
+            xymd: item.xymd || "00000000"
         }));
 
         const trendStatus = detectTrendChange(processedData);
-        const details = analyzeTrendDetails(processedData);
 
         return NextResponse.json({
             success: true,
             trendStatus,
-            details: {
-                currentSlope: details.currentSlope,
-                pastSlopes: details.pastSlopes,
-                closePrices: details.closePrices,
-                movingAverages: details.movingAverages,
-                slopes: details.slopes
-            }
         });
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';

@@ -83,18 +83,18 @@ export function PurchaseHistorySection() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {holdings.map((holding: any, index: number) => {
-                            const quantity = parseFloat(holding.ord_psbl_qty || 0) // 보유수량
-                            const avgPrice = parseFloat(holding.pchs_avg_pric || 0) // 매입평균가
-                            const currentPrice = parseFloat(holding.now_pric2 || 0) // 현재가
-                            const profit = parseFloat(holding.evlu_pfls_amt || 0) // 평가손익
-                            const profitRate = parseFloat(holding.evlu_pfls_rt || 0) // 수익률
+                        {holdings.map((holding: Record<string, unknown>, index: number) => {
+                            const quantity = parseFloat((holding.ord_psbl_qty as string) || '0') // 보유수량
+                            const avgPrice = parseFloat((holding.pchs_avg_pric as string) || '0') // 매입평균가
+                            const currentPrice = parseFloat((holding.now_pric2 as string) || '0') // 현재가
+                            const profit = parseFloat((holding.evlu_pfls_amt as string) || '0') // 평가손익
+                            const profitRate = parseFloat((holding.evlu_pfls_rt as string) || '0') // 수익률
 
                             return (
                                 <TableRow key={index}>
-                                    <TableCell className="font-medium">{holding.ovrs_pdno}</TableCell>
-                                    <TableCell className="truncate max-w-[150px]" title={holding.ovrs_item_name}>
-                                        {holding.ovrs_item_name}
+                                    <TableCell className="font-medium">{String(holding.ovrs_pdno || '')}</TableCell>
+                                    <TableCell className="truncate max-w-[150px]" title={String(holding.ovrs_item_name || '')}>
+                                        {String(holding.ovrs_item_name || '')}
                                     </TableCell>
                                     <TableCell className="text-right">{quantity}</TableCell>
                                     <TableCell className="text-right">{formatCurrency(avgPrice)}</TableCell>

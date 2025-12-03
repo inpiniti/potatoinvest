@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
         }
 
         // BYMD 방식으로 페이징 (날짜 기준으로 과거로 이동)
-        const allData: any[] = [];
+        const allData: unknown[] = [];
         let currentDate = ""; // 빈 문자열 = 최신 데이터부터
         const targetCount = 450;
         const maxIterations = 5;
